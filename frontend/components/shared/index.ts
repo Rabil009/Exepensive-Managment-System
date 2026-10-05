@@ -6,3 +6,4 @@ export { MetricCard } from "./MetricCard";
 export { StatusBadge } from "./StatusBadge";
 export { PageHeader } from "./PageHeader";
 export { EmptyState } from "./EmptyState";
+export { HeroAmbientBackground } from "./HeroAmbientBackground";

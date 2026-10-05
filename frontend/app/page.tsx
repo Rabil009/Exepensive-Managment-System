@@ -3,8 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Sun, Moon } from "lucide-react";
+import { ArrowUpRight, ArrowRight, Sun, Moon, ShieldCheck, TrendingUp, Sparkles, ChevronDown } from "lucide-react";
 import { useTheme } from "next-themes";
+import { HeroAmbientBackground } from "@/components/shared";
 
 const PORTALS = [
   {
@@ -24,12 +25,12 @@ const PORTALS = [
     action: "Review Queue",
   },
   {
-    title: "Finance & Treasury",
-    subtitle: "Settlement & Master Ledger",
-    description: "Final verification, manual payment disbursement recording, and export of audit-grade general ledger records.",
+    title: "Finance Portal",
+    subtitle: "Clearinghouse & Payout Settlement",
+    description: "Manage disbursement registers, execute corporate reconciliations, record electronic UTR references, and configure audit holds.",
     href: "/finance",
     image: "/images/vault.jpg",
-    action: "Open Treasury",
+    action: "Access Vault",
   },
 ];
 
@@ -38,18 +39,18 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.18,
+      staggerChildren: 0.12,
       delayChildren: 0.1,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, ease: "easeOut" as const },
+    transition: { duration: 0.6, ease: "easeOut" as const },
   },
 };
 
@@ -57,13 +58,14 @@ export default function HomePage() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="relative min-h-screen bg-[var(--bg-page)] text-[var(--text-display)] flex flex-col justify-between selection:bg-[var(--accent-gold)] selection:text-black overflow-x-hidden transition-colors duration-300">
-      {/* Top Header Heritage Bar */}
+    <div className="relative min-h-screen bg-[var(--bg-page)] text-[var(--text-display)] selection:bg-[var(--accent-gold)] selection:text-black overflow-x-hidden transition-colors duration-300">
+      
+      {/* ── Top Header Bar ────────────────────────────────────────────── */}
       <motion.header
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="border-b border-[var(--border-hairline)] px-8 py-5 backdrop-blur-md sticky top-0 z-30 bg-[var(--bg-page)]/85"
+        className="border-b border-[var(--border-hairline)] px-8 py-5 backdrop-blur-xl sticky top-0 z-30 bg-[var(--bg-page)]/80"
       >
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -89,99 +91,176 @@ export default function HomePage() {
         </div>
       </motion.header>
 
-      {/* Main Luxury Hero Section */}
-      <main className="mx-auto max-w-7xl px-8 py-16 lg:py-24 w-full">
-        {/* Editorial Subheader & Title */}
+      {/* ── Full-Screen Hero Section with Cinematic Atmospheric Video Background ── */}
+      <section className="relative min-h-[calc(100vh-80px)] w-full flex flex-col justify-center items-center overflow-hidden px-6 py-20 lg:py-28">
+        {/* Full-Screen Ambient Video & Volumetric Lighting Background */}
+        <HeroAmbientBackground />
+
+        {/* Hero Content Container */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="max-w-4xl"
+          className="relative z-10 mx-auto max-w-5xl text-center flex flex-col items-center"
         >
-          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 mb-4">
-            <span className="font-mono text-[10px] tracking-[0.35em] uppercase text-[var(--accent-gold)]">
-              Corporate Treasury & Expense Operations
+          {/* Subtle Institutional Kicker */}
+          <motion.div
+            variants={itemVariants}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 backdrop-blur-md mb-6 shadow-sm"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-[var(--accent-gold)]" />
+            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[var(--accent-gold)] font-medium">
+              Sovereign Capital Architecture // Direct Portals
             </span>
           </motion.div>
 
+          {/* Majestic Hero Headline */}
           <motion.h1
             variants={itemVariants}
-            className="font-outfit text-5xl sm:text-7xl lg:text-8xl tracking-tight font-semibold leading-[1.04] text-[var(--text-display)]"
+            className="font-outfit text-5xl sm:text-7xl lg:text-8xl tracking-tight font-semibold leading-[1.03] text-[var(--text-display)] drop-shadow-sm max-w-4xl"
           >
             Discipline in Capital.<br />
             Purity in Accounting.
           </motion.h1>
 
+          {/* Subtext */}
           <motion.p
             variants={itemVariants}
-            className="mt-6 text-sm sm:text-base text-[var(--text-body)] max-w-2xl font-light leading-relaxed tracking-wide"
+            className="mt-6 text-sm sm:text-base lg:text-lg text-[var(--text-body)] max-w-2xl font-light leading-relaxed tracking-normal"
           >
             A bespoke financial architecture connecting employee expense capture, managerial governance, and treasury settlement under one immutable system of record.
           </motion.p>
-        </motion.div>
 
-        {/* Featured Hero Vault Showcase (High Quality Visual Hero) */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: "easeOut" }}
-          className="mt-14 relative rounded-3xl overflow-hidden border border-[var(--border-hairline)] group shadow-2xl"
-        >
-          <div className="relative h-[320px] sm:h-[420px] w-full overflow-hidden">
-            <Image
-              src="/images/vault.jpg"
-              alt="Swiss Private Bank Treasury Vault"
-              fill
-              priority
-              className="object-cover object-center transition-transform duration-1000 group-hover:scale-105"
-            />
-            {/* Crisp High-Contrast Legibility Scrim */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
-            
-            <div className="absolute bottom-8 left-8 right-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-white">
-              <div>
-                <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#e6d5b8] block mb-1">
-                  CLEARINGHOUSE SYSTEM ARCHITECTURE
+          {/* Direct Workspace Launcher Group (No Auth Barrier) */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-10 flex flex-wrap items-center justify-center gap-4 w-full max-w-2xl"
+          >
+            <Link
+              href="/employee"
+              className="luxury-btn-primary inline-flex items-center gap-2.5 px-6 py-3.5 text-xs font-medium tracking-wide shadow-lg shadow-amber-900/10 hover:shadow-xl transition-all"
+            >
+              <span>Employee Workspace</span>
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/management"
+              className="luxury-btn-secondary inline-flex items-center gap-2.5 px-6 py-3.5 text-xs font-medium tracking-wide backdrop-blur-md bg-[var(--bg-surface)]/75 hover:bg-[var(--bg-surface)] transition-all"
+            >
+              <span>Manager Review</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+
+            <Link
+              href="/finance"
+              className="luxury-btn-secondary inline-flex items-center gap-2.5 px-6 py-3.5 text-xs font-medium tracking-wide backdrop-blur-md bg-[var(--bg-surface)]/75 hover:bg-[var(--bg-surface)] transition-all"
+            >
+              <span>Finance Clearinghouse</span>
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </motion.div>
+
+          {/* Live Financial Telemetry Strip */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-14 inline-flex flex-wrap items-center justify-center gap-6 sm:gap-10 border border-[var(--border-hairline)] bg-[var(--bg-surface)]/70 backdrop-blur-xl px-7 py-3 rounded-2xl shadow-sm"
+          >
+            <div className="flex items-center gap-2.5">
+              <TrendingUp className="h-4 w-4 text-[var(--accent-gold)]" />
+              <div className="text-left">
+                <span className="block font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
+                  Reserve Capital
                 </span>
-                <h3 className="font-outfit text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-                  The Sovereign Expense Clearinghouse
-                </h3>
-                <p className="text-xs text-zinc-300 font-light max-w-lg mt-1">
-                  Explore the unified 3-tier expense lifecycle across Employee, Management, and Finance workspaces.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/finance"
-                  className="luxury-btn-primary inline-flex items-center gap-2 backdrop-blur-md"
-                >
-                  <span>Explore Vault</span>
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
+                <span className="font-mono-nums text-xs font-semibold text-[var(--text-display)]">
+                  ₹4.20M Active
+                </span>
               </div>
             </div>
-          </div>
-        </motion.div>
 
-        {/* The Three Bespoke Portals Grid with Images & Animations */}
+            <div className="h-6 w-px bg-[var(--border-subtle)] hidden sm:block" />
+
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              <div className="text-left">
+                <span className="block font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
+                  Policy Adjudication
+                </span>
+                <span className="font-mono-nums text-xs font-semibold text-[var(--text-display)]">
+                  100% Deterministic
+                </span>
+              </div>
+            </div>
+
+            <div className="h-6 w-px bg-[var(--border-subtle)] hidden sm:block" />
+
+            <div className="flex items-center gap-2.5">
+              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              <div className="text-left">
+                <span className="block font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
+                  Settlement Cycle
+                </span>
+                <span className="font-mono-nums text-xs font-semibold text-[var(--text-display)]">
+                  FastAPI Direct Link
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Elegant Downward Scroll Prompt */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-12 flex flex-col items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-display)] transition-colors cursor-pointer"
+            onClick={() => {
+              window.scrollTo({ top: window.innerHeight * 0.9, behavior: "smooth" });
+            }}
+          >
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase font-light">
+              Explore Role Workspaces
+            </span>
+            <motion.div
+              animate={{ y: [0, 4, 0] }}
+              transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+            >
+              <ChevronDown className="h-4 w-4 text-[var(--accent-gold)]" />
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ── The Three Bespoke Portals Grid Showcase ───────────────────── */}
+      <section className="mx-auto max-w-7xl px-8 py-16 lg:py-24 w-full relative z-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-[var(--border-hairline)] pb-6 mb-12 gap-4">
+          <div>
+            <span className="font-mono text-[9px] tracking-[0.25em] text-[var(--accent-gold)] uppercase">
+              OPERATIONAL TIERS (PRD ROLES 1, 2 & 3)
+            </span>
+            <h2 className="font-outfit text-3xl sm:text-4xl font-semibold tracking-tight text-[var(--text-display)] mt-1">
+              Integrated Enterprise Portals
+            </h2>
+          </div>
+          <p className="text-xs text-[var(--text-muted)] max-w-md font-light leading-relaxed">
+            Role-separated portals purpose-built for instant access. Select any terminal to inspect live workflows.
+          </p>
+        </div>
+
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="mt-14 grid grid-cols-1 gap-6 lg:grid-cols-3"
+          className="grid grid-cols-1 gap-6 lg:grid-cols-3"
         >
           {PORTALS.map((portal) => (
             <motion.div
               key={portal.href}
               variants={itemVariants}
               whileHover={{ y: -6, transition: { duration: 0.3 } }}
-              className="luxury-card group flex flex-col justify-between rounded-3xl overflow-hidden border border-[var(--border-hairline)] bg-[var(--bg-surface)] shadow-sm"
+              className="luxury-card group flex flex-col justify-between rounded-3xl overflow-hidden border border-[var(--border-hairline)] bg-[var(--bg-surface)] shadow-sm hover:shadow-xl transition-all"
             >
               <div>
                 {/* Visual Image Header */}
-                <div className="relative h-52 w-full overflow-hidden border-b border-[var(--border-subtle)]">
+                <div className="relative h-56 w-full overflow-hidden border-b border-[var(--border-subtle)]">
                   <Image
                     src={portal.image}
                     alt={portal.title}
@@ -220,20 +299,20 @@ export default function HomePage() {
             </motion.div>
           ))}
         </motion.div>
-      </main>
+      </section>
 
-      {/* Footer Heritage Marks */}
-      <footer className="border-t border-[var(--border-hairline)] px-8 py-8 mt-12 bg-[var(--bg-surface)]">
+      {/* ── Footer Heritage Marks ─────────────────────────────────────── */}
+      <footer className="border-t border-[var(--border-hairline)] px-8 py-8 mt-12 bg-[var(--bg-surface)] relative z-10">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-[var(--text-muted)]">
           <p className="tracking-widest uppercase text-[10px]">
             FinPulse · Private Expense Clearinghouse · Direct Role Portals
           </p>
           <div className="flex items-center gap-6 text-[10px] tracking-widest uppercase text-[var(--accent-gold)]">
-            <span>Employee</span>
+            <Link href="/employee" className="hover:text-[var(--text-display)]">Employee</Link>
             <span>·</span>
-            <span>Manager</span>
+            <Link href="/management" className="hover:text-[var(--text-display)]">Manager</Link>
             <span>·</span>
-            <span>Finance</span>
+            <Link href="/finance" className="hover:text-[var(--text-display)]">Finance</Link>
           </div>
         </div>
       </footer>
