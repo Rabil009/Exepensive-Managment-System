@@ -50,69 +50,148 @@ const ROLE_OPTIONS = [
   },
 ];
 
+function HelixRibbon3D() {
+  return (
+    <svg viewBox="0 0 280 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-44 object-contain">
+      <defs>
+        <linearGradient id="helixGrad1" x1="10%" y1="10%" x2="90%" y2="90%">
+          <stop offset="0%" stopColor="#93c5fd" />
+          <stop offset="30%" stopColor="#3b82f6" />
+          <stop offset="65%" stopColor="#1d4ed8" />
+          <stop offset="100%" stopColor="#172554" />
+        </linearGradient>
+        <linearGradient id="helixGrad2" x1="80%" y1="20%" x2="20%" y2="80%">
+          <stop offset="0%" stopColor="#60a5fa" />
+          <stop offset="50%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#1e40af" />
+        </linearGradient>
+        <filter id="helixShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="16" stdDeviation="12" floodColor="#091e42" floodOpacity="0.4" />
+        </filter>
+      </defs>
+      <g filter="url(#helixShadow)">
+        <path
+          d="M 60 145 C 30 85, 100 25, 160 55 C 220 85, 245 145, 205 170 C 165 195, 105 175, 90 135"
+          stroke="url(#helixGrad2)"
+          strokeWidth="36"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          opacity="0.8"
+        />
+        <path
+          d="M 45 125 C 65 45, 155 20, 205 75 C 255 125, 225 175, 155 160 C 95 145, 75 75, 140 45 C 190 25, 245 75, 235 140"
+          stroke="url(#helixGrad1)"
+          strokeWidth="34"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+        <path
+          d="M 55 115 C 75 50, 145 32, 195 75 C 225 110, 205 145, 160 145"
+          stroke="#ffffff"
+          strokeOpacity="0.35"
+          strokeWidth="10"
+          strokeLinecap="round"
+          fill="none"
+        />
+      </g>
+    </svg>
+  );
+}
+
+function CogGear3D() {
+  return (
+    <svg viewBox="0 0 240 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-44 object-contain">
+      <defs>
+        <radialGradient id="cogFaceGrad" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#60a5fa" />
+          <stop offset="35%" stopColor="#2563eb" />
+          <stop offset="75%" stopColor="#1d4ed8" />
+          <stop offset="100%" stopColor="#172554" />
+        </radialGradient>
+        <linearGradient id="cogDepthGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1e3a8a" />
+          <stop offset="100%" stopColor="#0a192f" />
+        </linearGradient>
+        <filter id="cogShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="16" stdDeviation="14" floodColor="#091e42" floodOpacity="0.45" />
+        </filter>
+      </defs>
+      <g filter="url(#cogShadow)" transform="translate(0, 12)">
+        <path
+          d="M 120 18 C 126 18, 131 27, 136 28 C 145 30, 155 26, 161 32 C 167 38, 165 49, 172 56 C 179 63, 190 63, 194 71 C 198 79, 191 88, 193 97 C 195 106, 204 112, 204 121 C 204 130, 195 136, 193 145 C 191 154, 198 163, 194 171 C 190 179, 179 179, 172 186 C 165 193, 167 204, 161 210 C 155 216, 145 212, 136 214 C 131 215, 126 224, 120 224 C 114 224, 109 215, 104 214 C 95 212, 85 216, 79 210 C 73 204, 75 193, 68 186 C 61 179, 50 179, 46 171 C 42 163, 49 154, 47 145 C 45 136, 36 130, 36 121 C 36 112, 45 106, 47 97 C 49 88, 42 79, 46 71 C 50 63, 61 63, 68 56 C 75 49, 73 38, 79 32 C 85 26, 95 30, 104 28 C 109 27, 114 18, 120 18 Z"
+          fill="url(#cogDepthGrad)"
+          opacity="0.8"
+        />
+      </g>
+      <g filter="url(#cogShadow)">
+        <path
+          d="M 120 14 C 126 14, 131 23, 136 24 C 145 26, 155 22, 161 28 C 167 34, 165 45, 172 52 C 179 59, 190 59, 194 67 C 198 75, 191 84, 193 93 C 195 102, 204 108, 204 117 C 204 126, 195 132, 193 141 C 191 150, 198 159, 194 167 C 190 175, 179 175, 172 182 C 165 189, 167 200, 161 206 C 155 212, 145 208, 136 210 C 131 211, 126 220, 120 220 C 114 220, 109 211, 104 210 C 95 208, 85 212, 79 206 C 73 200, 75 189, 68 182 C 61 175, 50 175, 46 167 C 42 159, 49 150, 47 141 C 45 132, 36 126, 36 117 C 36 108, 45 102, 47 93 C 49 84, 42 75, 46 67 C 50 59, 61 59, 68 52 C 75 45, 73 34, 79 28 C 85 22, 95 26, 104 24 C 109 23, 114 14, 120 14 Z"
+          fill="url(#cogFaceGrad)"
+        />
+        <circle cx="120" cy="117" r="38" fill="#0f172a" />
+        <circle cx="120" cy="117" r="37" fill="#1e3a8a" opacity="0.7" />
+        <circle cx="118" cy="114" r="36" stroke="#93c5fd" strokeWidth="2.5" fill="none" opacity="0.6" />
+        <path d="M 115 15 L 125 15" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.5" />
+      </g>
+    </svg>
+  );
+}
+
+function RippleTorus3D() {
+  return (
+    <svg viewBox="0 0 260 220" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-44 object-contain">
+      <defs>
+        <radialGradient id="sphereGrad" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#93c5fd" />
+          <stop offset="35%" stopColor="#3b82f6" />
+          <stop offset="75%" stopColor="#1d4ed8" />
+          <stop offset="100%" stopColor="#172554" />
+        </radialGradient>
+        <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.15" />
+        </linearGradient>
+        <filter id="ringShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="16" stdDeviation="12" floodColor="#091e42" floodOpacity="0.35" />
+        </filter>
+      </defs>
+      <g filter="url(#ringShadow)">
+        <ellipse cx="140" cy="110" rx="98" ry="70" stroke="url(#ringGrad)" strokeWidth="18" fill="none" opacity="0.45" />
+        <ellipse cx="136" cy="112" rx="74" ry="54" stroke="url(#ringGrad)" strokeWidth="16" fill="none" opacity="0.65" />
+        <circle cx="130" cy="110" r="48" fill="url(#sphereGrad)" />
+        <ellipse cx="118" cy="95" rx="18" ry="10" fill="#ffffff" opacity="0.4" transform="rotate(-25 118 95)" />
+        <ellipse cx="132" cy="114" rx="34" ry="24" stroke="#bfdbfe" strokeWidth="2" fill="none" opacity="0.5" />
+      </g>
+    </svg>
+  );
+}
+
 const PORTALS = [
   {
-    title: "Employee Portal",
-    subtitle: "Expense Ingestion & Personal Claims",
-    description: "Submit itemized drafts, snap digital receipts with instant OCR matching, and track reimbursement milestones.",
+    title: "Seamless Integration",
+    portalName: "Employee Portal",
+    description: "Submit itemized expense claims, snap digital receipts, and track reimbursement milestones with zero friction.",
     href: "/employee",
-    icon: Receipt,
-    badge: "Role 1: Employee",
-    action: "Open Workspace",
-    accentColor: "from-blue-600 via-sky-500 to-sky-400",
-    iconBg: "bg-blue-50 text-blue-600 border-blue-100/80 group-hover:bg-blue-600 group-hover:text-white",
-    dotColor: "bg-blue-600",
-    tags: ["OCR Auto-Extract", "Live Policy Pre-check", "Instant Payout Track"],
-    preview: {
-      tag: "Smart OCR Receipt Scan",
-      status: "Verified 99.4%",
-      statusColor: "text-emerald-700 bg-emerald-50 border-emerald-100",
-      item: "Air India Boarding Pass",
-      amount: "₹8,500.00",
-      meta: "Flight · Auto-Categorized",
-    },
+    pillText: "Effortless Connectivity",
+    renderArt: HelixRibbon3D,
   },
   {
-    title: "Management Portal",
-    subtitle: "Review & Budget Oversight",
-    description: "Review team submissions, adjudicate policy exception warnings with 1-click approvals, and safeguard quarterly budgets.",
+    title: "Exceptional Security",
+    portalName: "Management Portal",
+    description: "Audit team submissions, adjudicate policy exception warnings, and protect quarterly budgets in real-time.",
     href: "/management",
-    icon: Users,
-    badge: "Role 2: Manager",
-    action: "Review Queue",
-    accentColor: "from-indigo-600 via-indigo-500 to-blue-500",
-    iconBg: "bg-indigo-50 text-indigo-600 border-indigo-100/80 group-hover:bg-indigo-600 group-hover:text-white",
-    dotColor: "bg-indigo-600",
-    tags: ["Policy Enforcement", "Budget Thresholds", "1-Click Approvals"],
-    preview: {
-      tag: "Approval Adjudication",
-      status: "Cap: ₹5,000 OK",
-      statusColor: "text-blue-700 bg-blue-50 border-blue-100",
-      item: "Aditya Kumar · Oberoi Grand",
-      amount: "₹6,000.00",
-      meta: "Exception Justification Attached",
-    },
+    pillText: "Exceptional Security",
+    renderArt: CogGear3D,
   },
   {
-    title: "Finance Clearinghouse",
-    subtitle: "Disbursement & Payout Settlement",
-    description: "Execute batch reimbursement runs, reconcile corporate cards, log official bank UTR tracking codes, and manage holds.",
+    title: "High Performance",
+    portalName: "Finance Clearinghouse",
+    description: "Execute consolidated disbursement batches, reconcile corporate cards, and log bank UTR references.",
     href: "/finance",
-    icon: Building2,
-    badge: "Role 3: Finance",
-    action: "Access Treasury",
-    accentColor: "from-emerald-600 via-teal-500 to-cyan-500",
-    iconBg: "bg-emerald-50 text-emerald-600 border-emerald-100/80 group-hover:bg-emerald-600 group-hover:text-white",
-    dotColor: "bg-emerald-600",
-    tags: ["Batch Direct Payout", "Bank UTR Ledger", "Audit Integrity"],
-    preview: {
-      tag: "Disbursement Register",
-      status: "Settled & Logged",
-      statusColor: "text-emerald-700 bg-emerald-50 border-emerald-100",
-      item: "Disbursement Batch #OCT-26",
-      amount: "₹38,400.00",
-      meta: "UTR #928410924719",
-    },
+    pillText: "Speedy Experience",
+    renderArt: RippleTorus3D,
   },
 ];
 
@@ -529,94 +608,44 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
             {PORTALS.map((portal) => {
-              const Icon = portal.icon;
+              const Art = portal.renderArt;
               return (
-                <div
+                <Link
                   key={portal.href}
-                  className="bg-white rounded-[32px] p-7 sm:p-8 border border-slate-200/90 shadow-[0_4px_25px_-5px_rgba(15,23,42,0.06)] hover:shadow-[0_25px_50px_-12px_rgba(15,23,42,0.14)] transition-all duration-300 flex flex-col justify-between group hover:-translate-y-2 relative overflow-hidden"
+                  href={portal.href}
+                  className="bg-gradient-to-b from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] rounded-[32px] p-7 sm:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[440px] sm:min-h-[470px] shadow-xl shadow-blue-600/15 hover:shadow-2xl hover:shadow-blue-600/25 transition-all duration-300 group hover:-translate-y-1.5 cursor-pointer"
                 >
-                  {/* Subtle Top Gradient Accent Strip */}
-                  <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${portal.accentColor} opacity-90 group-hover:h-2 transition-all`} />
+                  {/* Subtle Top Radial Ambient Light */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.2),_transparent_65%)] pointer-events-none" />
 
-                  <div>
-                    {/* Top Row: Icon & Role Badge */}
-                    <div className="flex items-center justify-between mb-5">
-                      <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-200 border ${portal.iconBg}`}>
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/90 border border-slate-200/60 text-slate-600 text-[11px] font-semibold">
-                        <span className={`h-1.5 w-1.5 rounded-full ${portal.dotColor}`} />
-                        <span>{portal.badge}</span>
-                      </div>
-                    </div>
-
-                    {/* Titles */}
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">
+                  {/* Top Content: Title & Enterprise Description */}
+                  <div className="relative z-10 text-left">
+                    <h3 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-white leading-tight">
                       {portal.title}
                     </h3>
-                    <p className="text-xs font-semibold text-blue-600 mt-1">
-                      {portal.subtitle}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-2.5 leading-relaxed font-normal">
+                    <p className="mt-3 text-xs sm:text-[13px] text-white/85 font-normal leading-relaxed max-w-[270px]">
                       {portal.description}
                     </p>
-
-                    {/* Interactive UI Mockup Preview Box */}
-                    <div className="my-5 p-3.5 rounded-2xl bg-slate-50/90 border border-slate-100 group-hover:border-slate-200/80 transition-colors">
-                      <div className="flex items-center justify-between text-[11px] mb-2">
-                        <span className="font-bold text-slate-700">
-                          {portal.preview.tag}
-                        </span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${portal.preview.statusColor}`}>
-                          {portal.preview.status}
-                        </span>
-                      </div>
-
-                      <div className="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs flex items-center justify-between">
-                        <div className="min-w-0 pr-2">
-                          <p className="text-xs font-bold text-slate-900 truncate">
-                            {portal.preview.item}
-                          </p>
-                          <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
-                            {portal.preview.meta}
-                          </p>
-                        </div>
-                        <span className="text-xs sm:text-sm font-black text-slate-900 shrink-0">
-                          {portal.preview.amount}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Micro Feature Tags */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {portal.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[10px] font-medium text-slate-600 bg-slate-100/70 px-2.5 py-1 rounded-lg border border-slate-200/40"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
                   </div>
 
-                  {/* Bottom Action Footer */}
-                  <div className="pt-6 mt-6 border-t border-slate-100">
-                    <Link
-                      href={portal.href}
-                      className="w-full inline-flex items-center justify-between group/link"
-                    >
-                      <span className="text-xs font-bold text-slate-900 group-hover/link:text-blue-600 transition-colors">
-                        {portal.action}
-                      </span>
-                      <div className="h-8 w-8 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center text-slate-700 transition-all duration-200 shadow-2xs">
-                        <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </div>
-                    </Link>
+                  {/* 3D Blue Sculptural Artwork */}
+                  <div className="relative z-10 my-4 flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
+                    <Art />
                   </div>
-                </div>
+
+                  {/* Bottom Controls Row: Pill Tag + Circular Arrow Button */}
+                  <div className="relative z-10 flex items-center justify-between pt-2">
+                    <span className="bg-white text-slate-900 text-xs font-bold px-4 py-2 rounded-full shadow-sm">
+                      {portal.pillText}
+                    </span>
+
+                    <div className="h-9 w-9 rounded-full bg-white text-slate-900 flex items-center justify-center shadow-md group-hover:scale-110 group-hover:bg-slate-950 group-hover:text-white transition-all shrink-0">
+                      <ArrowRight className="h-4 w-4" />
+                    </div>
+                  </div>
+                </Link>
               );
             })}
           </div>
