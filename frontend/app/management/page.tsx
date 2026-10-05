@@ -127,7 +127,7 @@ export default function ManagementPage() {
               <span className="font-mono text-[9px] tracking-[0.25em] text-[var(--accent-gold)] uppercase">
                 CAPITAL ALLOCATION RESERVE (PRD FR-14)
               </span>
-              <h3 className="font-forum text-xl text-[var(--text-display)] mt-0.5">
+              <h3 className="font-outfit text-xl font-semibold tracking-tight text-[var(--text-display)] mt-0.5">
                 {deptBudget.name} Fiscal Protocol ({deptBudget.fiscalPeriod})
               </h3>
             </div>
@@ -165,7 +165,7 @@ export default function ManagementPage() {
               <span className="font-mono text-[9px] tracking-[0.25em] text-[var(--accent-gold)] uppercase">
                 PENDING SCRUTINY DOCKET (PRD FR-09)
               </span>
-              <h2 className="font-forum text-2xl text-[var(--text-display)] mt-0.5">
+              <h2 className="font-outfit text-2xl font-semibold tracking-tight text-[var(--text-display)] mt-0.5">
                 Expense Approval Queue
               </h2>
             </div>
@@ -275,7 +275,7 @@ export default function ManagementPage() {
                   <span className="font-mono text-[9px] tracking-widest text-[var(--accent-gold)] uppercase">
                     AUDIT SCRUTINY FILE // {inspectClaim.id}
                   </span>
-                  <h3 className="font-forum text-2xl text-[var(--text-display)] mt-1">
+                  <h3 className="font-outfit text-2xl font-semibold tracking-tight text-[var(--text-display)] mt-1">
                     {inspectClaim.title}
                   </h3>
                 </div>
@@ -367,7 +367,7 @@ export default function ManagementPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
             <div className="luxury-card w-full max-w-lg rounded-2xl p-7">
               <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-3">
-                <h3 className="font-forum text-xl text-[var(--text-display)]">
+                <h3 className="font-outfit text-xl font-semibold tracking-tight text-[var(--text-display)]">
                   {actionType === "REJECT" ? "Formal Claim Rejection" : "Return Claim for Corrections"}
                 </h3>
                 <button onClick={() => setActionClaim(null)} className="text-[var(--text-muted)] hover:text-white">

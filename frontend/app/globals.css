@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Forum&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ── Haute Horlogerie & Private Wealth Design System ───────────── */
+/* ── Minimalist Geometric Luxury Design System ───────────── */
 :root {
-  --font-serif: 'Forum', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Warm Linen & Aged Ivory (Light Mode) */
@@ -35,13 +35,17 @@
 }
 
 /* ── Typography Utility Classes ────────────────────────────────── */
+.font-display,
+.font-outfit,
 .font-forum {
-  font-family: var(--font-serif);
-  letter-spacing: 0.02em;
+  font-family: var(--font-display);
+  letter-spacing: -0.025em;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 .font-sans-luxury {
   font-family: var(--font-sans);
+  letter-spacing: -0.01em;
 }
 
 .font-mono-nums {

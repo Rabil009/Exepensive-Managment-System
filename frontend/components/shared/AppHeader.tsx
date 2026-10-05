@@ -16,7 +16,7 @@ export function AppHeader({ currentUser, pageTitle }: AppHeaderProps) {
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--border-hairline)] bg-[var(--bg-page)]/85 px-8 backdrop-blur-xl transition-colors">
       <div className="flex items-center gap-4">
         {pageTitle && (
-          <span className="font-forum text-sm tracking-[0.12em] uppercase text-[var(--text-muted)]">
+          <span className="font-outfit text-sm font-medium tracking-tight text-[var(--text-muted)]">
             {pageTitle}
           </span>
         )}
@@ -44,7 +44,7 @@ export function AppHeader({ currentUser, pageTitle }: AppHeaderProps) {
 
         {/* User Pill Badge */}
         <div className="flex items-center gap-3 pl-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--accent-gold)]/40 bg-[var(--accent-gold-light)] font-forum text-xs font-semibold text-[var(--accent-gold)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--accent-gold)]/40 bg-[var(--accent-gold-light)] font-outfit text-xs font-semibold text-[var(--accent-gold)]">
             {currentUser.avatarInitials}
           </div>
           <div className="text-left hidden sm:block">

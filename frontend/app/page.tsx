@@ -67,7 +67,7 @@ export default function HomePage() {
       >
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="font-forum text-2xl tracking-[0.2em] uppercase text-[var(--text-display)]">
+            <span className="font-outfit text-2xl font-bold tracking-tight text-[var(--text-display)]">
               FinPulse
             </span>
             <span className="hidden sm:inline-block h-3.5 w-px bg-[var(--border-hairline)]" />
@@ -106,7 +106,7 @@ export default function HomePage() {
 
           <motion.h1
             variants={itemVariants}
-            className="font-forum text-5xl sm:text-7xl lg:text-8xl tracking-[0.01em] font-normal leading-[1.02] text-[var(--text-display)]"
+            className="font-outfit text-5xl sm:text-7xl lg:text-8xl tracking-tight font-semibold leading-[1.04] text-[var(--text-display)]"
           >
             Discipline in Capital.<br />
             Purity in Accounting.
@@ -143,7 +143,7 @@ export default function HomePage() {
                 <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-[#e6d5b8] block mb-1">
                   CLEARINGHOUSE SYSTEM ARCHITECTURE
                 </span>
-                <h3 className="font-forum text-2xl sm:text-3xl text-white">
+                <h3 className="font-outfit text-2xl sm:text-3xl font-semibold tracking-tight text-white">
                   The Sovereign Expense Clearinghouse
                 </h3>
                 <p className="text-xs text-zinc-300 font-light max-w-lg mt-1">
@@ -193,7 +193,7 @@ export default function HomePage() {
 
                 {/* Card Content */}
                 <div className="p-7">
-                  <h2 className="font-forum text-2xl tracking-wide text-[var(--text-display)]">
+                  <h2 className="font-outfit text-2xl font-semibold tracking-tight text-[var(--text-display)]">
                     {portal.title}
                   </h2>
                   

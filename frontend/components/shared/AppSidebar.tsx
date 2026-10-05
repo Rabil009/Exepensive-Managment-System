@@ -49,7 +49,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
       {/* Brand Logo Header */}
       <div className="flex h-20 flex-col justify-center border-b border-[var(--border-hairline)] px-6">
         <Link href="/" className="group block">
-          <span className="font-forum text-xl tracking-[0.16em] uppercase text-[var(--text-display)] group-hover:text-[var(--accent-gold)] transition-colors">
+          <span className="font-outfit text-xl font-bold tracking-tight text-[var(--text-display)] group-hover:text-[var(--accent-gold)] transition-colors">
             FinPulse
           </span>
           <span className="block font-mono text-[9px] tracking-[0.24em] text-[var(--accent-gold)] uppercase mt-0.5">

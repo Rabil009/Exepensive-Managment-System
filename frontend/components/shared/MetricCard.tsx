@@ -37,7 +37,7 @@ export function MetricCard({
 
       {/* Main Figures */}
       <div className="mt-4">
-        <h3 className="font-forum text-xs tracking-[0.14em] uppercase text-[var(--text-muted)]">
+        <h3 className="font-outfit text-xs font-semibold tracking-wider uppercase text-[var(--text-muted)]">
           {title}
         </h3>
         <p className="font-mono-nums text-3xl font-light tracking-tight text-[var(--text-display)] mt-1.5">

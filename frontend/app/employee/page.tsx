@@ -160,7 +160,7 @@ export default function EmployeePage() {
               <span className="font-mono text-[9px] tracking-[0.25em] text-[var(--accent-gold)] uppercase">
                 PORTFOLIO STATEMENT (PRD FR-04 & FR-13)
               </span>
-              <h2 className="font-forum text-2xl text-[var(--text-display)] mt-0.5">
+              <h2 className="font-outfit text-2xl font-semibold tracking-tight text-[var(--text-display)] mt-0.5">
                 Itemized Expense Register
               </h2>
             </div>
@@ -238,7 +238,7 @@ export default function EmployeePage() {
                   <span className="font-mono text-[9px] tracking-widest text-[var(--accent-gold)] uppercase">
                     NEW EXPENSE LODGEMENT (PRD FR-02)
                   </span>
-                  <h3 className="font-forum text-2xl text-[var(--text-display)] mt-0.5">
+                  <h3 className="font-outfit text-2xl font-semibold tracking-tight text-[var(--text-display)] mt-0.5">
                     Record Business Expense
                   </h3>
                 </div>

@@ -224,7 +224,7 @@ export default function FinancePage() {
               <span className="font-mono text-[9px] tracking-[0.25em] text-[var(--accent-gold)] uppercase">
                 SETTLEMENT MANIFEST (PRD FR-10 & FR-12)
               </span>
-              <h2 className="font-forum text-2xl text-[var(--text-display)] mt-0.5">
+              <h2 className="font-outfit text-2xl font-semibold tracking-tight text-[var(--text-display)] mt-0.5">
                 Authorized Disbursement Register
               </h2>
             </div>
@@ -342,7 +342,7 @@ export default function FinancePage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
             <div className="luxury-card w-full max-w-lg rounded-2xl p-7">
               <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-3">
-                <h3 className="font-forum text-xl text-[var(--text-display)]">
+                <h3 className="font-outfit text-xl font-semibold tracking-tight text-[var(--text-display)]">
                   Record Manual Payment Settlement
                 </h3>
                 <button onClick={() => setPayoutClaim(null)} className="text-[var(--text-muted)] hover:text-white">
@@ -430,7 +430,7 @@ export default function FinancePage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
             <div className="luxury-card w-full max-w-md rounded-2xl p-7">
               <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-3">
-                <h3 className="font-forum text-xl text-[var(--text-display)]">
+                <h3 className="font-outfit text-xl font-semibold tracking-tight text-[var(--text-display)]">
                   {holdClaim.isHold ? "Release Audit Hold" : "Place Claim on Hold"}
                 </h3>
                 <button onClick={() => setHoldClaim(null)} className="text-[var(--text-muted)] hover:text-white">
