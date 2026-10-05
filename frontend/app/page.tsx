@@ -170,27 +170,24 @@ function RippleTorus3D() {
 
 const PORTALS = [
   {
-    title: "Seamless Integration",
-    portalName: "Employee Portal",
+    title: "Employee Portal",
     description: "Submit itemized expense claims, snap digital receipts, and track reimbursement milestones with zero friction.",
     href: "/employee",
-    pillText: "Effortless Connectivity",
+    pillText: "Employee Workspace",
     renderArt: HelixRibbon3D,
   },
   {
-    title: "Exceptional Security",
-    portalName: "Management Portal",
+    title: "Manager Portal",
     description: "Audit team submissions, adjudicate policy exception warnings, and protect quarterly budgets in real-time.",
     href: "/management",
-    pillText: "Exceptional Security",
+    pillText: "Manager Review",
     renderArt: CogGear3D,
   },
   {
-    title: "High Performance",
-    portalName: "Finance Clearinghouse",
+    title: "Finance Portal",
     description: "Execute consolidated disbursement batches, reconcile corporate cards, and log bank UTR references.",
     href: "/finance",
-    pillText: "Speedy Experience",
+    pillText: "Finance Settlement",
     renderArt: RippleTorus3D,
   },
 ];
