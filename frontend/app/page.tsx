@@ -54,29 +54,65 @@ const PORTALS = [
   {
     title: "Employee Portal",
     subtitle: "Expense Ingestion & Personal Claims",
-    description: "Submit itemized drafts, snap digital receipts, and track reimbursement milestones with zero friction.",
+    description: "Submit itemized drafts, snap digital receipts with instant OCR matching, and track reimbursement milestones.",
     href: "/employee",
     icon: Receipt,
     badge: "Role 1: Employee",
     action: "Open Workspace",
+    accentColor: "from-blue-600 via-sky-500 to-sky-400",
+    iconBg: "bg-blue-50 text-blue-600 border-blue-100/80 group-hover:bg-blue-600 group-hover:text-white",
+    dotColor: "bg-blue-600",
+    tags: ["OCR Auto-Extract", "Live Policy Pre-check", "Instant Payout Track"],
+    preview: {
+      tag: "Smart OCR Receipt Scan",
+      status: "Verified 99.4%",
+      statusColor: "text-emerald-700 bg-emerald-50 border-emerald-100",
+      item: "Air India Boarding Pass",
+      amount: "₹8,500.00",
+      meta: "Flight · Auto-Categorized",
+    },
   },
   {
     title: "Management Portal",
     subtitle: "Review & Budget Oversight",
-    description: "Review pending submissions, adjudicate policy exception warnings, and protect quarterly budget reserves.",
+    description: "Review team submissions, adjudicate policy exception warnings with 1-click approvals, and safeguard quarterly budgets.",
     href: "/management",
     icon: Users,
     badge: "Role 2: Manager",
     action: "Review Queue",
+    accentColor: "from-indigo-600 via-indigo-500 to-blue-500",
+    iconBg: "bg-indigo-50 text-indigo-600 border-indigo-100/80 group-hover:bg-indigo-600 group-hover:text-white",
+    dotColor: "bg-indigo-600",
+    tags: ["Policy Enforcement", "Budget Thresholds", "1-Click Approvals"],
+    preview: {
+      tag: "Approval Adjudication",
+      status: "Cap: ₹5,000 OK",
+      statusColor: "text-blue-700 bg-blue-50 border-blue-100",
+      item: "Aditya Kumar · Oberoi Grand",
+      amount: "₹6,000.00",
+      meta: "Exception Justification Attached",
+    },
   },
   {
     title: "Finance Clearinghouse",
     subtitle: "Disbursement & Payout Settlement",
-    description: "Manage disbursement registers, separate corporate card reconciliations, record UTR codes, and configure holds.",
+    description: "Execute batch reimbursement runs, reconcile corporate cards, log official bank UTR tracking codes, and manage holds.",
     href: "/finance",
     icon: Building2,
     badge: "Role 3: Finance",
-    action: "Access Vault",
+    action: "Access Treasury",
+    accentColor: "from-emerald-600 via-teal-500 to-cyan-500",
+    iconBg: "bg-emerald-50 text-emerald-600 border-emerald-100/80 group-hover:bg-emerald-600 group-hover:text-white",
+    dotColor: "bg-emerald-600",
+    tags: ["Batch Direct Payout", "Bank UTR Ledger", "Audit Integrity"],
+    preview: {
+      tag: "Disbursement Register",
+      status: "Settled & Logged",
+      statusColor: "text-emerald-700 bg-emerald-50 border-emerald-100",
+      item: "Disbursement Batch #OCT-26",
+      amount: "₹38,400.00",
+      meta: "UTR #928410924719",
+    },
   },
 ];
 
@@ -493,43 +529,91 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {PORTALS.map((portal) => {
               const Icon = portal.icon;
               return (
                 <div
                   key={portal.href}
-                  className="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group hover:-translate-y-1"
+                  className="bg-white rounded-[32px] p-7 sm:p-8 border border-slate-200/90 shadow-[0_4px_25px_-5px_rgba(15,23,42,0.06)] hover:shadow-[0_25px_50px_-12px_rgba(15,23,42,0.14)] transition-all duration-300 flex flex-col justify-between group hover:-translate-y-2 relative overflow-hidden"
                 >
+                  {/* Subtle Top Gradient Accent Strip */}
+                  <div className={`absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r ${portal.accentColor} opacity-90 group-hover:h-2 transition-all`} />
+
                   <div>
-                    {/* Badge & Icon */}
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="h-11 w-11 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <Icon className="h-5 w-5" />
+                    {/* Top Row: Icon & Role Badge */}
+                    <div className="flex items-center justify-between mb-5">
+                      <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-200 border ${portal.iconBg}`}>
+                        <Icon className="h-6 w-6" />
                       </div>
-                      <span className="text-[11px] font-semibold text-slate-500 bg-slate-100/80 px-3 py-1 rounded-full">
-                        {portal.badge}
-                      </span>
+                      <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/90 border border-slate-200/60 text-slate-600 text-[11px] font-semibold">
+                        <span className={`h-1.5 w-1.5 rounded-full ${portal.dotColor}`} />
+                        <span>{portal.badge}</span>
+                      </div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                    {/* Titles */}
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">
                       {portal.title}
                     </h3>
-                    <p className="text-xs font-medium text-blue-600 mt-0.5">
+                    <p className="text-xs font-semibold text-blue-600 mt-1">
                       {portal.subtitle}
                     </p>
-                    <p className="text-xs text-slate-500 mt-3 leading-relaxed">
+                    <p className="text-xs text-slate-500 mt-2.5 leading-relaxed font-normal">
                       {portal.description}
                     </p>
+
+                    {/* Interactive UI Mockup Preview Box */}
+                    <div className="my-5 p-3.5 rounded-2xl bg-slate-50/90 border border-slate-100 group-hover:border-slate-200/80 transition-colors">
+                      <div className="flex items-center justify-between text-[11px] mb-2">
+                        <span className="font-bold text-slate-700">
+                          {portal.preview.tag}
+                        </span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${portal.preview.statusColor}`}>
+                          {portal.preview.status}
+                        </span>
+                      </div>
+
+                      <div className="bg-white rounded-xl p-2.5 border border-slate-200/70 shadow-2xs flex items-center justify-between">
+                        <div className="min-w-0 pr-2">
+                          <p className="text-xs font-bold text-slate-900 truncate">
+                            {portal.preview.item}
+                          </p>
+                          <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+                            {portal.preview.meta}
+                          </p>
+                        </div>
+                        <span className="text-xs sm:text-sm font-black text-slate-900 shrink-0">
+                          {portal.preview.amount}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Micro Feature Tags */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {portal.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-[10px] font-medium text-slate-600 bg-slate-100/70 px-2.5 py-1 rounded-lg border border-slate-200/40"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
+                  {/* Bottom Action Footer */}
                   <div className="pt-6 mt-6 border-t border-slate-100">
                     <Link
                       href={portal.href}
-                      className="w-full inline-flex items-center justify-between text-xs font-semibold text-slate-900 group-hover:text-blue-600 transition-colors"
+                      className="w-full inline-flex items-center justify-between group/link"
                     >
-                      <span>{portal.action}</span>
-                      <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      <span className="text-xs font-bold text-slate-900 group-hover/link:text-blue-600 transition-colors">
+                        {portal.action}
+                      </span>
+                      <div className="h-8 w-8 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center text-slate-700 transition-all duration-200 shadow-2xs">
+                        <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </div>
                     </Link>
                   </div>
                 </div>
