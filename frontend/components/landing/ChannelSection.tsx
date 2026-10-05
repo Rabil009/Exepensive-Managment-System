@@ -1,14 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
+import { Envelope3DCard } from "./Envelope3DCard";
 
 export function ChannelSection() {
   return (
     <section className="relative w-full bg-[#111111] text-white py-24 sm:py-32 lg:py-36 px-6 sm:px-12 lg:px-16 overflow-hidden">
       <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
         
-        {/* Left Column: 3D Envelope Illustration */}
+        {/* Left Column: 3D Squircle Envelope Card */}
         <motion.div 
           initial={{ opacity: 0, x: -30 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -16,14 +16,7 @@ export function ChannelSection() {
           transition={{ duration: 0.7, ease: "easeOut" }}
           className="lg:col-span-5 flex justify-center lg:justify-end"
         >
-          <div className="relative w-full max-w-[340px] sm:max-w-[400px] aspect-square rounded-3xl overflow-hidden animate-float">
-            <Image
-              src="/images/envelope-3d.jpg"
-              alt="3D envelope tile illustration with message bubble"
-              fill
-              className="object-contain"
-            />
-          </div>
+          <Envelope3DCard size="lg" />
         </motion.div>
 
         {/* Right Column: Left-Aligned Text */}

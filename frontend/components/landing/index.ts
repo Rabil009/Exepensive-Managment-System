@@ -8,3 +8,4 @@ export * from "./MethodsSection";
 export * from "./FinalCTA";
 export * from "./Footer";
 export * from "./FloatingCoin";
+export * from "./Envelope3DCard";
