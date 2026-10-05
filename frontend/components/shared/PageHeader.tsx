@@ -17,7 +17,7 @@ export function PageHeader({ title, subtitle, sectionCode, action, className }: 
             {sectionCode}
           </p>
         )}
-        <h1 className="font-outfit text-3xl sm:text-4xl text-[var(--text-display)] tracking-tight font-semibold">
+        <h1 className="font-luxury text-3xl sm:text-5xl text-[var(--text-display)] tracking-tight font-normal">
           {title}
         </h1>
         {subtitle && (

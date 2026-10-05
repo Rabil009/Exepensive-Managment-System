@@ -69,7 +69,7 @@ export default function HomePage() {
       >
         <div className="mx-auto max-w-7xl flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="font-outfit text-2xl font-bold tracking-tight text-[var(--text-display)]">
+            <span className="font-luxury text-3xl font-semibold tracking-tight text-[var(--text-display)]">
               FinPulse
             </span>
             <span className="hidden sm:inline-block h-3.5 w-px bg-[var(--border-hairline)]" />
@@ -103,21 +103,10 @@ export default function HomePage() {
           animate="visible"
           className="relative z-10 mx-auto max-w-5xl text-center flex flex-col items-center"
         >
-          {/* Subtle Institutional Kicker */}
-          <motion.div
-            variants={itemVariants}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface)]/80 backdrop-blur-md mb-6 shadow-sm"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-[var(--accent-gold)]" />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[var(--accent-gold)] font-medium">
-              Sovereign Capital Architecture // Direct Portals
-            </span>
-          </motion.div>
-
           {/* Majestic Hero Headline */}
           <motion.h1
             variants={itemVariants}
-            className="font-outfit text-5xl sm:text-7xl lg:text-8xl tracking-tight font-semibold leading-[1.03] text-[var(--text-display)] drop-shadow-sm max-w-4xl"
+            className="font-luxury text-6xl sm:text-8xl lg:text-9xl tracking-tight font-normal leading-[0.98] text-[var(--text-display)] drop-shadow-sm max-w-4xl"
           >
             Discipline in Capital.<br />
             Purity in Accounting.
@@ -195,7 +184,7 @@ export default function HomePage() {
             <div className="h-6 w-px bg-[var(--border-subtle)] hidden sm:block" />
 
             <div className="flex items-center gap-2.5">
-              <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              <div className="h-2 w-2 rounded-full bg-amber-400" />
               <div className="text-left">
                 <span className="block font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                   Settlement Cycle
@@ -207,9 +196,8 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Elegant Downward Scroll Prompt */}
-          <motion.div
-            variants={itemVariants}
+          {/* Elegant Still Downward Indicator */}
+          <div
             className="mt-12 flex flex-col items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-display)] transition-colors cursor-pointer"
             onClick={() => {
               window.scrollTo({ top: window.innerHeight * 0.9, behavior: "smooth" });
@@ -218,13 +206,8 @@ export default function HomePage() {
             <span className="font-mono text-[10px] tracking-[0.2em] uppercase font-light">
               Explore Role Workspaces
             </span>
-            <motion.div
-              animate={{ y: [0, 4, 0] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-            >
-              <ChevronDown className="h-4 w-4 text-[var(--accent-gold)]" />
-            </motion.div>
-          </motion.div>
+            <ChevronDown className="h-4 w-4 text-[var(--accent-gold)]" />
+          </div>
         </motion.div>
       </section>
 
@@ -235,7 +218,7 @@ export default function HomePage() {
             <span className="font-mono text-[9px] tracking-[0.25em] text-[var(--accent-gold)] uppercase">
               OPERATIONAL TIERS (PRD ROLES 1, 2 & 3)
             </span>
-            <h2 className="font-outfit text-3xl sm:text-4xl font-semibold tracking-tight text-[var(--text-display)] mt-1">
+            <h2 className="font-luxury text-4xl sm:text-5xl font-normal tracking-tight text-[var(--text-display)] mt-1">
               Integrated Enterprise Portals
             </h2>
           </div>
@@ -272,7 +255,7 @@ export default function HomePage() {
 
                 {/* Card Content */}
                 <div className="p-7">
-                  <h2 className="font-outfit text-2xl font-semibold tracking-tight text-[var(--text-display)]">
+                  <h2 className="font-luxury text-3xl font-normal tracking-tight text-[var(--text-display)]">
                     {portal.title}
                   </h2>
                   
