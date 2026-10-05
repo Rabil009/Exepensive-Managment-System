@@ -89,12 +89,6 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/employee"
-              className="text-xs font-semibold text-slate-700 hover:text-slate-950 px-3 py-2 transition-colors hidden sm:inline-block"
-            >
-              Log In
-            </Link>
-            <Link
-              href="/employee"
               className="bg-slate-950 text-white hover:bg-slate-800 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide transition-all shadow-sm hover:shadow"
             >
               Launch Portal
@@ -110,15 +104,6 @@ export default function HomePage() {
 
         {/* Hero Header Content */}
         <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center">
-          
-          {/* Top Pill Kicker */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-slate-200/90 bg-white/90 text-slate-600 shadow-sm mb-6 backdrop-blur-md">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-            <span className="text-[11px] font-medium tracking-wide">
-              Direct Role Access // Zero Friction
-            </span>
-          </div>
-
           {/* Pathio Punchy Headline */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.06] max-w-2xl">
             Stop chasing receipts.<br />
