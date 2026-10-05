@@ -67,7 +67,7 @@ function EmployeeWorkspaceView() {
   return (
     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 p-3.5 sm:p-4 text-left">
       {/* Left: Neural OCR Document Inspector */}
-      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between relative overflow-hidden">
+      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between relative overflow-hidden min-w-0">
         <div className="flex items-center justify-between pb-2.5 border-b border-slate-800/80">
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -127,7 +127,7 @@ function EmployeeWorkspaceView() {
       </div>
 
       {/* Right: Normalized Claim Entry & Policy Evaluation */}
-      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between">
+      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between min-w-0">
         <div>
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-800/80">
             <div>
@@ -350,7 +350,7 @@ function FinanceSettlementView() {
   return (
     <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-3.5 p-3.5 sm:p-4 text-left">
       {/* Left: Treasury Liquidity & Rail Summary */}
-      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between">
+      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between min-w-0">
         <div>
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-800/80">
             <span className="text-[9px] uppercase font-bold tracking-wider text-slate-400">Treasury Clearinghouse</span>
@@ -381,7 +381,7 @@ function FinanceSettlementView() {
       </div>
 
       {/* Right: Disbursement Batches & UTR Hashing */}
-      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between">
+      <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 p-3.5 sm:p-4 flex flex-col justify-between min-w-0">
         <div>
           <div className="flex items-center justify-between pb-2.5 border-b border-slate-800/80 mb-2.5">
             <div>
@@ -537,16 +537,16 @@ export default function HomePage() {
         <div className="relative w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
           {/* Left Column (lg:col-span-5): Title, Value Prop & Portal Switcher ON ONE SIDE */}
-          <div className={`relative flex flex-col items-start text-left transition-all ${isDropdownOpen ? "z-50" : "z-30"}`}>
+          <div className={`relative w-full min-w-0 lg:col-span-5 flex flex-col items-start text-left transition-all ${isDropdownOpen ? "z-50" : "z-30"}`}>
             
             {/* Security & Standard Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/5 border border-slate-200 text-slate-600 text-[11px] font-semibold mb-5">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/5 border border-slate-200 text-slate-600 text-[11px] font-semibold mb-5 whitespace-nowrap shrink-0">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
               <span>SOC-2 Type II Certified · Sub-Second OCR</span>
             </div>
 
             {/* Punchy Industry Headline on ONE SIDE */}
-            <h1 className="text-4xl sm:text-5xl xl:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.08] text-left">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[42px] xl:text-[50px] font-extrabold tracking-tight text-slate-950 leading-[1.1] text-left">
               Enterprise expenses.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-700 to-slate-900">
                 Deterministic accuracy.
@@ -684,7 +684,7 @@ export default function HomePage() {
           </div>
 
           {/* Right Column (lg:col-span-7): The Interactive Desktop Cockpit */}
-          <div className="relative z-20 w-full">
+          <div className="relative z-20 w-full min-w-0 lg:col-span-7">
             {/* Subtle Ambient Floor Reflection */}
             <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-slate-900/30 rounded-3xl blur-2xl opacity-40 -z-10" />
 
