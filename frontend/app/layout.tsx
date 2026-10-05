@@ -1,37 +1,28 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
-import { Toaster } from "sonner";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "FinPulse — Sovereign Capital & Expense Operations",
-  description: "Bespoke corporate expense management and private capital treasury",
+  title: "FinPulse — Track every expense, stay in control",
+  description: "9 out of 10 teams close their monthly reports in under an hour.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-[var(--bg-page)] text-[var(--text-display)] font-sans-luxury antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border-hairline)",
-                color: "var(--text-display)",
-                fontFamily: "var(--font-sans)",
-                borderRadius: "12px",
-              },
-            }}
-          />
-        </ThemeProvider>
+    <html lang="en" className={plusJakarta.variable}>
+      <body className="font-sans antialiased text-white selection:bg-[#3B6CF6] selection:text-white bg-[#111111] overflow-x-hidden">
+        {children}
       </body>
     </html>
   );
