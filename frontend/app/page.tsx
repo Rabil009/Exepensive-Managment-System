@@ -612,7 +612,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero Header Content */}
-        <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center">
+        <div className={`relative max-w-3xl mx-auto text-center flex flex-col items-center transition-all ${isDropdownOpen ? "z-50" : "z-30"}`}>
           {/* Pathio Punchy Headline */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.06] max-w-2xl">
             Stop chasing receipts.<br />
@@ -626,7 +626,7 @@ export default function HomePage() {
           </p>
 
           {/* Quick Portal Switcher Capsule with Custom Luxury Dropdown */}
-          <div ref={dropdownRef} className="relative mt-8 w-full max-w-md z-40">
+          <div ref={dropdownRef} className="relative mt-8 w-full max-w-md z-50">
             {/* The Main Capsule Pill */}
             <div className="w-full bg-white rounded-full p-1.5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between gap-2">
               {/* Dropdown Toggle Button */}
@@ -749,7 +749,7 @@ export default function HomePage() {
         </div>
 
         {/* ── Pathio Hero Centerpiece: Smartphone & Floating Interactive Cards ── */}
-        <div className="relative z-10 mt-14 sm:mt-20 w-full max-w-6xl mx-auto flex items-center justify-center min-h-[460px] sm:min-h-[520px]">
+        <div className="relative z-10 mt-16 sm:mt-24 w-full max-w-6xl mx-auto flex items-center justify-center min-h-[460px] sm:min-h-[520px]">
           
           {/* ── Floating Card 1: Top-Left (Policy Exception Alert) ─────────── */}
           <motion.div
@@ -766,7 +766,7 @@ export default function HomePage() {
               Policy Exception Alert
             </p>
             <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Hotel claim ₹6,000 exceeds ₹5,000 daily cap
+              Mandatory justification required when budget caps exceed
             </p>
           </motion.div>
 
@@ -784,8 +784,8 @@ export default function HomePage() {
                 CORP
               </div>
             </div>
-            <p className="text-xs font-bold text-slate-900">AWS Cloud Infra</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">₹15,400 · Auto-reconciled</p>
+            <p className="text-xs font-bold text-slate-900">Direct Bank Feed</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Automated Receipt Matching</p>
           </motion.div>
 
           {/* ── Floating Card 3: Top-Right (Budget Health) ──────────── */}
@@ -800,10 +800,10 @@ export default function HomePage() {
               <TrendingUp className="h-4 w-4" />
             </div>
             <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-              Budget Health
+              Department Budget
             </p>
             <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Engineering is 18% under Q4 allocated budget
+              Real-time expenditure tracking vs quarterly caps
             </p>
           </motion.div>
 
@@ -824,7 +824,7 @@ export default function HomePage() {
           </motion.div>
 
           {/* ── The Center Smartphone Frame ─────────────────────────── */}
-          <div className="relative w-[280px] sm:w-[320px] h-[490px] sm:h-[540px] bg-slate-950 p-2.5 rounded-[44px] shadow-[0_30px_90px_-20px_rgba(15,23,42,0.22)] border-[5px] border-slate-900/90 overflow-hidden flex flex-col justify-between">
+          <div className="relative w-[280px] sm:w-[320px] h-[510px] sm:h-[550px] bg-slate-950 p-2.5 rounded-[44px] shadow-[0_30px_90px_-20px_rgba(15,23,42,0.22)] border-[5px] border-slate-900/90 overflow-hidden flex flex-col justify-between">
             
             {/* Phone Inner Screen with Sky-Blue Gradient */}
             <div className="w-full h-full bg-gradient-to-b from-sky-100 via-sky-50 to-white rounded-[36px] p-4 pt-3 flex flex-col justify-between overflow-hidden relative">
@@ -843,14 +843,14 @@ export default function HomePage() {
               <div className="mt-2.5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white text-xs font-bold flex items-center justify-center shadow-sm">
-                    AK
+                    FP
                   </div>
                   <div>
                     <span className="block text-[10px] text-slate-500 font-medium leading-none">
-                      Good Morning
+                      Active Portal Hub
                     </span>
                     <span className="block text-xs font-bold text-slate-800 mt-0.5">
-                      Aditya Kumar · ID #EMP-4573
+                      FinPulse · Enterprise
                     </span>
                   </div>
                 </div>
@@ -866,62 +866,91 @@ export default function HomePage() {
               </div>
 
               {/* Personalized Greeting */}
-              <div className="mt-3 text-left">
-                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-                  Hello, Aditya
+              <div className="mt-2.5 text-left">
+                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                  Expense System
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
-                  3 expense claims pending approval
+                  Select workflow to inspect required fields
                 </p>
               </div>
 
               {/* Quick Reimbursement Summary Bar */}
-              <div className="mt-3 bg-white/95 backdrop-blur-sm rounded-2xl p-2.5 border border-sky-100/90 shadow-xs flex items-center justify-between">
+              <div className="mt-2.5 bg-white/95 backdrop-blur-sm rounded-2xl p-2.5 border border-sky-100/90 shadow-xs flex items-center justify-between">
                 <div className="text-left pl-1">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Total Claimed</span>
-                  <p className="text-sm font-extrabold text-slate-900 tracking-tight">₹17,700</p>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Claims</span>
+                  <p className="text-xs font-extrabold text-slate-900 tracking-tight">Processed</p>
                 </div>
-                <div className="h-6 w-px bg-slate-200/60" />
+                <div className="h-5 w-px bg-slate-200/60" />
                 <div className="text-left">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Approved</span>
-                  <p className="text-sm font-extrabold text-emerald-600 tracking-tight">₹8,500</p>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Audit</span>
+                  <p className="text-xs font-extrabold text-emerald-600 tracking-tight">Verified</p>
                 </div>
-                <div className="h-6 w-px bg-slate-200/60" />
+                <div className="h-5 w-px bg-slate-200/60" />
                 <div className="text-left pr-1">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600">In Review</span>
-                  <p className="text-sm font-extrabold text-blue-600 tracking-tight">₹9,200</p>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600">Disbursed</span>
+                  <p className="text-xs font-extrabold text-blue-600 tracking-tight">UTR Ready</p>
                 </div>
               </div>
 
-              {/* ── Active Enterprise Expense Claims (Pathio Signature Blue Capsules) ── */}
+              {/* ── Enterprise Required Portals & Workflows (Pathio Signature Blue Capsules) ── */}
               <div className="mt-auto space-y-2 z-10 pb-1">
-                {/* Pill 1: Flight / Travel */}
-                <div className="bg-[#2563eb] text-white rounded-2xl p-2.5 flex items-center justify-between shadow-lg shadow-blue-500/25">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0">
-                      <Plane className="h-4 w-4" />
+                {/* Portal Pill 1: Employee Workspace */}
+                <Link
+                  href="/employee"
+                  className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl p-2 flex items-center justify-between shadow-md shadow-blue-500/20 transition-all block group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="h-7 w-7 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:bg-white/30 transition-colors">
+                      <Receipt className="h-3.5 w-3.5" />
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold leading-tight">Air India · BLR to DEL</p>
-                      <p className="text-[10px] text-blue-100 font-medium">₹8,500 · Manager Approved</p>
+                    <div className="text-left min-w-0">
+                      <p className="text-xs font-bold leading-tight truncate">Employee Portal</p>
+                      <p className="text-[9.5px] text-blue-100 font-medium truncate">
+                        Required: Title, Category, Amount & Receipt
+                      </p>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-blue-200 shrink-0" />
-                </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-blue-200 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </Link>
 
-                {/* Pill 2: Hotel / Accommodation */}
-                <div className="bg-[#2563eb] text-white rounded-2xl p-2.5 flex items-center justify-between shadow-lg shadow-blue-500/25">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0">
-                      <Building2 className="h-4 w-4" />
+                {/* Portal Pill 2: Manager Review */}
+                <Link
+                  href="/management"
+                  className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl p-2 flex items-center justify-between shadow-md shadow-blue-500/20 transition-all block group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="h-7 w-7 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:bg-white/30 transition-colors">
+                      <Users className="h-3.5 w-3.5" />
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold leading-tight">The Oberoi · Client Sync</p>
-                      <p className="text-[10px] text-blue-100 font-medium">₹6,000 · Exception Review</p>
+                    <div className="text-left min-w-0">
+                      <p className="text-xs font-bold leading-tight truncate">Manager Portal</p>
+                      <p className="text-[9.5px] text-blue-100 font-medium truncate">
+                        Required: Policy Audit & Manager Sign-off
+                      </p>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-blue-200 shrink-0" />
-                </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-blue-200 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </Link>
+
+                {/* Portal Pill 3: Finance Settlement */}
+                <Link
+                  href="/finance"
+                  className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-2xl p-2 flex items-center justify-between shadow-md shadow-blue-500/20 transition-all block group"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="h-7 w-7 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0 group-hover:bg-white/30 transition-colors">
+                      <Building2 className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="text-left min-w-0">
+                      <p className="text-xs font-bold leading-tight truncate">Finance Portal</p>
+                      <p className="text-[9.5px] text-blue-100 font-medium truncate">
+                        Required: Bank UTR & Treasury Settlement
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-3.5 w-3.5 text-blue-200 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </Link>
               </div>
             </div>
           </div>
