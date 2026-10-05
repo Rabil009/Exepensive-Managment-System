@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight, 
   Search, 
@@ -17,9 +17,38 @@ import {
   Building2,
   ArrowUpRight,
   ShieldCheck,
-  CreditCard
+  CreditCard,
+  ChevronDown,
+  Check
 } from "lucide-react";
 import { HeroAmbientBackground } from "@/components/shared";
+
+const ROLE_OPTIONS = [
+  {
+    value: "/employee",
+    label: "Employee Portal",
+    badge: "Submit & Track",
+    desc: "Snap receipts, auto-scan OCR, track payouts",
+    icon: Receipt,
+    color: "text-blue-600 bg-blue-50 border border-blue-100",
+  },
+  {
+    value: "/management",
+    label: "Management Portal",
+    badge: "Approvals & Audit",
+    desc: "Review claims, policy exceptions, dept budgets",
+    icon: Users,
+    color: "text-indigo-600 bg-indigo-50 border border-indigo-100",
+  },
+  {
+    value: "/finance",
+    label: "Finance Portal",
+    badge: "Clearinghouse",
+    desc: "Disbursement register, UTR ledger, settlements",
+    icon: Building2,
+    color: "text-emerald-600 bg-emerald-50 border border-emerald-100",
+  },
+];
 
 const PORTALS = [
   {
@@ -53,6 +82,22 @@ const PORTALS = [
 
 export default function HomePage() {
   const [selectedRole, setSelectedRole] = useState("/employee");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const activeOption = ROLE_OPTIONS.find((opt) => opt.value === selectedRole) || ROLE_OPTIONS[0];
+  const ActiveIcon = activeOption.icon;
 
   return (
     <div className="min-h-screen w-full bg-white text-slate-900 selection:bg-sky-500 selection:text-white font-sans antialiased flex flex-col">
@@ -115,28 +160,113 @@ export default function HomePage() {
             Snap a receipt, enforce policy limits, and let real-time workflows handle the rest.
           </p>
 
-          {/* Quick Portal Switcher Capsule (Pathio Waitlist Box Style) */}
-          <div className="mt-8 w-full max-w-md bg-white rounded-full p-1.5 border border-slate-200 shadow-sm flex items-center justify-between gap-2">
-            <div className="flex-1 flex items-center gap-2 pl-4">
-              <Receipt className="h-4 w-4 text-slate-400 shrink-0" />
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full bg-transparent text-xs font-medium text-slate-700 outline-none cursor-pointer"
+          {/* Quick Portal Switcher Capsule with Custom Luxury Dropdown */}
+          <div ref={dropdownRef} className="relative mt-8 w-full max-w-md z-40">
+            {/* The Main Capsule Pill */}
+            <div className="w-full bg-white rounded-full p-1.5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between gap-2">
+              {/* Dropdown Toggle Button */}
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex-1 flex items-center justify-between pl-3 pr-2 py-1 text-left cursor-pointer group rounded-full focus:outline-none"
+                aria-haspopup="listbox"
+                aria-expanded={isDropdownOpen}
               >
-                <option value="/employee">Employee Portal (Submit Expenses)</option>
-                <option value="/management">Management Portal (Audit & Approvals)</option>
-                <option value="/finance">Finance Portal (Payment Settlement)</option>
-              </select>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${activeOption.color}`}>
+                    <ActiveIcon className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="truncate">
+                    <span className="block text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                      {activeOption.label}
+                    </span>
+                    <span className="block text-[10px] text-slate-400 font-medium truncate">
+                      {activeOption.badge}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="pl-2 pr-1 text-slate-400 group-hover:text-slate-700 transition-colors">
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      isDropdownOpen ? "rotate-180 text-blue-600" : ""
+                    }`}
+                  />
+                </div>
+              </button>
+
+              {/* Launch Action Button */}
+              <Link
+                href={selectedRole}
+                className="bg-slate-950 text-white hover:bg-slate-800 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide transition-all shrink-0 inline-flex items-center gap-1.5 shadow-sm hover:shadow"
+              >
+                <span>Launch</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
 
-            <Link
-              href={selectedRole}
-              className="bg-slate-950 text-white hover:bg-slate-800 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide transition-all shrink-0 inline-flex items-center gap-1.5"
-            >
-              <span>Launch</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+            {/* Custom Luxury Floating Dropdown Popover */}
+            <AnimatePresence>
+              {isDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                  transition={{ duration: 0.16, ease: "easeOut" }}
+                  className="absolute left-0 right-0 top-full mt-2 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-3xl p-2 shadow-[0_20px_50px_-10px_rgba(15,23,42,0.18)] z-50 overflow-hidden"
+                >
+                  <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Select Target Portal
+                  </div>
+                  <div className="space-y-1 mt-1">
+                    {ROLE_OPTIONS.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = selectedRole === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setSelectedRole(option.value);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-2xl text-left transition-all ${
+                            isSelected
+                              ? "bg-blue-50/70 border border-blue-100"
+                              : "hover:bg-slate-50 border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${option.color}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs font-bold ${isSelected ? "text-blue-950" : "text-slate-900"}`}>
+                                  {option.label}
+                                </span>
+                                <span className="text-[10px] font-semibold text-slate-500 bg-white/80 px-2 py-0.5 rounded-full border border-slate-200/60">
+                                  {option.badge}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 mt-0.5 truncate">
+                                {option.desc}
+                              </p>
+                            </div>
+                          </div>
+
+                          {isSelected && (
+                            <div className="h-5 w-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 ml-2">
+                              <Check className="h-3 w-3 stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Rating Stars & Trust Pill */}
