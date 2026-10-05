@@ -168,6 +168,262 @@ function RippleTorus3D() {
   );
 }
 
+function IsometricCube3D({ className = "w-28 h-28", id = "cube1" }: { className?: string; id?: string }) {
+  return (
+    <svg
+      viewBox="0 0 160 170"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${className} drop-shadow-xl filter`}
+    >
+      <defs>
+        {/* Top face: light ice-cyan to bright sky-blue */}
+        <linearGradient id={`${id}-top`} x1="20%" y1="10%" x2="80%" y2="90%">
+          <stop offset="0%" stopColor="#bae6fd" />
+          <stop offset="45%" stopColor="#60a5fa" />
+          <stop offset="100%" stopColor="#3b82f6" />
+        </linearGradient>
+
+        {/* Left face: rich royal blue */}
+        <linearGradient id={`${id}-left`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="60%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#1d4ed8" />
+        </linearGradient>
+
+        {/* Right face: deep cobalt / dark navy */}
+        <linearGradient id={`${id}-right`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1e40af" />
+          <stop offset="65%" stopColor="#1e3a8a" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+
+        {/* Ambient shadow */}
+        <radialGradient id={`${id}-shadow`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#1e3a8a" stopOpacity="0.4" />
+          <stop offset="70%" stopColor="#1e3a8a" stopOpacity="0.1" />
+          <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* Ground contact shadow */}
+      <ellipse cx="80" cy="154" rx="55" ry="14" fill={`url(#${id}-shadow)`} />
+
+      {/* Main Cube Group */}
+      <g>
+        {/* Left Face */}
+        <path
+          d="M 26 56 L 80 87 L 80 148 L 26 117 Z"
+          fill={`url(#${id}-left)`}
+        />
+
+        {/* Right Face */}
+        <path
+          d="M 80 87 L 134 56 L 134 117 L 80 148 Z"
+          fill={`url(#${id}-right)`}
+        />
+
+        {/* Top Face */}
+        <path
+          d="M 80 25 L 134 56 L 80 87 L 26 56 Z"
+          fill={`url(#${id}-top)`}
+        />
+
+        {/* Top Face Specular Glare */}
+        <path
+          d="M 80 30 L 126 56 L 80 82 L 34 56 Z"
+          fill="#ffffff"
+          opacity="0.22"
+        />
+
+        {/* Edge Bevel Accents */}
+        <path
+          d="M 27 56 L 80 87 L 133 56"
+          stroke="#ffffff"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.6"
+        />
+        <path
+          d="M 80 87 L 80 147"
+          stroke="#93c5fd"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          opacity="0.45"
+        />
+        <path
+          d="M 26 56 L 80 25 L 134 56"
+          stroke="#ffffff"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.75"
+        />
+      </g>
+    </svg>
+  );
+}
+
+function IsometricCubeMini({ className = "w-16 h-16", id = "cubemini" }: { className?: string; id?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 110"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${className} drop-shadow-lg filter`}
+    >
+      <defs>
+        <linearGradient id={`${id}-top`} x1="15%" y1="15%" x2="85%" y2="85%">
+          <stop offset="0%" stopColor="#bae6fd" />
+          <stop offset="60%" stopColor="#60a5fa" />
+          <stop offset="100%" stopColor="#3b82f6" />
+        </linearGradient>
+        <linearGradient id={`${id}-left`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#1d4ed8" />
+        </linearGradient>
+        <linearGradient id={`${id}-right`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1e40af" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+      </defs>
+
+      {/* Left Face */}
+      <path d="M 16 35 L 50 55 L 50 94 L 16 74 Z" fill={`url(#${id}-left)`} />
+      {/* Right Face */}
+      <path d="M 50 55 L 84 35 L 84 74 L 50 94 Z" fill={`url(#${id}-right)`} />
+      {/* Top Face */}
+      <path d="M 50 15 L 84 35 L 50 55 L 16 35 Z" fill={`url(#${id}-top)`} />
+
+      {/* Edge highlight */}
+      <path d="M 17 35 L 50 55 L 83 35" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+      <path d="M 50 55 L 50 93" stroke="#93c5fd" strokeWidth="1.5" strokeLinecap="round" opacity="0.4" />
+      <path d="M 16 35 L 50 15 L 84 35" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
+    </svg>
+  );
+}
+
+function GlassSphere3D({ className = "w-20 h-20", id = "sphere3d" }: { className?: string; id?: string }) {
+  return (
+    <svg
+      viewBox="0 0 120 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${className} drop-shadow-xl filter`}
+    >
+      <defs>
+        <radialGradient id={`${id}-body`} cx="38%" cy="32%" r="65%">
+          <stop offset="0%" stopColor="#e0f2fe" />
+          <stop offset="25%" stopColor="#93c5fd" />
+          <stop offset="55%" stopColor="#3b82f6" />
+          <stop offset="85%" stopColor="#1d4ed8" />
+          <stop offset="100%" stopColor="#172554" />
+        </radialGradient>
+        <linearGradient id={`${id}-ring`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="#bfdbfe" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.7" />
+        </linearGradient>
+      </defs>
+
+      {/* Ambient shadow */}
+      <ellipse cx="60" cy="108" rx="36" ry="8" fill="#1e3a8a" opacity="0.2" filter="blur(4px)" />
+
+      {/* Back orbit ring segment */}
+      <ellipse
+        cx="60"
+        cy="60"
+        rx="52"
+        ry="18"
+        stroke={`url(#${id}-ring)`}
+        strokeWidth="3"
+        fill="none"
+        transform="rotate(-20 60 60)"
+        strokeDasharray="90 120"
+        opacity="0.5"
+      />
+
+      {/* Core Sphere */}
+      <circle cx="60" cy="58" r="38" fill={`url(#${id}-body)`} />
+
+      {/* Specular Highlight */}
+      <ellipse cx="48" cy="45" rx="14" ry="8" fill="#ffffff" opacity="0.45" transform="rotate(-30 48 45)" />
+      <circle cx="44" cy="40" r="3" fill="#ffffff" opacity="0.8" />
+
+      {/* Bottom rim light */}
+      <path
+        d="M 38 78 C 45 88, 70 88, 80 76"
+        stroke="#93c5fd"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.55"
+      />
+
+      {/* Front orbit ring segment */}
+      <ellipse
+        cx="60"
+        cy="60"
+        rx="52"
+        ry="18"
+        stroke={`url(#${id}-ring)`}
+        strokeWidth="3.5"
+        fill="none"
+        transform="rotate(-20 60 60)"
+        strokeDasharray="120 90"
+      />
+    </svg>
+  );
+}
+
+function FloatingOctahedron3D({ className = "w-20 h-20", id = "octa" }: { className?: string; id?: string }) {
+  return (
+    <svg
+      viewBox="0 0 110 120"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${className} drop-shadow-xl filter`}
+    >
+      <defs>
+        <linearGradient id={`${id}-tleft`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#bae6fd" />
+          <stop offset="100%" stopColor="#60a5fa" />
+        </linearGradient>
+        <linearGradient id={`${id}-tright`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#3b82f6" />
+          <stop offset="100%" stopColor="#2563eb" />
+        </linearGradient>
+        <linearGradient id={`${id}-bleft`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#2563eb" />
+          <stop offset="100%" stopColor="#1d4ed8" />
+        </linearGradient>
+        <linearGradient id={`${id}-bright`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1e40af" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+      </defs>
+
+      {/* Shadow */}
+      <ellipse cx="55" cy="112" rx="30" ry="6" fill="#1e3a8a" opacity="0.2" filter="blur(4px)" />
+
+      {/* Upper Left Facet */}
+      <path d="M 55 12 L 18 55 L 55 68 Z" fill={`url(#${id}-tleft)`} />
+      {/* Upper Right Facet */}
+      <path d="M 55 12 L 92 55 L 55 68 Z" fill={`url(#${id}-tright)`} />
+      {/* Lower Left Facet */}
+      <path d="M 18 55 L 55 68 L 55 106 Z" fill={`url(#${id}-bleft)`} />
+      {/* Lower Right Facet */}
+      <path d="M 55 68 L 92 55 L 55 106 Z" fill={`url(#${id}-bright)`} />
+
+      {/* Ridges */}
+      <path d="M 55 12 L 55 68 L 55 106" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.6" />
+      <path d="M 18 55 L 55 68 L 92 55" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
+      <circle cx="55" cy="68" r="2.5" fill="#ffffff" opacity="0.8" />
+    </svg>
+  );
+}
+
 const PORTALS = [
   {
     title: "Employee Portal",
@@ -257,6 +513,103 @@ export default function HomePage() {
       <main className="w-full relative flex flex-col items-center justify-start pt-14 pb-20 px-4 sm:px-8 overflow-hidden">
         {/* Full-Screen Ambient Sky-Blue Glow Backdrop */}
         <HeroAmbientBackground />
+
+        {/* ── Left Flank: Floating 3D Blue Cubes & Live OCR Metric ─────────── */}
+        <div className="hidden lg:flex absolute left-3 xl:left-10 2xl:left-20 top-12 xl:top-16 z-20 flex-col items-start gap-5 pointer-events-none select-none max-w-[280px]">
+          {/* Upper Left: Main 3D Isometric Cube + OCR Badge */}
+          <motion.div
+            animate={{ 
+              y: [0, -14, 0],
+              rotate: [-2, 2, -2]
+            }}
+            transition={{ 
+              duration: 6, 
+              repeat: Infinity, 
+              ease: "easeInOut" 
+            }}
+            className="flex items-center gap-3 group pointer-events-auto cursor-default"
+          >
+            <IsometricCube3D className="w-20 h-20 xl:w-28 xl:h-28 transition-transform group-hover:scale-105 duration-300" id="hero-left-cube" />
+            <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-sky-100 shadow-[0_10px_25px_-5px_rgba(37,99,235,0.12)]">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[11px] font-extrabold text-slate-900 tracking-tight">OCR Scan Engine</span>
+              </div>
+              <p className="text-[10px] font-semibold text-blue-600 mt-0.5">99.4% Field Accuracy</p>
+            </div>
+          </motion.div>
+
+          {/* Lower Left: 3D Blue Glass Sphere + Mini Isometric Cube + GSTIN Badge */}
+          <motion.div
+            animate={{ 
+              y: [0, 12, 0],
+              rotate: [1, -2, 1]
+            }}
+            transition={{ 
+              duration: 7.2, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: 0.6 
+            }}
+            className="flex items-center gap-2 pl-3 xl:pl-6 group pointer-events-auto cursor-default"
+          >
+            <GlassSphere3D className="w-16 h-16 xl:w-20 xl:h-20 transition-transform group-hover:scale-105 duration-300" id="hero-left-sphere" />
+            <IsometricCubeMini className="w-10 h-10 xl:w-12 xl:h-12 -ml-2 -mt-3 opacity-90" id="hero-left-mini" />
+            <div className="bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-100 shadow-[0_6px_20px_-4px_rgba(15,23,42,0.08)] flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+              <span className="text-[10px] font-bold text-slate-700">Auto GSTIN Verify</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ── Right Flank: Floating 3D Blue Cubes & Enterprise Audit Badge ─────────── */}
+        <div className="hidden lg:flex absolute right-3 xl:right-10 2xl:right-20 top-12 xl:top-16 z-20 flex-col items-end gap-5 pointer-events-none select-none max-w-[280px]">
+          {/* Upper Right: Tilted 3D Isometric Cube + Dual Signoff Badge */}
+          <motion.div
+            animate={{ 
+              y: [0, -16, 0],
+              rotate: [8, 14, 8]
+            }}
+            transition={{ 
+              duration: 6.5, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: 0.3 
+            }}
+            className="flex items-center gap-3 flex-row-reverse group pointer-events-auto cursor-default"
+          >
+            <IsometricCube3D className="w-20 h-20 xl:w-28 xl:h-28 transition-transform group-hover:scale-105 duration-300" id="hero-right-cube" />
+            <div className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-sky-100 shadow-[0_10px_25px_-5px_rgba(37,99,235,0.12)] text-right">
+              <div className="flex items-center justify-end gap-1.5">
+                <span className="text-[11px] font-extrabold text-slate-900 tracking-tight">Dual-Signoff Gate</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+              </div>
+              <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">Strict Audit Enforced</p>
+            </div>
+          </motion.div>
+
+          {/* Lower Right: 3D Blue Octahedron Prism + Mini Isometric Cube + UTR Settlement Badge */}
+          <motion.div
+            animate={{ 
+              y: [0, 14, 0],
+              rotate: [-2, 3, -2]
+            }}
+            transition={{ 
+              duration: 7.8, 
+              repeat: Infinity, 
+              ease: "easeInOut",
+              delay: 0.8 
+            }}
+            className="flex items-center gap-2 pr-3 xl:pr-6 flex-row-reverse group pointer-events-auto cursor-default"
+          >
+            <FloatingOctahedron3D className="w-16 h-16 xl:w-20 xl:h-20 transition-transform group-hover:scale-105 duration-300" id="hero-right-octa" />
+            <IsometricCubeMini className="w-10 h-10 xl:w-12 xl:h-12 -mr-2 -mt-3 opacity-90" id="hero-right-mini" />
+            <div className="bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-100 shadow-[0_6px_20px_-4px_rgba(15,23,42,0.08)] flex items-center gap-1.5">
+              <TrendingUp className="h-3.5 w-3.5 text-blue-600" />
+              <span className="text-[10px] font-bold text-slate-700">Bank UTR Settlement</span>
+            </div>
+          </motion.div>
+        </div>
 
         {/* Hero Header Content */}
         <div className="relative z-10 max-w-3xl mx-auto text-center flex flex-col items-center">
