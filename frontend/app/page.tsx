@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowRight, Sun, Moon, ShieldCheck, TrendingUp, Sparkles, ChevronDown } from "lucide-react";
+import { ArrowUpRight, ArrowRight, Sun, Moon, ShieldCheck, TrendingUp, ChevronDown, Receipt, Landmark } from "lucide-react";
 import { useTheme } from "next-themes";
 import { HeroAmbientBackground } from "@/components/shared";
+import { cn } from "@/lib";
 
 const PORTALS = [
   {
@@ -13,24 +13,36 @@ const PORTALS = [
     subtitle: "Expense Ingestion & Personal Claims",
     description: "Submit itemized drafts, attach verified digital receipts, and monitor reimbursement lifecycle across every financial stage.",
     href: "/employee",
-    image: "/images/executive_ledger.jpg",
-    action: "Enter Portal",
+    icon: Receipt,
+    action: "Learn more",
+    // Oceanic Azure / Cyan Radiant Bloom (bottom-left card in reference)
+    glowGradient: "radial-gradient(ellipse at 50% 100%, #ffffff 0%, #38bdf8 26%, #2563eb 56%, #1e1b4b 86%, transparent 100%)",
+    coreGradient: "radial-gradient(ellipse at 45% 100%, #bae6fd 0%, #38bdf8 40%, transparent 75%)",
+    ambientShadow: "hover:shadow-[0_25px_60px_-15px_rgba(37,99,235,0.45)]",
   },
   {
     title: "Management Portal",
     subtitle: "Review & Budget Oversight",
     description: "Audit team submissions, adjudicate policy warnings, and regulate department capital drawdown limits in real-time.",
     href: "/management",
-    image: "/images/management_chamber.jpg",
-    action: "Review Queue",
+    icon: ShieldCheck,
+    action: "Learn more",
+    // Vivid Magenta / Orchid / Fuchsia Radiant Bloom (top-left card in reference)
+    glowGradient: "radial-gradient(ellipse at 50% 100%, #ffffff 0%, #ff2a85 28%, #a855f7 58%, #312e81 88%, transparent 100%)",
+    coreGradient: "radial-gradient(ellipse at 45% 100%, #fbcfe8 0%, #ec4899 40%, transparent 75%)",
+    ambientShadow: "hover:shadow-[0_25px_60px_-15px_rgba(217,70,239,0.45)]",
   },
   {
     title: "Finance Portal",
     subtitle: "Clearinghouse & Payout Settlement",
     description: "Manage disbursement registers, execute corporate reconciliations, record electronic UTR references, and configure audit holds.",
     href: "/finance",
-    image: "/images/vault.jpg",
-    action: "Access Vault",
+    icon: Landmark,
+    action: "Learn more",
+    // Solar Amber / Incandescent Gold / Flame Radiant Bloom (bottom-right card in reference)
+    glowGradient: "radial-gradient(ellipse at 50% 100%, #ffffff 0%, #fbbf24 26%, #f97316 56%, #7c2d12 86%, transparent 100%)",
+    coreGradient: "radial-gradient(ellipse at 50% 100%, #fef08a 0%, #f59e0b 40%, transparent 75%)",
+    ambientShadow: "hover:shadow-[0_25px_60px_-15px_rgba(245,158,11,0.45)]",
   },
 ];
 
@@ -91,9 +103,9 @@ export default function HomePage() {
         </div>
       </motion.header>
 
-      {/* ── Full-Screen Hero Section with Cinematic Atmospheric Video Background ── */}
+      {/* ── Full-Screen Hero Section with Cinematic Atmospheric Background ── */}
       <section className="relative min-h-[calc(100vh-80px)] w-full flex flex-col justify-center items-center overflow-hidden px-6 py-20 lg:py-28">
-        {/* Full-Screen Ambient Video & Volumetric Lighting Background */}
+        {/* Full-Screen Ambient Lighting Background */}
         <HeroAmbientBackground />
 
         {/* Hero Content Container */}
@@ -103,7 +115,7 @@ export default function HomePage() {
           animate="visible"
           className="relative z-10 mx-auto max-w-5xl text-center flex flex-col items-center"
         >
-          {/* Majestic Hero Headline */}
+          {/* Majestic Hero Headline (Cormorant Garamond) */}
           <motion.h1
             variants={itemVariants}
             className="font-luxury text-6xl sm:text-8xl lg:text-9xl tracking-tight font-normal leading-[0.98] text-[var(--text-display)] drop-shadow-sm max-w-4xl"
@@ -211,7 +223,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* ── The Three Bespoke Portals Grid Showcase ───────────────────── */}
+      {/* ── The Three Bespoke Portals Grid Showcase (New Radiant Aurora Cards) ── */}
       <section className="mx-auto max-w-7xl px-8 py-16 lg:py-24 w-full relative z-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-[var(--border-hairline)] pb-6 mb-12 gap-4">
           <div>
@@ -232,55 +244,65 @@ export default function HomePage() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+          className="grid grid-cols-1 gap-7 lg:grid-cols-3"
         >
-          {PORTALS.map((portal) => (
-            <motion.div
-              key={portal.href}
-              variants={itemVariants}
-              whileHover={{ y: -6, transition: { duration: 0.3 } }}
-              className="luxury-card group flex flex-col justify-between rounded-3xl overflow-hidden border border-[var(--border-hairline)] bg-[var(--bg-surface)] shadow-sm hover:shadow-xl transition-all"
-            >
-              <div>
-                {/* Visual Image Header */}
-                <div className="relative h-56 w-full overflow-hidden border-b border-[var(--border-subtle)]">
-                  <Image
-                    src={portal.image}
-                    alt={portal.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-surface)] via-transparent to-black/20" />
-                </div>
+          {PORTALS.map((portal) => {
+            const Icon = portal.icon;
+            return (
+              <motion.div
+                key={portal.href}
+                variants={itemVariants}
+                whileHover={{ y: -6, transition: { duration: 0.3 } }}
+                className={cn(
+                  "relative rounded-[28px] overflow-hidden border border-white/[0.08] bg-[#07070a] p-8 min-h-[430px] flex flex-col justify-between transition-all duration-500 group shadow-2xl",
+                  portal.ambientShadow
+                )}
+              >
+                {/* ── Content (Z-Index 10 above the radiant glow) ── */}
+                <div className="relative z-10">
+                  {/* Top Circular Glass Icon Badge */}
+                  <div className="h-9 w-9 rounded-full bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-white/80 mb-6 backdrop-blur-md transition-transform group-hover:scale-105">
+                    <Icon className="h-4 w-4" />
+                  </div>
 
-                {/* Card Content */}
-                <div className="p-7">
-                  <h2 className="font-luxury text-3xl font-normal tracking-tight text-[var(--text-display)]">
+                  {/* Title */}
+                  <h3 className="text-2xl font-bold tracking-tight text-white font-sans">
                     {portal.title}
-                  </h2>
-                  
-                  <p className="text-[10px] font-mono tracking-wider uppercase text-[var(--accent-gold)] mt-1">
-                    {portal.subtitle}
-                  </p>
+                  </h3>
 
-                  <p className="mt-4 text-xs text-[var(--text-body)] leading-relaxed font-light">
+                  {/* Description */}
+                  <p className="mt-3 text-xs sm:text-sm text-zinc-400 font-normal leading-relaxed max-w-[280px]">
                     {portal.description}
                   </p>
-                </div>
-              </div>
 
-              {/* Action Button Footer */}
-              <div className="p-7 pt-0">
-                <Link
-                  href={portal.href}
-                  className="luxury-btn-secondary w-full flex items-center justify-between text-center group-hover:bg-[var(--accent-gold)] group-hover:text-black group-hover:border-[var(--accent-gold)] transition-all"
-                >
-                  <span className="font-mono text-[10px] tracking-[0.2em]">{portal.action}</span>
-                  <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Link>
-              </div>
-            </motion.div>
-          ))}
+                  {/* Learn More Link with Underline */}
+                  <div className="mt-5">
+                    <Link
+                      href={portal.href}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-white/85 underline underline-offset-4 hover:text-white transition-colors"
+                    >
+                      <span>{portal.action}</span>
+                      <ArrowUpRight className="h-3 w-3 no-underline inline" />
+                    </Link>
+                  </div>
+                </div>
+
+                {/* ── Glowing Radiant Chromatic Ambient Aurora at Bottom ── */}
+                <div className="absolute -bottom-14 -left-10 -right-10 h-56 pointer-events-none overflow-hidden select-none">
+                  {/* Outer Diffused Radiant Cloud */}
+                  <div
+                    className="absolute inset-0 blur-3xl opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+                    style={{ background: portal.glowGradient }}
+                  />
+                  {/* Inner Incandescent Core Wave */}
+                  <div
+                    className="absolute inset-x-6 bottom-0 h-32 blur-2xl opacity-75 group-hover:opacity-90 transition-all duration-700"
+                    style={{ background: portal.coreGradient }}
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </section>
 
