@@ -8,15 +8,16 @@ import {
   Search, 
   Bell, 
   AlertTriangle, 
-  Sparkles, 
-  Coffee, 
-  ShoppingBag, 
+  TrendingUp, 
+  Plane, 
   ChevronRight, 
   Star,
   Receipt,
   Users,
   Building2,
-  ArrowUpRight
+  ArrowUpRight,
+  ShieldCheck,
+  CreditCard
 } from "lucide-react";
 import { HeroAmbientBackground } from "@/components/shared";
 
@@ -56,44 +57,42 @@ export default function HomePage() {
   return (
     <div className="min-h-screen w-full bg-white text-slate-900 selection:bg-sky-500 selection:text-white font-sans antialiased flex flex-col">
       
-      {/* ── Pathio Navbar (Full Width Edge-to-Edge) ──────────────────── */}
-      <header className="w-full px-6 sm:px-12 lg:px-16 py-5 flex items-center justify-between border-b border-slate-100/90 sticky top-0 z-30 bg-white/85 backdrop-blur-md">
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 via-sky-500 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/25">
-              <Receipt className="h-5 w-5" />
-            </div>
-            <span className="font-extrabold text-xl tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
-              FinPulse
-            </span>
-          </Link>
-
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-slate-600">
-            <Link href="/employee" className="hover:text-slate-900 transition-colors">
-              Employee Portal
-            </Link>
-            <Link href="/management" className="hover:text-slate-900 transition-colors">
-              Manager Review
-            </Link>
-            <Link href="/finance" className="hover:text-slate-900 transition-colors">
-              Finance Treasury
-            </Link>
-            <a href="#how-it-works" className="hover:text-slate-900 transition-colors">
-              How It Works
-            </a>
-          </nav>
-
-          {/* Action Pills */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/employee"
-              className="bg-slate-950 text-white hover:bg-slate-800 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide transition-all shadow-sm hover:shadow"
-            >
-              Launch Portal
-            </Link>
+      {/* ── Pathio Navbar (True Edge-to-Edge Full Width) ──────────────────── */}
+      <header className="w-full px-4 sm:px-8 lg:px-10 py-4 flex items-center justify-between border-b border-slate-100/90 sticky top-0 z-30 bg-white/85 backdrop-blur-md">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 via-sky-500 to-sky-400 flex items-center justify-center text-white shadow-md shadow-sky-500/25">
+            <Receipt className="h-5 w-5" />
           </div>
+          <span className="font-extrabold text-xl tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">
+            FinPulse
+          </span>
+        </Link>
+
+        {/* Nav Links */}
+        <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-slate-600">
+          <Link href="/employee" className="hover:text-slate-900 transition-colors">
+            Employee Portal
+          </Link>
+          <Link href="/management" className="hover:text-slate-900 transition-colors">
+            Manager Review
+          </Link>
+          <Link href="/finance" className="hover:text-slate-900 transition-colors">
+            Finance Treasury
+          </Link>
+          <a href="#how-it-works" className="hover:text-slate-900 transition-colors">
+            How It Works
+          </a>
+        </nav>
+
+        {/* Action Pills */}
+        <div className="flex items-center gap-3">
+          <Link
+            href="/employee"
+            className="bg-slate-950 text-white hover:bg-slate-800 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide transition-all shadow-sm hover:shadow"
+          >
+            Launch Portal
+          </Link>
         </div>
       </header>
 
@@ -142,12 +141,12 @@ export default function HomePage() {
 
           {/* Rating Stars & Trust Pill */}
           <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
-            <div className="flex items-center text-amber-400">
-              <Star className="h-3.5 w-3.5 fill-amber-400" />
-              <Star className="h-3.5 w-3.5 fill-amber-400" />
-              <Star className="h-3.5 w-3.5 fill-amber-400" />
-              <Star className="h-3.5 w-3.5 fill-amber-400" />
-              <Star className="h-3.5 w-3.5 fill-amber-400" />
+            <div className="flex items-center text-blue-500">
+              <Star className="h-3.5 w-3.5 fill-blue-500 text-blue-500" />
+              <Star className="h-3.5 w-3.5 fill-blue-500 text-blue-500" />
+              <Star className="h-3.5 w-3.5 fill-blue-500 text-blue-500" />
+              <Star className="h-3.5 w-3.5 fill-blue-500 text-blue-500" />
+              <Star className="h-3.5 w-3.5 fill-blue-500 text-blue-500" />
             </div>
             <span className="text-slate-300">|</span>
             <span>Trusted by 1,200+ finance teams & employees</span>
@@ -155,24 +154,24 @@ export default function HomePage() {
         </div>
 
         {/* ── Pathio Hero Centerpiece: Smartphone & Floating Interactive Cards ── */}
-        <div className="relative z-10 mt-14 sm:mt-20 w-full max-w-5xl mx-auto flex items-center justify-center min-h-[460px] sm:min-h-[520px]">
+        <div className="relative z-10 mt-14 sm:mt-20 w-full max-w-6xl mx-auto flex items-center justify-center min-h-[460px] sm:min-h-[520px]">
           
-          {/* ── Floating Card 1: Top-Left (High Spend Alert) ─────────── */}
+          {/* ── Floating Card 1: Top-Left (Policy Exception Alert) ─────────── */}
           <motion.div
             initial={{ opacity: 0, x: -20, rotate: -8 }}
             animate={{ opacity: 1, x: 0, rotate: -8 }}
             transition={{ duration: 0.6 }}
             whileHover={{ rotate: -4, scale: 1.03 }}
-            className="absolute left-2 sm:left-10 lg:left-16 top-2 sm:top-6 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[200px] sm:max-w-[240px] text-left cursor-default hidden sm:block"
+            className="absolute left-2 sm:left-6 lg:left-12 top-2 sm:top-6 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[200px] sm:max-w-[240px] text-left cursor-default hidden sm:block"
           >
-            <div className="h-7 w-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 mb-2.5">
+            <div className="h-7 w-7 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-2.5">
               <AlertTriangle className="h-4 w-4" />
             </div>
             <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-              High Spend Alert
+              Policy Exception Alert
             </p>
             <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              You spent ₹6,200 on dining this month
+              Hotel claim ₹6,000 exceeds ₹5,000 daily cap
             </p>
           </motion.div>
 
@@ -182,62 +181,62 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0, rotate: -6 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             whileHover={{ rotate: -2, scale: 1.03 }}
-            className="absolute left-6 sm:left-16 lg:left-24 bottom-6 sm:bottom-12 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[190px] sm:max-w-[220px] text-left cursor-default hidden sm:block"
+            className="absolute left-4 sm:left-10 lg:left-16 bottom-6 sm:bottom-12 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[190px] sm:max-w-[220px] text-left cursor-default hidden sm:block"
           >
             <div className="flex items-center justify-between mb-2">
               <p className="text-[11px] font-semibold text-slate-700">Corporate Card</p>
-              <div className="h-4 w-6 rounded bg-rose-500 flex items-center justify-center text-[8px] font-bold text-white">
-                N
+              <div className="h-4 px-1.5 rounded bg-blue-600 flex items-center justify-center text-[9px] font-bold text-white tracking-wider">
+                CORP
               </div>
             </div>
             <p className="text-xs font-bold text-slate-900">AWS Cloud Infra</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">₹15,400 · HDFC Card</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">₹15,400 · Auto-reconciled</p>
           </motion.div>
 
-          {/* ── Floating Card 3: Top-Right (Weekly Insight) ──────────── */}
+          {/* ── Floating Card 3: Top-Right (Budget Health) ──────────── */}
           <motion.div
             initial={{ opacity: 0, x: 20, rotate: 8 }}
             animate={{ opacity: 1, x: 0, rotate: 8 }}
             transition={{ duration: 0.6, delay: 0.15 }}
             whileHover={{ rotate: 4, scale: 1.03 }}
-            className="absolute right-2 sm:right-10 lg:right-16 top-4 sm:top-8 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[200px] sm:max-w-[230px] text-left cursor-default hidden sm:block"
+            className="absolute right-2 sm:right-6 lg:right-12 top-4 sm:top-8 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[200px] sm:max-w-[230px] text-left cursor-default hidden sm:block"
           >
             <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-2.5">
-              <Sparkles className="h-4 w-4" />
+              <TrendingUp className="h-4 w-4" />
             </div>
             <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-              Weekly Insight
+              Budget Health
             </p>
             <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Department is 18% under budget
+              Engineering is 18% under Q4 allocated budget
             </p>
           </motion.div>
 
-          {/* ── Floating Card 4: Bottom-Right (Policy Mode) ─────────── */}
+          {/* ── Floating Card 4: Bottom-Right (Compliance Check) ─────────── */}
           <motion.div
             initial={{ opacity: 0, x: 20, rotate: 6 }}
             animate={{ opacity: 1, x: 0, rotate: 6 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             whileHover={{ rotate: 2, scale: 1.03 }}
-            className="absolute right-6 sm:right-16 lg:right-24 bottom-8 sm:bottom-14 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[190px] sm:max-w-[220px] text-left cursor-default hidden sm:block"
+            className="absolute right-4 sm:right-10 lg:right-16 bottom-8 sm:bottom-14 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[190px] sm:max-w-[220px] text-left cursor-default hidden sm:block"
           >
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-semibold text-slate-700">Policy Mode</p>
+              <p className="text-[11px] font-semibold text-slate-700">Audit Compliance</p>
               <div className="h-2 w-2 rounded-full bg-blue-600" />
             </div>
             <p className="text-xs font-bold text-slate-900">Zero Duplicates</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">SHA-256 Verified</p>
+            <p className="text-[10px] text-slate-400 mt-0.5">Receipt SHA-256 Verified</p>
           </motion.div>
 
           {/* ── The Center Smartphone Frame ─────────────────────────── */}
-          <div className="relative w-[280px] sm:w-[320px] h-[480px] sm:h-[530px] bg-slate-950 p-2.5 rounded-[44px] shadow-[0_30px_90px_-20px_rgba(15,23,42,0.22)] border-[5px] border-slate-900/90 overflow-hidden flex flex-col justify-between">
+          <div className="relative w-[280px] sm:w-[320px] h-[490px] sm:h-[540px] bg-slate-950 p-2.5 rounded-[44px] shadow-[0_30px_90px_-20px_rgba(15,23,42,0.22)] border-[5px] border-slate-900/90 overflow-hidden flex flex-col justify-between">
             
             {/* Phone Inner Screen with Sky-Blue Gradient */}
-            <div className="w-full h-full bg-gradient-to-b from-sky-100 via-sky-50 to-white rounded-[36px] p-5 pt-3 flex flex-col justify-between overflow-hidden relative">
+            <div className="w-full h-full bg-gradient-to-b from-sky-100 via-sky-50 to-white rounded-[36px] p-4 pt-3 flex flex-col justify-between overflow-hidden relative">
               
               {/* Status Bar */}
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-800 pb-3 border-b border-sky-200/40">
-                <span>8:00</span>
+              <div className="flex items-center justify-between text-[11px] font-bold text-slate-800 pb-2 border-b border-sky-200/40">
+                <span>9:41</span>
                 <div className="h-3 w-16 bg-slate-900 rounded-full" />
                 <div className="flex items-center gap-1.5 text-[10px]">
                   <span>5G</span>
@@ -246,17 +245,17 @@ export default function HomePage() {
               </div>
 
               {/* Profile Header Row */}
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white text-xs font-bold flex items-center justify-center shadow-sm">
-                    AC
+              <div className="mt-2.5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                    AK
                   </div>
                   <div>
                     <span className="block text-[10px] text-slate-500 font-medium leading-none">
                       Good Morning
                     </span>
                     <span className="block text-xs font-bold text-slate-800 mt-0.5">
-                      ID #EMP-4573
+                      Aditya Kumar · ID #EMP-4573
                     </span>
                   </div>
                 </div>
@@ -271,44 +270,62 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Big Personalized Greeting */}
-              <div className="mt-5 text-left">
-                <h3 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+              {/* Personalized Greeting */}
+              <div className="mt-3 text-left">
+                <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
                   Hello, Aditya
                 </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  3 claims pending manager endorsement
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  3 expense claims pending approval
                 </p>
               </div>
 
-              {/* ── Front Overlapping Blue Pill List (Pathio Signature) ── */}
-              <div className="mt-auto space-y-2.5 z-10 pb-2">
-                {/* Pill 1 */}
-                <div className="bg-[#2563eb] text-white rounded-2xl p-3 flex items-center justify-between shadow-lg shadow-blue-500/25">
+              {/* Quick Reimbursement Summary Bar */}
+              <div className="mt-3 bg-white/95 backdrop-blur-sm rounded-2xl p-2.5 border border-sky-100/90 shadow-xs flex items-center justify-between">
+                <div className="text-left pl-1">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Total Claimed</span>
+                  <p className="text-sm font-extrabold text-slate-900 tracking-tight">₹17,700</p>
+                </div>
+                <div className="h-6 w-px bg-slate-200/60" />
+                <div className="text-left">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Approved</span>
+                  <p className="text-sm font-extrabold text-emerald-600 tracking-tight">₹8,500</p>
+                </div>
+                <div className="h-6 w-px bg-slate-200/60" />
+                <div className="text-left pr-1">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600">In Review</span>
+                  <p className="text-sm font-extrabold text-blue-600 tracking-tight">₹9,200</p>
+                </div>
+              </div>
+
+              {/* ── Active Enterprise Expense Claims (Pathio Signature Blue Capsules) ── */}
+              <div className="mt-auto space-y-2 z-10 pb-1">
+                {/* Pill 1: Flight / Travel */}
+                <div className="bg-[#2563eb] text-white rounded-2xl p-2.5 flex items-center justify-between shadow-lg shadow-blue-500/25">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-white">
-                      <ShoppingBag className="h-4 w-4" />
+                    <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0">
+                      <Plane className="h-4 w-4" />
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold leading-tight">Grocery Store</p>
-                      <p className="text-[10px] text-blue-100 font-medium">-$84.20 · Auto-categorized</p>
+                      <p className="text-xs font-bold leading-tight">Air India · BLR to DEL</p>
+                      <p className="text-[10px] text-blue-100 font-medium">₹8,500 · Manager Approved</p>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-blue-200" />
+                  <ChevronRight className="h-4 w-4 text-blue-200 shrink-0" />
                 </div>
 
-                {/* Pill 2 */}
-                <div className="bg-[#2563eb] text-white rounded-2xl p-3 flex items-center justify-between shadow-lg shadow-blue-500/25">
+                {/* Pill 2: Hotel / Accommodation */}
+                <div className="bg-[#2563eb] text-white rounded-2xl p-2.5 flex items-center justify-between shadow-lg shadow-blue-500/25">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-white">
-                      <Coffee className="h-4 w-4" />
+                    <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-white shrink-0">
+                      <Building2 className="h-4 w-4" />
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold leading-tight">Coffee Shop</p>
-                      <p className="text-[10px] text-blue-100 font-medium">-$6.50 · High spend alert</p>
+                      <p className="text-xs font-bold leading-tight">The Oberoi · Client Sync</p>
+                      <p className="text-[10px] text-blue-100 font-medium">₹6,000 · Exception Review</p>
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-blue-200" />
+                  <ChevronRight className="h-4 w-4 text-blue-200 shrink-0" />
                 </div>
               </div>
             </div>
@@ -392,9 +409,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Footer (Full Width Edge-to-Edge) ─────────────────────────── */}
-      <footer className="w-full px-6 sm:px-12 lg:px-16 py-8 border-t border-slate-100 bg-white">
-        <div className="w-full max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
+      {/* ── Footer (True Full Width Edge-to-Edge) ─────────────────────────── */}
+      <footer className="w-full px-4 sm:px-8 lg:px-10 py-8 border-t border-slate-100 bg-white">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
           <p>© 2026 FinPulse Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link href="/employee" className="hover:text-slate-900">Employee Workspace</Link>
