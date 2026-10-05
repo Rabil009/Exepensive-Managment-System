@@ -9,9 +9,6 @@ import {
   Bell, 
   AlertTriangle, 
   TrendingUp, 
-  Plane, 
-  ChevronRight, 
-  Star,
   Receipt,
   Users,
   Building2,
@@ -19,7 +16,19 @@ import {
   ShieldCheck,
   CreditCard,
   ChevronDown,
-  Check
+  Check,
+  CheckCircle2,
+  Lock,
+  Zap,
+  Layers,
+  BarChart3,
+  Clock,
+  Sparkles,
+  FileText,
+  Sliders,
+  Shield,
+  Activity,
+  Cpu
 } from "lucide-react";
 import { HeroAmbientBackground } from "@/components/shared";
 
@@ -28,7 +37,7 @@ const ROLE_OPTIONS = [
     value: "/employee",
     label: "Employee Portal",
     badge: "Submit & Track",
-    desc: "Snap receipts, auto-scan OCR, track payouts",
+    desc: "Neural OCR receipt scanner, claim assembly & payout status",
     icon: Receipt,
     color: "text-emerald-700 bg-emerald-50 border border-emerald-200/80",
   },
@@ -36,7 +45,7 @@ const ROLE_OPTIONS = [
     value: "/management",
     label: "Management Portal",
     badge: "Approvals & Audit",
-    desc: "Review claims, policy exceptions, dept budgets",
+    desc: "Policy exception adjudication, budget caps & 1-click approvals",
     icon: Users,
     color: "text-indigo-700 bg-indigo-50 border border-indigo-200/80",
   },
@@ -44,177 +53,421 @@ const ROLE_OPTIONS = [
     value: "/finance",
     label: "Finance Portal",
     badge: "Clearinghouse",
-    desc: "Disbursement register, UTR ledger, settlements",
+    desc: "Treasury disbursement batches, bank UTR ledger & ERP reconciliation",
     icon: Building2,
     color: "text-teal-700 bg-teal-50 border border-teal-200/80",
   },
 ];
 
-function EmployeeLedgerPreview() {
+/* ── Interactive Desktop Cockpit Sub-Views ─────────────────────────────────── */
+
+function EmployeeWorkspaceView() {
+  const [submitted, setSubmitted] = useState(false);
+
   return (
-    <div className="w-full bg-slate-950/80 border border-slate-800/90 rounded-2xl p-4 backdrop-blur-md shadow-inner text-left">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <Receipt className="h-3.5 w-3.5" />
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 text-left">
+      {/* Left: Neural OCR Document Inspector (5 cols) */}
+      <div className="lg:col-span-5 bg-slate-900/90 rounded-2xl border border-slate-800/90 p-4 sm:p-5 flex flex-col justify-between relative overflow-hidden">
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-bold text-slate-200 tracking-wide uppercase">
+              Neural OCR Scanner
+            </span>
           </div>
-          <span className="text-xs font-bold text-slate-200">Receipt OCR Stream</span>
-        </div>
-        <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/40">
-          99.4% Match
-        </span>
-      </div>
-
-      <div className="space-y-2 mt-3">
-        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800/60">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
-            <div className="truncate">
-              <p className="text-[11px] font-bold text-slate-100 truncate">Software Subscription</p>
-              <p className="text-[9px] text-slate-400">JetBrains IDE · GSTIN Verified</p>
-            </div>
-          </div>
-          <span className="text-xs font-mono font-bold text-emerald-400 shrink-0">₹14,500</span>
-        </div>
-
-        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800/60">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="h-1.5 w-1.5 rounded-full bg-teal-400 shrink-0" />
-            <div className="truncate">
-              <p className="text-[11px] font-bold text-slate-100 truncate">Client Hospitality</p>
-              <p className="text-[9px] text-slate-400">Olive Beach · Auto-Extracted</p>
-            </div>
-          </div>
-          <span className="text-xs font-mono font-bold text-teal-400 shrink-0">₹3,200</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ManagerAuditPreview() {
-  return (
-    <div className="w-full bg-slate-950/80 border border-slate-800/90 rounded-2xl p-4 backdrop-blur-md shadow-inner text-left">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-            <Users className="h-3.5 w-3.5" />
-          </div>
-          <span className="text-xs font-bold text-slate-200">Policy Audit Guard</span>
-        </div>
-        <span className="text-[10px] font-semibold text-indigo-300 bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-800/40">
-          Dual Signoff
-        </span>
-      </div>
-
-      <div className="space-y-2 mt-3">
-        <div className="p-2 rounded-xl bg-slate-900/90 border border-slate-800/60">
-          <div className="flex items-center justify-between text-[10px] font-semibold mb-1.5">
-            <span className="text-slate-300">Engineering Q4 Budget</span>
-            <span className="text-emerald-400">68% Utilized</span>
-          </div>
-          <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full w-[68%]" />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800/60">
-          <div className="flex items-center gap-2 min-w-0">
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-            <div className="truncate">
-              <p className="text-[11px] font-bold text-slate-100 truncate">Policy Cap Warning</p>
-              <p className="text-[9px] text-slate-400">Exceeded by ₹1,000 · Justified</p>
-            </div>
-          </div>
-          <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-800/40">
-            Approved
+          <span className="text-[10px] font-mono font-semibold text-emerald-400 bg-emerald-950/70 px-2 py-0.5 rounded border border-emerald-800/50">
+            99.8% Confidence
           </span>
         </div>
+
+        {/* Realistic Invoice Document Preview with Bounding Box Highlights */}
+        <div className="my-4 bg-slate-950/80 rounded-xl p-4 border border-slate-800/70 font-mono text-[11px] leading-relaxed relative">
+          <div className="flex items-start justify-between border-b border-slate-800/80 pb-3 mb-3">
+            <div>
+              <p className="text-white font-bold text-xs tracking-tight">AWS Cloud Services India</p>
+              <p className="text-slate-400 text-[10px]">Invoice #INV-2026-98124</p>
+            </div>
+            <div className="text-right">
+              <p className="text-slate-400 text-[10px]">Date: 04 Oct 2026</p>
+              <span className="inline-block text-[9px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-700/40">
+                GSTIN MATCHED
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="p-1.5 rounded bg-emerald-950/30 border border-emerald-500/40 flex items-center justify-between">
+              <span className="text-slate-300">GSTIN: 29AABCS1429B1Z</span>
+              <span className="text-[9px] text-emerald-400 font-sans font-semibold">Validated</span>
+            </div>
+            <div className="flex items-center justify-between text-slate-400 text-[10px] px-1">
+              <span>Cloud Compute Cluster (c6i.4xlarge)</span>
+              <span className="text-slate-200 font-medium">₹21,093.22</span>
+            </div>
+            <div className="flex items-center justify-between text-slate-400 text-[10px] px-1">
+              <span>CGST + SGST (18.0%)</span>
+              <span className="text-slate-200 font-medium">₹3,796.78</span>
+            </div>
+            <div className="p-2 rounded bg-emerald-950/50 border border-emerald-500/50 flex items-center justify-between mt-2">
+              <span className="text-emerald-300 font-bold">Total Paid</span>
+              <span className="text-emerald-300 font-bold text-xs">₹24,890.00</span>
+            </div>
+          </div>
+
+          {/* SHA-256 Anti-Fraud Verification Badge */}
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center gap-1.5 text-[9px] text-slate-400">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            <span className="truncate">Hash: 8f9b4...2a19 (Zero duplicate collision)</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+          <span>Target Category</span>
+          <span className="text-slate-200 font-medium">Cloud Infrastructure</span>
+        </div>
+      </div>
+
+      {/* Right: Normalized Claim Entry & Policy Evaluation (7 cols) */}
+      <div className="lg:col-span-7 bg-slate-900/90 rounded-2xl border border-slate-800/90 p-4 sm:p-5 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80">
+            <div>
+              <h4 className="text-sm font-bold text-white tracking-tight">Normalized Claim Entry</h4>
+              <p className="text-[11px] text-slate-400">Fields synthesized from raw receipt bytes</p>
+            </div>
+            <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-800/40 flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3" /> Auto-Assembled
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3.5 my-4">
+            <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+              <span className="block text-[10px] uppercase font-bold text-slate-500">Merchant</span>
+              <span className="block text-xs font-bold text-slate-100 mt-0.5">AWS India</span>
+            </div>
+            <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+              <span className="block text-[10px] uppercase font-bold text-slate-500">Total Claim</span>
+              <span className="block text-xs font-mono font-bold text-emerald-400 mt-0.5">₹24,890.00</span>
+            </div>
+            <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+              <span className="block text-[10px] uppercase font-bold text-slate-500">Department</span>
+              <span className="block text-xs font-bold text-slate-100 mt-0.5">Engineering / Core</span>
+            </div>
+            <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/60">
+              <span className="block text-[10px] uppercase font-bold text-slate-500">GST Input Credit</span>
+              <span className="block text-xs font-mono font-bold text-teal-400 mt-0.5">₹3,796.78</span>
+            </div>
+          </div>
+
+          {/* Policy Guardrails Status Check */}
+          <div className="bg-emerald-950/30 border border-emerald-800/40 rounded-xl p-3 flex items-start gap-2.5 mb-4">
+            <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="text-left">
+              <p className="text-xs font-bold text-emerald-300">Policy Evaluation: Pass</p>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Within monthly Engineering Cloud allowance (₹50,000 limit). No manager escalation required.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Interactive Action Button */}
+        <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+          <span className="text-[11px] text-slate-400 font-mono">Status: Ready for Submission</span>
+          <button
+            type="button"
+            onClick={() => setSubmitted(!submitted)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              submitted 
+                ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20" 
+                : "bg-emerald-600 hover:bg-emerald-500 text-white"
+            }`}
+          >
+            {submitted ? (
+              <>
+                <Check className="h-3.5 w-3.5 stroke-[3]" />
+                <span>Claim #CLM-9021 Submitted</span>
+              </>
+            ) : (
+              <>
+                <span>Submit for Manager Signoff</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-function FinanceSettlementPreview() {
+function ManagerAuditView() {
+  const [approvedIds, setApprovedIds] = useState<number[]>([1]);
+
+  const toggleApproval = (id: number) => {
+    setApprovedIds((prev) => 
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
   return (
-    <div className="w-full bg-slate-950/80 border border-slate-800/90 rounded-2xl p-4 backdrop-blur-md shadow-inner text-left">
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <Building2 className="h-3.5 w-3.5" />
+    <div className="w-full p-4 sm:p-6 text-left space-y-5">
+      {/* Top Department Budget Velocity Bar */}
+      <div className="bg-slate-900/90 rounded-2xl border border-slate-800/90 p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800/80">
+          <div>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Department Audit</span>
+            <h4 className="text-sm font-bold text-white tracking-tight mt-0.5">Engineering Q4 Budget Velocity</h4>
           </div>
-          <span className="text-xs font-bold text-slate-200">Disbursement Registry</span>
+          <div className="text-right">
+            <span className="text-xs font-mono font-bold text-emerald-400">₹18,42,000</span>
+            <span className="text-slate-400 text-xs font-mono"> / ₹25,00,000 (73.68%)</span>
+          </div>
         </div>
-        <span className="text-[10px] font-semibold text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/40">
-          Batch #SET-8402
-        </span>
+
+        <div className="mt-3">
+          <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 rounded-full w-[73.68%]" />
+          </div>
+          <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5">
+            <span>₹6,58,000 remaining</span>
+            <span className="text-emerald-400 font-medium">Optimal Velocity · 47 Days Remaining</span>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-2 mt-3">
-        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800/60">
-          <div className="flex items-center gap-2 min-w-0">
-            <CreditCard className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-            <div className="truncate">
-              <p className="text-[11px] font-bold text-slate-100 truncate">HDFC Corporate NEFT</p>
-              <p className="text-[9px] text-slate-400">UTR-2026-9482 · Cleared</p>
-            </div>
-          </div>
-          <span className="text-xs font-mono font-bold text-emerald-400 shrink-0">₹1,48,200</span>
+      {/* Approval Docket List */}
+      <div className="bg-slate-900/90 rounded-2xl border border-slate-800/90 p-4 sm:p-5">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 mb-3">
+          <span className="text-xs font-bold text-slate-200">Pending Review Queue (3 items)</span>
+          <span className="text-[10px] font-mono text-slate-400">Auto-prioritized by policy flags</span>
         </div>
 
-        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800/60">
-          <div className="flex items-center gap-2 min-w-0">
-            <ShieldCheck className="h-3.5 w-3.5 text-teal-400 shrink-0" />
-            <div className="truncate">
-              <p className="text-[11px] font-bold text-slate-100 truncate">14 Claims Disbursed</p>
-              <p className="text-[9px] text-slate-400">Zero Reconciliation Drift</p>
+        <div className="space-y-2.5">
+          {/* Item 1 */}
+          <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs shrink-0">
+                AS
+              </div>
+              <div className="truncate">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-100 truncate">Aditi Sharma · Staff Infra</span>
+                  <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800/40">
+                    Compliant
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 truncate">AWS Compute Cluster · GST Invoice #98124</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+              <span className="text-xs font-mono font-bold text-white">₹24,890</span>
+              <button
+                type="button"
+                onClick={() => toggleApproval(1)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  approvedIds.includes(1)
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                    : "bg-emerald-600 hover:bg-emerald-500 text-white"
+                }`}
+              >
+                {approvedIds.includes(1) ? "✓ Approved" : "1-Click Signoff"}
+              </button>
             </div>
           </div>
-          <span className="text-[9px] font-bold text-teal-400 bg-teal-950/80 px-2 py-0.5 rounded-md border border-teal-800/40">
-            Settled
-          </span>
+
+          {/* Item 2: Policy Exception */}
+          <div className="bg-slate-950/80 rounded-xl p-3 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
+                RV
+              </div>
+              <div className="truncate">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-100 truncate">Rahul Verma · Product Lead</span>
+                  <span className="text-[9px] font-bold text-amber-400 bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-800/40 flex items-center gap-1">
+                    <AlertTriangle className="h-2.5 w-2.5" /> +₹3,200 Over Cap
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 truncate">Client Hospitality Dinner · Justification: &quot;Q4 Enterprise Client Closing&quot;</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+              <span className="text-xs font-mono font-bold text-white">₹8,200</span>
+              <button
+                type="button"
+                onClick={() => toggleApproval(2)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  approvedIds.includes(2)
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                    : "bg-amber-600 hover:bg-amber-500 text-white"
+                }`}
+              >
+                {approvedIds.includes(2) ? "✓ Overridden" : "Approve Exception"}
+              </button>
+            </div>
+          </div>
+
+          {/* Item 3 */}
+          <div className="bg-slate-950/80 rounded-xl p-3 border border-slate-800/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs shrink-0">
+                RP
+              </div>
+              <div className="truncate">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-100 truncate">Rohan Patel · Tech Lead</span>
+                  <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800/40">
+                    Compliant
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 truncate">BLR → DEL On-site Travel Fare · Indigo Direct</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+              <span className="text-xs font-mono font-bold text-white">₹12,400</span>
+              <button
+                type="button"
+                onClick={() => toggleApproval(3)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  approvedIds.includes(3)
+                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                    : "bg-emerald-600 hover:bg-emerald-500 text-white"
+                }`}
+              >
+                {approvedIds.includes(3) ? "✓ Approved" : "1-Click Signoff"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-const PORTALS = [
-  {
-    title: "Employee Portal",
-    description: "Submit itemized expense claims, snap digital receipts, and track reimbursement milestones with zero friction.",
-    href: "/employee",
-    pillText: "Employee Workspace",
-    badge: "Capture & Track",
-    cardBg: "bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-slate-800/90 shadow-xl shadow-slate-950/20",
-    pillStyle: "bg-emerald-950/80 text-emerald-300 border border-emerald-800/60",
-    renderArt: EmployeeLedgerPreview,
-  },
-  {
-    title: "Manager Portal",
-    description: "Audit team submissions, adjudicate policy exception warnings, and protect quarterly budgets in real-time.",
-    href: "/management",
-    pillText: "Manager Review",
-    badge: "Audit & Approvals",
-    cardBg: "bg-gradient-to-b from-[#0f172a] via-[#111827] to-[#0b0f19] border border-slate-800/90 shadow-xl shadow-slate-950/20",
-    pillStyle: "bg-indigo-950/80 text-indigo-300 border border-indigo-800/60",
-    renderArt: ManagerAuditPreview,
-  },
-  {
-    title: "Finance Portal",
-    description: "Execute consolidated disbursement batches, reconcile corporate cards, and log bank UTR references.",
-    href: "/finance",
-    pillText: "Finance Settlement",
-    badge: "Clearinghouse",
-    cardBg: "bg-gradient-to-b from-[#064e3b]/80 via-[#022c22] to-[#090d16] border border-emerald-900/40 shadow-xl shadow-emerald-950/20",
-    pillStyle: "bg-emerald-900/80 text-emerald-300 border border-emerald-700/60",
-    renderArt: FinanceSettlementPreview,
-  },
-];
+function FinanceSettlementView() {
+  const [batchSettled, setBatchSettled] = useState(false);
+
+  return (
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 text-left">
+      {/* Left: Treasury Liquidity & Rail Summary (5 cols) */}
+      <div className="lg:col-span-5 bg-slate-900/90 rounded-2xl border border-slate-800/90 p-4 sm:p-5 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Treasury Clearinghouse</span>
+            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/70 px-2 py-0.5 rounded border border-emerald-800/40">
+              NEFT / RTGS Live
+            </span>
+          </div>
+
+          <div className="my-4 space-y-3">
+            <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/70">
+              <span className="text-[10px] text-slate-400 font-medium">Pending Treasury Disbursement</span>
+              <p className="text-xl font-mono font-extrabold text-white mt-0.5">₹1,48,200.00</p>
+              <span className="text-[10px] text-emerald-400">14 Verified Claims Across 3 Departments</span>
+            </div>
+
+            <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/70">
+              <span className="text-[10px] text-slate-400 font-medium">Active Bank Account</span>
+              <p className="text-xs font-bold text-slate-200 mt-0.5">HDFC Corporate Virtual Account</p>
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">VA-HDFC-9948201 · Balance: ₹84.20 Lakhs</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-emerald-950/30 border border-emerald-800/40 rounded-xl p-3 flex items-center gap-2 text-[10px] text-emerald-300">
+          <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
+          <span>Zero ledger reconciliation variance detected</span>
+        </div>
+      </div>
+
+      {/* Right: Disbursement Batches & UTR Hashing (7 cols) */}
+      <div className="lg:col-span-7 bg-slate-900/90 rounded-2xl border border-slate-800/90 p-4 sm:p-5 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/80 mb-3">
+            <div>
+              <h4 className="text-sm font-bold text-white tracking-tight">Active Settlement Batches</h4>
+              <p className="text-[11px] text-slate-400">Direct transmission to banking gateway</p>
+            </div>
+            <span className="text-[10px] font-mono text-slate-400">ERP Synced</span>
+          </div>
+
+          <div className="space-y-3">
+            {/* Batch 1: Cleared */}
+            <div className="bg-slate-950/80 rounded-xl p-3.5 border border-slate-800/70">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-white">#BATCH-8402 (NEFT)</span>
+                  <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800/40">
+                    Settled & Cleared
+                  </span>
+                </div>
+                <span className="text-xs font-mono font-bold text-emerald-400">₹82,400</span>
+              </div>
+              <div className="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                <span>UTR: 2026-HDFC-9842104</span>
+                <span className="text-slate-300 font-sans">8 Accounts Disbursed</span>
+              </div>
+            </div>
+
+            {/* Batch 2: Interactive Settlement */}
+            <div className="bg-slate-950/80 rounded-xl p-3.5 border border-slate-800/70">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-white">#BATCH-8403 (RTGS)</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                    batchSettled
+                      ? "text-emerald-400 bg-emerald-950/80 border-emerald-800/40"
+                      : "text-amber-400 bg-amber-950/80 border-amber-800/40"
+                  }`}>
+                    {batchSettled ? "Settled & Cleared" : "Ready to Disburse"}
+                  </span>
+                </div>
+                <span className="text-xs font-mono font-bold text-white">₹65,800</span>
+              </div>
+              <div className="mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                <span>{batchSettled ? "UTR: 2026-HDFC-9842105" : "Bank File Generated"}</span>
+                <span className="text-slate-300 font-sans">6 Accounts Pending</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+          <span className="text-[11px] text-slate-400 font-mono">Gateway: HDFC Direct API</span>
+          <button
+            type="button"
+            onClick={() => setBatchSettled(!batchSettled)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              batchSettled
+                ? "bg-emerald-500 text-slate-950"
+                : "bg-emerald-600 hover:bg-emerald-500 text-white"
+            }`}
+          >
+            {batchSettled ? (
+              <>
+                <Check className="h-3.5 w-3.5 stroke-[3]" />
+                <span>Batch Settled · UTR Stamped</span>
+              </>
+            ) : (
+              <>
+                <span>Disburse Batch #8403</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Landing Page Component ───────────────────────────────────────────── */
 
 export default function HomePage() {
   const [selectedRole, setSelectedRole] = useState("/employee");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showcaseTab, setShowcaseTab] = useState<"employee" | "manager" | "finance">("employee");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -234,8 +487,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen w-full bg-white text-slate-900 selection:bg-emerald-500 selection:text-white font-sans antialiased flex flex-col">
       
-      {/* ── Pathio Navbar (True Edge-to-Edge Full Width) ──────────────────── */}
-      <header className="w-full px-4 sm:px-8 lg:px-10 py-4 flex items-center justify-between border-b border-slate-100/90 sticky top-0 z-30 bg-white/85 backdrop-blur-md">
+      {/* ── Top Navbar (Edge-to-Edge Desktop Navigation) ──────────────────── */}
+      <header className="w-full px-4 sm:px-8 lg:px-12 py-4 flex items-center justify-between border-b border-slate-100/90 sticky top-0 z-40 bg-white/90 backdrop-blur-md">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
           <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-slate-900 via-slate-800 to-emerald-600 flex items-center justify-center text-emerald-400 shadow-md shadow-emerald-950/20 border border-slate-700/40">
@@ -246,59 +499,66 @@ export default function HomePage() {
           </span>
         </Link>
 
-        {/* Nav Links */}
+        {/* Desktop Nav Links */}
         <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-slate-600">
           <Link href="/employee" className="hover:text-emerald-800 transition-colors">
             Employee Portal
           </Link>
           <Link href="/management" className="hover:text-emerald-800 transition-colors">
-            Manager Review
+            Manager Audit
           </Link>
           <Link href="/finance" className="hover:text-emerald-800 transition-colors">
             Finance Treasury
           </Link>
+          <a href="#capabilities" className="hover:text-emerald-800 transition-colors">
+            Capabilities
+          </a>
           <a href="#how-it-works" className="hover:text-emerald-800 transition-colors">
-            How It Works
+            Orchestration
           </a>
         </nav>
 
-        {/* Action Pills */}
+        {/* Action Button */}
         <div className="flex items-center gap-3">
           <Link
             href="/employee"
             className="bg-slate-950 text-white hover:bg-slate-800 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide transition-all shadow-sm hover:shadow"
           >
-            Launch Portal
+            Launch System
           </Link>
         </div>
       </header>
 
-      {/* ── Enterprise Hero Section (Clean, Grounded, Bespoke Modern Grid) ─────────── */}
+      {/* ── Hero Section (Architectural Grid, Value Proposition & Capsule) ── */}
       <main className="w-full relative flex flex-col items-center justify-start pt-14 pb-20 px-4 sm:px-8 overflow-hidden">
-        {/* Precision Dot Matrix & Subtle Emerald Atmosphere */}
+        {/* Hairline Dot Matrix Background (Clean, No 3D Shapes) */}
         <HeroAmbientBackground />
 
         {/* Hero Header Content */}
-        <div className={`relative max-w-3xl mx-auto text-center flex flex-col items-center transition-all ${isDropdownOpen ? "z-50" : "z-30"}`}>
-          {/* Punchy Headline with High-End Emerald / Slate Gradient */}
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.06] max-w-3xl">
-            Stop chasing receipts.<br />
+        <div className={`relative max-w-4xl mx-auto text-center flex flex-col items-center transition-all ${isDropdownOpen ? "z-50" : "z-30"}`}>
+          
+          {/* Security & Standard Pill */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/5 border border-slate-200 text-slate-600 text-[11px] font-semibold mb-6">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+            <span>SOC-2 Type II Certified · Sub-Second OCR · Direct Bank Rails</span>
+          </div>
+
+          {/* Punchy Industry Headline */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.08] max-w-3xl">
+            Enterprise expenses.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-700 to-slate-900">
-              Start scanning.
+              Deterministic accuracy.
             </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="mt-5 text-sm sm:text-base text-slate-600 max-w-xl font-normal leading-relaxed">
-            The automated expense management platform that simplifies enterprise finances.
-            Snap a receipt, enforce policy limits, and let real-time workflows handle the rest.
+          {/* Value Proposition Description */}
+          <p className="mt-5 text-sm sm:text-base text-slate-600 max-w-2xl font-normal leading-relaxed">
+            FinPulse eliminates manual reimbursement friction with neural receipt extraction, deterministic policy adjudication, and instant UTR bank settlement in a single unified platform.
           </p>
 
-          {/* Quick Portal Switcher Capsule with Custom Luxury Dropdown */}
+          {/* Portal Switcher Capsule with Luxury Dropdown */}
           <div ref={dropdownRef} className="relative mt-8 w-full max-w-md z-50">
-            {/* The Main Capsule Pill */}
             <div className="w-full bg-white rounded-full p-1.5 border border-slate-200/90 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between gap-2">
-              {/* Dropdown Toggle Button */}
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -329,7 +589,6 @@ export default function HomePage() {
                 </div>
               </button>
 
-              {/* Launch Action Button */}
               <Link
                 href={selectedRole}
                 className="bg-slate-950 text-white hover:bg-slate-800 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide transition-all shrink-0 inline-flex items-center gap-1.5 shadow-sm hover:shadow"
@@ -339,7 +598,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Custom Luxury Floating Dropdown Popover */}
+            {/* Dropdown Menu */}
             <AnimatePresence>
               {isDropdownOpen && (
                 <motion.div
@@ -350,7 +609,7 @@ export default function HomePage() {
                   className="absolute left-0 right-0 top-full mt-2 bg-white/98 backdrop-blur-2xl border border-slate-200/95 rounded-3xl p-2 shadow-[0_20px_50px_-10px_rgba(15,23,42,0.18)] z-50 overflow-hidden ring-1 ring-black/5"
                 >
                   <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Select Target Portal
+                    Select Target Operational Tier
                   </div>
                   <div className="space-y-1 mt-1">
                     {ROLE_OPTIONS.map((option) => {
@@ -402,321 +661,605 @@ export default function HomePage() {
               )}
             </AnimatePresence>
           </div>
-
-          {/* Rating Stars & Trust Pill */}
-          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-500 font-medium">
-            <div className="flex items-center text-emerald-500">
-              <Star className="h-3.5 w-3.5 fill-emerald-500 text-emerald-500" />
-              <Star className="h-3.5 w-3.5 fill-emerald-500 text-emerald-500" />
-              <Star className="h-3.5 w-3.5 fill-emerald-500 text-emerald-500" />
-              <Star className="h-3.5 w-3.5 fill-emerald-500 text-emerald-500" />
-              <Star className="h-3.5 w-3.5 fill-emerald-500 text-emerald-500" />
-            </div>
-            <span className="text-slate-300">|</span>
-            <span>Trusted by 1,200+ enterprise finance teams & employees</span>
-          </div>
         </div>
 
-        {/* ── Pathio Hero Centerpiece: Smartphone & Floating Interactive Cards ── */}
-        <div className="relative z-10 mt-16 sm:mt-24 w-full max-w-6xl mx-auto flex items-center justify-center min-h-[460px] sm:min-h-[520px]">
-          
-          {/* ── Floating Card 1: Top-Left (Policy Exception Alert) ─────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: -20, rotate: -8 }}
-            animate={{ opacity: 1, x: 0, rotate: -8 }}
-            transition={{ duration: 0.6 }}
-            whileHover={{ rotate: -4, scale: 1.03 }}
-            className="absolute left-2 sm:left-6 lg:left-12 top-2 sm:top-6 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[200px] sm:max-w-[240px] text-left cursor-default hidden sm:block"
-          >
-            <div className="h-7 w-7 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mb-2.5">
-              <AlertTriangle className="h-4 w-4" />
-            </div>
-            <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-              Policy Exception Alert
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Mandatory justification required when budget caps exceed
-            </p>
-          </motion.div>
+        {/* ── Centerpiece: Interactive Enterprise Desktop Cockpit ─────────── */}
+        <div className="relative z-20 mt-14 sm:mt-18 w-full max-w-5xl mx-auto">
+          {/* Subtle Ambient Floor Reflection */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-slate-900/30 rounded-3xl blur-2xl opacity-50 -z-10" />
 
-          {/* ── Floating Card 2: Bottom-Left (Corporate Card) ─────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: -20, rotate: -6 }}
-            animate={{ opacity: 1, x: 0, rotate: -6 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            whileHover={{ rotate: -2, scale: 1.03 }}
-            className="absolute left-4 sm:left-10 lg:left-16 bottom-6 sm:bottom-12 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[190px] sm:max-w-[220px] text-left cursor-default hidden sm:block"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-semibold text-slate-700">Corporate Card</p>
-              <div className="h-4 px-1.5 rounded bg-slate-900 text-emerald-400 border border-slate-700 flex items-center justify-center text-[9px] font-bold tracking-wider">
-                CORP
-              </div>
-            </div>
-            <p className="text-xs font-bold text-slate-900">Direct Bank Feed</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Automated Receipt Matching</p>
-          </motion.div>
-
-          {/* ── Floating Card 3: Top-Right (Budget Health) ──────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: 20, rotate: 8 }}
-            animate={{ opacity: 1, x: 0, rotate: 8 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            whileHover={{ rotate: 4, scale: 1.03 }}
-            className="absolute right-2 sm:right-6 lg:right-12 top-4 sm:top-8 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[200px] sm:max-w-[230px] text-left cursor-default hidden sm:block"
-          >
-            <div className="h-7 w-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-2.5">
-              <TrendingUp className="h-4 w-4" />
-            </div>
-            <p className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-              Department Budget
-            </p>
-            <p className="text-[11px] text-slate-500 mt-1 leading-normal">
-              Real-time expenditure tracking vs quarterly caps
-            </p>
-          </motion.div>
-
-          {/* ── Floating Card 4: Bottom-Right (Compliance Check) ─────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: 20, rotate: 6 }}
-            animate={{ opacity: 1, x: 0, rotate: 6 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            whileHover={{ rotate: 2, scale: 1.03 }}
-            className="absolute right-4 sm:right-10 lg:right-16 bottom-8 sm:bottom-14 z-20 bg-white rounded-2xl p-4 sm:p-5 shadow-[0_15px_40px_-10px_rgba(15,23,42,0.12)] border border-slate-100 max-w-[190px] sm:max-w-[220px] text-left cursor-default hidden sm:block"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] font-semibold text-slate-700">Audit Compliance</p>
-              <div className="h-2 w-2 rounded-full bg-emerald-500" />
-            </div>
-            <p className="text-xs font-bold text-slate-900">Zero Duplicates</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">Receipt SHA-256 Verified</p>
-          </motion.div>
-
-          {/* ── The Center Smartphone Frame ─────────────────────────── */}
-          <div className="relative w-[280px] sm:w-[320px] h-[510px] sm:h-[550px] bg-slate-950 p-2.5 rounded-[44px] shadow-[0_30px_90px_-20px_rgba(15,23,42,0.22)] border-[5px] border-slate-900/90 overflow-hidden flex flex-col justify-between">
+          {/* The Desktop Application Showcase Window */}
+          <div className="w-full bg-slate-950 rounded-2xl sm:rounded-3xl border border-slate-800 shadow-[0_25px_70px_-15px_rgba(15,23,42,0.35)] overflow-hidden">
             
-            {/* Phone Inner Screen with Clean Neutral Gradient */}
-            <div className="w-full h-full bg-gradient-to-b from-slate-100 via-slate-50 to-white rounded-[36px] p-4 pt-3 flex flex-col justify-between overflow-hidden relative">
-              
-              {/* Status Bar */}
-              <div className="flex items-center justify-between text-[11px] font-bold text-slate-800 pb-2 border-b border-slate-200/60">
-                <span>9:41</span>
-                <div className="h-3 w-16 bg-slate-900 rounded-full" />
-                <div className="flex items-center gap-1.5 text-[10px]">
-                  <span>5G</span>
-                  <div className="h-2 w-3.5 border border-slate-700 rounded-sm" />
-                </div>
-              </div>
-
-              {/* Profile Header Row */}
-              <div className="mt-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-slate-900 to-emerald-700 text-emerald-200 text-xs font-bold flex items-center justify-center shadow-sm">
-                    AK
-                  </div>
-                  <div>
-                    <span className="block text-[10px] text-slate-500 font-medium leading-none">
-                      Good Morning
-                    </span>
-                    <span className="block text-xs font-bold text-slate-800 mt-0.5">
-                      Aditya Kumar · ID #EMP-4573
-                    </span>
-                  </div>
-                </div>
-
+            {/* macOS / Web Application Window Chrome */}
+            <div className="w-full bg-slate-900/90 px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 backdrop-blur-md">
+              {/* Left: Window Controls & Route Address Bar */}
+              <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
-                  <button className="h-7 w-7 rounded-full bg-white/80 border border-slate-200/60 flex items-center justify-center text-slate-600 shadow-2xs">
-                    <Search className="h-3.5 w-3.5" />
-                  </button>
-                  <button className="h-7 w-7 rounded-full bg-white/80 border border-slate-200/60 flex items-center justify-center text-slate-600 shadow-2xs">
-                    <Bell className="h-3.5 w-3.5" />
-                  </button>
+                  <span className="h-3 w-3 rounded-full bg-rose-500/80 inline-block" />
+                  <span className="h-3 w-3 rounded-full bg-amber-500/80 inline-block" />
+                  <span className="h-3 w-3 rounded-full bg-emerald-500/80 inline-block" />
+                </div>
+                
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] font-mono text-slate-400">
+                  <Lock className="h-3 w-3 text-emerald-400" />
+                  <span className="text-slate-300">app.finpulse.internal</span>
+                  <span className="text-slate-600">/</span>
+                  <span className="text-emerald-400">{showcaseTab}</span>
                 </div>
               </div>
 
-              {/* Personalized Greeting */}
-              <div className="mt-2.5 text-left">
-                <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                  Hello, Aditya
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  3 recent activity updates & messages
-                </p>
+              {/* Center: Live Interactive Showcase Tab Switchers */}
+              <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800/90 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowcaseTab("employee")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    showcaseTab === "employee"
+                      ? "bg-slate-800 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <Receipt className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>1. Employee Scan</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowcaseTab("manager")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    showcaseTab === "manager"
+                      ? "bg-slate-800 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <Users className="h-3.5 w-3.5 text-indigo-400" />
+                  <span>2. Manager Audit</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowcaseTab("finance")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    showcaseTab === "finance"
+                      ? "bg-slate-800 text-white shadow-xs"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <Building2 className="h-3.5 w-3.5 text-teal-400" />
+                  <span>3. Finance Settlement</span>
+                </button>
               </div>
 
-              {/* Quick Reimbursement Summary Bar */}
-              <div className="mt-2.5 bg-white/95 backdrop-blur-sm rounded-2xl p-2.5 border border-slate-200/90 shadow-xs flex items-center justify-between">
-                <div className="text-left pl-1">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Total Claimed</span>
-                  <p className="text-xs font-extrabold text-slate-900 tracking-tight">₹17,700</p>
-                </div>
-                <div className="h-5 w-px bg-slate-200/60" />
-                <div className="text-left">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600">Approved</span>
-                  <p className="text-xs font-extrabold text-emerald-600 tracking-tight">₹8,500</p>
-                </div>
-                <div className="h-5 w-px bg-slate-200/60" />
-                <div className="text-left pr-1">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600">In Review</span>
-                  <p className="text-xs font-extrabold text-slate-700 tracking-tight">₹9,200</p>
-                </div>
+              {/* Right: Live Sync Indicator */}
+              <div className="hidden lg:flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Sync: Active (18ms)</span>
               </div>
+            </div>
 
-              {/* ── Activity & Notification Messages (Sleek Obsidian & Emerald Cards) ── */}
-              <div className="mt-auto space-y-2 z-10 pb-1">
-                {/* Message 1: Manager Sign-off */}
-                <div className="bg-slate-900 text-white rounded-2xl p-2.5 shadow-sm border border-slate-800/80">
-                  <div className="flex items-start gap-2.5">
-                    <div className="h-7 w-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
-                      <ShieldCheck className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="text-left min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <p className="text-xs font-bold leading-tight truncate text-slate-100">Manager Approved</p>
-                        <span className="text-[9px] text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded-full font-medium border border-emerald-800/40 shrink-0">
-                          Just now
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-300 font-normal mt-0.5 line-clamp-1">
-                        Expense claim #CLM-104 approved by Tejasvini Rao.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            {/* Showcase Viewport */}
+            <div className="w-full bg-[#090d16] min-h-[380px] flex flex-col justify-center">
+              <AnimatePresence mode="wait">
+                {showcaseTab === "employee" && (
+                  <motion.div
+                    key="employee-view"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <EmployeeWorkspaceView />
+                  </motion.div>
+                )}
 
-                {/* Message 2: OCR Scan Verified */}
-                <div className="bg-slate-900 text-white rounded-2xl p-2.5 shadow-sm border border-slate-800/80">
-                  <div className="flex items-start gap-2.5">
-                    <div className="h-7 w-7 rounded-xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400 shrink-0 mt-0.5">
-                      <Receipt className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="text-left min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <p className="text-xs font-bold leading-tight truncate text-slate-100">Receipt Scanned</p>
-                        <span className="text-[9px] text-teal-400 bg-teal-950/60 px-1.5 py-0.5 rounded-full font-medium border border-teal-800/40 shrink-0">
-                          14m ago
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-300 font-normal mt-0.5 line-clamp-1">
-                        GST invoice parsed with 99.4% OCR accuracy.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {showcaseTab === "manager" && (
+                  <motion.div
+                    key="manager-view"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ManagerAuditView />
+                  </motion.div>
+                )}
 
-                {/* Message 3: Bank Disbursement Settlement */}
-                <div className="bg-slate-900 text-white rounded-2xl p-2.5 shadow-sm border border-slate-800/80">
-                  <div className="flex items-start gap-2.5">
-                    <div className="h-7 w-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
-                      <Building2 className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="text-left min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1">
-                        <p className="text-xs font-bold leading-tight truncate text-slate-100">Payout Disbursed</p>
-                        <span className="text-[9px] text-emerald-400 bg-emerald-950/60 px-1.5 py-0.5 rounded-full font-medium border border-emerald-800/40 shrink-0">
-                          Today
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-slate-300 font-normal mt-0.5 line-clamp-1">
-                        ₹8,500 settled to bank account (UTR #FIN-89421).
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                {showcaseTab === "finance" && (
+                  <motion.div
+                    key="finance-view"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <FinanceSettlementView />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
 
-        {/* ── Social Proof / Partner Bar ─────────────── */}
-        <div className="relative z-10 mt-16 sm:mt-24 text-center w-full max-w-5xl mx-auto">
-          <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase mb-6">
-            Trusted by modern enterprise teams & fast-growing startups
+        {/* ── Enterprise Performance Metrics Strip ────────────────────────── */}
+        <div className="relative z-10 mt-16 sm:mt-20 w-full max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-3xl bg-slate-50 border border-slate-200/80 text-center">
+            <div className="p-2">
+              <span className="block text-2xl sm:text-3xl font-extrabold text-slate-950 font-mono tracking-tight">
+                99.8%
+              </span>
+              <span className="block text-xs font-semibold text-slate-600 mt-1">
+                OCR Field Extraction Accuracy
+              </span>
+            </div>
+            <div className="p-2 border-l border-slate-200/80">
+              <span className="block text-2xl sm:text-3xl font-extrabold text-emerald-600 font-mono tracking-tight">
+                &lt; 4.2 hrs
+              </span>
+              <span className="block text-xs font-semibold text-slate-600 mt-1">
+                Average Reimbursement Turnaround
+              </span>
+            </div>
+            <div className="p-2 border-t md:border-t-0 md:border-l border-slate-200/80">
+              <span className="block text-2xl sm:text-3xl font-extrabold text-slate-950 font-mono tracking-tight">
+                100%
+              </span>
+              <span className="block text-xs font-semibold text-slate-600 mt-1">
+                Deterministic Policy Enforcement
+              </span>
+            </div>
+            <div className="p-2 border-t md:border-t-0 border-l border-slate-200/80">
+              <span className="block text-2xl sm:text-3xl font-extrabold text-teal-700 font-mono tracking-tight">
+                ₹0 Drift
+              </span>
+              <span className="block text-xs font-semibold text-slate-600 mt-1">
+                General Ledger Reconciliation
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Enterprise Ecosystem Trust Strip ───────────────────────────── */}
+        <div className="relative z-10 mt-12 text-center w-full max-w-5xl mx-auto">
+          <p className="text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-5">
+            Designed for high-throughput finance teams, fast-growing startups & enterprise controllers
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-slate-400 font-bold text-sm tracking-tight grayscale opacity-75">
-            <span className="hover:text-slate-800 transition-colors cursor-pointer">HubSpót</span>
-            <span className="hover:text-slate-800 transition-colors cursor-pointer">asana</span>
-            <span className="hover:text-slate-800 transition-colors cursor-pointer">GUMROAD</span>
-            <span className="hover:text-slate-800 transition-colors cursor-pointer">Spotify</span>
-            <span className="hover:text-slate-800 transition-colors cursor-pointer">webflow</span>
-            <span className="hover:text-slate-800 transition-colors cursor-pointer">Notion</span>
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-slate-400 font-bold text-sm tracking-tight grayscale opacity-70">
+            <span className="hover:text-slate-800 transition-colors">Stripe Connect</span>
+            <span className="hover:text-slate-800 transition-colors">Tally Prime</span>
+            <span className="hover:text-slate-800 transition-colors">HDFC Corporate</span>
+            <span className="hover:text-slate-800 transition-colors">NetSuite ERP</span>
+            <span className="hover:text-slate-800 transition-colors">Zoho Books</span>
+            <span className="hover:text-slate-800 transition-colors">SAP S/4HANA</span>
           </div>
         </div>
       </main>
 
-      {/* ── 3 Operational Portals Section (Full Width, Centered Max-Width) ── */}
-      <section id="how-it-works" className="w-full px-6 sm:px-12 lg:px-16 py-20 border-t border-slate-100 bg-slate-50/60">
+      {/* ── Platform Capabilities Bento Grid ──────────────────────────────── */}
+      <section id="capabilities" className="w-full px-6 sm:px-12 lg:px-16 py-20 border-t border-slate-100 bg-white">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200/80">
+              CORE CAPABILITIES
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight mt-3">
+              Engineered for Deterministic Financial Control.
+            </h2>
+            <p className="text-sm text-slate-500 mt-2">
+              Four architectural pillars designed to eliminate reimbursement leakages and audit overhead.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Bento Card 1: Neural OCR Engine (Span 2) */}
+            <div className="md:col-span-2 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 rounded-3xl p-7 text-white border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-800/50">
+                  Sub-Second Extraction
+                </span>
+                <span className="text-xs font-mono text-slate-400">SHA-256 Protected</span>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                  Neural Receipt Parsing & Anti-Fraud Fingerprinting
+                </h3>
+                <p className="text-sm text-slate-300 mt-2 max-w-xl leading-relaxed">
+                  Extracts vendor name, GSTIN, line-item totals, and tax breakdowns in under 800ms. Every receipt image is cryptographically fingerprinted to eliminate duplicate submissions across the entire organization.
+                </p>
+              </div>
+
+              {/* Micro Visual */}
+              <div className="mt-6 bg-slate-900/90 rounded-2xl p-4 border border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/60">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Line Extraction</span>
+                  <p className="text-xs font-bold text-emerald-400 mt-0.5">Automated Itemization</p>
+                  <span className="text-[9px] text-slate-500">Subtotal + GST calculated</span>
+                </div>
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/60">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">GSTIN Engine</span>
+                  <p className="text-xs font-bold text-teal-400 mt-0.5">Direct Verification</p>
+                  <span className="text-[9px] text-slate-500">Government portal matched</span>
+                </div>
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/60">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Duplicate Guard</span>
+                  <p className="text-xs font-bold text-slate-200 mt-0.5">Zero Double Dipping</p>
+                  <span className="text-[9px] text-slate-500">Image hash ledger verified</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bento Card 2: Deterministic Policy Guardrails (Span 1) */}
+            <div className="bg-slate-50 rounded-3xl p-7 border border-slate-200/90 flex flex-col justify-between">
+              <div>
+                <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center mb-4">
+                  <Sliders className="h-5 w-5" />
+                </div>
+                <h3 className="text-xl font-extrabold text-slate-950 tracking-tight">
+                  Deterministic Policy Guardrails
+                </h3>
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  Configure department spending velocity, per-diem dining limits, and category caps. Submissions violating caps trigger mandatory executive justification prior to sign-off.
+                </p>
+              </div>
+
+              <div className="mt-6 p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800 mb-1">
+                  <span>Policy Enforcer</span>
+                  <span className="text-emerald-600">Active</span>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-normal">
+                  Soft warnings prompt justification; hard ceilings reject submission automatically.
+                </p>
+              </div>
+            </div>
+
+            {/* Bento Card 3: 1-Click Signoff Hierarchy (Span 1) */}
+            <div className="bg-slate-50 rounded-3xl p-7 border border-slate-200/90 flex flex-col justify-between">
+              <div>
+                <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 flex items-center justify-center mb-4">
+                  <Users className="h-5 w-5" />
+                </div>
+                <h3 className="text-xl font-extrabold text-slate-950 tracking-tight">
+                  Cryptographic Sign-off Matrix
+                </h3>
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  Tiered manager and director approvals with contextual spend history. Every sign-off event is stamped with employee identity, role, timestamp, and audit trail.
+                </p>
+              </div>
+
+              <div className="mt-6 p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800 mb-1">
+                  <span>Signoff Traceability</span>
+                  <span className="text-indigo-600">Tamper-Proof</span>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-normal">
+                  Full lineage inspection from employee upload to manager signoff.
+                </p>
+              </div>
+            </div>
+
+            {/* Bento Card 4: Direct UTR Settlement (Span 2) */}
+            <div className="md:col-span-2 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 rounded-3xl p-7 text-white border border-slate-800 relative overflow-hidden flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-400 bg-teal-950/80 px-2.5 py-1 rounded-full border border-teal-800/50">
+                  Bank Rails & Clearing
+                </span>
+                <span className="text-xs font-mono text-slate-400">Zero Reconciliation Drift</span>
+              </div>
+
+              <div>
+                <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                  Direct UTR Bank Settlement & ERP Journal Sync
+                </h3>
+                <p className="text-sm text-slate-300 mt-2 max-w-xl leading-relaxed">
+                  Eliminate manual payment files. Batch-approve reimbursements directly through corporate banking rails (NEFT / RTGS) with instant UTR transaction hashing and automatic general ledger reconciliation.
+                </p>
+              </div>
+
+              {/* Micro Visual */}
+              <div className="mt-6 bg-slate-900/90 rounded-2xl p-4 border border-slate-800/80 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400 flex items-center justify-center">
+                    <Building2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-white">Batch #SET-8402 Executed</span>
+                    <span className="block text-[10px] font-mono text-slate-400">UTR-2026-HDFC-9842104 · ₹82,400 Cleared</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-800/40">
+                    ERP Reconciled
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3-Stage Orchestration Pipeline ("How FinPulse Works") ───────── */}
+      <section id="how-it-works" className="w-full px-6 sm:px-12 lg:px-16 py-20 border-t border-slate-100 bg-slate-50/70">
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200/80">
+              ORCHESTRATION PIPELINE
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight mt-3">
+              From Receipt Capture to Bank Settlement in 3 Steps.
+            </h2>
+            <p className="text-sm text-slate-500 mt-2">
+              A synchronized, deterministic chain connecting employees, team managers, and the finance treasury.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {/* Step 1 */}
+            <div className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs relative flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-2xl font-mono font-extrabold text-slate-300">01</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                    Capture & Parse
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                  Employee Submits & OCR Parses
+                </h3>
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  Employees snap receipts or upload tax invoices. The neural OCR instantly parses merchant, GSTIN, dates, and amounts with 99.8% field accuracy while checking for duplicates.
+                </p>
+              </div>
+              <div className="mt-6 pt-3 border-t border-slate-100 text-[11px] font-mono text-emerald-700 font-semibold flex items-center gap-1">
+                <Check className="h-3 w-3 stroke-[3]" /> Under 800ms extraction
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs relative flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-2xl font-mono font-extrabold text-slate-300">02</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+                    Policy Adjudication
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                  Manager Audits Exceptions
+                </h3>
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  Submissions are automatically matched against departmental quarterly budgets. Managers execute 1-click batch approvals or review policy exception justifications with complete spend context.
+                </p>
+              </div>
+              <div className="mt-6 pt-3 border-t border-slate-100 text-[11px] font-mono text-indigo-700 font-semibold flex items-center gap-1">
+                <Check className="h-3 w-3 stroke-[3]" /> Cryptographic sign-off stamp
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-white rounded-3xl p-7 border border-slate-200/90 shadow-xs relative flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-2xl font-mono font-extrabold text-slate-300">03</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
+                    Treasury Clearing
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                  Finance Settles via Direct Rails
+                </h3>
+                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                  Finance generates batch payout files and executes NEFT/RTGS disbursements directly through corporate bank accounts. Bank UTR numbers are captured and reconciled with zero accounting drift.
+                </p>
+              </div>
+              <div className="mt-6 pt-3 border-t border-slate-100 text-[11px] font-mono text-teal-700 font-semibold flex items-center gap-1">
+                <Check className="h-3 w-3 stroke-[3]" /> Instant UTR hash logging
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Operational Portals Launch Grid ──────────────────────────────── */}
+      <section className="w-full px-6 sm:px-12 lg:px-16 py-20 border-t border-slate-100 bg-white">
         <div className="w-full max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200/80">
               OPERATIONAL TIERS
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 tracking-tight mt-3">
-              One Unified System. Three Purpose-Built Portals.
+              One Unified System. Three Dedicated Portals.
             </h2>
             <p className="text-sm text-slate-500 mt-2">
-              Fast, deterministic expense workflows tailored to each organizational role.
+              Select your role to access purpose-built workspaces designed for each stage of expense management.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
-            {PORTALS.map((portal) => {
-              const PreviewArt = portal.renderArt;
-              return (
-                <Link
-                  key={portal.href}
-                  href={portal.href}
-                  className={`${portal.cardBg} rounded-[32px] p-7 sm:p-8 text-white relative overflow-hidden flex flex-col justify-between min-h-[460px] sm:min-h-[490px] transition-all duration-300 group hover:-translate-y-1.5 cursor-pointer`}
-                >
-                  {/* Subtle Top Ambient Horizon */}
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_65%)] pointer-events-none" />
+            {/* Card 1: Employee */}
+            <Link
+              href="/employee"
+              className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 rounded-[32px] p-7 text-white border border-slate-800 shadow-xl shadow-slate-950/10 relative overflow-hidden flex flex-col justify-between min-h-[440px] group hover:-translate-y-1.5 transition-all duration-300"
+            >
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 inline-block mb-3">
+                  Capture & Track
+                </span>
+                <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                  Employee Portal
+                </h3>
+                <p className="mt-2 text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+                  Submit itemized expense claims, snap digital receipts, and track reimbursement milestones with zero friction.
+                </p>
+              </div>
 
-                  {/* Top Content: Badge, Title & Enterprise Description */}
-                  <div className="relative z-10 text-left">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full ${portal.pillStyle}`}>
-                        {portal.badge}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-white leading-tight">
-                      {portal.title}
-                    </h3>
-                    <p className="mt-2.5 text-xs sm:text-[13px] text-slate-300 font-normal leading-relaxed max-w-[280px]">
-                      {portal.description}
-                    </p>
+              {/* In-app Preview Card */}
+              <div className="my-5 bg-slate-950/80 border border-slate-800/90 rounded-2xl p-4 text-left">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <span className="text-xs font-bold text-slate-200">Recent Claim</span>
+                  <span className="text-[10px] font-mono text-emerald-400">99.8% Match</span>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="truncate">
+                    <p className="text-xs font-bold text-white truncate">Cloud Hosting (AWS)</p>
+                    <p className="text-[10px] text-slate-400">GSTIN Verified</p>
                   </div>
+                  <span className="text-xs font-mono font-bold text-emerald-400">₹24,890</span>
+                </div>
+              </div>
 
-                  {/* Real Micro-UI Interactive Ledger / Audit Preview */}
-                  <div className="relative z-10 my-4 transform group-hover:scale-[1.02] transition-transform duration-300">
-                    <PreviewArt />
+              <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
+                <span className="text-xs font-bold text-slate-300">Employee Workspace</span>
+                <div className="h-9 w-9 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-md group-hover:scale-110 group-hover:bg-emerald-400 group-hover:text-slate-950 transition-all shrink-0">
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            </Link>
+
+            {/* Card 2: Management */}
+            <Link
+              href="/management"
+              className="bg-gradient-to-b from-[#0f172a] via-[#111827] to-[#0b0f19] rounded-[32px] p-7 text-white border border-slate-800 shadow-xl shadow-slate-950/10 relative overflow-hidden flex flex-col justify-between min-h-[440px] group hover:-translate-y-1.5 transition-all duration-300"
+            >
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 inline-block mb-3">
+                  Audit & Approvals
+                </span>
+                <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                  Manager Portal
+                </h3>
+                <p className="mt-2 text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+                  Audit team submissions, adjudicate policy exception warnings, and protect quarterly budgets in real-time.
+                </p>
+              </div>
+
+              {/* In-app Preview Card */}
+              <div className="my-5 bg-slate-950/80 border border-slate-800/90 rounded-2xl p-4 text-left">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <span className="text-xs font-bold text-slate-200">Department Velocity</span>
+                  <span className="text-[10px] font-mono text-emerald-400">73.6% Spent</span>
+                </div>
+                <div className="mt-2.5 w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 w-[73.6%]" />
+                </div>
+                <p className="text-[10px] text-slate-400 mt-2">Optimal spend pacing across Q4</p>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
+                <span className="text-xs font-bold text-slate-300">Manager Review</span>
+                <div className="h-9 w-9 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-md group-hover:scale-110 group-hover:bg-indigo-400 group-hover:text-slate-950 transition-all shrink-0">
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            </Link>
+
+            {/* Card 3: Finance */}
+            <Link
+              href="/finance"
+              className="bg-gradient-to-b from-[#064e3b]/80 via-[#022c22] to-[#090d16] rounded-[32px] p-7 text-white border border-emerald-900/40 shadow-xl shadow-emerald-950/10 relative overflow-hidden flex flex-col justify-between min-h-[440px] group hover:-translate-y-1.5 transition-all duration-300"
+            >
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-900/80 text-emerald-300 border border-emerald-700/60 inline-block mb-3">
+                  Clearinghouse
+                </span>
+                <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                  Finance Portal
+                </h3>
+                <p className="mt-2 text-xs sm:text-[13px] text-slate-300 leading-relaxed">
+                  Execute consolidated disbursement batches, reconcile corporate cards, and log bank UTR references.
+                </p>
+              </div>
+
+              {/* In-app Preview Card */}
+              <div className="my-5 bg-slate-950/80 border border-slate-800/90 rounded-2xl p-4 text-left">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                  <span className="text-xs font-bold text-slate-200">Disbursement Registry</span>
+                  <span className="text-[10px] font-mono text-emerald-400">Batch #8402</span>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="truncate">
+                    <p className="text-xs font-bold text-white truncate">HDFC Corporate NEFT</p>
+                    <p className="text-[10px] text-slate-400">UTR-2026-9482 · Cleared</p>
                   </div>
+                  <span className="text-xs font-mono font-bold text-emerald-400">₹1,48,200</span>
+                </div>
+              </div>
 
-                  {/* Bottom Controls Row: Pill Tag + Arrow Button */}
-                  <div className="relative z-10 flex items-center justify-between pt-2 border-t border-slate-800/60">
-                    <span className="text-xs font-bold text-slate-200">
-                      {portal.pillText}
-                    </span>
+              <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
+                <span className="text-xs font-bold text-slate-300">Finance Settlement</span>
+                <div className="h-9 w-9 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-md group-hover:scale-110 group-hover:bg-emerald-400 group-hover:text-slate-950 transition-all shrink-0">
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
 
-                    <div className="h-9 w-9 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-md group-hover:scale-110 group-hover:bg-emerald-400 group-hover:text-slate-950 transition-all shrink-0">
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+      {/* ── Enterprise Security & Compliance Section ─────────────────────── */}
+      <section className="w-full px-6 sm:px-12 lg:px-16 py-16 border-t border-slate-100 bg-slate-50/50">
+        <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Shield className="h-5 w-5 text-emerald-600" />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                Bank-Grade Security Architecture
+              </span>
+            </div>
+            <h3 className="text-2xl font-extrabold text-slate-950 tracking-tight">
+              Enterprise Trust & Compliance Standards
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl">
+              Engineered with end-to-end 256-bit TLS/AES encryption, granular role-based access control (RBAC), and immutable audit logs.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 shrink-0">
+            <div className="px-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center">
+              <span className="block text-xs font-bold text-slate-900">SOC-2 Type II</span>
+              <span className="block text-[10px] text-emerald-600 font-semibold">Certified</span>
+            </div>
+            <div className="px-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center">
+              <span className="block text-xs font-bold text-slate-900">ISO 27001</span>
+              <span className="block text-[10px] text-emerald-600 font-semibold">Compliant</span>
+            </div>
+            <div className="px-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center">
+              <span className="block text-xs font-bold text-slate-900">GST Portal</span>
+              <span className="block text-[10px] text-emerald-600 font-semibold">API Verified</span>
+            </div>
+            <div className="px-4 py-2.5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs text-center">
+              <span className="block text-xs font-bold text-slate-900">256-Bit AES</span>
+              <span className="block text-[10px] text-emerald-600 font-semibold">Encrypted</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── Footer (True Full Width Edge-to-Edge) ─────────────────────────── */}
-      <footer className="w-full px-4 sm:px-8 lg:px-10 py-8 border-t border-slate-100 bg-white">
-        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-medium">
-          <p>© 2026 FinPulse Inc. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/employee" className="hover:text-slate-900">Employee Workspace</Link>
-            <Link href="/management" className="hover:text-slate-900">Manager Docket</Link>
-            <Link href="/finance" className="hover:text-slate-900">Finance Settlement</Link>
+      <footer className="w-full px-6 sm:px-12 lg:px-16 py-10 border-t border-slate-100 bg-white">
+        <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2.5">
+            <div className="h-7 w-7 rounded-lg bg-slate-950 flex items-center justify-center text-emerald-400">
+              <Receipt className="h-4 w-4" />
+            </div>
+            <span className="text-sm font-bold text-slate-900">FinPulse Enterprise Systems</span>
           </div>
+
+          <div className="flex flex-wrap items-center gap-6 text-xs text-slate-500 font-medium">
+            <Link href="/employee" className="hover:text-slate-900 transition-colors">Employee Workspace</Link>
+            <Link href="/management" className="hover:text-slate-900 transition-colors">Manager Review</Link>
+            <Link href="/finance" className="hover:text-slate-900 transition-colors">Finance Settlement</Link>
+            <a href="#capabilities" className="hover:text-slate-900 transition-colors">Capabilities</a>
+            <a href="#how-it-works" className="hover:text-slate-900 transition-colors">Orchestration</a>
+          </div>
+
+          <p className="text-xs text-slate-400 font-mono">
+            © 2026 FinPulse Inc. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>
