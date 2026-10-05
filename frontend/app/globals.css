@@ -1,54 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ── Modern Monochromatic & Platinum Luxury Design System ───────────── */
+/* ── Pathio Clean Light & Sky Blue Design System ───────────── */
 :root {
-  --font-luxury: 'Cormorant Garamond', Garamond, Georgia, serif;
-  --font-display: 'Cormorant Garamond', Garamond, Georgia, serif;
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Cool Platinum & Crisp Ivory (Light Mode) */
-  --bg-page: #fbfbfb;
+  /* Pathio Clean Light Palette */
+  --bg-page: #f8fafc;
   --bg-surface: #ffffff;
-  --bg-surface-elevated: #f4f4f5;
-  --border-hairline: rgba(0, 0, 0, 0.09);
-  --border-subtle: rgba(0, 0, 0, 0.05);
-  --text-display: #09090b;
-  --text-body: #3f3f46;
-  --text-muted: #71717a;
-  --accent-gold: #52525b;
-  --accent-gold-light: rgba(0, 0, 0, 0.05);
-  --accent-primary: #10b981;
+  --bg-surface-elevated: #f1f5f9;
+  --border-hairline: rgba(15, 23, 42, 0.08);
+  --border-subtle: rgba(15, 23, 42, 0.04);
+  --text-display: #0f172a;
+  --text-body: #475569;
+  --text-muted: #64748b;
+  --accent-blue: #2563eb;
+  --accent-blue-light: #eff6ff;
+  --accent-gold: #64748b;
+  --accent-gold-light: rgba(15, 23, 42, 0.04);
+  --accent-primary: #2563eb;
 }
 
+/* Light Theme Permanent Lock (Remove Dark Mode) */
 .dark {
-  /* Deep Obsidian, Caviar & Cool Silver (Dark Mode) */
-  --bg-page: #08080a;
-  --bg-surface: #0e0e12;
-  --bg-surface-elevated: #16161b;
-  --border-hairline: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.05);
-  --text-display: #fafafa;
-  --text-body: #a1a1aa;
-  --text-muted: #71717a;
-  --accent-gold: #a1a1aa;
-  --accent-gold-light: rgba(255, 255, 255, 0.08);
-  --accent-primary: #10b981;
+  --bg-page: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
+  --border-hairline: rgba(15, 23, 42, 0.08);
+  --border-subtle: rgba(15, 23, 42, 0.04);
+  --text-display: #0f172a;
+  --text-body: #475569;
+  --text-muted: #64748b;
+  --accent-blue: #2563eb;
+  --accent-blue-light: #eff6ff;
+  --accent-gold: #64748b;
+  --accent-gold-light: rgba(15, 23, 42, 0.04);
+  --accent-primary: #2563eb;
 }
 
 /* ── Typography Utility Classes ────────────────────────────────── */
-.font-luxury,
 .font-display,
+.font-luxury,
 .font-outfit,
 .font-forum {
-  font-family: var(--font-luxury);
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 .font-sans-luxury {
   font-family: var(--font-sans);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .font-mono-nums {

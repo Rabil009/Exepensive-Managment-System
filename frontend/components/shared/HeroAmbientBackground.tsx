@@ -10,37 +10,30 @@ export function HeroAmbientBackground({ className = "" }: HeroAmbientBackgroundP
       className={`absolute inset-0 pointer-events-none overflow-hidden select-none ${className}`}
       aria-hidden="true"
     >
-      {/* ── High-Luxury Ambient Radial Spotlight (Cool Platinum, Pure Monochromatic) ── */}
+      {/* ── Soft Sky-Blue / Ice-Cyan Radiant Center Glow ── */}
       <div 
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[1400px] h-[700px] opacity-75 dark:opacity-35"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/3 w-[1200px] h-[900px] opacity-75 blur-3xl pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 65% 55% at 50% 0%, rgba(120, 130, 150, 0.15) 0%, rgba(100, 110, 130, 0.05) 45%, transparent 75%)",
+          background: "radial-gradient(ellipse 65% 55% at 50% 50%, rgba(186, 230, 253, 0.8) 0%, rgba(224, 242, 254, 0.6) 35%, rgba(240, 249, 255, 0.2) 65%, transparent 85%)",
         }}
       />
 
-      {/* ── Soft Volumetric Ambient Diffusion Cone (Cool Silver/Slate) ── */}
+      {/* ── Secondary Powder Blue Soft Wings ── */}
       <div 
-        className="absolute -top-24 left-1/2 -translate-x-1/2 w-[850px] h-[500px] opacity-50 dark:opacity-25 blur-3xl"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[900px] h-[550px] opacity-65 blur-2xl pointer-events-none"
         style={{
-          background: "radial-gradient(circle, rgba(160, 175, 200, 0.18) 0%, rgba(140, 155, 180, 0.06) 50%, transparent 80%)",
+          background: "radial-gradient(circle at 50% 70%, rgba(147, 197, 253, 0.45) 0%, rgba(191, 219, 254, 0.2) 50%, transparent 80%)",
         }}
       />
 
-      {/* ── Crisp Static Architectural Financial Grid ── */}
-      <div 
-        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.04]"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, var(--text-display) 1px, transparent 1px),
-            linear-gradient(to bottom, var(--text-display) 1px, transparent 1px)
-          `,
-          backgroundSize: "72px 72px",
-        }}
-      />
+      {/* ── Subtle Concentric Radial Rings (Matching Pathio Centerpiece) ── */}
+      <div className="absolute top-[62%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[720px] rounded-full border border-sky-300/30 opacity-60 pointer-events-none" />
+      <div className="absolute top-[62%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[980px] h-[980px] rounded-full border border-sky-200/25 opacity-50 pointer-events-none" />
+      <div className="absolute top-[62%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1240px] h-[1240px] rounded-full border border-sky-100/20 opacity-40 pointer-events-none" />
 
-      {/* ── Atmospheric Vignette and Seamless Base Bleed ── */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-page)] via-[var(--bg-page)]/20 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-page)]/50 via-transparent to-[var(--bg-page)]" />
+      {/* ── Seamless Top & Bottom Bleed ── */}
+      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white via-white/80 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-50 via-slate-50/70 to-transparent" />
     </div>
   );
 }
