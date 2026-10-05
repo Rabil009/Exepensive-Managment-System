@@ -1,38 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-/* ── Haute Private Banking & Luxury Sovereign Design System ───────────── */
+/* ── Modern Monochromatic & Platinum Luxury Design System ───────────── */
 :root {
   --font-luxury: 'Cormorant Garamond', Garamond, Georgia, serif;
   --font-display: 'Cormorant Garamond', Garamond, Georgia, serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Warm Linen & Aged Ivory (Light Mode) */
-  --bg-page: #fbf9f5;
+  /* Cool Platinum & Crisp Ivory (Light Mode) */
+  --bg-page: #fbfbfb;
   --bg-surface: #ffffff;
-  --bg-surface-elevated: #f4efe6;
-  --border-hairline: rgba(180, 150, 105, 0.22);
-  --border-subtle: rgba(40, 35, 25, 0.08);
-  --text-display: #1a1714;
-  --text-body: #4a453e;
-  --text-muted: #8c8275;
-  --accent-gold: #b38b4d;
-  --accent-gold-light: rgba(179, 139, 77, 0.12);
+  --bg-surface-elevated: #f4f4f5;
+  --border-hairline: rgba(0, 0, 0, 0.09);
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --text-display: #09090b;
+  --text-body: #3f3f46;
+  --text-muted: #71717a;
+  --accent-gold: #52525b;
+  --accent-gold-light: rgba(0, 0, 0, 0.05);
+  --accent-primary: #10b981;
 }
 
 .dark {
-  /* Deep Caviar, Obsidian & Brushed Bronze (Dark Mode) */
-  --bg-page: #080809;
-  --bg-surface: #0e0e11;
-  --bg-surface-elevated: #151518;
-  --border-hairline: rgba(212, 175, 122, 0.18);
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --text-display: #f5f2ea;
-  --text-body: #a8a298;
-  --text-muted: #6e675d;
-  --accent-gold: #c5a880;
-  --accent-gold-light: rgba(197, 168, 128, 0.14);
+  /* Deep Obsidian, Caviar & Cool Silver (Dark Mode) */
+  --bg-page: #08080a;
+  --bg-surface: #0e0e12;
+  --bg-surface-elevated: #16161b;
+  --border-hairline: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --text-display: #fafafa;
+  --text-body: #a1a1aa;
+  --text-muted: #71717a;
+  --accent-gold: #a1a1aa;
+  --accent-gold-light: rgba(255, 255, 255, 0.08);
+  --accent-primary: #10b981;
 }
 
 /* ── Typography Utility Classes ────────────────────────────────── */
@@ -115,8 +117,8 @@
 }
 
 .luxury-btn-secondary:hover {
-  background: var(--accent-gold-light);
-  border-color: var(--accent-gold);
+  background: var(--border-subtle);
+  border-color: var(--text-display);
 }
 
 /* ── Minimalist Scrollbar ──────────────────────────────────────── */

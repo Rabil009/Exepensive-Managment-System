@@ -39,10 +39,10 @@ const PORTALS = [
     href: "/finance",
     icon: Landmark,
     action: "Learn more",
-    // Solar Amber / Incandescent Gold / Flame Radiant Bloom (bottom-right card in reference)
-    glowGradient: "radial-gradient(ellipse at 50% 100%, #ffffff 0%, #fbbf24 26%, #f97316 56%, #7c2d12 86%, transparent 100%)",
-    coreGradient: "radial-gradient(ellipse at 50% 100%, #fef08a 0%, #f59e0b 40%, transparent 75%)",
-    ambientShadow: "hover:shadow-[0_25px_60px_-15px_rgba(245,158,11,0.45)]",
+    // Electric Emerald / Neon Lime / Mint Bloom (top-right card in reference, zero gold)
+    glowGradient: "radial-gradient(ellipse at 50% 100%, #ffffff 0%, #a3e635 25%, #10b981 55%, #064e3b 85%, transparent 100%)",
+    coreGradient: "radial-gradient(ellipse at 45% 100%, #dcfce7 0%, #34d399 40%, transparent 75%)",
+    ambientShadow: "hover:shadow-[0_25px_60px_-15px_rgba(16,185,129,0.45)]",
   },
 ];
 
@@ -70,7 +70,7 @@ export default function HomePage() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="relative min-h-screen bg-[var(--bg-page)] text-[var(--text-display)] selection:bg-[var(--accent-gold)] selection:text-black overflow-x-hidden transition-colors duration-300">
+    <div className="relative min-h-screen bg-[var(--bg-page)] text-[var(--text-display)] selection:bg-zinc-800 selection:text-white overflow-x-hidden transition-colors duration-300">
       
       {/* ── Top Header Bar ────────────────────────────────────────────── */}
       <motion.header
@@ -94,7 +94,7 @@ export default function HomePage() {
             {/* Theme Switcher Capsule */}
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-muted)] transition-all hover:border-[var(--accent-gold)] hover:text-[var(--text-display)]"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-hairline)] bg-[var(--bg-surface)] text-[var(--text-muted)] transition-all hover:border-zinc-400 hover:text-[var(--text-display)]"
               aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
@@ -103,7 +103,7 @@ export default function HomePage() {
         </div>
       </motion.header>
 
-      {/* ── Full-Screen Hero Section with Cinematic Atmospheric Background ── */}
+      {/* ── Full-Screen Hero Section with Monochromatic Atmospheric Background ── */}
       <section className="relative min-h-[calc(100vh-80px)] w-full flex flex-col justify-center items-center overflow-hidden px-6 py-20 lg:py-28">
         {/* Full-Screen Ambient Lighting Background */}
         <HeroAmbientBackground />
@@ -139,7 +139,7 @@ export default function HomePage() {
           >
             <Link
               href="/employee"
-              className="luxury-btn-primary inline-flex items-center gap-2.5 px-6 py-3.5 text-xs font-medium tracking-wide shadow-lg shadow-amber-900/10 hover:shadow-xl transition-all"
+              className="luxury-btn-primary inline-flex items-center gap-2.5 px-6 py-3.5 text-xs font-medium tracking-wide shadow-lg shadow-zinc-950/20 hover:shadow-xl transition-all"
             >
               <span>Employee Workspace</span>
               <ArrowRight className="h-4 w-4" />
@@ -168,7 +168,7 @@ export default function HomePage() {
             className="mt-14 inline-flex flex-wrap items-center justify-center gap-6 sm:gap-10 border border-[var(--border-hairline)] bg-[var(--bg-surface)]/70 backdrop-blur-xl px-7 py-3 rounded-2xl shadow-sm"
           >
             <div className="flex items-center gap-2.5">
-              <TrendingUp className="h-4 w-4 text-[var(--accent-gold)]" />
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
               <div className="text-left">
                 <span className="block font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                   Reserve Capital
@@ -196,7 +196,7 @@ export default function HomePage() {
             <div className="h-6 w-px bg-[var(--border-subtle)] hidden sm:block" />
 
             <div className="flex items-center gap-2.5">
-              <div className="h-2 w-2 rounded-full bg-amber-400" />
+              <div className="h-2 w-2 rounded-full bg-emerald-400" />
               <div className="text-left">
                 <span className="block font-mono text-[9px] uppercase tracking-wider text-[var(--text-muted)]">
                   Settlement Cycle
@@ -218,16 +218,16 @@ export default function HomePage() {
             <span className="font-mono text-[10px] tracking-[0.2em] uppercase font-light">
               Explore Role Workspaces
             </span>
-            <ChevronDown className="h-4 w-4 text-[var(--accent-gold)]" />
+            <ChevronDown className="h-4 w-4 text-zinc-400" />
           </div>
         </motion.div>
       </section>
 
-      {/* ── The Three Bespoke Portals Grid Showcase (New Radiant Aurora Cards) ── */}
+      {/* ── The Three Bespoke Portals Grid Showcase (Radiant Aurora Cards) ── */}
       <section className="mx-auto max-w-7xl px-8 py-16 lg:py-24 w-full relative z-10">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-[var(--border-hairline)] pb-6 mb-12 gap-4">
           <div>
-            <span className="font-mono text-[9px] tracking-[0.25em] text-[var(--accent-gold)] uppercase">
+            <span className="font-mono text-[9px] tracking-[0.25em] text-zinc-400 uppercase">
               OPERATIONAL TIERS (PRD ROLES 1, 2 & 3)
             </span>
             <h2 className="font-luxury text-4xl sm:text-5xl font-normal tracking-tight text-[var(--text-display)] mt-1">
@@ -312,7 +312,7 @@ export default function HomePage() {
           <p className="tracking-widest uppercase text-[10px]">
             FinPulse · Private Expense Clearinghouse · Direct Role Portals
           </p>
-          <div className="flex items-center gap-6 text-[10px] tracking-widest uppercase text-[var(--accent-gold)]">
+          <div className="flex items-center gap-6 text-[10px] tracking-widest uppercase text-zinc-400">
             <Link href="/employee" className="hover:text-[var(--text-display)]">Employee</Link>
             <span>·</span>
             <Link href="/management" className="hover:text-[var(--text-display)]">Manager</Link>

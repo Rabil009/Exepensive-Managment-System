@@ -34,7 +34,7 @@ export function AppHeader({ currentUser, pageTitle }: AppHeaderProps) {
 
         {/* Notifications */}
         <button 
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-subtle)] text-[var(--text-muted)] transition-all hover:border-[var(--accent-gold)] hover:text-[var(--text-display)]"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--border-subtle)] text-[var(--text-muted)] transition-all hover:border-zinc-400 hover:text-[var(--text-display)]"
           aria-label="Audit notices"
         >
           <Bell className="h-3.5 w-3.5" />
@@ -44,7 +44,7 @@ export function AppHeader({ currentUser, pageTitle }: AppHeaderProps) {
 
         {/* User Pill Badge */}
         <div className="flex items-center gap-3 pl-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--accent-gold)]/40 bg-[var(--accent-gold-light)] font-outfit text-xs font-semibold text-[var(--accent-gold)]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-zinc-500/30 bg-zinc-500/10 font-outfit text-xs font-semibold text-[var(--text-display)]">
             {currentUser.avatarInitials}
           </div>
           <div className="text-left hidden sm:block">
