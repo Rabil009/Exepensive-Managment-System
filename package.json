@@ -8,12 +8,18 @@
     "pnpm": "12.9.1"
   },
   "scripts": {
-    "dev": "pnpm --filter frontend dev",
-    "build": "pnpm -r build",
-    "typecheck": "pnpm -r typecheck",
+    "dev": "corepack pnpm --filter frontend dev",
+    "build": "corepack pnpm -r build",
+    "typecheck": "corepack pnpm -r typecheck",
+    "lint": "oxlint -A unicorn/no-empty-file frontend/src ui/src/components templates",
     "format": "prettier --write ."
   },
   "devDependencies": {
+    "oxlint": "^1.86.0",
     "prettier": "3.9.9"
+  },
+  "dependencies": {
+    "@types/react": "19.3.0",
+    "react": "19.3.0"
   }
 }

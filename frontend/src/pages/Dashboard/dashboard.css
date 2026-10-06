@@ -1,0 +1,204 @@
+.paytrack-dashboard {
+  --pt-border: #20262b;
+  --pt-muted: #c2cbd9;
+  min-height: 100vh;
+  display: flex;
+  background: #000000;
+  color: #f4f6fa;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+.paytrack-dashboard button { cursor: pointer; }
+.paytrack-sidebar {
+  position: sticky;
+  top: 0;
+  width: 272px;
+  height: 100vh;
+  flex: 0 0 272px;
+  display: flex;
+  flex-direction: column;
+  padding: 19px 20px 16px;
+  background: #000000;
+  border-right: 1px solid #20252a;
+  transition: all 0.3s ease;
+  overflow-x: hidden;
+}
+.paytrack-sidebar.collapsed {
+  width: 72px;
+  flex: 0 0 72px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.paytrack-sidebar .brand-text,
+.paytrack-sidebar .paytrack-nav-link span,
+.paytrack-sidebar .paytrack-person,
+.paytrack-sidebar .paytrack-sidebar-profile > svg {
+  transition: opacity 0.2s ease, max-width 0.3s ease;
+  opacity: 1;
+  max-width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.paytrack-sidebar.collapsed .brand-text,
+.paytrack-sidebar.collapsed .paytrack-nav-link span,
+.paytrack-sidebar.collapsed .paytrack-person,
+.paytrack-sidebar.collapsed .paytrack-sidebar-profile > svg {
+  opacity: 0;
+  max-width: 0;
+  pointer-events: none;
+}
+.paytrack-sidebar.collapsed .paytrack-brand { justify-content: center; padding: 0; gap: 0; }
+.paytrack-sidebar.collapsed .paytrack-nav-link { justify-content: center; padding: 0; gap: 0; }
+.paytrack-sidebar.collapsed .paytrack-help { justify-content: center; padding: 28px 0 0; margin-left: 0; margin-right: 0; }
+.paytrack-sidebar.collapsed .paytrack-sidebar-profile { justify-content: center; padding: 0; border-color: transparent; gap: 0; }
+.paytrack-brand {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 21px;
+  color: #f4f6f8;
+  font-size: 23px;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -.7px;
+}
+.paytrack-logo { width: 31px; height: 31px; position: relative; display: block; border-radius: 4px; background: #0786ff; box-shadow: inset 0 0 6px #0474e9; }
+.paytrack-logo::before { content: ""; position: absolute; width: 10px; height: 10px; top: 11px; left: 9px; border-radius: 50%; background: #07151e; }
+.paytrack-logo::after { content: ""; position: absolute; width: 5px; height: 5px; right: 3px; top: 4px; border-radius: 50%; background: #07151e; }
+.paytrack-logo span { position: absolute; width: 4px; height: 4px; right: 3px; bottom: 5px; border-radius: 50%; background: #07151e; }
+.paytrack-nav { display: grid; gap: 5px; margin-top: 19px; }
+.paytrack-nav-link { height: 52px; display: flex; align-items: center; gap: 22px; padding: 0 15px; border-radius: 9px; color: #f3f6fa; text-decoration: none; font-size: 15px; white-space: nowrap; transition: background .15s; }
+.paytrack-nav-link svg { flex: none; color: #cce2fa; }
+.paytrack-nav-link:hover, .paytrack-nav-link.active { background: #333333; }
+.paytrack-sidebar-bottom { margin-top: auto; }
+.paytrack-help { border-top: 1px solid #30353a; border-radius: 0; margin: 0 7px 277px; padding: 28px 8px 0; height: 76px; }
+.paytrack-sidebar-profile { border: 1px solid #30363c; border-radius: 10px; min-height: 62px; width: 100%; padding: 8px 13px; display: flex; align-items: center; gap: 12px; background: transparent; color: inherit; text-align: left; }
+.paytrack-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: linear-gradient(135deg, #253668, #303d75); color: #fff; font-weight: 700; font-size: 14px; }
+.paytrack-person { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.paytrack-person strong { font-weight: 600; font-size: 14px; white-space: nowrap; }
+.paytrack-person small { color: #b7c5d9; font-size: 12px; }
+.paytrack-main { min-width: 0; flex: 1; }
+.paytrack-topbar { height: 73px; border-bottom: 1px solid #1d2227; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 35px 0 31px; background: #000000; }
+.paytrack-topbar h1 { margin: 0; font-size: 25px; font-weight: 650; letter-spacing: -.5px; white-space: nowrap; }
+.paytrack-top-actions { display: flex; align-items: center; gap: 31px; }
+.paytrack-search { width: min(580px, 48vw); height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 18px; background: #15191d; border: 1px solid #2b343a; border-radius: 10px; color: #c8d7ec; box-shadow: inset 0 1px 8px #111419; transition: border-color .15s, box-shadow .15s; }
+.paytrack-search:focus-within { border-color: #587a95; box-shadow: 0 0 0 3px #4d86b126; }
+.paytrack-search > svg { flex: none; }
+.paytrack-search input { flex: 1; min-width: 0; width: 100%; height: 100%; color: #dce7f7; background: transparent; border: 0; outline: 0; font-size: 14px; line-height: 1.4; }
+.paytrack-search input::placeholder { color: #c6d5e8; opacity: 1; }
+.paytrack-notification { position: relative; background: transparent; border: 0; color: #d5e6f9; width: 35px; height: 42px; display: grid; place-items: center; }
+.paytrack-notification span { position: absolute; right: 3px; top: 7px; width: 10px; height: 10px; background: #f9274d; border-radius: 50%; }
+
+.paytrack-content { padding: 16px 21px 40px; max-width: 1720px; margin: 0 auto; }
+.paytrack-dashboard .paytrack-card { background: #000000; border: 1px solid var(--pt-border); border-radius: 11px; box-shadow: none; padding: 0; gap: 0; color: #f7f8fb; }
+.paytrack-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 17px; }
+.paytrack-stat { min-height: 120px; display: flex !important; flex-direction: row !important; align-items: flex-start !important; gap: 16px !important; padding: 22px 20px !important; min-width: 0; }
+.paytrack-stat-icon { width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: 10px; }
+.paytrack-stat-icon.tone-blue { background: #102b4d; color: #0989ff; }
+.paytrack-stat-icon.tone-yellow { background: #2b2610; color: #ffc700; }
+.paytrack-stat-icon.tone-green { background: #063721; color: #00cf6c; }
+.paytrack-stat-icon.tone-cyan { background: #062d44; color: #078ff5; }
+.paytrack-stat-body { min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 0; }
+.paytrack-stat-heading { display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 14px; white-space: nowrap; font-weight: 500; color: #a1a1aa; line-height: 1; margin-bottom: 8px; }
+.paytrack-change { padding: 4px 6px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-weight: 650; font-size: 12px; line-height: 1; }
+.paytrack-change svg { display: block; margin-top: -1px; }
+.paytrack-change.tone-blue, .paytrack-change.tone-cyan { color: #0096ff; background: #071d31; }
+.paytrack-change.tone-yellow { color: #fa2c51; background: #2c111b; }
+.paytrack-change.tone-green { color: #00d572; background: #072d1c; }
+.paytrack-stat-body > strong { font-size: 26px; line-height: 1; letter-spacing: -.5px; white-space: nowrap; font-weight: 600; color: #ffffff; }
+.paytrack-stat-detail { font-size: 13px; color: #71717a; margin-top: 6px; white-space: nowrap; }
+
+.paytrack-charts { display: grid; grid-template-columns: minmax(0, 1.83fr) minmax(0, 1fr); gap: 18px; margin-top: 16px; }
+.paytrack-trend, .paytrack-categories { height: auto; min-width: 0; padding: 18px 21px 22px !important; }
+.paytrack-dashboard .paytrack-trend {
+  background: radial-gradient(circle at 68% 80%, rgba(30, 77, 48, .16), transparent 55%), #1c1f1d;
+}
+.paytrack-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.paytrack-panel-heading h2 { font-size: 20px; line-height: 1.2; margin: 0; font-weight: 650; letter-spacing: -.4px; }
+.paytrack-periods { border: 1px solid #252b32; border-radius: 9px; display: flex; align-items: center; height: 37px; overflow: hidden; flex: none; }
+.paytrack-dashboard .paytrack-periods button, .paytrack-dashboard .paytrack-recent-actions button { color: #f3f5f8; border: 0; background: transparent; box-shadow: none; font-size: 13px; font-weight: 500; height: 36px; padding: 0 16px; border-radius: 8px; }
+.paytrack-dashboard .paytrack-periods button.selected { background: linear-gradient(180deg, #1a5528, #123e20); box-shadow: 0 0 16px #2ba54a33; }
+.paytrack-chart-canvas { height: 223px; margin-top: 20px; margin-left: -8px; }
+.paytrack-chart-canvas .recharts-surface { overflow: visible; }
+.paytrack-chart-canvas .recharts-area-curve { filter: drop-shadow(0 0 3px rgba(103, 215, 131, .25)); }
+.paytrack-categories { padding-left: 17px !important; padding-right: 17px !important; }
+.paytrack-category-list { display: grid; gap: 7px; margin-top: 22px; }
+.paytrack-category { display: grid; grid-template-columns: 44px minmax(92px, 1fr) minmax(68px, 135px) 35px 88px; gap: 12px; align-items: center; height: 40px; font-size: 13px; }
+.paytrack-category-icon { width: 44px; height: 38px; display: grid; place-items: center; border-radius: 9px; }
+.paytrack-category-icon.tone-blue, .paytrack-category-badge.tone-blue { color: #078bff; background: #071e35; }
+.paytrack-category-icon.tone-purple, .paytrack-category-badge.tone-purple { color: #c455ff; background: #260a36; }
+.paytrack-category-icon.tone-royal, .paytrack-category-badge.tone-royal { color: #268cff; background: #091c31; }
+.paytrack-category-icon.tone-violet, .paytrack-category-badge.tone-violet { color: #bd43fa; background: #250b39; }
+.paytrack-category-icon.tone-orange, .paytrack-category-badge.tone-orange { color: #ff9800; background: #3d2300; }
+.paytrack-category-icon.tone-gray { color: #b9c9dd; background: #1d242b; }
+.paytrack-category-icon.tone-cyan, .paytrack-category-badge.tone-cyan { color: #00d2ff; background: #00293d; }
+.paytrack-category-label { line-height: 1.25; }
+.paytrack-bar { height: 16px; border-radius: 10px; background: #20262b; overflow: hidden; }
+.paytrack-bar span { display: block; height: 100%; border-radius: inherit; }
+.paytrack-bar .tone-blue { background: #0786fb; }.paytrack-bar .tone-purple, .paytrack-bar .tone-violet { background: #933af1; }.paytrack-bar .tone-orange { background: #ff8c00; }.paytrack-bar .tone-royal { background: #5284f5; }.paytrack-bar .tone-gray { background: #657185; }.paytrack-bar .tone-cyan { background: #00d2ff; }
+.paytrack-percent { text-align: right; color: #c8d4e7; }.paytrack-category strong { text-align: right; font-size: 13px; white-space: nowrap; }
+.paytrack-recent { margin-top: 15px; overflow: hidden; }
+.paytrack-recent [data-slot="table-container"] {
+  max-height: 316px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.paytrack-recent [data-slot="table-container"]::-webkit-scrollbar { width: 12px; height: 10px; }
+.paytrack-recent [data-slot="table-container"]::-webkit-scrollbar-track { background: #24282b; border-radius: 10px; }
+.paytrack-recent [data-slot="table-container"]::-webkit-scrollbar-thumb { background: #a8adb0; border: 2px solid #24282b; border-radius: 10px; }
+.paytrack-recent [data-slot="table-container"]::-webkit-scrollbar-thumb:hover { background: #d0d4d6; }
+.paytrack-recent-head { min-height: 45px; display: flex; align-items: center; justify-content: flex-start; padding: 8px 18px; }
+.paytrack-recent-actions { display: inline-flex; align-items: center; gap: 0; padding: 2px; border: 1px solid #263034; border-radius: 8px; background: #0b0f11; }
+.paytrack-dashboard .paytrack-recent-actions button { min-width: 0; height: 25px; padding: 0 11px; border: 1px solid transparent; border-radius: 6px; color: #a5b1b7; background: transparent; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.paytrack-filter-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; border-radius: 10px; background: #303b42; color: #ffffff; font-size: 11px; font-weight: 700; padding: 0 6px; line-height: 1; margin-left: 2px; }
+.paytrack-dashboard .paytrack-recent-actions button:hover:not(.selected) .paytrack-filter-count { background: #3c4951; }
+.paytrack-dashboard .paytrack-recent-actions button.selected .paytrack-filter-count { background: #40535b; }
+.paytrack-dashboard .paytrack-recent-actions button:hover:not(.selected) { color: #f1f5f6; background: #182124; }
+.paytrack-dashboard .paytrack-recent-actions button.selected { border-color: #344348; color: #f3f7f8; background: #11191c; }
+.paytrack-dashboard .paytrack-recent-actions button:active { background: #080c0e; }
+.paytrack-dashboard .paytrack-recent-actions button:focus-visible { outline: 2px solid #566b70; outline-offset: 2px; }
+
+.paytrack-table-tools { display: flex; gap: 8px; margin-left: auto; }
+.paytrack-tool-button { background: transparent; border: 1px solid #263034; color: #a5b1b7; height: 32px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 6px; transition: all 0.2s; }
+.paytrack-tool-button:hover { background: #11191c; color: #f3f7f8; border-color: #344348; }
+.paytrack-table { min-width: 1080px; width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; }
+.paytrack-table thead th { position: sticky; top: 0; z-index: 1; background: #242424; border-bottom: 1px solid #30363a; }
+.paytrack-table th { color: #aab3ba; font-weight: 500; font-size: 13px; height: 48px; }
+.paytrack-table th, .paytrack-table td { padding: 0 12px; text-align: left; }
+.paytrack-table th:first-child, .paytrack-table td:first-child { width: 60px; padding-left: 24px; }
+.paytrack-table th:nth-child(2) { width: 145px; }
+.paytrack-table th:nth-child(3) { width: 230px; }
+.paytrack-table th:nth-child(4) { width: 235px; }
+.paytrack-table th:nth-child(5) { width: 145px; }
+.paytrack-table th:nth-child(6) { width: 155px; }
+.paytrack-table th:nth-child(7) { width: 85px; }
+.paytrack-table th:last-child { width: 48px; }
+.paytrack-table th:nth-child(4), .paytrack-table td:nth-child(4), .paytrack-table th:nth-child(6), .paytrack-table td:nth-child(6), .paytrack-table th:nth-child(7), .paytrack-table td:nth-child(7) { text-align: center; }
+.paytrack-table th:last-child, .paytrack-table td:last-child { text-align: right; padding-right: 16px; }
+.paytrack-table th svg { vertical-align: middle; display: inline-block; margin-left: 5px; }
+.paytrack-table tbody tr { height: 52px; border-color: #242a30; }
+.paytrack-table tbody td { border-bottom: 1px solid #242a30; }
+.paytrack-table tbody tr:last-child td { border-bottom: 0; }
+.paytrack-table tbody tr:hover { background: #151b20; }
+.paytrack-table td { font-size: 13px; }
+.paytrack-table [data-slot="checkbox"] { width: 20px; height: 20px; border: 2px solid #b9d4f0; border-radius: 5px; background: transparent; }
+.paytrack-table thead [data-slot="checkbox"] { border-color: #9b9ba0; }
+.paytrack-merchant { display: flex; align-items: center; gap: 20px; line-height: 1.3; }
+.paytrack-merchant-mark { width: 26px; height: 26px; flex: none; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px; }
+.paytrack-merchant-mark svg { width: 16px; height: 16px; object-fit: contain; }
+.paytrack-category-badge, .paytrack-status { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 26px; padding: 0 12px; border-radius: 20px; white-space: nowrap; font-size: 12px; border: 1px solid #30363d; background: transparent !important; }
+.paytrack-amount { font-weight: 700; white-space: nowrap; }
+.paytrack-status.status-approved { color: #00d873; border-color: #05331d; }
+.paytrack-status.status-pending { color: #ffd000; border-color: #2d2502; }
+.paytrack-status.status-reimbursed { color: #008fff; border-color: #081e32; }
+.paytrack-icon-button { display: inline-grid; place-items: center; width: 36px; height: 36px; background: transparent; color: #d3e7fb; border: 0; border-radius: 7px; }
+.paytrack-icon-button:hover { background: #222b32; }
+.paytrack-icon-button:focus-visible { outline: 2px solid #70a8e8; outline-offset: 2px; }
+.paytrack-empty { padding: 28px !important; text-align: center !important; color: #aebfd2; }
+@media (max-width: 1450px) { .paytrack-sidebar { width: 240px; flex-basis: 240px; }.paytrack-content { padding: 16px; }.paytrack-stat { gap: 12px !important; padding: 16px 12px !important; }.paytrack-stat-icon { width: 50px; height: 50px; }.paytrack-stat-body > strong { font-size: 23px; }.paytrack-category { grid-template-columns: 38px minmax(75px,1fr) minmax(50px,105px) 31px 80px; gap: 8px; }.paytrack-category-icon { width: 38px; } }
+@media (max-width: 1150px) { .paytrack-topbar { padding: 0 20px; }.paytrack-topbar h1 { font-size: 21px; }.paytrack-search { width: min(520px, calc(100vw - 500px)); }.paytrack-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }.paytrack-charts { grid-template-columns: 1fr; }.paytrack-categories { height: auto; padding-bottom: 22px !important; }.paytrack-category { grid-template-columns: 44px minmax(130px,1fr) minmax(100px, 1.5fr) 40px 90px; } }
+@media (max-width: 750px) { .paytrack-dashboard { display: block; }.paytrack-sidebar { position: relative; width: 100%; height: auto; padding: 10px 14px; }.paytrack-brand { font-size: 20px; }.paytrack-nav { display: flex; overflow-x: auto; margin-top: 10px; }.paytrack-nav-link { height: 42px; padding: 0 10px; gap: 8px; font-size: 12px; }.paytrack-nav-link svg { width: 17px; }.paytrack-sidebar-bottom { display: none; }.paytrack-topbar { height: auto; min-height: 68px; flex-wrap: wrap; padding: 12px 16px; }.paytrack-topbar h1 { font-size: 20px; }.paytrack-top-actions { width: 100%; gap: 10px; }.paytrack-search { width: auto; flex: 1; }.paytrack-content { padding: 14px; }.paytrack-stats { gap: 10px; }.paytrack-stat { min-height: 110px; }.paytrack-stat-icon { display: none; }.paytrack-stat-body > strong { font-size: 22px; }.paytrack-stat-detail { white-space: normal; }.paytrack-panel-heading { flex-direction: column; }.paytrack-trend { height: auto; }.paytrack-chart-canvas { height: 214px; }.paytrack-recent-head { align-items: flex-start; flex-direction: column; }.paytrack-recent-actions { justify-content: flex-start; gap: 6px; }.paytrack-dashboard .paytrack-recent-actions button { min-width: auto; }.paytrack-periods button { padding: 0 8px !important; } }
+@media (max-width: 450px) { .paytrack-stats { grid-template-columns: 1fr; }.paytrack-category { grid-template-columns: 36px minmax(90px,1fr) minmax(40px,1fr) 28px; }.paytrack-category strong { display: none; } }
+@media (max-height: 800px) and (min-width: 751px) { .paytrack-help { margin-bottom: 80px; } }
+@media (max-width: 750px) { .paytrack-recent-head { flex-direction: row; }.paytrack-recent-actions { gap: 0; } }
