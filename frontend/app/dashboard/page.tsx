@@ -1,62 +1,262 @@
-import Link from "next/link";
-import { ArrowLeft, Receipt, CheckCircle, Clock, AlertCircle } from "lucide-react";
+"use client";
+
+import React, { useState } from "react";
+import { Sidebar } from "@/components/dashboard/Sidebar";
+import { SlideOutIconRail } from "@/components/dashboard/SlideOutIconRail";
+import { Header } from "@/components/dashboard/Header";
+import { GlobalFilters, FilterState, DEFAULT_FILTERS } from "@/components/dashboard/GlobalFilters";
+import { KpiCards } from "@/components/dashboard/KpiCards";
+import { ExceptionsQueue } from "@/components/dashboard/ExceptionsQueue";
+import { BudgetVsActualChart } from "@/components/dashboard/BudgetVsActualChart";
+import { CategoryDonutChart } from "@/components/dashboard/CategoryDonutChart";
+import { DepartmentSpendChart } from "@/components/dashboard/DepartmentSpendChart";
+import { ChartAreaInteractive } from "@/components/dashboard/ChartAreaInteractive";
+import { BudgetBreakdownTable } from "@/components/dashboard/BudgetBreakdownTable";
+import { RecentReimbursementsTable } from "@/components/dashboard/RecentReimbursementsTable";
+
+// Screen Views for PRD Finance Navigation
+import { VerificationQueueView } from "@/components/dashboard/VerificationQueueView";
+import { ReimbursementsView } from "@/components/dashboard/ReimbursementsView";
+import { PaymentsView } from "@/components/dashboard/PaymentsView";
+import { ExceptionsView } from "@/components/dashboard/ExceptionsView";
+import { BudgetsView } from "@/components/dashboard/BudgetsView";
+import { ReportsView } from "@/components/dashboard/ReportsView";
+
+// Working Modals
+import { QuickCreateModal } from "@/components/dashboard/QuickCreateModal";
+import { SettingsModal } from "@/components/dashboard/SettingsModal";
+import { SearchModal } from "@/components/dashboard/SearchModal";
+import { HelpModal } from "@/components/dashboard/HelpModal";
+
+import { FinanceProvider, useFinanceStore } from "@/lib/finance-store";
+import { ThemeProvider, useTheme } from "@/lib/theme-store";
+
+function DashboardContent() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const {
+    activeView,
+    setActiveView,
+    awaitingVerificationCount,
+    awaitingHighPriorityCount,
+    approvedAmountTotal,
+    reimbursementsPendingCount,
+    reimbursementsPendingAmount,
+    paymentsPendingCount,
+    paymentsPendingAmount,
+  } = useFinanceStore();
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [hoverSidebarOpen, setHoverSidebarOpen] = useState(false);
+  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnterTrigger = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    setHoverSidebarOpen(true);
+  };
+
+  const handleMouseLeaveTrigger = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoverSidebarOpen(false);
+    }, 250);
+  };
+
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+
+  // Modals state
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+
+  const getPageTitle = () => {
+    switch (activeView) {
+      case "Verification":
+        return "Finance Verification Queue";
+      case "Reimbursements":
+        return "Employee Reimbursements";
+      case "Payments":
+        return "Disbursement & Payments";
+      case "Exceptions":
+        return "Exceptions & Policy Violations";
+      case "Budgets":
+        return "Treasury Budgets & Limits";
+      case "Reports":
+        return "Accounting Reports & CSV Export";
+      default:
+        return "Finance Operations";
+    }
+  };
+
+  return (
+    <div className={`flex h-screen w-screen overflow-hidden font-sans antialiased transition-colors ${
+      isDark ? "bg-[#09090B] text-zinc-100" : "bg-[#FAFAFA] text-zinc-900"
+    }`}>
+      {/* Fixed Left Vertical Sidebar */}
+      {sidebarOpen && (
+        <Sidebar
+          onToggleSidebar={() => setSidebarOpen(false)}
+          onQuickCreate={() => setShowQuickCreate(true)}
+          onOpenSettings={() => setShowSettings(true)}
+          onOpenHelp={() => setShowHelp(true)}
+          onOpenSearch={() => setShowSearch(true)}
+        />
+      )}
+
+      {/* Hover Sensor along left screen edge when sidebar is closed */}
+      {!sidebarOpen && (
+        <div
+          onMouseEnter={handleMouseEnterTrigger}
+          onMouseLeave={handleMouseLeaveTrigger}
+          className="fixed left-0 top-0 bottom-0 w-7 z-40 pointer-events-auto group cursor-pointer"
+          title="Move cursor here to reveal navigation"
+        >
+          {/* Subtle visual hover cue */}
+          <div className="h-full w-[2px] bg-transparent group-hover:bg-zinc-400/40 dark:group-hover:bg-white/20 transition-colors" />
+        </div>
+      )}
+
+      {/* Pop-out Icon Rail on cursor hover */}
+      <SlideOutIconRail
+        isOpen={!sidebarOpen && hoverSidebarOpen}
+        onMouseEnter={handleMouseEnterTrigger}
+        onMouseLeave={handleMouseLeaveTrigger}
+        onPinSidebar={() => {
+          setSidebarOpen(true);
+          setHoverSidebarOpen(false);
+        }}
+        onQuickCreate={() => setShowQuickCreate(true)}
+        onOpenSettings={() => setShowSettings(true)}
+        onOpenHelp={() => setShowHelp(true)}
+        onOpenSearch={() => setShowSearch(true)}
+      />
+
+      {/* Main Application Area */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+        {/* Top Header with Single Filter Option in Top Right Corner */}
+        <Header
+          title={getPageTitle()}
+          rightContent={
+            activeView === "Dashboard" ? (
+              <GlobalFilters
+                filters={filters}
+                onFilterChange={setFilters}
+                onReset={() => setFilters(DEFAULT_FILTERS)}
+              />
+            ) : null
+          }
+        />
+
+        {/* Scrollable Main Content */}
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Main Dashboard Overview View */}
+          {activeView === "Dashboard" && (
+            <>
+              {/* 2. Top KPI Cards */}
+              <div
+                onClick={(e) => {
+                  const target = (e.target as HTMLElement).closest("div");
+                  if (!target) return;
+                  if (target.textContent?.includes("Awaiting")) setActiveView("Verification");
+                  else if (target.textContent?.includes("Reimbursements")) setActiveView("Reimbursements");
+                  else if (target.textContent?.includes("Payments")) setActiveView("Payments");
+                }}
+                className="cursor-pointer"
+              >
+                <KpiCards
+                  data={{
+                    awaitingVerificationCount,
+                    awaitingVerificationHighPriority: awaitingHighPriorityCount,
+                    approvedAmount: `₹${(approvedAmountTotal / 100000).toFixed(2)}L`,
+                    reimbursementsPendingCount,
+                    reimbursementsPendingAmount: `₹${reimbursementsPendingAmount.toLocaleString("en-IN")} total`,
+                    paymentsPendingCount,
+                    paymentsPendingAmount: `₹${paymentsPendingAmount.toLocaleString("en-IN")} total`,
+                  }}
+                />
+              </div>
+
+              {/* 2.5 Interactive Trends Area Chart */}
+              <ChartAreaInteractive />
+
+              {/* 3. Visual Bento Grid: Budget vs Actual Bar Chart (7 cols) + Category Donut Chart (5 cols) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7">
+                  <BudgetVsActualChart />
+                </div>
+                <div className="lg:col-span-5">
+                  <CategoryDonutChart />
+                </div>
+              </div>
+
+              {/* 4. Secondary Visual Grid: Department Utilization (6 cols) + Exceptions Queue (6 cols) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-6">
+                  <DepartmentSpendChart />
+                </div>
+                <div className="lg:col-span-6">
+                  <ExceptionsQueue
+                    onViewAll={() => setActiveView("Exceptions")}
+                    onReviewException={() => setActiveView("Verification")}
+                  />
+                </div>
+              </div>
+
+              {/* 5. Budget Breakdown & Threshold Indicators */}
+              <BudgetBreakdownTable />
+
+              {/* 6. Recent Completed Reimbursements */}
+              <RecentReimbursementsTable
+                onViewAll={() => setActiveView("Reimbursements")}
+              />
+            </>
+          )}
+
+          {/* Verification Queue View (PRD FR-10) */}
+          {activeView === "Verification" && <VerificationQueueView />}
+
+          {/* Reimbursements View (PRD FR-11) */}
+          {activeView === "Reimbursements" && <ReimbursementsView />}
+
+          {/* Payments View (PRD FR-12) */}
+          {activeView === "Payments" && <PaymentsView />}
+
+          {/* Exceptions View (PRD FR-05 & FR-06) */}
+          {activeView === "Exceptions" && <ExceptionsView />}
+
+          {/* Budgets View (PRD FR-14) */}
+          {activeView === "Budgets" && <BudgetsView />}
+
+          {/* Reports View (PRD FR-18) */}
+          {activeView === "Reports" && <ReportsView />}
+        </main>
+      </div>
+
+      {/* Interactive Modals */}
+      {showQuickCreate && (
+        <QuickCreateModal onClose={() => setShowQuickCreate(false)} />
+      )}
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} />
+      )}
+      {showSearch && (
+        <SearchModal onClose={() => setShowSearch(false)} />
+      )}
+      {showHelp && (
+        <HelpModal onClose={() => setShowHelp(false)} />
+      )}
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-[#111111] text-white p-6 sm:p-12 font-sans">
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-6">
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/"
-              className="h-9 w-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">FinPulse Dashboard</h1>
-              <p className="text-xs text-neutral-400">Expense overview & approvals</p>
-            </div>
-          </div>
-          <Link
-            href="/"
-            className="text-xs font-medium text-neutral-400 hover:text-white transition-colors"
-          >
-            Back to Home
-          </Link>
-        </div>
-
-        {/* Quick Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-[#1A1A1A] p-5 rounded-2xl border border-white/5">
-            <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
-              <span>Total Expenses</span>
-              <Receipt className="h-4 w-4 text-[#3B6CF6]" />
-            </div>
-            <p className="text-2xl font-bold font-mono">₹42,850</p>
-            <p className="text-[11px] text-neutral-500 mt-1">18 claims logged this month</p>
-          </div>
-
-          <div className="bg-[#1A1A1A] p-5 rounded-2xl border border-white/5">
-            <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
-              <span>Approved & Cleared</span>
-              <CheckCircle className="h-4 w-4 text-emerald-400" />
-            </div>
-            <p className="text-2xl font-bold font-mono text-emerald-400">₹31,400</p>
-            <p className="text-[11px] text-neutral-500 mt-1">Direct UTR bank settled</p>
-          </div>
-
-          <div className="bg-[#1A1A1A] p-5 rounded-2xl border border-white/5">
-            <div className="flex items-center justify-between text-xs text-neutral-400 mb-2">
-              <span>In Audit Review</span>
-              <Clock className="h-4 w-4 text-amber-400" />
-            </div>
-            <p className="text-2xl font-bold font-mono text-amber-400">₹11,450</p>
-            <p className="text-[11px] text-neutral-500 mt-1">3 pending manager sign-offs</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ThemeProvider>
+      <FinanceProvider>
+        <DashboardContent />
+      </FinanceProvider>
+    </ThemeProvider>
   );
 }

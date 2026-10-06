@@ -1,22 +1,63 @@
 @import "tailwindcss";
 
+@utility font-forum {
+  font-family: 'Forum', serif, Georgia, Cambria, Times, "Times New Roman";
+}
+
+@utility font-jakarta {
+  font-family: 'Plus Jakarta Sans', var(--font-sans), sans-serif;
+}
+
+@utility font-space {
+  font-family: 'Space Grotesk', monospace, sans-serif;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
-    --color-royal-blue: #0A3CC8;
-    --color-royal-blue-gradient: linear-gradient(180deg, #0A3CC8 0%, #082FA1 60%, #062274 100%);
-    --color-dark-bg: #111111;
-    --color-light-bg: #F8F8F8;
-    --color-accent-blue: #3B6CF6;
-    --color-accent-pink: #F472B6;
-    --color-text-muted: #9CA3AF;
+    --canvas-bg: #FAFAFA;
+    --surface-card: #FFFFFF;
+    --surface-elevated: #F4F4F5;
+    --border-hairline: rgba(0, 0, 0, 0.08);
+    --text-primary: #18181B;
+    --text-secondary: #71717A;
+    --text-tertiary: #A1A1AA;
+    
+    --chart-blue: #5A78A6;
+    --chart-emerald: #3B9B78;
+    --chart-amber: #C98642;
+    --chart-violet: #8875B8;
+    --chart-1: #5A78A6;
+    --chart-2: #3B9B78;
+  }
+
+  .dark {
+    --canvas-bg: #09090B;
+    --surface-card: #111113;
+    --surface-elevated: #18181B;
+    --border-hairline: rgba(255, 255, 255, 0.07);
+    --text-primary: #F4F4F5;
+    --text-secondary: #A1A1AA;
+    --text-tertiary: #71717A;
+    
+    --chart-blue: #6086D6;
+    --chart-emerald: #48B18B;
+    --chart-amber: #D4954A;
+    --chart-violet: #9D8BC9;
+    --chart-1: #6086D6;
+    --chart-2: #48B18B;
   }
 
   body {
-    background-color: var(--color-dark-bg);
-    color: #FFFFFF;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: var(--font-sans), Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "cv05" 1, "cv11" 1;
   }
 }
 
