@@ -12,12 +12,12 @@ export function OverviewHeader({ cycleFilter, exportExpenses }: Props) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-          My Expenses
-        </span>
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 mt-0.5">
-          Welcome, Rabil
+        <h1 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          Welcome back, Rabil
         </h1>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+          Manage your corporate cards, submit expense claims, and track reimbursement status.
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -51,3 +51,4 @@ export function OverviewHeader({ cycleFilter, exportExpenses }: Props) {
     </div>
   );
 }
+export default OverviewHeader;

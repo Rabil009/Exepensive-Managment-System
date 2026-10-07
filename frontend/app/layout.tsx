@@ -28,7 +28,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans antialiased text-[#F4F4F5] selection:bg-white/20 selection:text-white bg-[#09090B] overflow-x-hidden">
+      <body className="font-sans antialiased selection:bg-zinc-800 selection:text-white overflow-x-hidden">
         {children}
       </body>
     </html>
