@@ -1,6 +1,5 @@
-﻿"use client";
-
 import React from "react";
+import { Sun, Moon } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 
 interface ManagerHeaderProps {
@@ -12,7 +11,7 @@ export function ManagerHeader({
   title = "Manager Cockpit & Approvals",
   rightContent,
 }: ManagerHeaderProps) {
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
   return (
@@ -34,12 +33,29 @@ export function ManagerHeader({
         </span>
       </div>
 
-      {/* Right Content */}
-      {rightContent && (
-        <div className="flex items-center gap-2">
-          {rightContent}
-        </div>
-      )}
+      {/* Right Content: Action controls + Theme Toggle Button */}
+      <div className="flex items-center gap-2">
+        {rightContent}
+
+        {/* Theme Toggle Button */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label="Toggle Theme"
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+            isDark
+              ? "bg-[#141418] hover:bg-[#1E1E24] text-amber-300 border border-white/[0.08]"
+              : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
+          }`}
+        >
+          {isDark ? (
+            <Sun className="h-4 w-4 stroke-[2]" />
+          ) : (
+            <Moon className="h-4 w-4 stroke-[2]" />
+          )}
+        </button>
+      </div>
     </header>
   );
 }

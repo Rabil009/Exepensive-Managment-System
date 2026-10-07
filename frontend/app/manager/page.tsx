@@ -317,34 +317,33 @@ function ManagerDashboardInner() {
             </div>
           )}
 
-          {/* Standardized Flat KPI Cards */}
+          {/* Standardized Flat KPI Cards Matching Finance Dashboard */}
           <section aria-label="Manager Key Metrics">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: Total Team Spend */}
               <div
                 onClick={() => setActiveView("Team Spend")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Team Total Spend
                   </span>
-                  <Wallet className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <Wallet className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     ₹3,84,500
                   </span>
@@ -354,28 +353,27 @@ function ManagerDashboardInner() {
               {/* Card 2: Awaiting Approval */}
               <div
                 onClick={() => setActiveView("Approvals")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Awaiting Verification
                   </span>
-                  <Clock className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <Clock className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     {pendingClaims.length}
                   </span>
@@ -385,28 +383,27 @@ function ManagerDashboardInner() {
               {/* Card 3: Approved This Month */}
               <div
                 onClick={() => setActiveView("Approvals")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Approved This Month
                   </span>
-                  <CheckCircle2 className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <CheckCircle2 className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     ₹2,48,200
                   </span>
@@ -416,28 +413,27 @@ function ManagerDashboardInner() {
               {/* Card 4: Policy Exceptions */}
               <div
                 onClick={() => setActiveView("Exceptions")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Policy Exceptions
                   </span>
-                  <AlertTriangle className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <AlertTriangle className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     3
                   </span>
@@ -1106,9 +1102,11 @@ function ManagerDashboardInner() {
 
 export default function ManagerDashboardPage() {
   return (
-    <React.Suspense fallback={<div className="h-screen w-full bg-transparent" />}>
-      <ManagerDashboardInner />
-    </React.Suspense>
+    <ThemeProvider>
+      <React.Suspense fallback={<div className="h-screen w-full bg-transparent" />}>
+        <ManagerDashboardInner />
+      </React.Suspense>
+    </ThemeProvider>
   );
 }
 
