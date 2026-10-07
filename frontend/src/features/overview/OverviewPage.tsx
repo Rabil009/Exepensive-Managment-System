@@ -3,7 +3,6 @@
 import { AppShell } from "../../shared/layout/AppShell";
 import { Toast } from "../../shared/components/Toast";
 import { useOverview } from "./hooks/useOverview";
-import { OverviewHeader } from "./components/OverviewHeader";
 import { OverviewSummary } from "./components/OverviewSummary";
 import { QuickReceiptCapture } from "./components/QuickReceiptCapture";
 import { OverviewExpenseTable } from "./components/OverviewExpenseTable";
@@ -12,11 +11,7 @@ export default function OverviewPage() {
   const model = useOverview();
   return (
     <AppShell active="Overview" onSearch={model.setQuery}>
-      <div className="space-y-6 w-full">
-        <OverviewHeader
-          cycleFilter={model.cycleFilter}
-          exportExpenses={model.exportExpenses}
-        />
+      <div className="space-y-4 sm:space-y-6 w-full">
         <OverviewSummary />
         <QuickReceiptCapture
           onUpload={() =>
