@@ -10,7 +10,7 @@ import "./styles/analytics.css";
 export default function AnalyticsPage() {
   return (
     <AppShell active="Analytics">
-      <div className="pasted-analytics flex flex-col w-full gap-6 pb-16">
+      <div className="employee-page pasted-analytics flex flex-col w-full gap-6 pb-16">
         <AnalyticsHeader />
         <SummaryMetrics />
         <SpendingOverview />

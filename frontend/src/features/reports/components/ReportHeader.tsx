@@ -24,7 +24,7 @@ export function ReportHeader({ model }: Props) {
     addItem,
   } = model;
   return (
-    <section className="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-sm border-b border-outline-variant/30">
+    <section className="employee-page-header flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-sm border-b border-outline-variant/30">
       <div className="flex flex-col gap-1.5">
         <nav
           aria-label="Breadcrumb"

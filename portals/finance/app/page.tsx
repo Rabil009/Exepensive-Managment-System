@@ -167,6 +167,12 @@ export default function LoginPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("portal") === "employee") {
+      setSelectedPortal("/employee");
+    }
+  }, []);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsPortalDropdownOpen(false);

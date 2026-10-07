@@ -11,7 +11,7 @@ export default function ReportsPage() {
   const model = useReports();
   return (
     <AppShell active="Reports" onSearch={model.setQuery}>
-      <div className="aura-reports flex flex-col w-full gap-space-xl">
+      <div className="employee-page aura-reports flex flex-col w-full gap-space-xl">
         <ReportHeader model={model} />
         <section className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
           <ReportSummary model={model} />

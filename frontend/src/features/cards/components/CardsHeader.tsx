@@ -10,7 +10,7 @@ type Props = {
 export function CardsHeader({ model }: Props) {
   const { state, update, setRevealed, openDialog } = model;
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-lg pb-space-sm border-b border-outline-variant/20">
+    <div className="employee-page-header flex flex-col md:flex-row md:items-center justify-between gap-space-lg pb-space-sm border-b border-outline-variant/20">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-label-caps uppercase tracking-wider text-primary font-semibold">

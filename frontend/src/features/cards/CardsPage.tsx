@@ -12,7 +12,7 @@ export default function CardsPage() {
   const model = useCardControls();
   return (
     <AppShell active="Cards & Limits">
-      <div className="aura-cards flex flex-col w-full gap-4">
+      <div className="employee-page aura-cards flex flex-col w-full gap-4">
         <CardsHeader model={model} />
         {model.message && (
           <div className="aura-card-notice" role="status">

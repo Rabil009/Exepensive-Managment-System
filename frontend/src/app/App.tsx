@@ -10,6 +10,7 @@ const ReportsPage = lazy(() => import("../features/reports/ReportsPage"));
 const CardsPage = lazy(() => import("../features/cards/CardsPage"));
 
 const AnalyticsPage = lazy(() => import("../features/analytics/AnalyticsPage"));
+const EmployeeLogin = lazy(() => import("../features/auth/EmployeeLogin"));
 
 export default function App() {
   return (
@@ -22,6 +23,8 @@ export default function App() {
         }
       >
         <Routes>
+          <Route path="/login" element={<EmployeeLogin />} />
+          <Route path="/employee/login" element={<EmployeeLogin />} />
           <Route
             path="/"
             element={<Navigate to="/employee/dashboard" replace />}

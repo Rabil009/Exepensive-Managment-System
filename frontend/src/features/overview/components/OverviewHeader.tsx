@@ -1,7 +1,7 @@
 type Props = { cycleFilter: () => void; exportExpenses: () => void };
 export function OverviewHeader({ cycleFilter, exportExpenses }: Props) {
   return (
-    <section className="flex flex-col md:flex-row md:items-end justify-between gap-space-lg">
+    <section className="employee-page-header flex flex-col md:flex-row md:items-end justify-between gap-space-lg">
       <div className="space-y-1">
         <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
           <span className="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>

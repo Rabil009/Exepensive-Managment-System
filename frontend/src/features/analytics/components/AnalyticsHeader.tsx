@@ -1,6 +1,6 @@
 export function AnalyticsHeader() {
   return (
-    <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
+    <header className="employee-page-header flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
       <div>
         <h1 className="font-display-md text-display-md text-on-surface tracking-tight">
           Expense Analytics

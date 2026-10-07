@@ -8,6 +8,7 @@
     /* Match the Mobile Wallet control row across Employee navigation bars. */
     --surface-navigation: #f8f8f9;
     --surface-elevated: #f4f4f5;
+    --surface-muted: #f8f8f9;
     --border-hairline: rgba(0, 0, 0, 0.08);
     --text-primary: #18181b;
     --text-secondary: #71717a;
@@ -26,6 +27,7 @@
     --surface-card: #111113;
     --surface-navigation: #09090b;
     --surface-elevated: #18181b;
+    --surface-muted: #18181b;
     --border-hairline: rgba(255, 255, 255, 0.07);
     --text-primary: #f4f4f5;
     --text-secondary: #a1a1aa;

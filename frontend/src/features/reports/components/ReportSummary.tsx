@@ -1,5 +1,5 @@
 import type { ReportsModel } from "../hooks/useReports";
-import { formatTotal, isPersonal } from "../utils/reportTotals";
+import { formatTotal, isPersonal, isPersonalCard } from "../utils/reportTotals";
 
 type Props = {
   model: Pick<
@@ -9,8 +9,16 @@ type Props = {
 };
 export function ReportSummary({ model }: Props) {
   const { items, corporate, personal, chartItems, total, verified } = model;
+  const personalCard = personal.filter(isPersonalCard);
+  const outOfPocket = personal.filter((item) => !isPersonalCard(item));
+  const personalCardTotal = chartItems
+    .filter(isPersonalCard)
+    .reduce((sum, item) => sum + item.amount, 0);
+  const outOfPocketTotal = chartItems
+    .filter((item) => isPersonal(item) && !isPersonalCard(item))
+    .reduce((sum, item) => sum + item.amount, 0);
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+    <div className="report-summary grid grid-cols-1 md:grid-cols-3 gap-space-md">
       <div className="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between">
         <div className="flex items-center justify-between text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
           <span className="">Total Claimed</span>
@@ -52,11 +60,20 @@ export function ReportSummary({ model }: Props) {
           </div>
           <div className="flex justify-between items-center text-body-sm font-body-sm">
             <span className="text-on-surface-variant flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-outline"></span>
+              Personal Card:
+            </span>
+            <span className="font-financial-tabular text-financial-tabular font-medium text-on-surface">
+              {formatTotal(personalCard)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center text-body-sm font-body-sm">
+            <span className="text-on-surface-variant flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-tertiary-container"></span>
               Out of Pocket:
             </span>
             <span className="font-financial-tabular text-financial-tabular font-semibold text-tertiary">
-              {formatTotal(personal)}
+              {formatTotal(outOfPocket)}
             </span>
           </div>
         </div>
@@ -67,7 +84,18 @@ export function ReportSummary({ model }: Props) {
               width: `${total ? (chartItems.filter((item) => !isPersonal(item)).reduce((sum, item) => sum + item.amount, 0) / total) * 100 : 0}%`,
             }}
           ></div>
-          <div className="bg-tertiary-container h-full flex-1"></div>
+          <div
+            className="bg-outline h-full"
+            style={{
+              width: `${total ? (personalCardTotal / total) * 100 : 0}%`,
+            }}
+          ></div>
+          <div
+            className="bg-tertiary-container h-full"
+            style={{
+              width: `${total ? (outOfPocketTotal / total) * 100 : 0}%`,
+            }}
+          ></div>
         </div>
       </div>
       <div className="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between">

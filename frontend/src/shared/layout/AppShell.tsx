@@ -1,8 +1,8 @@
 import { useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { Sidebar } from "./Sidebar";
+import { SidebarUtilityDialog } from "./SidebarUtilityDialog";
 import { Header } from "./Header";
-import { SlideOutIconRail } from "./SlideOutIconRail";
 import { navigation } from "./navigation";
 import { Toast } from "../components/Toast";
 import "../styles/shell.css";
@@ -29,6 +29,9 @@ export function AppShell({
     return localStorage.getItem("aura-sidebar-expanded") !== "false";
   });
   const [notice, setNotice] = useState("");
+  const [utilityPanel, setUtilityPanel] = useState<"settings" | "help" | null>(
+    null,
+  );
   const searchRef = useRef<HTMLInputElement>(null);
   function toggleSidebar() {
     setSidebarOpen((open) => {
@@ -46,38 +49,27 @@ export function AppShell({
   return (
     <div className="aura-app finance-shell flex h-dvh w-full overflow-hidden font-sans antialiased transition-colors bg-[var(--canvas-bg)] text-[var(--text-primary)]">
       {sidebarOpen && (
-        <>
-          <button
-            className="finance-sidebar-backdrop"
-            aria-label="Close navigation"
-            onClick={toggleSidebar}
-          />
-          <div className="finance-sidebar-wrap">
-            <Sidebar
-              activeView={active}
-              onNavigate={onNavigate}
-              navItems={sidebarNav}
-              user={user}
-              quickCreateLabel="New Expense"
-              onQuickCreate={createExpense}
-              onOpenSearch={openSearch}
-              onToggleSidebar={toggleSidebar}
-            />
-          </div>
-        </>
+        <button
+          className="finance-sidebar-backdrop"
+          aria-label="Close navigation"
+          onClick={toggleSidebar}
+        />
       )}
-      {!sidebarOpen && (
-        <SlideOutIconRail
-          onToggleSidebar={toggleSidebar}
-          onQuickCreate={createExpense}
-          onOpenSearch={openSearch}
+      <div className={sidebarOpen ? "finance-sidebar-wrap" : undefined}>
+        <Sidebar
+          isCollapsed={!sidebarOpen}
           activeView={active}
           onNavigate={onNavigate}
           navItems={sidebarNav}
           user={user}
           quickCreateLabel="New Expense"
+          onQuickCreate={createExpense}
+          onOpenSearch={openSearch}
+          onOpenSettings={() => setUtilityPanel("settings")}
+          onOpenHelp={() => setUtilityPanel("help")}
+          onToggleSidebar={toggleSidebar}
         />
-      )}
+      </div>
       <div className="flex-1 flex flex-col h-dvh overflow-hidden min-w-0">
         <Header
           searchRef={searchRef}
@@ -89,6 +81,10 @@ export function AppShell({
         </main>
       </div>
       <Toast message={notice} onDismiss={() => setNotice("")} />
+      <SidebarUtilityDialog
+        panel={utilityPanel}
+        onClose={() => setUtilityPanel(null)}
+      />
     </div>
   );
 }

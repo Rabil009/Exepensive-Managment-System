@@ -14,7 +14,7 @@ export function ExpenseForm() {
   const model = useExpenseForm();
   return (
     <form
-      className="aura-expense-form flex flex-col w-full gap-space-lg"
+      className="employee-page aura-expense-form flex flex-col w-full gap-space-lg"
       onSubmit={model.submit}
     >
       <ExpenseFormHeader model={model} />

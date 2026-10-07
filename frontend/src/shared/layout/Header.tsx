@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import { Link } from "react-router";
-import { Sun, Moon } from "lucide-react";
+import { Bell, Sun, Moon } from "lucide-react";
 import { AuraIcon } from "../components/AuraIcon";
 import { useTheme } from "../theme/theme-store";
 
@@ -31,27 +31,22 @@ export function Header({ searchRef, onSearch, onNotifications }: HeaderProps) {
           />
         </form>
       </div>
-      <div className="flex items-center gap-2 sm:gap-5 shrink-0">
-        <div className="hidden md:flex items-center gap-1 bg-surface-container-low border border-outline-variant/30 px-3 py-1 rounded-lg">
-          <AuraIcon className="text-base">payments</AuraIcon>
-          <span className="text-label-md">INR (₹)</span>
-          <AuraIcon className="text-sm">expand_more</AuraIcon>
-        </div>
+      <div className="flex items-center gap-2 shrink-0">
         <button
           type="button"
           aria-label="Notifications"
           onClick={onNotifications}
-          className="relative p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high"
+          className="relative h-9 w-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high"
         >
-          <AuraIcon className="text-xl">notifications</AuraIcon>
-          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary-container" />
+          <Bell className="h-4 w-4" />
+          <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary-container" />
         </button>
         <button
           type="button"
           onClick={toggleTheme}
           aria-label="Toggle Theme"
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          className="h-8 w-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high"
+          className="h-9 w-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high"
         >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>

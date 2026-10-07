@@ -27,3 +27,9 @@ The Finance Turbopack root points to the workspace root so Next.js can resolve p
 - Removed Finance's old `SlideOutIconRail.tsx` as deleted upstream; its sidebar now handles collapse itself.
 - Retained all Employee files, gray controls, and the login redirect to the Employee dashboard.
 - Finance production build and TypeScript checks passed. All 12 upstream file changes match the source in the Finance portal, and Employee source matches the checkpoint exactly.
+
+## Employee sidebar and shared login
+
+Employee now uses the latest Aditya sidebar geometry: 240px expanded, 64px collapsed, 40px navigation rows, and 16px icons. One sidebar component handles both states. Employee keeps its continuous navigation list, user identity, and gray theme.
+
+Employee `/login` and `/employee/login` open the shared Finance login page with `?portal=employee`, selecting Employee Portal automatically. Configure `VITE_LOGIN_URL` in Employee for deployments; both development servers must be running locally. Existing dashboard routes remain accessible directly. This adds shared login navigation, not authentication enforcement.

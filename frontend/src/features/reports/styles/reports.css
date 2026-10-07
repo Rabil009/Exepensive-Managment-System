@@ -5,6 +5,10 @@
 .aura-reports {
   padding-top: 20px;
 }
+.report-summary > div,
+.report-workflow {
+  background: var(--surface-muted);
+}
 .report-selector {
   background: transparent;
   outline: none;

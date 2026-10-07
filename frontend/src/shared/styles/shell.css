@@ -34,6 +34,71 @@
 .employee-content {
   background: var(--canvas-bg);
 }
+.employee-content .employee-page {
+  gap: 24px;
+  padding-top: 0;
+}
+.employee-content .employee-page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  min-height: 88px;
+  padding: 0;
+  border-bottom: 0;
+}
+.employee-page-header > div:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 4px;
+}
+.employee-page-header > div:first-child > * {
+  margin-block: 0;
+}
+.employee-page-header > div:first-child > :first-child:not(h1) {
+  height: 20px;
+  min-height: 20px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.employee-page-header > div:first-child > div:has(h1) {
+  min-height: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.employee-page-header nav {
+  flex-wrap: wrap;
+  padding-top: 0;
+}
+.employee-page-header > div:last-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+.employee-page-header > div:last-child > button {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (min-width: 1100px) {
+  .employee-content .employee-page-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 24px;
+  }
+  .employee-page-header > div:last-child {
+    justify-content: flex-end;
+    padding-top: 24px;
+    flex-wrap: nowrap;
+  }
+}
+.employee-page-header > div:first-child > h1:only-child {
+  margin-top: 24px;
+}
 .employee-content h1 {
   font-size: 24px;
   font-weight: 600;
@@ -183,6 +248,9 @@
   font-weight: 600;
 }
 @media (max-width: 767px) {
+  .employee-page-header > div:first-child > :first-child:not(h1) {
+    height: auto;
+  }
   .finance-sidebar-wrap {
     position: fixed;
     left: 0;

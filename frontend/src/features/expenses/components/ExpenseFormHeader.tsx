@@ -5,7 +5,7 @@ type Props = { model: Pick<ExpenseFormModel, "save" | "submitted" | "ready"> };
 export function ExpenseFormHeader({ model }: Props) {
   const { save, submitted, ready } = model;
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-xs">
+    <div className="employee-page-header flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-xs">
       <div className="flex flex-col gap-1.5">
         <nav
           className="flex items-center gap-2 text-label-md text-on-surface-variant pt-1"
