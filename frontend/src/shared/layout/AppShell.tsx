@@ -72,12 +72,14 @@ export function AppShell({
       {/* Main Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         <Header
+          title={active ? `Employee • ${active}` : "Employee Portal"}
           searchRef={{ current: null }}
           onSearch={onSearch}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
           onNotifications={() => toast.info("No new notifications")}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           {children}
         </main>
       </div>

@@ -2,16 +2,24 @@
 
 import React, { type RefObject } from "react";
 import Link from "next/link";
-import { Search, Bell, Sun, Moon, Plus } from "lucide-react";
+import { Search, Bell, Sun, Moon, Plus, PanelLeft } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 
 interface HeaderProps {
-  searchRef: RefObject<HTMLInputElement | null>;
+  title?: string;
+  searchRef?: RefObject<HTMLInputElement | null>;
   onSearch?: (value: string) => void;
-  onNotifications: () => void;
+  onNotifications?: () => void;
+  onToggleSidebar?: () => void;
 }
 
-export function Header({ searchRef, onSearch, onNotifications }: HeaderProps) {
+export function Header({
+  title = "Employee Portal",
+  searchRef,
+  onSearch,
+  onNotifications,
+  onToggleSidebar,
+}: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
@@ -23,15 +31,33 @@ export function Header({ searchRef, onSearch, onNotifications }: HeaderProps) {
           : "bg-white border-zinc-200 text-zinc-900"
       }`}
     >
-      {/* Left Search Bar */}
-      <div className="flex items-center gap-3 min-w-0 flex-1 max-w-sm">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+      {/* Left Title / Mobile Toggle / Search */}
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 max-w-md">
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            title="Toggle Menu"
+            aria-label="Toggle Menu"
+            className={`md:hidden h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 ${
+              isDark
+                ? "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+            }`}
+          >
+            <PanelLeft className="h-4 w-4 stroke-[1.85]" />
+          </button>
+        )}
+        <span className={`text-[13.5px] sm:text-[14px] font-medium truncate shrink-0 ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
+          {title}
+        </span>
+        <div className="relative w-full max-w-xs hidden sm:block">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
           <input
             ref={searchRef}
             name="search"
             aria-label="Search transactions"
-            placeholder="Search transactions, tags, reports..."
+            placeholder="Search transactions, tags..."
             onChange={(e) => onSearch?.(e.target.value)}
             className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all focus:outline-none ${
               isDark

@@ -26,7 +26,7 @@ export function OverviewHeader({ cycleFilter, exportExpenses }: Props) {
           className="h-8 px-3 rounded-lg border text-xs font-medium bg-white dark:bg-[#111113] border-zinc-200/80 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181D] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
         >
           <Calendar className="h-3.5 w-3.5 text-zinc-400" />
-          <span className="tabular-nums">Oct 1 - 31, 2025</span>
+          <span className="tabular-nums">Oct 1 - 31, 2026</span>
           <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
         </button>
 
