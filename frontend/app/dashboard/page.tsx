@@ -82,7 +82,7 @@ function DashboardContent() {
   };
 
   return (
-    <div className={`flex h-screen w-screen overflow-hidden font-sans antialiased transition-colors ${
+    <div className={`flex h-screen w-full overflow-hidden font-sans antialiased transition-colors ${
       isDark ? "bg-[#09090B] text-zinc-100" : "bg-[#FAFAFA] text-zinc-900"
     }`}>
       {/* Static Left Vertical Sidebar (Expands to full or collapses to slim icon rail) */}
@@ -96,7 +96,7 @@ function DashboardContent() {
       />
 
       {/* Main Application Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Top Header with Single Filter Option in Top Right Corner */}
         <Header
           title={getPageTitle()}

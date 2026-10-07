@@ -54,8 +54,9 @@ export function ManagerSidebar({
 
   return (
     <aside
+      style={{ willChange: "width" }}
       aria-label="Manager Navigation"
-      className={`shrink-0 h-screen border-r flex flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-300 ease-in-out ${
+      className={`shrink-0 h-screen border-r flex flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-200 ease-in-out ${
         isCollapsed ? "w-[64px]" : "w-[240px]"
       } ${
         isDark
@@ -72,7 +73,7 @@ export function ManagerSidebar({
           }`}
         >
           <div
-            className={`flex items-center gap-2.5 overflow-hidden transition-all duration-300 ${
+            className={`flex items-center gap-2.5 overflow-hidden transition-all duration-200 ${
               isCollapsed
                 ? "max-w-0 opacity-0 pointer-events-none"
                 : "max-w-[140px] opacity-100"
@@ -149,7 +150,7 @@ export function ManagerSidebar({
                 </div>
 
                 <div
-                  className={`flex items-center justify-between flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-300 ${
+                  className={`flex items-center justify-between flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
                     isCollapsed
                       ? "max-w-0 opacity-0 pointer-events-none ml-0"
                       : "max-w-[170px] opacity-100"
@@ -182,7 +183,7 @@ export function ManagerSidebar({
         {/* Documents Group */}
         <div className="mt-4 w-full">
           <div
-            className={`overflow-hidden transition-all duration-300 ${
+            className={`overflow-hidden transition-all duration-200 ${
               isCollapsed
                 ? "max-h-0 opacity-0 pointer-events-none mb-0"
                 : "max-h-6 opacity-100 mb-1"
@@ -238,7 +239,7 @@ export function ManagerSidebar({
                   </div>
 
                   <div
-                    className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-300 ${
+                    className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
                       isCollapsed
                         ? "max-w-0 opacity-0 pointer-events-none ml-0"
                         : "max-w-[170px] opacity-100"
@@ -286,7 +287,7 @@ export function ManagerSidebar({
           </div>
 
           <div
-            className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-300 ${
+            className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
               isCollapsed
                 ? "max-w-0 opacity-0 pointer-events-none ml-0"
                 : "max-w-[170px] opacity-100"
@@ -325,7 +326,7 @@ export function ManagerSidebar({
             </div>
 
             <div
-              className={`flex items-center justify-between flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-300 ${
+              className={`flex items-center justify-between flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
                 isCollapsed
                   ? "max-w-0 opacity-0 pointer-events-none ml-0"
                   : "max-w-[170px] opacity-100"

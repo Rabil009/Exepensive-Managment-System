@@ -60,7 +60,7 @@ export const ChartContainer = React.forwardRef<
         {...props}
       >
         {mounted ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" debounce={150}>
             {children}
           </ResponsiveContainer>
         ) : (
