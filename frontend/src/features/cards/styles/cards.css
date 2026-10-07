@@ -1,0 +1,437 @@
+.aura-cards .aura-card-button {
+  height: 36px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #c1c6d64d;
+  border-radius: 8px;
+  background: white;
+  color: #1a1b1f;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.aura-cards .aura-card-button:hover {
+  background: #e9e7ed;
+}
+.aura-cards .aura-card-button.primary {
+  background: #0059b5;
+  color: white;
+  border-color: transparent;
+}
+.aura-cards .aura-card-button.primary:hover {
+  background: #0071e3;
+}
+.aura-cards .aura-card-button.is-frozen {
+  background: #ffdad6;
+  color: #93000a;
+}
+.aura-physical-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid #ffffff1a;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1.586;
+  height: auto;
+  align-self: flex-start;
+  background: linear-gradient(135deg, #1e2024, #17181b, #0f1012);
+  color: white;
+  box-shadow: 0 15px 25px -12px #1a1b1f66;
+  transition:
+    filter 0.2s,
+    opacity 0.2s;
+}
+.aura-physical-card::before {
+  content: "";
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  right: -80px;
+  top: -100px;
+  background: radial-gradient(circle, #ffffff16, transparent 70%);
+  z-index: -1;
+}
+.aura-physical-card::after {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 200px;
+  left: -90px;
+  bottom: -90px;
+  background: radial-gradient(circle, #0059b555, transparent 70%);
+  z-index: -1;
+}
+.aura-physical-card.frozen {
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+.aura-card-chip {
+  width: 44px;
+  height: 32px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #f5d57d99;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #e0bb53, #f7e7a8, #9e7d23);
+}
+.aura-card-chip i {
+  height: 2px;
+  background: #0006;
+  border-radius: 2px;
+}
+.aura-card-chip i:nth-child(2) {
+  width: 75%;
+}
+.aura-card-pan {
+  white-space: pre;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.055em;
+  font-variant-numeric: tabular-nums;
+}
+.aura-cards .aura-card-control {
+  height: 36px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #c1c6d64d;
+  border-radius: 8px;
+  background: #f4f3f8;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.aura-cards .aura-card-control:hover {
+  background: #e9e7ed;
+}
+.aura-cards .aura-card-control.wallet {
+  background: #111;
+  color: white;
+}
+.aura-card-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.aura-card-kpis > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+  border-left: 1px solid #c1c6d633;
+}
+.aura-card-kpis > div:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+.aura-card-kpis > div:last-child {
+  padding-right: 0;
+}
+.aura-card-kpis strong {
+  font-size: 28px;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.aura-card-kpis strong.green {
+  color: #006a26;
+}
+.aura-card-kpis strong.gray {
+  color: #5f5e60;
+}
+.aura-card-kpis small {
+  font-size: 12px;
+  color: #414753;
+}
+.aura-spend-track {
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e9e7ed;
+}
+.aura-spend-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #0071e3;
+}
+.aura-spend-track.small {
+  height: 6px;
+  margin-top: 4px;
+}
+.aura-spend-track.green span {
+  background: #006a26;
+}
+.aura-spend-track.gray span {
+  background: #5f5e60;
+}
+.aura-category-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #0059b51a;
+  color: #0059b5;
+  flex: none;
+}
+.aura-category-icon.green {
+  background: #006a261a;
+  color: #006a26;
+}
+.aura-category-icon.gray {
+  background: #e9e7ed;
+  color: #5f5e60;
+}
+.aura-card-switch {
+  width: 36px;
+  height: 20px;
+  flex: none;
+  padding: 2px;
+  display: flex;
+  border-radius: 999px;
+  background: #c1c6d666;
+  transition: background 0.15s;
+}
+.aura-card-switch span {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 2px #1a1b1f22;
+}
+.aura-card-switch.on {
+  background: #0071e3;
+}
+.aura-card-switch.on span {
+  margin-left: auto;
+}
+.aura-transaction-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f4f3f8;
+  border: 1px solid #c1c6d64d;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #414753;
+}
+.aura-transaction-filter select {
+  background: transparent;
+  color: #1a1b1f;
+  font-weight: 500;
+  outline: none;
+}
+.aura-card-transactions {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-size: 12px;
+}
+.aura-card-transactions th {
+  padding: 8px 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  color: #414753;
+  border-bottom: 1px solid #c1c6d633;
+}
+.aura-card-transactions th:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+.aura-card-transactions td {
+  background: #f4f3f8;
+  padding: 12px;
+  border-top: 1px solid #c1c6d633;
+  border-bottom: 1px solid #c1c6d633;
+}
+.aura-card-transactions td:first-child {
+  border-left: 1px solid #c1c6d633;
+  border-radius: 12px 0 0 12px;
+  white-space: nowrap;
+}
+.aura-card-transactions td:last-child {
+  border-right: 1px solid #c1c6d633;
+  border-radius: 0 12px 12px 0;
+}
+.aura-card-transactions strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+.aura-card-transactions small {
+  display: block;
+  font-size: 12px;
+  color: #414753;
+  margin-top: 2px;
+}
+.aura-card-transactions .aura-transaction-amount {
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.aura-card-transactions .aura-transaction-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #006a261a;
+  color: #006a26;
+  font-size: 10.5px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+.aura-card-transactions .aura-card-empty {
+  text-align: center;
+  padding: 30px;
+}
+.aura-transactions-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 20px;
+  font-size: 10.5px;
+  color: #414753;
+  border-top: 1px solid #c1c6d633;
+}
+.aura-transactions-footer strong {
+  color: #1a1b1f;
+  font-variant-numeric: tabular-nums;
+}
+.aura-card-notice {
+  padding: 12px 16px;
+  background: #d7e2ff88;
+  color: #00458f;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.aura-card-dialog {
+  margin: auto;
+  width: min(440px, calc(100vw - 32px));
+  background: white;
+  color: #1a1b1f;
+  border: 1px solid #c1c6d666;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 24px 80px #1a1b1f33;
+}
+.aura-card-dialog::backdrop {
+  background: #1a1b1f66;
+}
+.aura-card-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.aura-card-dialog h2 {
+  font-size: 20px;
+}
+.aura-card-dialog p {
+  font-size: 13px;
+  color: #414753;
+}
+.aura-card-dialog p[role="alert"] {
+  color: #ba1a1a;
+}
+.aura-card-dialog label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.aura-card-dialog input {
+  width: 100%;
+  background: #f4f3f8;
+  border: 1px solid #c1c6d666;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline-color: #0071e3;
+}
+@media (max-width: 1250px) and (min-width: 1024px) {
+  .aura-card-kpis strong {
+    font-size: 23px;
+  }
+  .aura-cards > div:nth-child(1) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+@media (max-width: 600px) {
+  .aura-card-kpis {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .aura-card-kpis > div {
+    padding: 10px 0 0;
+    border-left: 0;
+    border-top: 1px solid #c1c6d633;
+  }
+  .aura-card-kpis > div:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .aura-card-pan {
+    font-size: 18px;
+    letter-spacing: 0.025em;
+  }
+  .aura-cards .aura-card-control {
+    font-size: 10px;
+    gap: 4px;
+  }
+  .aura-cards h1 {
+    font-size: 28px;
+  }
+  .aura-card-transactions,
+  .aura-card-transactions tbody {
+    display: block;
+  }
+  .aura-card-transactions thead {
+    display: none;
+  }
+  .aura-card-transactions tr {
+    display: flex;
+    flex-direction: column;
+    background: #f4f3f8;
+    border: 1px solid #c1c6d633;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  .aura-card-transactions td,
+  .aura-card-transactions td:first-child,
+  .aura-card-transactions td:last-child {
+    display: block;
+    border: none;
+    border-radius: 0;
+    padding: 3px 0;
+  }
+  .aura-card-transactions .aura-transaction-amount {
+    text-align: left;
+  }
+}

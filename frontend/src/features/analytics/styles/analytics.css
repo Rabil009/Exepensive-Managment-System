@@ -1,0 +1,40 @@
+/* Layout and typography from the supplied Analytics HTML. */
+.pasted-analytics {
+  padding-top: 24px;
+}
+.pasted-analytics .material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  line-height: 1;
+}
+.pasted-analytics .text-display-md {
+  line-height: 30px;
+  letter-spacing: -0.018em;
+}
+.pasted-analytics .text-headline-sm {
+  line-height: 20px;
+}
+.pasted-analytics .text-financial-display {
+  line-height: 32px;
+}
+.pasted-analytics .text-label-caps {
+  line-height: 14px;
+}
+.pasted-analytics .text-label-md {
+  line-height: 16px;
+}
+.pasted-analytics .text-body-sm {
+  line-height: 16px;
+}
+.pasted-analytics .text-body-md,
+.pasted-analytics .text-financial-tabular {
+  line-height: 18px;
+}
+.pasted-analytics .font-bold {
+  font-weight: 700;
+}
+.pasted-analytics .font-semibold {
+  font-weight: 600;
+}
+.pasted-analytics .font-medium {
+  font-weight: 500;
+}

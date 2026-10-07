@@ -1,0 +1,100 @@
+.aura-reports button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.aura-reports {
+  padding-top: 20px;
+}
+.report-selector {
+  background: transparent;
+  outline: none;
+  max-width: 330px;
+  font-size: 12px;
+}
+.report-filter {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #f4f3f8;
+  border: 1px solid #c1c6d64d;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.report-filter select {
+  background: transparent;
+  color: #414753;
+  min-width: 45px;
+  outline: none;
+}
+.report-merchant {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.report-merchant strong {
+  white-space: nowrap;
+}
+.report-distribution-value {
+  flex-wrap: wrap;
+}
+.aura-reports table {
+  min-width: 880px;
+}
+.aura-reports :is(button, select, input):focus-visible {
+  outline: 2px solid #0071e3;
+  outline-offset: 3px;
+}
+@media (max-width: 1200px) {
+  .report-merchant {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+@media (max-width: 600px) {
+  .report-selector {
+    max-width: 180px;
+  }
+}
+@media print {
+  .aura-app > div > aside,
+  .aura-app > div > div > header,
+  .aura-toast {
+    display: none !important;
+  }
+  .aura-app > div > div {
+    padding-left: 0 !important;
+  }
+  .aura-app main {
+    padding: 0 !important;
+    min-height: 0;
+    max-width: none;
+  }
+  .aura-reports {
+    gap: 16px;
+    font-size: 10px;
+  }
+  .aura-reports button,
+  .aura-reports section:last-child label,
+  .aura-reports section:last-child input {
+    display: none;
+  }
+  .aura-reports section {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+  .aura-reports .overflow-x-auto {
+    overflow: visible;
+  }
+  .aura-reports table {
+    min-width: 0;
+  }
+  .aura-reports table th,
+  .aura-reports table td {
+    padding: 6px;
+  }
+  * {
+    print-color-adjust: exact;
+  }
+}

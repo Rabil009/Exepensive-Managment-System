@@ -1,28 +1,28 @@
-# Expense Management System
+# Aura Expense Workspace
 
-This pnpm workspace contains the frontend application shell in `frontend/` and the shared UI package in `ui/`. The `backend/` directory is reserved and empty.
+React, TypeScript, Vite, and Tailwind CSS application using the supplied Aura UI.
 
-# Expense Management System
+## Screens
 
-Minimal React, TypeScript, and Vite architecture starter for a multi-developer SaaS product. It contains no product screens or backend implementation.
+- Overview: `/employee/dashboard`
+- New Expense: `/employee/expenses/new`
+- Reports: `/employee/reports`
+- Cards & Limits: `/employee/cards`
+- Analytics: `/employee/analytics` — supplied HTML layout, charts, card usage, funding split, and insights
 
-## Setup
+All screens use the same Aura shell. Feature components, state, data, and styles live together under `frontend/src/features/`. The shared header, sidebar, theme, and utilities live under `frontend/src/shared/`.
 
-Use Node 24.21.0 and pnpm 10.18.3. From the repository root:
+See [the architecture guide](docs/architecture.md) for the folder map, feature ownership, storage keys, and verification commands.
 
-```bash
+## Run
+
+```sh
 corepack pnpm install
 corepack pnpm dev
 ```
 
-Run `corepack pnpm typecheck`, `corepack pnpm lint`, and `corepack pnpm build` before review.
+Open http://127.0.0.1:5173/. Run `corepack pnpm build` and `corepack pnpm lint` to verify changes.
 
-## Structure
+## Data
 
-- `frontend/`: app entry, layouts, feature boundaries, and thin pages.
-- `ui/`: the shared design foundation, themes, approved product template, icons, components, and patterns.
-- `templates/`: reusable page structures.
-- `backend/`: intentionally empty, with `.gitkeep` so Git tracks the folder.
-- `docs/`: architecture, design rules, and contribution guidance.
-
-Start with [frontend architecture](docs/frontend-architecture.md) and the [contribution guide](docs/contribution-guide.md).
+Expense records and demo card settings are stored in this browser. Receipt OCR and card issuer services are not connected. Reports and Overview use the same expense records. Analytics reproduces the supplied HTML's static sample values and chart geometry; its filter and export controls are visual elements from that HTML.

@@ -1,0 +1,330 @@
+.aura-app {
+  min-height: 100dvh;
+  color: #1a1b1f;
+  background: #faf8fe;
+  font-family: Inter, Arial, sans-serif;
+  font-size: 13px;
+  color-scheme: light;
+}
+.aura-app .material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+.aura-app button {
+  cursor: pointer;
+}
+.aura-app button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.aura-app button:focus-visible,
+.aura-app a:focus-visible,
+.aura-app input:focus-visible {
+  outline: 2px solid #0059b5;
+  outline-offset: 2px;
+}
+.aura-app h1 {
+  font-weight: 600;
+  letter-spacing: -0.024em;
+  line-height: 1.2;
+}
+.aura-app h2 {
+  font-weight: 600;
+}
+.aura-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: #faf8fe;
+  color: #414753;
+}
+.aura-expense-status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: #eeedf3;
+  color: #414753;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.aura-expense-status.approved {
+  background: #00863326;
+  color: #006a26;
+}
+.aura-expense-status.reimbursed {
+  background: #d7e2ff;
+  color: #0059b5;
+}
+.aura-expense-status.rejected {
+  background: #ffdad6;
+  color: #93000a;
+}
+.aura-app .font-headline-sm {
+  font-weight: 600;
+  letter-spacing: -0.008em;
+}
+.aura-app .font-headline-lg {
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+.aura-app .font-financial-display {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+}
+.aura-app .font-financial-tabular {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.aura-app .font-label-md {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.aura-app .font-label-caps {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.aura-app tbody tr {
+  border-top: 1px solid #f3f2f6;
+}
+.aura-app tbody tr:hover {
+  background: #f4f3f8;
+}
+.aura-app .aura-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 80;
+  max-width: min(420px, calc(100vw - 48px));
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #1a1b1f;
+  color: white;
+  box-shadow: 0 16px 45px #1a1b1f33;
+}
+.aura-toast button {
+  color: white;
+  font-size: 20px;
+  line-height: 1;
+}
+/* Sidebar and content move together when the navigation toggle is pressed. */
+.aura-app > div > aside {
+  transition:
+    width 0.2s ease,
+    background-color 0.2s ease;
+}
+.aura-app > div > div {
+  transition: padding-left 0.2s ease;
+}
+.aura-app > div > div > header {
+  transition: left 0.2s ease;
+}
+.aura-app.sidebar-collapsed > div > aside {
+  width: 64px;
+  background: #ffffff;
+  border-color: #c1c6d64d;
+  color: #414753;
+}
+.aura-app.sidebar-collapsed > div > div {
+  padding-left: 64px;
+}
+.aura-app.sidebar-collapsed > div > div > header {
+  left: 64px;
+}
+.sidebar-collapsed .aura-brand {
+  padding: 0;
+  justify-content: center;
+  border-color: #c1c6d633;
+}
+.sidebar-collapsed .aura-brand .material-symbols-outlined {
+  font-size: 28px;
+}
+.sidebar-collapsed
+  :is(
+    .aura-brand-name,
+    .aura-brand-tier,
+    .aura-nav-heading,
+    .aura-nav-label,
+    .aura-profile-details,
+    .aura-profile-status
+  ) {
+  display: none;
+}
+.sidebar-collapsed aside nav {
+  gap: 6px;
+}
+.sidebar-collapsed aside nav a {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  justify-content: center;
+  color: #414753;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 8px;
+}
+.sidebar-collapsed aside nav a:hover {
+  color: #1a1b1f;
+  background: #e9e7ed;
+}
+.sidebar-collapsed aside nav a[aria-current="page"] {
+  color: #fff;
+  background: #0071e3;
+}
+.sidebar-collapsed aside nav a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  background: #0071e3;
+  border-radius: 0 3px 3px 0;
+}
+.sidebar-collapsed aside nav .material-symbols-outlined {
+  font-size: 27px;
+}
+.sidebar-collapsed .aura-sidebar-footer {
+  padding: 12px;
+  border-color: #c1c6d633;
+  background: transparent;
+}
+.sidebar-collapsed .aura-sidebar-footer > div:first-child {
+  padding: 4px;
+  justify-content: center;
+}
+@media (max-width: 1050px) {
+  .aura-app > div > aside {
+    width: 210px;
+  }
+  .aura-app > div > div {
+    padding-left: 210px;
+  }
+  .aura-app > div > div > header {
+    left: 210px;
+  }
+  .aura-app main {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .aura-app header input {
+    max-width: 260px;
+  }
+}
+@media (max-width: 760px) {
+  .aura-app {
+    overflow-x: hidden;
+  }
+  .aura-app > div > aside {
+    position: relative;
+    width: 100%;
+    height: auto;
+    z-index: 1;
+  }
+  .aura-app > div > aside > div:last-child {
+    display: none;
+  }
+  .aura-app > div > aside nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .aura-app > div > aside nav a {
+    white-space: nowrap;
+  }
+  .aura-app > div > div {
+    padding-left: 0;
+  }
+  .aura-app > div > div > header {
+    position: sticky;
+    left: 0;
+    height: auto;
+    min-height: 64px;
+    padding: 10px 16px;
+    gap: 8px;
+  }
+  .aura-app > div > div > header > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+  .aura-app > div > div > header > div:first-child > div {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+  .aura-app > div > div > header > div:first-child > div > div {
+    min-width: 0;
+  }
+  .aura-app > div > div > header > div:last-child {
+    flex: none;
+    gap: 0;
+  }
+  .aura-app > div > div > header > div:last-child > div,
+  .aura-app > div > div > header > div:last-child > button {
+    display: none;
+  }
+  .aura-app > div > div > header > div:last-child > a {
+    font-size: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+  .aura-app > div > div > header > div:last-child > a span {
+    font-size: 22px;
+  }
+  .aura-app > div > div > header > div:last-child > a span:last-child {
+    display: none;
+  }
+  .aura-app header input {
+    max-width: none;
+    width: 100%;
+    min-width: 0;
+  }
+  .aura-app main {
+    padding-top: 20px;
+  }
+  .aura-app main > div {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .aura-app.sidebar-collapsed > div > aside {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    z-index: 50;
+  }
+  .aura-app.sidebar-collapsed > div > aside nav {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+  .aura-app.sidebar-collapsed > div > aside > div:last-child {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aura-app > div > aside,
+  .aura-app > div > div,
+  .aura-app > div > div > header {
+    transition: none;
+  }
+}

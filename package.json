@@ -11,15 +11,11 @@
     "dev": "corepack pnpm --filter frontend dev",
     "build": "corepack pnpm -r build",
     "typecheck": "corepack pnpm -r typecheck",
-    "lint": "oxlint -A unicorn/no-empty-file frontend/src ui/src/components templates",
-    "format": "prettier --write ."
+    "lint": "corepack pnpm --filter frontend lint",
+    "format": "prettier --write frontend/src README.md docs/architecture.md docs/coding-standards.md",
+    "format:check": "prettier --check frontend/src README.md docs/architecture.md docs/coding-standards.md"
   },
   "devDependencies": {
-    "oxlint": "^1.86.0",
     "prettier": "3.9.9"
-  },
-  "dependencies": {
-    "@types/react": "19.3.0",
-    "react": "19.3.0"
   }
 }

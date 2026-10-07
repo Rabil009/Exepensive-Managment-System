@@ -1,184 +1,75 @@
-import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router";
-import { Upload } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@ui/components/data-display/Card/card";
-import { Button } from "@ui/components/actions/Button/button";
-import { Input } from "@ui/components/forms/Input/input";
-import { Textarea } from "@ui/components/forms/Textarea/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@ui/components/forms/Select/select";
-import { FormPageTemplate } from "../../../../../templates/form-page/FormPageTemplate";
-import { categories, type ExpenseStatus } from "../data/expenses.mock";
-import { useExpenses } from "../data/ExpensesContext";
-
+import { Link } from "react-router";
+import { AuraIcon } from "../../../shared/components/AuraIcon";
+import { useExpenseForm } from "../hooks/useExpenseForm";
+import { panelClass } from "../styles/formClasses";
+import { ExpenseFormHeader } from "./ExpenseFormHeader";
+import { ReceiptCapture } from "./ReceiptCapture";
+import { UnlinkedTransactions } from "./UnlinkedTransactions";
+import { ExpenseDetailsFields } from "./ExpenseDetailsFields";
+import { ExpenseCategorization } from "./ExpenseCategorization";
+import { ExpenseAttendees } from "./ExpenseAttendees";
+import { ExpenseFormActions } from "./ExpenseFormActions";
+import "../styles/expense-form.css";
 export function ExpenseForm() {
-  const navigate = useNavigate();
-  const { addExpense } = useExpenses();
-  const [category, setCategory] = useState("");
-  const [merchant, setMerchant] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [receipt, setReceipt] = useState("");
-  const [error, setError] = useState("");
-  const save = (status: ExpenseStatus) => {
-    if (
-      !category ||
-      !merchant.trim() ||
-      !amount ||
-      Number(amount) <= 0 ||
-      !date
-    ) {
-      setError("Complete category, merchant, amount, and expense date.");
-      return;
-    }
-    if (status === "Pending" && !receipt) {
-      setError("Attach a receipt before submitting.");
-      return;
-    }
-    addExpense({
-      id: `EXP-${Date.now().toString().slice(-6)}`,
-      category,
-      merchant: merchant.trim(),
-      amount: Number(amount),
-      date,
-      description,
-      receipt,
-      status,
-    });
-    navigate("/employee/expenses");
-  };
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    save("Pending");
-  };
+  const model = useExpenseForm();
   return (
-    <FormPageTemplate
-      header={
-        <div className="page-header">
-          <div>
-            <h1>Add Expense</h1>
-            <p>Submit a new expense for approval.</p>
-          </div>
-        </div>
-      }
+    <form
+      className="aura-expense-form flex flex-col w-full gap-space-lg"
+      onSubmit={model.submit}
     >
-      <form onSubmit={submit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>Expense details</CardTitle>
-            <CardDescription>
-              Enter the purchase details and attach your receipt.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="form-grid">
-              <div className="field">
-                <label htmlFor="category">Category</label>
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger id="category" className="w-full">
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((value) => (
-                      <SelectItem key={value} value={value}>
-                        {value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field">
-                <label htmlFor="merchant">Merchant</label>
-                <Input
-                  id="merchant"
-                  placeholder="e.g. Uber"
-                  value={merchant}
-                  onChange={(event) => setMerchant(event.target.value)}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="amount">Amount (₹)</label>
-                <Input
-                  id="amount"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(event) => setAmount(event.target.value)}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="date">Expense Date</label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={date}
-                  onChange={(event) => setDate(event.target.value)}
-                />
-              </div>
-              <div className="field full">
-                <label htmlFor="description">Description</label>
-                <Textarea
-                  id="description"
-                  placeholder="What was this expense for?"
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                />
-              </div>
-              <div className="field full">
-                <label htmlFor="receipt">Receipt</label>
-                <div className="flex items-center gap-3">
-                  <Upload size={17} className="text-muted-foreground" />
-                  <Input
-                    id="receipt"
-                    type="file"
-                    accept=".pdf,.png,.jpg,.jpeg"
-                    onChange={(event) =>
-                      setReceipt(event.target.files?.[0]?.name ?? "")
-                    }
-                  />
-                </div>
-                <span className="field-help">PDF, PNG, or JPG receipt.</span>
-              </div>
+      <ExpenseFormHeader model={model} />
+      {(model.error || model.message) && (
+        <div
+          className={`aura-form-message ${model.error ? "error" : ""}`}
+          role={model.error ? "alert" : "status"}
+        >
+          {model.error || model.message}
+          {model.submitted && (
+            <Link to={`/employee/reports?expense=${model.draft.id}`}>
+              View expense →
+            </Link>
+          )}
+        </div>
+      )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+        <div className="lg:col-span-5 flex flex-col gap-space-md">
+          <ReceiptCapture model={model} />
+          <UnlinkedTransactions model={model} />
+        </div>
+        <div className="lg:col-span-7 flex flex-col gap-space-md">
+          <div className="rounded-xl bg-primary-fixed/30 border border-primary-fixed-dim/60 p-space-md flex items-center gap-3">
+            <span className="w-9 h-9 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+              <AuraIcon className="text-lg">auto_awesome</AuraIcon>
+            </span>
+            <div className="flex flex-col">
+              <strong className="text-body-md text-on-primary-fixed">
+                Instant Neural Auto-Fill
+              </strong>
+              <span className="text-body-sm text-on-surface-variant">
+                Automatic receipt extraction is not connected yet. Attach a
+                receipt on the left and enter the details below.
+              </span>
             </div>
-            {error && (
-              <p role="alert" className="mt-4 text-sm text-red-400">
-                {error}
-              </p>
-            )}
-            <div className="form-actions">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => navigate("/employee/expenses")}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => save("Draft")}
-              >
-                Save Draft
-              </Button>
-              <Button type="submit">Submit Expense</Button>
+          </div>
+          <div
+            className={`${panelClass} p-space-xl flex flex-col gap-space-lg`}
+          >
+            <ExpenseDetailsFields model={model} />
+            <div className="h-px w-full bg-surface-container-high" />
+            <ExpenseCategorization model={model} />
+            <div className="h-px w-full bg-surface-container-high" />
+            <ExpenseAttendees model={model} />
+            <div className="aura-policy-note">
+              <AuraIcon className="text-xl">shield</AuraIcon>
+              <span>
+                <strong>Policy review</strong>
+                <small>Policy clearance will be checked during approval.</small>
+              </span>
             </div>
-          </CardContent>
-        </Card>
-      </form>
-    </FormPageTemplate>
+          </div>
+          <ExpenseFormActions model={model} />
+        </div>
+      </div>
+    </form>
   );
 }
