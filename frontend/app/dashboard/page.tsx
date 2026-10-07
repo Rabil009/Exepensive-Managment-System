@@ -105,7 +105,7 @@ function DashboardContent() {
         />
 
         {/* Scrollable Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
           {/* Main Dashboard Overview View */}
           {activeView === "Dashboard" && (
             <>

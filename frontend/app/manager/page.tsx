@@ -290,12 +290,16 @@ function ManagerDashboardInner() {
       />
 
       {/* Main Content Workspace */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+      <div className={`flex-1 flex flex-col h-full overflow-hidden min-w-0 ${
+        isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
+      }`}>
         {/* Core Manager Header */}
         <ManagerHeader title={getPageTitle()} />
 
         {/* Scrollable Main Application Space */}
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <main className={`flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 ${
+          isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
+        }`}>
           {/* Toast Notification */}
           {feedbackNotice && (
             <div

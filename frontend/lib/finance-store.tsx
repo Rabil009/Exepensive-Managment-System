@@ -1,9 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useState, useMemo } from "react";
+import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import type { ExpenseClaim, DepartmentBudget, ClaimStatus } from "@/types/finance";
 import { MOCK_CLAIMS, MOCK_BUDGETS } from "@/lib/mock-data";
+import { getExpenseClaims, updateClaimInDb, getDepartmentBudgets } from "@/lib/api";
 
 export interface ExceptionItem {
   id: string;
@@ -122,16 +123,37 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [budgets, setBudgets] = useState<DepartmentBudget[]>(MOCK_BUDGETS);
   const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>(INITIAL_REIMBURSEMENTS);
 
+  // Sync state from Supabase database
+  useEffect(() => {
+    let isMounted = true;
+    getExpenseClaims().then((fetched) => {
+      if (isMounted && fetched && fetched.length > 0) {
+        setClaims(fetched);
+      }
+    });
+    getDepartmentBudgets().then((fetchedBudgets) => {
+      if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) {
+        setBudgets(fetchedBudgets);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // FR-10: Finance Approval
   const approveClaim = (claimId: string, remark?: string) => {
+    const isPersonalClaim = claims.find((c) => c.id === claimId)?.paymentMethod !== "CORPORATE_CARD";
+    const newStatus: ClaimStatus = isPersonalClaim ? "PAYMENT_PENDING" : "CLOSED";
+    const finalRemark = remark || "Verified & approved by Finance Treasury.";
+
     setClaims((prev) =>
       prev.map((c) => {
         if (c.id === claimId) {
-          const isPersonal = c.paymentMethod !== "CORPORATE_CARD";
           return {
             ...c,
-            status: isPersonal ? ("PAYMENT_PENDING" as ClaimStatus) : ("CLOSED" as ClaimStatus),
-            financeRemark: remark || "Verified & approved by Finance Treasury.",
+            status: newStatus,
+            financeRemark: finalRemark,
             isHold: false,
             updatedAt: new Date().toISOString(),
           };
@@ -139,6 +161,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         return c;
       })
     );
+    updateClaimInDb(claimId, {
+      status: newStatus,
+      financeRemark: finalRemark,
+      isHold: false,
+    });
     toast.success(`Claim ${claimId} verified and approved for disbursement.`);
   };
 
@@ -156,6 +183,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+    updateClaimInDb(claimId, {
+      status: "FINANCE_REJECTED",
+      financeRemark: reason,
+    });
     toast.error(`Claim ${claimId} declined with reason: "${reason}".`);
   };
 
@@ -173,11 +204,16 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+    updateClaimInDb(claimId, {
+      status: "SUBMITTED",
+      financeRemark: `Sent back: ${reason}`,
+    });
     toast.info(`Claim ${claimId} sent back to employee for correction.`);
   };
 
   // FR-10: Place on Hold
   const placeHold = (claimId: string, reason: string) => {
+    const now = new Date().toISOString();
     setClaims((prev) =>
       prev.map((c) =>
         c.id === claimId
@@ -185,12 +221,17 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
               ...c,
               isHold: true,
               holdReason: reason,
-              heldAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
+              heldAt: now,
+              updatedAt: now,
             }
           : c
       )
     );
+    updateClaimInDb(claimId, {
+      isHold: true,
+      holdReason: reason,
+      heldAt: now,
+    });
     toast.warning(`Claim ${claimId} placed on audit hold.`);
   };
 
@@ -209,6 +250,10 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+    updateClaimInDb(claimId, {
+      isHold: false,
+      holdReason: "",
+    });
     toast.success(`Audit hold released on claim ${claimId}.`);
   };
 
@@ -231,6 +276,12 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+    updateClaimInDb(claimId, {
+      status: "PAID",
+      paymentReference: utr,
+      paymentChannel: channel,
+      disbursedAt: date,
+    });
 
     // Add to completed reimbursements ledger
     const newReimb: ReimbursementItem = {

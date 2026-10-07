@@ -33,9 +33,12 @@ import { useTheme } from "@/lib/theme-store";
 
 function renderMetricValue(val: string, isDark: boolean) {
   return (
-    <span className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
-      isDark ? "text-zinc-100" : "text-zinc-900"
-    }`}>
+    <span
+      className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
+        isDark ? "text-zinc-100" : "text-zinc-900"
+      }`}
+      style={{ fontSize: "32px", lineHeight: "1" }}
+    >
       {val}
     </span>
   );

@@ -40,7 +40,10 @@ export function MetricCard({
         <h3 className="font-outfit text-xs font-semibold tracking-wider uppercase text-[var(--text-muted)]">
           {title}
         </h3>
-        <p className="font-mono-nums text-3xl font-light tracking-tight text-[var(--text-display)] mt-1.5">
+        <p
+          className="font-mono-nums text-[32px] font-bold tracking-tight text-[var(--text-display)] mt-1.5 leading-none"
+          style={{ fontSize: "32px", lineHeight: "1" }}
+        >
           {value}
         </p>
         {subtitle && (
