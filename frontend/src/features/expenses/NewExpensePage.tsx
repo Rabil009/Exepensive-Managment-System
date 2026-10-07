@@ -1,9 +1,9 @@
 import { ExpenseForm } from "./components/ExpenseForm";
-import { AuraShell } from "../../shared/layout/AuraShell";
+import { AppShell } from "../../shared/layout/AppShell";
 export default function NewExpensePage() {
   return (
-    <AuraShell active="New Expense">
+    <AppShell active="New Expense">
       <ExpenseForm />
-    </AuraShell>
+    </AppShell>
   );
 }

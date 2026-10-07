@@ -59,9 +59,7 @@ export function ExpenseDetailsFields({ model }: Props) {
             value={draft.currency}
             onChange={(event) => update("currency", event.target.value)}
           >
-            <option value="USD">USD ($)</option>
             <option value="INR">INR (₹)</option>
-            <option value="EUR">EUR (€)</option>
           </select>
           <input
             id="amount"

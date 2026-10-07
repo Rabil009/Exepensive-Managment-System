@@ -71,7 +71,7 @@ export function useCardControls() {
     ) {
       setDialogError(
         dialogType === "limit"
-          ? "Enter a requested limit above $7,500."
+          ? "Enter a requested limit above ₹7,500."
           : "Enter a positive spending limit.",
       );
       return;
@@ -91,14 +91,14 @@ export function useCardControls() {
       setMessage("Demo virtual card created in this browser.");
     } else {
       if (!update({ ...state, requestedLimit: amount })) return;
-      setMessage("Demo limit request saved. The active limit remains $7,500.");
+      setMessage("Demo limit request saved. The active limit remains ₹7,500.");
     }
     setDialogType(null);
   }
   function exportTransactions() {
     exportCsv(
       "aura-card-transactions.csv",
-      ["Date", "Merchant", "Purpose", "Payment", "Status", "Amount (USD)"],
+      ["Date", "Merchant", "Purpose", "Payment", "Status", "Amount (INR)"],
       visible.map((item) => [
         item.date,
         item.merchant,

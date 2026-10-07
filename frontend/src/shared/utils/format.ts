@@ -1,5 +1,5 @@
 export const money = (value: number, currency = "INR") =>
-  new Intl.NumberFormat(currency === "INR" ? "en-IN" : "en-US", {
+  new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
     maximumFractionDigits: 2,

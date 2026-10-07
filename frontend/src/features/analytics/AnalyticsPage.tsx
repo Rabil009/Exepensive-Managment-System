@@ -1,4 +1,4 @@
-import { AuraShell } from "../../shared/layout/AuraShell";
+import { AppShell } from "../../shared/layout/AppShell";
 import { AnalyticsHeader } from "./components/AnalyticsHeader";
 import { SummaryMetrics } from "./components/SummaryMetrics";
 import { SpendingOverview } from "./components/SpendingOverview";
@@ -9,7 +9,7 @@ import "./styles/analytics.css";
 
 export default function AnalyticsPage() {
   return (
-    <AuraShell active="Analytics">
+    <AppShell active="Analytics">
       <div className="pasted-analytics flex flex-col w-full gap-6 pb-16">
         <AnalyticsHeader />
         <SummaryMetrics />
@@ -18,6 +18,6 @@ export default function AnalyticsPage() {
         <FundingSplit />
         <AnalyticsInsights />
       </div>
-    </AuraShell>
+    </AppShell>
   );
 }

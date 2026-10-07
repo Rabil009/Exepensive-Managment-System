@@ -102,7 +102,7 @@ export const defaultState: CardState = {
 };
 
 export const demoCardAccount = {
-  currency: "USD",
+  currency: "INR",
   billingStart: "2025-10-01",
   billingEnd: "2025-10-31",
   monthlyLimit: 7500,

@@ -1,4 +1,5 @@
 import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
+import { StatusBadge } from "../../../shared/components/StatusBadge";
 import { displayDate, money } from "../../../shared/utils/format";
 import { tabs, categoryIcons } from "../data/overview";
 import type { OverviewModel } from "../hooks/useOverview";
@@ -156,11 +157,19 @@ export function OverviewExpenseTable({ model }: Props) {
                   {money(item.amount, item.currency)}
                 </td>
                 <td className="py-3 px-space-lg text-right">
-                  <span
-                    className={`aura-expense-status ${item.status.toLowerCase()}`}
+                  <StatusBadge
+                    tone={
+                      item.status === "Rejected"
+                        ? "danger"
+                        : item.status === "Pending"
+                          ? "warning"
+                          : item.status === "Draft"
+                            ? "neutral"
+                            : "success"
+                    }
                   >
                     {item.status}
-                  </span>
+                  </StatusBadge>
                 </td>
               </tr>
             ))}

@@ -1,4 +1,5 @@
 import type { ReportsModel } from "../hooks/useReports";
+import { StatusBadge } from "../../../shared/components/StatusBadge";
 import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
 import { displayDate, money } from "../../../shared/utils/format";
 import { formatTotal, isPersonal } from "../utils/reportTotals";
@@ -168,19 +169,14 @@ export function ReportTransactions({ model }: Props) {
                   </div>
                 </td>
                 <td className="py-3 px-space-md">
-                  <span
-                    className={`inline-flex items-center gap-1 text-label-caps px-2 py-0.5 rounded-full whitespace-nowrap ${item.receipt?.includes("Verified") || item.receipt?.includes("Matched") ? "text-tertiary bg-tertiary-fixed/30" : "text-on-surface-variant bg-surface-container"}`}
-                  >
-                    <Icon className="text-sm">
-                      {item.receipt ? "check_circle" : "pending"}
-                    </Icon>
+                  <StatusBadge tone={item.receipt ? "success" : "warning"}>
                     {item.receipt || "Receipt missing"}
-                  </span>
+                  </StatusBadge>
                 </td>
                 <td
                   className={`py-3 px-space-md text-right text-financial-tabular font-semibold whitespace-nowrap ${isPersonal(item) ? "text-tertiary" : ""}`}
                 >
-                  {money(item.amount, item.currency || "USD")}
+                  {money(item.amount, item.currency || "INR")}
                 </td>
               </tr>
             ))}

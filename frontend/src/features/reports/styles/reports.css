@@ -15,15 +15,15 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background: #f4f3f8;
-  border: 1px solid #c1c6d64d;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-hairline);
   border-radius: 8px;
   padding: 6px 10px;
   font-size: 12px;
 }
 .report-filter select {
   background: transparent;
-  color: #414753;
+  color: var(--text-secondary);
   min-width: 45px;
   outline: none;
 }
@@ -42,7 +42,7 @@
   min-width: 880px;
 }
 .aura-reports :is(button, select, input):focus-visible {
-  outline: 2px solid #0071e3;
+  outline: 2px solid var(--chart-blue);
   outline-offset: 3px;
 }
 @media (max-width: 1200px) {

@@ -1,3 +1,4 @@
+import { money } from "../../../shared/utils/format";
 export function SummaryMetrics() {
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -14,7 +15,7 @@ export function SummaryMetrics() {
         </div>
         <div>
           <div className="font-financial-display text-financial-display text-on-surface tracking-tight font-bold">
-            $38,420.00
+            {money(38420.0)}
           </div>
         </div>
       </div>
@@ -31,7 +32,7 @@ export function SummaryMetrics() {
         </div>
         <div>
           <div className="font-financial-display text-financial-display text-secondary tracking-tight font-bold">
-            $2,840.50
+            {money(2840.5)}
           </div>
         </div>
       </div>
@@ -48,7 +49,7 @@ export function SummaryMetrics() {
         </div>
         <div>
           <div className="font-financial-display text-financial-display text-tertiary tracking-tight font-bold">
-            $35,100.00
+            {money(35100.0)}
           </div>
         </div>
       </div>
@@ -65,7 +66,7 @@ export function SummaryMetrics() {
         </div>
         <div>
           <div className="font-financial-display text-financial-display text-primary tracking-tight font-bold">
-            $3,320.50
+            {money(3320.5)}
           </div>
         </div>
       </div>

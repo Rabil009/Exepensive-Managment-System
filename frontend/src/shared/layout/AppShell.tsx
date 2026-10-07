@@ -1,0 +1,94 @@
+import { useRef, useState, type ReactNode } from "react";
+import { useNavigate } from "react-router";
+import { Sidebar } from "./Sidebar";
+import { Header } from "./Header";
+import { SlideOutIconRail } from "./SlideOutIconRail";
+import { navigation } from "./navigation";
+import { Toast } from "../components/Toast";
+import "../styles/shell.css";
+
+const user = {
+  name: "Rabil Khan",
+  initials: "RK",
+  subtitle: "Employee · Executive Member",
+};
+const sidebarNav = navigation.filter((item) => item.label !== "New Expense");
+
+export function AppShell({
+  children,
+  active,
+  onSearch,
+}: {
+  children: ReactNode;
+  active: string;
+  onSearch?: (value: string) => void;
+}) {
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (window.matchMedia("(max-width: 767px)").matches) return false;
+    return localStorage.getItem("aura-sidebar-expanded") !== "false";
+  });
+  const [notice, setNotice] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  function toggleSidebar() {
+    setSidebarOpen((open) => {
+      localStorage.setItem("aura-sidebar-expanded", String(!open));
+      return !open;
+    });
+  }
+  function onNavigate(label: string) {
+    const item = navigation.find((item) => item.label === label);
+    if (item) navigate(item.path);
+    if (window.matchMedia("(max-width: 767px)").matches) setSidebarOpen(false);
+  }
+  const createExpense = () => onNavigate("New Expense");
+  const openSearch = () => searchRef.current?.focus();
+  return (
+    <div className="aura-app finance-shell flex h-dvh w-full overflow-hidden font-sans antialiased transition-colors bg-[var(--canvas-bg)] text-[var(--text-primary)]">
+      {sidebarOpen && (
+        <>
+          <button
+            className="finance-sidebar-backdrop"
+            aria-label="Close navigation"
+            onClick={toggleSidebar}
+          />
+          <div className="finance-sidebar-wrap">
+            <Sidebar
+              activeView={active}
+              onNavigate={onNavigate}
+              navItems={sidebarNav}
+              user={user}
+              quickCreateLabel="New Expense"
+              onQuickCreate={createExpense}
+              onOpenSearch={openSearch}
+              onToggleSidebar={toggleSidebar}
+            />
+          </div>
+        </>
+      )}
+      {!sidebarOpen && (
+        <SlideOutIconRail
+          onToggleSidebar={toggleSidebar}
+          onQuickCreate={createExpense}
+          onOpenSearch={openSearch}
+          activeView={active}
+          onNavigate={onNavigate}
+          navItems={sidebarNav}
+          user={user}
+          quickCreateLabel="New Expense"
+        />
+      )}
+      <div className="flex-1 flex flex-col h-dvh overflow-hidden min-w-0">
+        <Header
+          searchRef={searchRef}
+          onSearch={onSearch}
+          onNotifications={() => setNotice("No new notifications.")}
+        />
+        <main className="employee-content flex-1 overflow-y-auto p-6 space-y-6">
+          {children}
+        </main>
+      </div>
+      <Toast message={notice} onDismiss={() => setNotice("")} />
+    </div>
+  );
+}

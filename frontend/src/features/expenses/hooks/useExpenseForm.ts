@@ -12,7 +12,7 @@ export function useExpenseForm() {
     try {
       const saved = localStorage.getItem(draftKey);
       const restored = saved
-        ? { ...emptyDraft(), ...JSON.parse(saved) }
+        ? { ...emptyDraft(), ...JSON.parse(saved), currency: "INR" }
         : emptyDraft();
       return report ? { ...restored, report } : restored;
     } catch {

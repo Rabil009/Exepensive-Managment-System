@@ -1,3 +1,4 @@
+import { money } from "../../../shared/utils/format";
 import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
 import { panelClass } from "../styles/formClasses";
@@ -42,7 +43,7 @@ export function UnlinkedTransactions({ model }: Props) {
             </span>
             <span className="flex items-center gap-2 shrink-0">
               <strong className="text-body-md tabular-nums">
-                ${transaction.amount}
+                {money(Number(transaction.amount))}
               </strong>
               <Icon className="text-base text-on-surface-variant">
                 add_link

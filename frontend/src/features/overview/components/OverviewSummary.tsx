@@ -1,3 +1,4 @@
+import { money } from "../../../shared/utils/format";
 export function OverviewSummary() {
   return (
     <section className="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
@@ -9,7 +10,7 @@ export function OverviewSummary() {
             </span>
             <div className="flex items-baseline gap-2">
               <span className="font-financial-display text-financial-display text-on-surface">
-                $2,480.50
+                {money(2480.5)}
               </span>
             </div>
           </div>
@@ -37,7 +38,7 @@ export function OverviewSummary() {
             </span>
             <div className="flex items-baseline gap-2">
               <span className="font-financial-display text-financial-display text-on-surface">
-                $840.00
+                {money(840.0)}
               </span>
             </div>
           </div>
@@ -65,10 +66,10 @@ export function OverviewSummary() {
             </span>
             <div className="flex items-baseline gap-2">
               <span className="font-financial-display text-financial-display text-on-surface">
-                $3,320.50
+                {money(3320.5)}
               </span>
               <span className="font-body-sm text-body-sm text-on-surface-variant">
-                / $7,500.00
+                / {money(7500.0)}
               </span>
             </div>
           </div>
@@ -85,7 +86,7 @@ export function OverviewSummary() {
           </div>
           <div className="flex items-center justify-between font-label-md text-label-md text-on-surface-variant">
             <span className="">44% utilized</span>
-            <span className="text-on-surface">$4,179.50 remaining</span>
+            <span className="text-on-surface">{money(4179.5)} remaining</span>
           </div>
         </div>
       </div>

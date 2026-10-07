@@ -1,4 +1,4 @@
-import { AuraShell } from "../../shared/layout/AuraShell";
+import { AppShell } from "../../shared/layout/AppShell";
 import { useCardControls } from "./hooks/useCardControls";
 import { CardsHeader } from "./components/CardsHeader";
 import { CardPreview } from "./components/CardPreview";
@@ -11,7 +11,7 @@ import "./styles/cards.css";
 export default function CardsPage() {
   const model = useCardControls();
   return (
-    <AuraShell active="Cards & Limits">
+    <AppShell active="Cards & Limits">
       <div className="aura-cards flex flex-col w-full gap-4">
         <CardsHeader model={model} />
         {model.message && (
@@ -27,13 +27,15 @@ export default function CardsPage() {
           </div>
         )}
         <div className="grid grid-cols-1 lg:grid-cols-12 items-start gap-space-lg">
-          <CardPreview model={model} />
+          <div className="lg:col-span-5 min-w-0 flex flex-col gap-4">
+            <CardPreview model={model} />
+            <CardSecurity model={model} />
+          </div>
           <SpendingLimits model={model} />
         </div>
-        <CardSecurity model={model} />
         <CardTransactions model={model} />
         <CardDialog model={model} />
       </div>
-    </AuraShell>
+    </AppShell>
   );
 }

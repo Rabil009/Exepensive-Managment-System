@@ -1,76 +1,232 @@
-import { Link } from "react-router";
-import { AuraIcon } from "../components/AuraIcon";
-import { navigation } from "./navigation";
-export function Sidebar({ active }: { active: string }) {
+import { SidebarToggle } from "./SidebarToggle";
+
+import React from "react";
+import {
+  Settings,
+  HelpCircle,
+  Search,
+  PlusCircle,
+  ChevronsUpDown,
+} from "lucide-react";
+import { useTheme } from "../theme/theme-store";
+
+import type { NavigationItem, SidebarUser } from "./navigation.types";
+
+interface SidebarProps {
+  activeView: string;
+  onNavigate: (label: string) => void;
+  navItems: NavigationItem[];
+  user: SidebarUser;
+  quickCreateLabel?: string;
+  onQuickCreate?: () => void;
+  onOpenSettings?: () => void;
+  onOpenHelp?: () => void;
+  onOpenSearch?: () => void;
+  onToggleSidebar: () => void;
+}
+
+export function Sidebar({
+  activeView,
+  onNavigate: setActiveView,
+  navItems,
+  user,
+  quickCreateLabel = "Quick Create",
+  onQuickCreate,
+  onOpenSettings,
+  onOpenHelp,
+  onOpenSearch,
+  onToggleSidebar,
+}: SidebarProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   return (
     <aside
-      id="aura-sidebar"
       aria-label="Main navigation"
-      className="fixed left-0 top-0 h-full w-[260px] bg-surface-container-lowest/80 backdrop-blur-xl border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none"
+      className={`w-[235px] shrink-0 h-screen border-r flex flex-col justify-between select-none font-sans transition-colors ${
+        isDark
+          ? "bg-[var(--surface-navigation)] border-white/[0.08] text-[#F4F4F5]"
+          : "bg-[var(--surface-navigation)] border-zinc-200/80 text-zinc-900"
+      }`}
     >
-      <div>
-        <Link
-          to="/employee/dashboard"
-          aria-label="Aura overview"
-          title="Aura overview"
-          className="aura-brand h-16 px-space-lg flex items-center gap-space-sm border-b border-outline-variant/20"
-        >
-          <span className="w-8 h-8 rounded-lg bg-[#1e2022] flex items-center justify-center text-white shrink-0 shadow-sm">
-            <AuraIcon className="text-lg">umbrella</AuraIcon>
-          </span>
-          <span className="aura-brand-name font-headline-lg text-headline-lg font-bold tracking-tight text-on-surface ml-1">
-            Aura
-          </span>
-          <span className="aura-brand-tier ml-auto bg-surface-container-high px-space-xs py-0.5 rounded text-on-surface-variant text-[10px] uppercase tracking-wider font-semibold">
-            Enterprise
-          </span>
-        </Link>
-        <div className="pt-space-lg px-space-sm">
-          <p className="aura-nav-heading px-space-md mb-space-xs font-label-caps text-label-caps uppercase text-on-surface-variant tracking-wider">
-            Governance
-          </p>
-          <nav className="flex flex-col gap-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.label}
-                to={item.path}
-                aria-label={item.label}
-                title={item.label}
-                aria-current={active === item.label ? "page" : undefined}
-                className={`flex items-center gap-space-md px-space-md py-2 rounded-lg transition-colors ${active === item.label ? "bg-primary-container text-on-primary-container font-headline-sm shadow-sm" : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-body-md text-body-md"}`}
-              >
-                <AuraIcon className="text-lg">{item.icon}</AuraIcon>
-                <span className="aura-nav-label">{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </div>
-      <div className="aura-sidebar-footer p-space-md border-t border-outline-variant/20 bg-surface-container-lowest/50">
-        <div className="flex items-center gap-space-md p-space-xs">
-          <span className="w-8 h-8 rounded-full bg-primary-fixed text-primary text-xs font-semibold flex items-center justify-center shrink-0">
-            RK
-          </span>
-          <div className="aura-profile-details flex flex-col flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <strong className="truncate font-headline-sm text-headline-sm">
-                Rabil Khan
-              </strong>
-              <AuraIcon className="text-base text-on-surface-variant">
-                more_vert
-              </AuraIcon>
+      {/* Top Section */}
+      <div className="p-4 pb-0 flex flex-col">
+        {/* Workspace Brand Header */}
+        <div className="flex items-center justify-between px-2 py-2 mb-4">
+          <div className="flex items-center gap-2.5">
+            <div
+              className={`h-5 w-5 rounded-full border-[1.8px] flex items-center justify-center ${
+                isDark ? "border-white" : "border-zinc-900"
+              }`}
+            >
+              <div
+                className={`h-1.5 w-1.5 rounded-full ${isDark ? "bg-white" : "bg-zinc-900"}`}
+              />
             </div>
-            <span className="text-body-sm text-on-surface-variant">
-              Executive Member
+            <span
+              className={`text-[15px] font-semibold tracking-tight ${isDark ? "text-white" : "text-zinc-900"}`}
+            >
+              Payout
             </span>
           </div>
+          <SidebarToggle expanded onToggle={onToggleSidebar} />
         </div>
-        <div className="aura-profile-status mt-space-xs flex items-center justify-between px-space-xs text-label-caps">
-          <span className="inline-flex items-center gap-1 text-tertiary">
-            <span className="w-1.5 h-1.5 rounded-full bg-tertiary-container" />
-            Active · FY25
-          </span>
-          <span className="text-on-surface-variant">v2.4.0</span>
+
+        {/* Primary Navigation List (Airy, crisp, uncluttered) */}
+        <nav className="space-y-1">
+          {onOpenSearch && (
+            <button
+              type="button"
+              onClick={onOpenSearch}
+              className="group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium text-zinc-900 dark:text-zinc-300 hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+            >
+              <Search className="h-4 w-4 shrink-0 stroke-[1.85]" />
+              <span>Search</span>
+            </button>
+          )}
+          {/* Quick Create - aligned seamlessly with nav items, no permanent black background */}
+          <button
+            type="button"
+            onClick={onQuickCreate}
+            aria-current={activeView === quickCreateLabel ? "page" : undefined}
+            className={`group w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13.5px] transition-all duration-150 text-left cursor-pointer font-medium ${
+              activeView === quickCreateLabel
+                ? isDark
+                  ? "bg-white text-black font-semibold shadow-sm"
+                  : "bg-black text-white font-medium shadow-sm"
+                : isDark
+                  ? "text-zinc-200 hover:bg-white hover:text-black"
+                  : "text-zinc-900 hover:bg-black hover:text-white"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <PlusCircle
+                className={`h-4 w-4 shrink-0 stroke-[2] transition-colors ${
+                  activeView === quickCreateLabel
+                    ? "text-current"
+                    : isDark
+                      ? "text-zinc-300 group-hover:text-black"
+                      : "text-zinc-800 group-hover:text-white"
+                }`}
+              />
+              <span className="transition-colors">{quickCreateLabel}</span>
+            </div>
+          </button>
+
+          {navItems.map((item) => {
+            const isActive = activeView === item.label;
+            return (
+              <button
+                key={item.label}
+                aria-current={isActive ? "page" : undefined}
+                type="button"
+                onClick={() => setActiveView(item.label)}
+                className={`group w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13.5px] transition-all duration-150 text-left cursor-pointer ${
+                  isActive
+                    ? isDark
+                      ? "bg-white text-black font-semibold shadow-sm"
+                      : "bg-black text-white font-medium shadow-sm"
+                    : isDark
+                      ? "text-zinc-300 font-medium hover:bg-white hover:text-black"
+                      : "text-zinc-900 font-medium hover:bg-black hover:text-white"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon
+                    className={`h-4 w-4 shrink-0 stroke-[1.85] transition-colors ${
+                      isActive
+                        ? isDark
+                          ? "text-black"
+                          : "text-white"
+                        : isDark
+                          ? "text-zinc-400 group-hover:text-black"
+                          : "text-zinc-800 group-hover:text-white"
+                    }`}
+                  />
+                  <span className="transition-colors">{item.label}</span>
+                </div>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Bottom Section: Settings, Help, Search, User Profile */}
+      <div className="p-4 pt-0 space-y-1">
+        {[
+          { label: "Settings", icon: Settings, action: onOpenSettings },
+          { label: "Get Help", icon: HelpCircle, action: onOpenHelp },
+        ]
+          .filter((item) => item.action)
+          .map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={item.action}
+              className={`group w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-all duration-150 text-left cursor-pointer ${
+                isDark
+                  ? "text-zinc-300 hover:bg-white hover:text-black"
+                  : "text-zinc-900 hover:bg-black hover:text-white"
+              }`}
+            >
+              <item.icon
+                className={`h-4 w-4 shrink-0 stroke-[1.85] transition-colors ${
+                  isDark
+                    ? "text-zinc-400 group-hover:text-black"
+                    : "text-zinc-800 group-hover:text-white"
+                }`}
+              />
+              <span>{item.label}</span>
+            </button>
+          ))}
+
+        {/* User Profile Card (Shadcn style clean layout) */}
+        <div
+          className={`pt-2 mt-2 border-t ${isDark ? "border-white/[0.08]" : "border-zinc-200/80"}`}
+        >
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors cursor-pointer text-left group ${
+              isDark
+                ? "hover:bg-white hover:text-black text-white"
+                : "hover:bg-zinc-100 text-zinc-900"
+            }`}
+          >
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <div
+                className={`h-8 w-8 rounded-lg flex items-center justify-center ring-1 shrink-0 text-xs font-semibold ${isDark ? "bg-zinc-800 ring-zinc-700 text-zinc-200" : "bg-zinc-100 ring-zinc-300 text-zinc-900"}`}
+              >
+                {user.initials}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span
+                  className={`text-[13px] font-semibold truncate leading-tight transition-colors ${
+                    isDark
+                      ? "text-white group-hover:text-black"
+                      : "text-zinc-900"
+                  }`}
+                >
+                  {user.name}
+                </span>
+                <span
+                  className={`text-[11px] truncate leading-tight mt-0.5 transition-colors ${
+                    isDark
+                      ? "text-zinc-400 group-hover:text-zinc-600"
+                      : "text-zinc-500"
+                  }`}
+                >
+                  {user.subtitle}
+                </span>
+              </div>
+            </div>
+            <ChevronsUpDown
+              className={`h-4 w-4 shrink-0 transition-colors ${
+                isDark
+                  ? "text-zinc-500 group-hover:text-black"
+                  : "text-zinc-400 group-hover:text-zinc-700"
+              }`}
+            />
+          </button>
         </div>
       </div>
     </aside>

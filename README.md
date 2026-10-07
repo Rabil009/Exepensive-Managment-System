@@ -10,7 +10,7 @@ React, TypeScript, Vite, and Tailwind CSS application using the supplied Aura UI
 - Cards & Limits: `/employee/cards`
 - Analytics: `/employee/analytics` — supplied HTML layout, charts, card usage, funding split, and insights
 
-All screens use the same Aura shell. Feature components, state, data, and styles live together under `frontend/src/features/`. The shared header, sidebar, theme, and utilities live under `frontend/src/shared/`.
+All screens use the Finance UI system from `devlop-aditya`, configured for Employee navigation and content. Feature components, state, data, and styles live together under `frontend/src/features/`. The shared header, sidebar, theme, and utilities live under `frontend/src/shared/`. See [the Finance UI migration notes](docs/finance-ui-migration.md) for source mappings and preserved workflows.
 
 See [the architecture guide](docs/architecture.md) for the folder map, feature ownership, storage keys, and verification commands.
 

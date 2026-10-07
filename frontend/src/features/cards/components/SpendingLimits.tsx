@@ -81,7 +81,7 @@ export function SpendingLimits({ model }: Props) {
             <span style={{ width: `${percent}%` }} />
           </div>
           <div className="flex justify-between gap-2 flex-wrap text-label-caps text-on-surface-variant">
-            <span>$0.00</span>
+            <span>{money(0.0)}</span>
             <strong className="text-primary">
               Current Spend: {money(spent)} (44.2%)
             </strong>

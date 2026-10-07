@@ -1,3 +1,4 @@
+import { money } from "../../../shared/utils/format";
 export function AnalyticsInsights() {
   return (
     <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -27,7 +28,7 @@ export function AnalyticsInsights() {
             Largest Single Expense
           </span>
           <div className="font-headline-sm text-headline-sm text-on-surface font-semibold mt-1">
-            $1,120.00
+            {money(1120.0)}
           </div>
         </div>
       </div>

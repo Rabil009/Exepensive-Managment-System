@@ -13,9 +13,10 @@ frontend/src/
     cards/                    Physical card, limits, controls, transactions, dialogs
     analytics/                Supplied HTML sections, charts, card usage, funding, insights
   shared/
-    components/               AuraIcon and Toast
-    layout/                   AuraShell, Sidebar, Header, navigation definitions
-    styles/                   Global theme and shared shell styles
+    components/               AuraIcon, Toast, Finance StatusBadge
+    layout/                   AppShell, Finance Sidebar/Header/SlideOutIconRail, navigation
+    theme/                    Finance ThemeProvider and useTheme
+    styles/                   Finance theme tokens, compatibility aliases, shared styles
     utils/                    Currency/date formatting and CSV export
 ```
 
@@ -63,12 +64,15 @@ Overview is ordinary React JSX. It no longer injects an HTML template, mounts ro
 - `aura-demo-card-v1`: local demo card settings and virtual cards.
 - `aura-recalled-reports`: local demo report recall state.
 - `aura-sidebar-expanded`: sidebar display preference.
+- `finpulse-theme`: shared Finance/Employee light or dark theme preference.
 
 Existing storage keys are preserved by the reorganization. Receipt files are previewed in memory; filenames are stored with expense records. There is no backend, OCR service, card issuer integration, or bank feed connection. Overview summary values and compliance indicators retain the supplied demo presentation. Card controls and approval workflow are demos. Reports derive expense totals from shared records and keep currencies separate; their quarterly chart uses USD records from Q4 2025.
 
 Analytics reproduces the user's supplied HTML directly as six React section components. Its sample amounts, SVG geometry, category shares, weekly card bars, workflow rows, funding split, and insights come from `docs/design-references/analytics.html`. Filter, interval, and export buttons are the supplied static visual controls. The shared shell provides working navigation and sidebar collapse. The previous custom Analytics calculations, table, and extra chart have been removed.
 
 Supplied screenshots and HTML exports are archived under `docs/design-references/`. They are documentation assets and are not imported into the app or shipped in its bundle.
+
+The Finance UI components and tokens are sourced from `devlop-aditya`. See [the migration guide](finance-ui-migration.md) for exact source mappings, component configuration, and scope limitations. Employee class names are aliases to the shared Finance tokens; they do not define another theme.
 
 ## Verification
 

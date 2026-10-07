@@ -1,3 +1,4 @@
+import { money } from "../../../shared/utils/format";
 export function FundingSplit() {
   return (
     <div className="grid grid-cols-1 gap-5 items-stretch">
@@ -30,7 +31,7 @@ export function FundingSplit() {
             </div>
             <div className="mt-3">
               <div className="font-financial-display text-financial-display font-bold text-on-surface">
-                $3,320.50
+                {money(3320.5)}
               </div>
             </div>
           </div>
@@ -48,7 +49,7 @@ export function FundingSplit() {
             </div>
             <div className="mt-3">
               <div className="font-financial-display text-financial-display font-bold text-on-surface">
-                $35,100.00
+                {money(35100.0)}
               </div>
             </div>
           </div>
@@ -56,10 +57,10 @@ export function FundingSplit() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between font-label-md text-label-md">
             <span className="text-primary font-semibold">
-              8.6% Corporate Card ($3,320.50)
+              8.6% Corporate Card ({money(3320.5)})
             </span>
             <span className="text-tertiary font-semibold">
-              91.4% Personal Reimbursable ($35,100.00)
+              91.4% Personal Reimbursable ({money(35100.0)})
             </span>
           </div>
           <div className="w-full h-3 rounded-full bg-surface-container-low overflow-hidden flex gap-0.5">

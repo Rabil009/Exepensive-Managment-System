@@ -14,7 +14,13 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem(key);
       return saved
-        ? [...(JSON.parse(saved) as Expense[]), ...initialExpenses]
+        ? [
+            ...(JSON.parse(saved) as Expense[]).map((expense) => ({
+              ...expense,
+              currency: "INR",
+            })),
+            ...initialExpenses,
+          ]
         : initialExpenses;
     } catch {
       return initialExpenses;
@@ -22,7 +28,7 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
   });
   const addExpense = (expense: Expense) => {
     const userExpenses = [
-      expense,
+      { ...expense, currency: "INR" },
       ...expenses.filter(
         (item) =>
           item.id !== expense.id &&

@@ -1,15 +1,15 @@
 .aura-expense-form .aura-draft-button {
   padding: 8px 12px;
   border-radius: 8px;
-  background: #f4f3f8;
-  color: #414753;
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 500;
   transition: background 0.15s;
   white-space: nowrap;
 }
 .aura-expense-form .aura-draft-button:hover {
-  background: #eeedf3;
+  background: var(--surface-elevated);
 }
 .aura-expense-form .aura-submit-button {
   display: inline-flex;
@@ -18,29 +18,29 @@
   gap: 6px;
   padding: 8px 20px;
   border-radius: 8px;
-  color: white;
-  background: #0071e3;
+  color: var(--canvas-bg);
+  background: var(--text-primary);
   font-size: 15px;
   font-weight: 600;
   transition: background 0.15s;
   white-space: nowrap;
 }
 .aura-expense-form .aura-submit-button:hover {
-  background: #0059b5;
+  background: var(--text-primary);
 }
 .aura-expense-form .aura-submit-button:disabled {
-  background: #eeedf3;
+  background: var(--surface-elevated);
   color: #41475366;
   opacity: 0.6;
   cursor: not-allowed;
 }
 .aura-receipt-dropzone {
   min-height: 260px;
-  background-image: linear-gradient(white, #f4f3f850);
+  background-image: linear-gradient(white, var(--surface-elevated));
 }
 .aura-receipt-dropzone.is-dragging {
-  border-color: #0071e3;
-  background: #d7e2ff66;
+  border-color: var(--chart-blue);
+  background: var(--surface-elevated);
 }
 .aura-receipt-preview {
   max-height: 210px;
@@ -58,7 +58,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  color: #414753;
+  color: var(--text-secondary);
   pointer-events: none;
 }
 .aura-select-wrap > .material-symbols-outlined:first-child {
@@ -92,8 +92,8 @@
   align-items: center;
   border-radius: 8px;
   padding: 12px;
-  background: #f4f3f8;
-  color: #414753;
+  background: var(--surface-elevated);
+  color: var(--text-secondary);
 }
 .aura-policy-note span {
   display: grid;
@@ -109,7 +109,7 @@
   align-items: center;
   flex-wrap: wrap;
   border-radius: 8px;
-  background: #d7e2ff88;
+  background: var(--surface-elevated);
   color: #00458f;
 }
 .aura-form-message.error {

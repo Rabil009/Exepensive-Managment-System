@@ -1,4 +1,4 @@
-import { AuraShell } from "../../shared/layout/AuraShell";
+import { AppShell } from "../../shared/layout/AppShell";
 import { Toast } from "../../shared/components/Toast";
 import { useOverview } from "./hooks/useOverview";
 import { OverviewHeader } from "./components/OverviewHeader";
@@ -9,7 +9,7 @@ import { ComplianceBanner } from "./components/ComplianceBanner";
 export default function OverviewPage() {
   const model = useOverview();
   return (
-    <AuraShell active="Overview" onSearch={model.setQuery}>
+    <AppShell active="Overview" onSearch={model.setQuery}>
       <div className="flex flex-col w-full gap-space-xl">
         <OverviewHeader
           cycleFilter={model.cycleFilter}
@@ -28,6 +28,6 @@ export default function OverviewPage() {
         <ComplianceBanner />
       </div>
       <Toast message={model.notice} onDismiss={() => model.setNotice("")} />
-    </AuraShell>
+    </AppShell>
   );
 }

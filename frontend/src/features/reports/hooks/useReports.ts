@@ -30,9 +30,9 @@ export function useReports() {
   const items = expenses.filter((item) => reportName(item) === selected);
   const corporate = items.filter((item) => !isPersonal(item));
   const personal = items.filter(isPersonal);
-  const chartCurrency = items[0]?.currency || "USD";
+  const chartCurrency = items[0]?.currency || "INR";
   const chartItems = items.filter(
-    (item) => (item.currency || "USD") === chartCurrency,
+    (item) => (item.currency || "INR") === chartCurrency,
   );
   const total = chartItems.reduce((sum, item) => sum + item.amount, 0);
   const verified = items.filter((item) =>
@@ -55,7 +55,7 @@ export function useReports() {
     (item) =>
       item.date >= "2025-10-01" &&
       item.date <= "2025-12-31" &&
-      (item.currency || "USD") === "USD",
+      (item.currency || "INR") === "INR",
   );
   const quarterTotal = quarterItems.reduce((sum, item) => sum + item.amount, 0);
   const distribution = [
@@ -63,25 +63,25 @@ export function useReports() {
       name: "Travel & Lodging",
       description: "Flights, Hotels",
       categories: ["Travel", "Accommodation"],
-      color: "#0059b5",
+      color: "var(--chart-blue)",
     },
     {
       name: "Software & SaaS",
       description: "Subscriptions, Licenses",
       categories: ["Software"],
-      color: "#abc7ff",
+      color: "var(--chart-violet)",
     },
     {
       name: "Meals & Other",
       description: "Meals, Team expenses",
       categories: ["Food", "Other"],
-      color: "#006a26",
+      color: "var(--chart-emerald)",
     },
     {
       name: "Hardware & Gear",
       description: "Monitors, Ergonomics",
       categories: ["Office"],
-      color: "#c8c6c8",
+      color: "var(--chart-amber)",
     },
   ].map((group) => {
     const records = quarterItems.filter((item) =>
@@ -121,7 +121,7 @@ export function useReports() {
         item.category,
         item.paymentMethod || "",
         item.status,
-        item.currency || "USD",
+        item.currency || "INR",
         item.amount,
       ]),
     );

@@ -23,7 +23,7 @@ export function SpendDistribution({ model }: Props) {
         </Link>
       </div>
       <p className="text-body-sm text-on-surface-variant">
-        USD expense receipts across your Q4 FY25 reports
+        INR expense receipts across your Q4 FY25 reports
       </p>
       <div className="flex h-2 rounded-full overflow-hidden bg-surface-container-high my-1">
         {distribution.map((group) => (
@@ -40,7 +40,7 @@ export function SpendDistribution({ model }: Props) {
         {distribution.map((group) => (
           <div
             key={group.name}
-            className="p-2.5 rounded-lg bg-white border border-outline-variant/20 flex flex-col gap-1"
+            className="p-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant/20 flex flex-col gap-1"
           >
             <div className="report-distribution-value flex items-center justify-between gap-2 text-body-sm">
               <span className="flex items-center gap-1.5 font-medium">

@@ -1,3 +1,4 @@
+import { money } from "../../../shared/utils/format";
 export function CardAndApproval() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
@@ -21,7 +22,7 @@ export function CardAndApproval() {
               Total Spent
             </div>
             <div className="font-financial-display text-[22px] text-primary font-bold mt-0.5 whitespace-nowrap">
-              $3,320.50
+              {money(3320.5)}
             </div>
           </div>
           <div className="min-w-0">
@@ -29,7 +30,7 @@ export function CardAndApproval() {
               Available Credit
             </div>
             <div className="font-financial-display text-[22px] text-tertiary font-bold mt-0.5 whitespace-nowrap">
-              $4,179.50
+              {money(4179.5)}
             </div>
           </div>
           <div className="min-w-0">
@@ -37,7 +38,7 @@ export function CardAndApproval() {
               Monthly Limit
             </div>
             <div className="font-financial-display text-[22px] text-on-surface font-bold mt-0.5 whitespace-nowrap">
-              $7,500.00
+              {money(7500.0)}
             </div>
           </div>
         </div>
@@ -48,13 +49,13 @@ export function CardAndApproval() {
               Weekly Pacing Benchmark
             </span>
             <span className="font-financial-tabular text-body-sm font-semibold text-outline">
-              $1,875 / wk limit
+              {money(1875)} / wk limit
             </span>
           </div>
           <div className="grid grid-cols-4 gap-4 h-24 items-end pt-4">
             <div className="flex flex-col items-center gap-1.5 h-full justify-end">
               <span className="font-financial-tabular text-body-sm font-semibold text-on-surface-variant">
-                $640
+                {money(640)}
               </span>
               <div
                 className="w-full max-w-[48px] bg-primary-fixed/40 hover:bg-primary-container transition-colors rounded-t-md"
@@ -66,7 +67,7 @@ export function CardAndApproval() {
             </div>
             <div className="flex flex-col items-center gap-1.5 h-full justify-end">
               <span className="font-financial-tabular text-body-sm font-semibold text-on-surface-variant">
-                $890
+                {money(890)}
               </span>
               <div
                 className="w-full max-w-[48px] bg-primary-fixed/40 hover:bg-primary-container transition-colors rounded-t-md"
@@ -78,7 +79,7 @@ export function CardAndApproval() {
             </div>
             <div className="flex flex-col items-center gap-1.5 h-full justify-end">
               <span className="font-financial-tabular text-body-sm font-semibold text-on-surface-variant">
-                $670
+                {money(670)}
               </span>
               <div
                 className="w-full max-w-[48px] bg-primary-fixed/40 hover:bg-primary-container transition-colors rounded-t-md"
@@ -90,7 +91,7 @@ export function CardAndApproval() {
             </div>
             <div className="flex flex-col items-center gap-1.5 h-full justify-end">
               <span className="font-financial-tabular text-body-sm font-semibold text-primary">
-                $1,120
+                {money(1120)}
               </span>
               <div
                 className="w-full max-w-[48px] bg-primary-container shadow-sm rounded-t-md"
@@ -144,7 +145,7 @@ export function CardAndApproval() {
             </div>
             <div className="flex items-center gap-3">
               <div className="font-financial-tabular text-headline-sm font-bold text-tertiary">
-                $35,100.00
+                {money(35100.0)}
               </div>
               <span className="font-label-caps text-label-caps text-outline w-12 text-right font-medium">
                 91.4%
@@ -160,7 +161,7 @@ export function CardAndApproval() {
             </div>
             <div className="flex items-center gap-3">
               <div className="font-financial-tabular text-headline-sm font-bold text-secondary">
-                $2,840.50
+                {money(2840.5)}
               </div>
               <span className="font-label-caps text-label-caps text-outline w-12 text-right font-medium">
                 7.4%
@@ -176,7 +177,7 @@ export function CardAndApproval() {
             </div>
             <div className="flex items-center gap-3">
               <div className="font-financial-tabular text-headline-sm font-bold text-primary-container">
-                $447.80
+                {money(447.8)}
               </div>
               <span className="font-label-caps text-label-caps text-outline w-12 text-right font-medium">
                 1.2%
@@ -192,7 +193,7 @@ export function CardAndApproval() {
             </div>
             <div className="flex items-center gap-3">
               <div className="font-financial-tabular text-headline-sm font-bold text-outline">
-                $0.00
+                {money(0.0)}
               </div>
               <span className="font-label-caps text-label-caps uppercase text-outline w-12 text-right font-medium">
                 0.0%

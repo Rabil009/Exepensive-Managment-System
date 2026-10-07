@@ -67,8 +67,8 @@ export function CardDialog({ model }: Props) {
         )}
         <label>
           {dialogType === "limit"
-            ? "Requested monthly limit (USD)"
-            : "Spending limit (USD)"}
+            ? "Requested monthly limit (INR)"
+            : "Spending limit (INR)"}
           <input
             type="number"
             min={dialogType === "limit" ? "7500.01" : "0.01"}

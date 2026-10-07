@@ -1,6 +1,7 @@
 import type { ReportsModel } from "../hooks/useReports";
 import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
 import { steps } from "../data/demoWorkflow";
+import { StatusBadge } from "../../../shared/components/StatusBadge";
 
 type Props = { model: Pick<ReportsModel, "completed" | "recalled"> };
 export function ApprovalWorkflow({ model }: Props) {
@@ -25,7 +26,7 @@ export function ApprovalWorkflow({ model }: Props) {
           >
             <div className="flex items-center gap-space-sm">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${completed || (index === 0 && !recalled) ? "bg-tertiary-container text-white" : index === 1 && !recalled ? "bg-white text-primary ring-2 ring-primary-container ring-offset-2 ring-offset-surface-container-low" : "bg-surface-container-highest text-on-surface-variant"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${completed || (index === 0 && !recalled) ? "bg-tertiary-container text-white" : index === 1 && !recalled ? "bg-surface-container-lowest text-primary ring-2 ring-primary-container ring-offset-2 ring-offset-surface-container-low" : "bg-surface-container-highest text-on-surface-variant"}`}
               >
                 <Icon className="text-base">
                   {completed || (index === 0 && !recalled)
@@ -46,11 +47,17 @@ export function ApprovalWorkflow({ model }: Props) {
                 <span className="text-headline-sm">
                   {index + 1}. {step.title}
                 </span>
-                <span
-                  className={`px-1.5 py-0.5 rounded text-label-caps ${completed || (index === 0 && !recalled) ? "bg-tertiary-fixed/30 text-on-tertiary-fixed-variant" : index === 1 && !recalled ? "bg-primary-fixed text-on-primary-fixed-variant" : "bg-surface-container-high text-on-surface-variant"}`}
+                <StatusBadge
+                  tone={
+                    completed || (index === 0 && !recalled)
+                      ? "success"
+                      : index === 1 && !recalled
+                        ? "warning"
+                        : "neutral"
+                  }
                 >
                   {completed ? "Passed" : recalled ? "Queued" : step.status}
-                </span>
+                </StatusBadge>
               </div>
               <p className="text-body-sm mt-0.5">{step.owner}</p>
               <p className="text-label-caps text-on-surface-variant mt-1">

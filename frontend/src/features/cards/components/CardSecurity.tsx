@@ -14,7 +14,7 @@ export function CardSecurity({ model }: Props) {
           {state.controls.filter(Boolean).length} of 4 Active
         </span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
         {controls.map((item, index) => (
           <div
             key={item.name}

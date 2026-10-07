@@ -1,4 +1,5 @@
 import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
+import { StatusBadge } from "../../../shared/components/StatusBadge";
 import type { CardControlsModel } from "../hooks/useCardControls";
 import { cardPanelClass as panel } from "../styles/cardClasses";
 import { transactions } from "../data/demoCards";
@@ -77,7 +78,7 @@ export function CardTransactions({ model }: Props) {
           </select>
         </label>
       </div>
-      <div className="px-space-lg py-space-sm">
+      <div className="overflow-x-auto px-space-lg py-space-sm">
         <table className="aura-card-transactions">
           <thead>
             <tr>
@@ -85,7 +86,7 @@ export function CardTransactions({ model }: Props) {
               <th>Merchant &amp; Details</th>
               <th>Payment Card</th>
               <th>Status</th>
-              <th>Amount (USD)</th>
+              <th>Amount (INR)</th>
             </tr>
           </thead>
           <tbody>
@@ -109,10 +110,17 @@ export function CardTransactions({ model }: Props) {
                   </span>
                 </td>
                 <td>
-                  <span className="aura-transaction-status">
-                    <Icon className="text-sm">check_circle</Icon>
+                  <StatusBadge
+                    tone={
+                      item.status === "Success"
+                        ? "success"
+                        : item.status === "Failed"
+                          ? "danger"
+                          : "warning"
+                    }
+                  >
                     {item.status}
-                  </span>
+                  </StatusBadge>
                 </td>
                 <td className="aura-transaction-amount">
                   {money(item.amount)}

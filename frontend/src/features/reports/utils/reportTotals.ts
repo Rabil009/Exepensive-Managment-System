@@ -8,7 +8,7 @@ export const isPersonal = (item: Expense) =>
   /personal|pocket/i.test(item.paymentMethod || "");
 export function formatTotal(items: Expense[], average = false) {
   const totals = items.reduce<Record<string, number>>((result, item) => {
-    const currency = item.currency || "USD";
+    const currency = item.currency || "INR";
     result[currency] = (result[currency] || 0) + item.amount;
     return result;
   }, {});
@@ -18,12 +18,12 @@ export function formatTotal(items: Expense[], average = false) {
         money(
           average
             ? amount /
-                items.filter((item) => (item.currency || "USD") === currency)
+                items.filter((item) => (item.currency || "INR") === currency)
                   .length
             : amount,
           currency,
         ),
       )
-      .join(" · ") || "$0.00"
+      .join(" · ") || "₹0.00"
   );
 }

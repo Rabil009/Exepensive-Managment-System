@@ -36,7 +36,7 @@ export function useOverview() {
         item.merchant,
         item.date,
         item.report || "Unassigned",
-        item.currency || "USD",
+        item.currency || "INR",
         item.amount,
         item.status,
       ]),

@@ -1,4 +1,5 @@
 import type { ReportsModel } from "../hooks/useReports";
+import { StatusBadge } from "../../../shared/components/StatusBadge";
 
 type Props = {
   model: Pick<
@@ -60,14 +61,15 @@ export function ReportHeader({ model }: Props) {
           <h1 className="font-display-md text-display-md text-on-surface tracking-tight font-semibold">
             Expense Report
           </h1>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-md text-label-md bg-amber-500/10 text-amber-800 border border-outline-variant/30 font-medium">
-            <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse"></span>
+          <StatusBadge
+            tone={completed ? "success" : recalled ? "neutral" : "warning"}
+          >
             {recalled
               ? "Draft · Recalled"
               : completed
                 ? "Reimbursed · Complete"
                 : "Submitted · In Review"}
-          </span>
+          </StatusBadge>
         </div>
       </div>
       <div className="flex items-center gap-space-sm self-start md:self-auto flex-wrap">

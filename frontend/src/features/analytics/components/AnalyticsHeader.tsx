@@ -26,7 +26,7 @@ export function AnalyticsHeader() {
           <span className="text-outline font-body-sm text-body-sm">
             Currency:
           </span>
-          <span className="font-semibold">USD ($)</span>
+          <span className="font-semibold">INR (₹)</span>
           <span className="material-symbols-outlined text-[15px] text-outline">
             expand_more
           </span>

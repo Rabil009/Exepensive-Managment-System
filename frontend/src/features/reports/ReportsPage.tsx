@@ -1,4 +1,4 @@
-import { AuraShell } from "../../shared/layout/AuraShell";
+import { AppShell } from "../../shared/layout/AppShell";
 import { Toast } from "../../shared/components/Toast";
 import { useReports } from "./hooks/useReports";
 import { ReportHeader } from "./components/ReportHeader";
@@ -10,7 +10,7 @@ import "./styles/reports.css";
 export default function ReportsPage() {
   const model = useReports();
   return (
-    <AuraShell active="Reports" onSearch={model.setQuery}>
+    <AppShell active="Reports" onSearch={model.setQuery}>
       <div className="aura-reports flex flex-col w-full gap-space-xl">
         <ReportHeader model={model} />
         <section className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
@@ -25,6 +25,6 @@ export default function ReportsPage() {
         onDismiss={() => model.setNotice("")}
         dismissLabel="Dismiss report notice"
       />
-    </AuraShell>
+    </AppShell>
   );
 }

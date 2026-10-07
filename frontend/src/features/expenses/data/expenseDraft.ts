@@ -17,7 +17,7 @@ export const emptyDraft = (): Draft => ({
   merchant: "",
   date: "",
   amount: "",
-  currency: "USD",
+  currency: "INR",
   category: "",
   report: "Q4 Design Summit — SFO",
   paymentMethod: "Corporate Card (••4921)",

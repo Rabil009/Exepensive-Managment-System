@@ -1,3 +1,4 @@
+import { money } from "../../../shared/utils/format";
 export function SpendingOverview() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
@@ -36,16 +37,20 @@ export function SpendingOverview() {
           >
             <defs>
               <linearGradient id="spendGradient" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#0071e3" stopOpacity="0.22"></stop>
+                <stop
+                  offset="0%"
+                  stopColor="var(--chart-blue)"
+                  stopOpacity="0.22"
+                ></stop>
                 <stop
                   offset="100%"
-                  stopColor="#0071e3"
+                  stopColor="var(--chart-blue)"
                   stopOpacity="0.0"
                 ></stop>
               </linearGradient>
             </defs>
             <line
-              stroke="#eeedf3"
+              stroke="var(--border-hairline)"
               strokeDasharray="3 3"
               strokeWidth="1"
               x1="40"
@@ -54,7 +59,7 @@ export function SpendingOverview() {
               y2="20"
             ></line>
             <line
-              stroke="#eeedf3"
+              stroke="var(--border-hairline)"
               strokeDasharray="3 3"
               strokeWidth="1"
               x1="40"
@@ -63,7 +68,7 @@ export function SpendingOverview() {
               y2="65"
             ></line>
             <line
-              stroke="#eeedf3"
+              stroke="var(--border-hairline)"
               strokeDasharray="3 3"
               strokeWidth="1"
               x1="40"
@@ -72,7 +77,7 @@ export function SpendingOverview() {
               y2="110"
             ></line>
             <line
-              stroke="#eeedf3"
+              stroke="var(--border-hairline)"
               strokeDasharray="3 3"
               strokeWidth="1"
               x1="40"
@@ -81,7 +86,7 @@ export function SpendingOverview() {
               y2="155"
             ></line>
             <line
-              stroke="#eeedf3"
+              stroke="var(--border-hairline)"
               strokeWidth="1"
               x1="40"
               x2="720"
@@ -90,53 +95,53 @@ export function SpendingOverview() {
             ></line>
             <text
               className="font-financial-tabular"
-              fill="#717785"
+              fill="var(--text-secondary)"
               fontSize="10"
               textAnchor="end"
               x="32"
               y="24"
             >
-              $4k
+              ₹4k
             </text>
             <text
               className="font-financial-tabular"
-              fill="#717785"
+              fill="var(--text-secondary)"
               fontSize="10"
               textAnchor="end"
               x="32"
               y="69"
             >
-              $3k
+              ₹3k
             </text>
             <text
               className="font-financial-tabular"
-              fill="#717785"
+              fill="var(--text-secondary)"
               fontSize="10"
               textAnchor="end"
               x="32"
               y="114"
             >
-              $2k
+              ₹2k
             </text>
             <text
               className="font-financial-tabular"
-              fill="#717785"
+              fill="var(--text-secondary)"
               fontSize="10"
               textAnchor="end"
               x="32"
               y="159"
             >
-              $1k
+              ₹1k
             </text>
             <text
               className="font-financial-tabular"
-              fill="#717785"
+              fill="var(--text-secondary)"
               fontSize="10"
               textAnchor="end"
               x="32"
               y="203"
             >
-              $0
+              {money(0)}
             </text>
             <polygon
               fill="url(#spendGradient)"
@@ -145,7 +150,7 @@ export function SpendingOverview() {
             <polyline
               fill="none"
               points="50,178 110,182 170,165 230,130 290,148 350,118 410,136 470,95 530,120 590,52 650,140 710,162"
-              stroke="#0071e3"
+              stroke="var(--chart-blue)"
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth="2.5"
@@ -153,38 +158,38 @@ export function SpendingOverview() {
             <circle
               cx="170"
               cy="165"
-              fill="#ffffff"
+              fill="var(--surface-card)"
               r="3.5"
-              stroke="#0071e3"
+              stroke="var(--chart-blue)"
               strokeWidth="2"
             ></circle>
             <circle
               cx="290"
               cy="148"
-              fill="#ffffff"
+              fill="var(--surface-card)"
               r="3.5"
-              stroke="#0071e3"
+              stroke="var(--chart-blue)"
               strokeWidth="2"
             ></circle>
             <circle
               cx="410"
               cy="136"
-              fill="#ffffff"
+              fill="var(--surface-card)"
               r="3.5"
-              stroke="#0071e3"
+              stroke="var(--chart-blue)"
               strokeWidth="2"
             ></circle>
             <circle
               cx="470"
               cy="95"
-              fill="#ffffff"
+              fill="var(--surface-card)"
               r="3.5"
-              stroke="#0071e3"
+              stroke="var(--chart-blue)"
               strokeWidth="2"
             ></circle>
             <line
               opacity="0.6"
-              stroke="#0071e3"
+              stroke="var(--chart-blue)"
               strokeDasharray="2 2"
               strokeWidth="1.5"
               x1="590"
@@ -192,14 +197,19 @@ export function SpendingOverview() {
               y1="52"
               y2="200"
             ></line>
-            <circle cx="590" cy="52" fill="#0071e3" r="6"></circle>
-            <circle cx="590" cy="52" fill="#ffffff" r="2.5"></circle>
+            <circle cx="590" cy="52" fill="var(--chart-blue)" r="6"></circle>
+            <circle
+              cx="590"
+              cy="52"
+              fill="var(--surface-card)"
+              r="2.5"
+            ></circle>
           </svg>
-          <div className="absolute top-2 left-[73%] -translate-x-1/2 bg-on-background/95 backdrop-blur-md text-surface-container-lowest px-3 py-1.5 rounded-lg shadow-xl pointer-events-none text-left">
+          <div className="absolute top-2 left-[73%] -translate-x-1/2 bg-surface-container-lowest border border-outline-variant text-on-surface px-3 py-1.5 rounded-lg shadow-xl pointer-events-none text-left">
             <div className="font-financial-tabular text-body-sm font-semibold tracking-tight">
-              $1,120.00
+              {money(1120.0)}
             </div>
-            <div className="font-label-caps text-label-caps text-outline-variant flex items-center gap-1 mt-0.5">
+            <div className="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-1 mt-0.5">
               <span className="">Oct 24</span>
               <span className="">·</span>
               <span className="">Delta Air Lines</span>
@@ -233,7 +243,7 @@ export function SpendingOverview() {
               cy="50"
               fill="transparent"
               r="38"
-              stroke="#eeedf3"
+              stroke="var(--border-hairline)"
               strokeWidth="14"
             ></circle>
             <circle
@@ -241,7 +251,7 @@ export function SpendingOverview() {
               cy="50"
               fill="transparent"
               r="38"
-              stroke="#0071e3"
+              stroke="var(--chart-blue)"
               strokeDasharray="107.44 238.76"
               strokeDashoffset="0"
               strokeWidth="14"
@@ -251,7 +261,7 @@ export function SpendingOverview() {
               cy="50"
               fill="transparent"
               r="38"
-              stroke="#008633"
+              stroke="var(--chart-emerald)"
               strokeDasharray="54.91 238.76"
               strokeDashoffset="-107.44"
               strokeWidth="14"
@@ -261,7 +271,7 @@ export function SpendingOverview() {
               cy="50"
               fill="transparent"
               r="38"
-              stroke="#5f5e60"
+              stroke="var(--text-secondary)"
               strokeDasharray="45.36 238.76"
               strokeDashoffset="-162.35"
               strokeWidth="14"
@@ -271,7 +281,7 @@ export function SpendingOverview() {
               cy="50"
               fill="transparent"
               r="38"
-              stroke="#0059b5"
+              stroke="var(--chart-violet)"
               strokeDasharray="31.03 238.76"
               strokeDashoffset="-207.71"
               strokeWidth="14"
@@ -279,14 +289,14 @@ export function SpendingOverview() {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
             <span className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
-              $38,420
+              {money(38420)}
             </span>
           </div>
         </div>
         <div className="flex flex-col gap-2 pt-1 font-body-sm text-body-sm">
           <div className="flex items-center justify-between p-1.5 rounded-lg bg-surface-container-low/40">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary-container shrink-0"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--chart-blue)] shrink-0"></span>
               <span className="truncate font-medium text-on-surface">
                 Travel &amp; Lodging
               </span>
@@ -319,7 +329,7 @@ export function SpendingOverview() {
           </div>
           <div className="flex items-center justify-between p-1.5 rounded-lg bg-surface-container-low/40">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--chart-violet)] shrink-0"></span>
               <span className="truncate font-medium text-on-surface">
                 Hardware &amp; Gear
               </span>

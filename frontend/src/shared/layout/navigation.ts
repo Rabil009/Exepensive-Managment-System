@@ -1,11 +1,23 @@
+import {
+  Compass,
+  Receipt,
+  ClipboardList,
+  CreditCard,
+  ChartNoAxesCombined,
+} from "lucide-react";
+
 export const navigation = [
-  { label: "Overview", icon: "grid_view", path: "/employee/dashboard" },
+  { label: "Overview", icon: Compass, path: "/employee/dashboard" },
   {
     label: "New Expense",
-    icon: "receipt_long",
+    icon: Receipt,
     path: "/employee/expenses/new",
   },
-  { label: "Reports", icon: "fact_check", path: "/employee/reports" },
-  { label: "Cards & Limits", icon: "credit_card", path: "/employee/cards" },
-  { label: "Analytics", icon: "trending_up", path: "/employee/analytics" },
+  { label: "Cards & Limits", icon: CreditCard, path: "/employee/cards" },
+  { label: "Reports", icon: ClipboardList, path: "/employee/reports" },
+  {
+    label: "Analytics",
+    icon: ChartNoAxesCombined,
+    path: "/employee/analytics",
+  },
 ];
