@@ -774,10 +774,10 @@ function ManagerDashboardInner() {
 
                       <div className="flex items-center gap-3 shrink-0">
                         <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                          className={`text-xs font-medium ${
                             percent > 80
-                              ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                              : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                              ? "text-amber-500"
+                              : "text-emerald-500 dark:text-emerald-400"
                           }`}
                         >
                           {percent > 80 ? "Near Threshold" : "Healthy Buffer"}
