@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { SlideOutIconRail } from "@/components/dashboard/SlideOutIconRail";
 import { Header } from "@/components/dashboard/Header";
 import { GlobalFilters, FilterState, DEFAULT_FILTERS } from "@/components/dashboard/GlobalFilters";
 import { KpiCards } from "@/components/dashboard/KpiCards";
@@ -47,22 +46,7 @@ function DashboardContent() {
     paymentsPendingAmount,
   } = useFinanceStore();
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [hoverSidebarOpen, setHoverSidebarOpen] = useState(false);
-  const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const handleMouseEnterTrigger = () => {
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    setHoverSidebarOpen(true);
-  };
-
-  const handleMouseLeaveTrigger = () => {
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => {
-      setHoverSidebarOpen(false);
-    }, 250);
-  };
-
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // Modals state
@@ -94,39 +78,10 @@ function DashboardContent() {
     <div className={`flex h-screen w-screen overflow-hidden font-sans antialiased transition-colors ${
       isDark ? "bg-[#09090B] text-zinc-100" : "bg-[#FAFAFA] text-zinc-900"
     }`}>
-      {/* Fixed Left Vertical Sidebar */}
-      {sidebarOpen && (
-        <Sidebar
-          onToggleSidebar={() => setSidebarOpen(false)}
-          onQuickCreate={() => setShowQuickCreate(true)}
-          onOpenSettings={() => setShowSettings(true)}
-          onOpenHelp={() => setShowHelp(true)}
-          onOpenSearch={() => setShowSearch(true)}
-        />
-      )}
-
-      {/* Hover Sensor along left screen edge when sidebar is closed */}
-      {!sidebarOpen && (
-        <div
-          onMouseEnter={handleMouseEnterTrigger}
-          onMouseLeave={handleMouseLeaveTrigger}
-          className="fixed left-0 top-0 bottom-0 w-7 z-40 pointer-events-auto group cursor-pointer"
-          title="Move cursor here to reveal navigation"
-        >
-          {/* Subtle visual hover cue */}
-          <div className="h-full w-[2px] bg-transparent group-hover:bg-zinc-400/40 dark:group-hover:bg-white/20 transition-colors" />
-        </div>
-      )}
-
-      {/* Pop-out Icon Rail on cursor hover */}
-      <SlideOutIconRail
-        isOpen={!sidebarOpen && hoverSidebarOpen}
-        onMouseEnter={handleMouseEnterTrigger}
-        onMouseLeave={handleMouseLeaveTrigger}
-        onPinSidebar={() => {
-          setSidebarOpen(true);
-          setHoverSidebarOpen(false);
-        }}
+      {/* Static Left Vertical Sidebar (Expands to full or collapses to slim icon rail) */}
+      <Sidebar
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         onQuickCreate={() => setShowQuickCreate(true)}
         onOpenSettings={() => setShowSettings(true)}
         onOpenHelp={() => setShowHelp(true)}

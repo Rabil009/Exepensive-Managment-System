@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Search } from "lucide-react";
 import { useFinanceStore } from "@/lib/finance-store";
 import { useTheme } from "@/lib/theme-store";
-import { formatCurrency } from "@/lib";
+import { formatCurrency, getEmployeeAvatar } from "@/lib";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { ExpenseClaim } from "@/types/finance";
 
@@ -161,13 +161,24 @@ export function VerificationQueueView() {
                       {claim.id}
                     </td>
                     <td className="py-3 px-4">
-                      <div>
-                        <span className={`font-medium block ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
-                          {claim.employeeName}
-                        </span>
-                        <span className={`text-[11px] block ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
-                          {claim.employeeDepartment}
-                        </span>
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-8 w-8 rounded-full overflow-hidden shrink-0 ring-1 ring-black/5 dark:ring-white/10 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          <img
+                            src={getEmployeeAvatar(claim.employeeName)}
+                            alt={claim.employeeName}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className={`font-medium text-[13px] leading-tight truncate ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                            {claim.employeeName}
+                          </span>
+                          {claim.employeeDepartment && (
+                            <span className={`text-[11.5px] leading-tight mt-0.5 truncate ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
+                              {claim.employeeDepartment}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="py-3 px-4 max-w-xs">

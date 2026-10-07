@@ -223,10 +223,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white text-neutral-900 relative flex flex-col justify-between p-5 sm:p-7 lg:px-10 lg:py-6 select-none">
+    <div className="h-screen w-screen overflow-hidden bg-white text-neutral-900 relative flex items-center justify-center p-5 select-none">
       <StaticHalftoneBackground />
 
-      <div className="relative z-10 my-auto max-w-[340px] sm:max-w-[350px] w-full">
+      {/* Top Left Brand Logo & Title */}
+      <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20 flex items-center gap-2.5">
+        <div className="h-5 w-5 rounded-full border-[1.8px] border-zinc-900 flex items-center justify-center shrink-0">
+          <div className="h-1.5 w-1.5 rounded-full bg-zinc-900" />
+        </div>
+        <span className="text-[15px] font-semibold tracking-tight text-zinc-900">
+          Payout
+        </span>
+      </div>
+
+      <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08)] p-8 sm:p-9">
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight text-neutral-950">
             Sign In
@@ -430,10 +440,6 @@ export default function LoginPage() {
             Create an Account
           </button>
         </div>
-      </div>
-
-      <div className="relative z-10 text-[10px] font-mono text-neutral-400">
-        © 2026 PAYOUT TECHNOLOGIES INC.
       </div>
 
       {showForgotModal && (

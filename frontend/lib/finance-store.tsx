@@ -18,6 +18,7 @@ export interface ReimbursementItem {
   id: string;
   claimId: string;
   employee: string;
+  avatar?: string;
   department: string;
   amount: number;
   currency: string;
@@ -65,6 +66,7 @@ const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
     id: "RMB-101",
     claimId: "CLM-006",
     employee: "Rahul Sharma",
+    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
     department: "Engineering",
     amount: 8450,
     currency: "INR",
@@ -77,6 +79,7 @@ const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
     id: "RMB-102",
     claimId: "CLM-008",
     employee: "Priya Singh",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
     department: "Operations",
     amount: 4200,
     currency: "INR",
@@ -89,6 +92,7 @@ const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
     id: "RMB-103",
     claimId: "CLM-004",
     employee: "Amit Kumar",
+    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
     department: "Sales",
     amount: 12800,
     currency: "INR",
@@ -101,6 +105,7 @@ const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
     id: "RMB-104",
     claimId: "CLM-010",
     employee: "Neha Verma",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
     department: "HR",
     amount: 3650,
     currency: "INR",
