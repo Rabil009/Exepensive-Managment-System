@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -128,15 +128,6 @@ export function QuarterlyFinancialStatements() {
             <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
               Quarterly Financial Statements
             </h3>
-            <span
-              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                isDark
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
-              }`}
-            >
-              Q2 2026 Audited
-            </span>
           </div>
           <p className="text-xs text-zinc-500 mt-0.5">
             Download verified GST reports and company expense reconciliations.
