@@ -83,7 +83,7 @@ export function EmployeeAvatar({
   const sizeClasses = {
     xs: "h-6 w-6 text-[10px]",
     sm: "h-7 w-7 text-xs",
-    md: "h-9 w-9 text-xs",
+    md: "h-8 w-8 text-xs",
     lg: "h-11 w-11 text-sm",
     xl: "h-14 w-14 text-base",
   }[size];
@@ -146,12 +146,14 @@ export function EmployeeCell({
   return (
     <div className="flex items-center gap-3">
       <EmployeeAvatar name={name} department={department} src={avatarSrc} size={size} shape={shape} />
-      <div className="min-w-0">
-        <div className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
+      <div className="flex flex-col min-w-0">
+        <span className="font-medium text-[13px] leading-tight truncate text-zinc-900 dark:text-zinc-100">
           {name}
-        </div>
+        </span>
         {department && (
-          <div className="text-[11px] text-zinc-500 truncate">{department}</div>
+          <span className="text-[11.5px] leading-tight mt-0.5 text-zinc-500 dark:text-zinc-400 truncate">
+            {department}
+          </span>
         )}
       </div>
     </div>
