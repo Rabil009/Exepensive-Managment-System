@@ -21,7 +21,7 @@ export function ReportSummary({ model }: Props) {
     <div className="report-summary grid grid-cols-1 md:grid-cols-3 gap-space-md">
       <div className="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between">
         <div className="flex items-center justify-between text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
-          <span className="">Total Claimed</span>
+          <span className="">Report Total</span>
           <span className="material-symbols-outlined text-base text-primary">
             receipt_long
           </span>
@@ -31,11 +31,11 @@ export function ReportSummary({ model }: Props) {
             {formatTotal(items)}
           </span>
           <span className="font-body-sm text-body-sm text-on-surface-variant">
-            ({items.length} receipts)
+            ({items.length} expenses)
           </span>
         </div>
         <div className="mt-2 pt-2 border-t border-outline-variant/20 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
-          <span className="">Avg. transaction</span>
+          <span className="">Average Expense</span>
           <span className="font-financial-tabular text-financial-tabular font-medium text-on-surface">
             {formatTotal(items, true)}
           </span>
@@ -70,7 +70,7 @@ export function ReportSummary({ model }: Props) {
           <div className="flex justify-between items-center text-body-sm font-body-sm">
             <span className="text-on-surface-variant flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-tertiary-container"></span>
-              Out of Pocket:
+              Out-of-Pocket:
             </span>
             <span className="font-financial-tabular text-financial-tabular font-semibold text-tertiary">
               {formatTotal(outOfPocket)}
@@ -100,7 +100,7 @@ export function ReportSummary({ model }: Props) {
       </div>
       <div className="p-space-md rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col justify-between">
         <div className="flex items-center justify-between text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
-          <span className="">Policy Governance</span>
+          <span className="">Receipt Status</span>
           <span className="material-symbols-outlined text-base text-tertiary">
             verified_user
           </span>
@@ -108,8 +108,8 @@ export function ReportSummary({ model }: Props) {
         <div className="mt-2 flex items-center gap-space-xs">
           <span className="px-2.5 py-0.5 rounded font-headline-sm text-headline-sm bg-tertiary-fixed/30 text-on-tertiary-fixed-variant">
             {verified.length === items.length && items.length
-              ? "100% Compliant"
-              : "Receipts Pending"}
+              ? "All Receipts Attached"
+              : "Receipts Need Review"}
           </span>
         </div>
         <div className="mt-2 pt-2 border-t border-outline-variant/20 flex items-center gap-1.5 font-body-sm text-body-sm text-on-surface-variant">
@@ -117,7 +117,7 @@ export function ReportSummary({ model }: Props) {
             check_circle
           </span>
           <span className="">
-            {verified.length} of {items.length} receipts verified
+            {verified.length} of {items.length} receipts attached
           </span>
         </div>
       </div>

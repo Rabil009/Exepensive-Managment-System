@@ -6,9 +6,9 @@ export function ExpenseDetailsFields({ model }: Props) {
   return (
     <section className="flex flex-col gap-space-md">
       <div className="flex items-center justify-between">
-        <h2 className="text-headline-sm">Details</h2>
+        <h2 className="text-headline-sm">Expense Details</h2>
         <span className="text-label-caps text-on-surface-variant">
-          Manual entry or auto-fill
+          Enter details from your receipt
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
@@ -22,7 +22,7 @@ export function ExpenseDetailsFields({ model }: Props) {
           <input
             id="merchant"
             className={fieldClass}
-            placeholder="Awaiting receipt scan or enter manually..."
+            placeholder="Enter the merchant name"
             value={draft.merchant}
             onChange={(event) => update("merchant", event.target.value)}
             required
@@ -74,7 +74,7 @@ export function ExpenseDetailsFields({ model }: Props) {
             required
           />
           <span className="aura-entry-state mr-3 px-2.5 py-1 rounded-md bg-surface-container-low border border-outline-variant/30 text-label-caps text-on-surface-variant whitespace-nowrap">
-            {Number(draft.amount) > 0 ? "Entered" : "Pending Entry"}
+            {Number(draft.amount) > 0 ? "Entered" : "Enter amount"}
           </span>
         </div>
       </div>

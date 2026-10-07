@@ -22,6 +22,6 @@ export const emptyDraft = (): Draft => ({
   report: "Q4 Design Summit — SFO",
   paymentMethod: "Corporate Card (••4921)",
   purpose: "",
-  attendees: ["Elena Vance"],
+  attendees: ["Rabil Khan"],
   receipt: "",
 });

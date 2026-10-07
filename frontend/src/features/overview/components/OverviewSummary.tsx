@@ -23,7 +23,7 @@ export function OverviewSummary() {
         <div className="mt-space-lg pt-space-sm flex items-center justify-between border-t-0 bg-surface-container-low/50 -mx-space-lg -mb-space-lg px-space-lg py-2.5">
           <div className="inline-flex items-center gap-1.5 text-tertiary font-label-md text-label-md">
             <span className="w-2 h-2 rounded-full bg-tertiary"></span>
-            <span className="">Direct Deposit Oct 28</span>
+            <span className="">Expected payment: Oct 28</span>
           </div>
           <span className="font-body-sm text-body-sm text-on-surface-variant">
             2 approved reports
@@ -51,7 +51,7 @@ export function OverviewSummary() {
         <div className="mt-space-lg pt-space-sm flex items-center justify-between bg-surface-container-low/50 -mx-space-lg -mb-space-lg px-space-lg py-2.5">
           <div className="inline-flex items-center gap-1.5 font-label-md text-label-md text-on-surface">
             <span className="w-2 h-2 rounded-full bg-secondary"></span>
-            <span className="">Under review by Sarah C.</span>
+            <span className="">Awaiting manager review</span>
           </div>
           <span className="font-body-sm text-body-sm text-on-surface-variant">
             1 report
@@ -62,7 +62,7 @@ export function OverviewSummary() {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <span className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">
-              Monthly Spend Allowance
+              Monthly Card Spending
             </span>
             <div className="flex items-baseline gap-2">
               <span className="font-financial-display text-financial-display text-on-surface">
@@ -85,7 +85,7 @@ export function OverviewSummary() {
             ></div>
           </div>
           <div className="flex items-center justify-between font-label-md text-label-md text-on-surface-variant">
-            <span className="">44% utilized</span>
+            <span className="">44% of limit used</span>
             <span className="text-on-surface">{money(4179.5)} remaining</span>
           </div>
         </div>

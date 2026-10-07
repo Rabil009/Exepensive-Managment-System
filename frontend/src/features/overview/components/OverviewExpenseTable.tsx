@@ -31,7 +31,7 @@ export function OverviewExpenseTable({ model }: Props) {
     <section className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-space-md bg-surface-container-lowest gap-space-md">
         <div
-          className="inline-flex p-1 rounded-lg bg-surface-container gap-1"
+          className="inline-flex flex-wrap p-1 rounded-lg bg-surface-container gap-1"
           role="group"
           aria-label="Expense status"
         >
@@ -41,10 +41,12 @@ export function OverviewExpenseTable({ model }: Props) {
               type="button"
               aria-pressed={tab === value}
               onClick={() => setTab(value)}
-              className={`px-3 py-1 rounded-md text-label-md font-label-md transition-all ${tab === value ? "bg-surface-container-lowest text-on-surface shadow-sm" : "text-on-surface-variant hover:text-on-surface"}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-label-md font-label-md transition-all ${tab === value ? "bg-surface-container-lowest text-on-surface shadow-sm" : "text-on-surface-variant hover:text-on-surface"}`}
             >
               {label}
-              <span className="ml-1 opacity-60">{countFor(value)}</span>
+              <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-outline/10 px-1 text-[11px] leading-none font-medium tabular-nums text-on-surface-variant">
+                {countFor(value)}
+              </span>
             </button>
           ))}
         </div>
@@ -56,7 +58,7 @@ export function OverviewExpenseTable({ model }: Props) {
           <button
             type="button"
             className="p-1 hover:bg-surface-container rounded"
-            title="Refresh Feed"
+            title="Refresh Expenses"
             onClick={() => setNotice("Expense records are up to date.")}
           >
             <Icon className="text-base">sync</Icon>
@@ -88,13 +90,13 @@ export function OverviewExpenseTable({ model }: Props) {
               </th>
               {!hideReceipt && (
                 <th className="py-2 px-space-md font-label-caps">
-                  Receipt Audit
+                  Receipt Status
                 </th>
               )}
               <th className="py-2 px-space-md font-label-caps text-right">
                 Amount
               </th>
-              <th className="py-2 px-space-lg font-label-caps text-right">
+              <th className="py-2 px-space-lg font-label-caps text-left">
                 Status
               </th>
             </tr>
@@ -149,14 +151,14 @@ export function OverviewExpenseTable({ model }: Props) {
                       <Icon className="text-base">
                         {item.receipt ? "attachment" : "receipt_long"}
                       </Icon>
-                      {item.receipt || "No receipt"}
+                      {item.receipt === "Auto-Matched Invoice" ? "Invoice Attached" : item.receipt === "Verified Receipt" ? "Receipt Attached" : item.receipt || "No receipt"}
                     </span>
                   </td>
                 )}
                 <td className="py-3 px-space-md text-right font-financial-tabular whitespace-nowrap">
                   {money(item.amount, item.currency)}
                 </td>
-                <td className="py-3 px-space-lg text-right">
+                <td className="py-3 px-space-lg text-left align-middle">
                   <StatusBadge
                     tone={
                       item.status === "Rejected"
@@ -192,8 +194,7 @@ export function OverviewExpenseTable({ model }: Props) {
             check_circle
           </span>
           <span className="">
-            All transactions synced with Silicon Valley Bank Ledger feed 4
-            minutes ago.
+            Your saved expenses are shown above.
           </span>
         </div>
         <div className="flex items-center gap-1">

@@ -1,3 +1,5 @@
+"use client";
+
 import { AppShell } from "../../shared/layout/AppShell";
 import { Toast } from "../../shared/components/Toast";
 import { useReports } from "./hooks/useReports";

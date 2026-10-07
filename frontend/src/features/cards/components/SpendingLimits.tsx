@@ -18,13 +18,12 @@ export function SpendingLimits({ model }: Props) {
         <div className="flex items-center justify-between border-b border-outline-variant/20 pb-space-md gap-2 flex-wrap">
           <div className="flex flex-col gap-0.5">
             <span className="text-label-caps uppercase tracking-wider text-on-surface-variant font-semibold">
-              Billing Interval
+              Spending Period
             </span>
             <strong className="text-headline-lg">Oct 1 – Oct 31, 2025</strong>
           </div>
           <span className="flex items-center gap-1.5 bg-surface-container-low px-3 py-1.5 rounded-full text-on-surface-variant text-label-md border border-outline-variant/30">
-            <Icon className="text-sm text-primary">autorenew</Icon>Refreshes in
-            7 days
+            <Icon className="text-sm text-primary">autorenew</Icon>Resets Nov 1, 2025
           </span>
         </div>
         <div className="aura-card-kpis">
@@ -32,19 +31,19 @@ export function SpendingLimits({ model }: Props) {
             {
               name: "Total Spent",
               value: spent,
-              note: "44.2% of corporate limit",
+              note: `${percent.toFixed(1)}% of monthly limit used`,
               tone: "",
             },
             {
-              name: "Available Credit",
+              name: "Available to Spend",
               value: limit - spent,
-              note: "Auto-cleared capacity",
+              note: "Remaining spending amount",
               tone: "green",
             },
             {
-              name: "Hard Cap",
+              name: "Monthly Limit",
               value: limit,
-              note: "Monthly allocation",
+              note: "Your spending limit",
               tone: "gray",
             },
           ].map((item) => (
@@ -61,7 +60,7 @@ export function SpendingLimits({ model }: Props) {
           <div className="flex justify-between items-center text-label-md gap-2 flex-wrap">
             <strong className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-primary-container" />
-              Monthly Spend Progress
+              Monthly Spending
             </strong>
             <span className="font-semibold text-primary">
               {money(spent)}{" "}
@@ -83,7 +82,7 @@ export function SpendingLimits({ model }: Props) {
           <div className="flex justify-between gap-2 flex-wrap text-label-caps text-on-surface-variant">
             <span>{money(0.0)}</span>
             <strong className="text-primary">
-              Current Spend: {money(spent)} (44.2%)
+              Spent: {money(spent)} ({percent.toFixed(1)}%)
             </strong>
             <span>Monthly Limit: {money(limit)}</span>
           </div>
@@ -91,10 +90,10 @@ export function SpendingLimits({ model }: Props) {
         <div className="flex flex-col gap-space-sm">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-label-caps uppercase tracking-wider text-on-surface-variant">
-              Merchant Category Velocity Rules
+              Spending Limits by Category
             </h2>
             <span className="text-label-caps text-on-surface-variant whitespace-nowrap">
-              4 Policy Sub-caps
+              4 categories
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
@@ -124,7 +123,7 @@ export function SpendingLimits({ model }: Props) {
                 </div>
                 <div className="flex justify-between text-label-caps text-on-surface-variant">
                   <span>
-                    {Math.round((item.spent / item.limit) * 100)}% utilized
+                    {Math.round((item.spent / item.limit) * 100)}% used
                   </span>
                   <span>{money(item.limit - item.spent)} remaining</span>
                 </div>
@@ -134,7 +133,7 @@ export function SpendingLimits({ model }: Props) {
         </div>
         {state.requestedLimit && (
           <p className="text-body-sm text-primary">
-            Demo increase request: {money(state.requestedLimit)} · not sent to
+            Limit increase requested: {money(state.requestedLimit)} · not sent to
             an issuer
           </p>
         )}

@@ -7,7 +7,7 @@ export function ExpenseCategorization({ model }: Props) {
   const { draft, update } = model;
   return (
     <section className="flex flex-col gap-space-md">
-      <h2 className="text-headline-sm">Categorization</h2>
+      <h2 className="text-headline-sm">Category &amp; Payment</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
         <div className="flex flex-col gap-1.5">
           <label

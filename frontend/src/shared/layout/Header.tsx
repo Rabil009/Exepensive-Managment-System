@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { Link } from "react-router";
+import Link from "next/link";
 import { Bell, Sun, Moon } from "lucide-react";
 import { AuraIcon } from "../components/AuraIcon";
 import { useTheme } from "../theme/theme-store";
@@ -51,7 +51,7 @@ export function Header({ searchRef, onSearch, onNotifications }: HeaderProps) {
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <Link
-          to="/employee/expenses/new"
+          href="/employee/expenses/new"
           className="finance-primary-button inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-lg text-sm font-medium shadow-sm"
           aria-label="New Expense"
         >

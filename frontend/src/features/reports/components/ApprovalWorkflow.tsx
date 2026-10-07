@@ -14,8 +14,8 @@ export function ApprovalWorkflow({ model }: Props) {
           {completed
             ? "Review complete"
             : recalled
-              ? "Submission recalled — ready for editing"
-              : "Demo approval workflow · Est. completion: Oct 28, 2025"}
+              ? "Report withdrawn - ready to edit"
+              : "Report Approval Progress - Sample Timeline"}
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-space-md pt-2">
@@ -56,7 +56,7 @@ export function ApprovalWorkflow({ model }: Props) {
                         : "neutral"
                   }
                 >
-                  {completed ? "Passed" : recalled ? "Queued" : step.status}
+                  {completed ? "Complete" : recalled ? "Not Submitted" : step.status}
                 </StatusBadge>
               </div>
               <p className="text-body-sm mt-0.5">{step.owner}</p>

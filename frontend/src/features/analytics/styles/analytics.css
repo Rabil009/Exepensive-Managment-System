@@ -1,4 +1,18 @@
 /* Layout and typography from the supplied Analytics HTML. */
+.analytics-card-selector {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-hairline);
+  cursor: pointer;
+}
+.analytics-card-selector:hover {
+  border-color: var(--text-primary);
+}
+.analytics-card-selector[aria-pressed="true"] {
+  background: var(--text-primary);
+  color: var(--surface-card);
+  border-color: var(--text-primary);
+}
 .pasted-analytics {
   padding-top: 24px;
 }

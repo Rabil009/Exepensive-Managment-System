@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import Link from "next/link";
 import { AuraIcon } from "../../../shared/components/AuraIcon";
 import { useExpenseForm } from "../hooks/useExpenseForm";
 import { panelClass } from "../styles/formClasses";
@@ -25,7 +25,7 @@ export function ExpenseForm() {
         >
           {model.error || model.message}
           {model.submitted && (
-            <Link to={`/employee/reports?expense=${model.draft.id}`}>
+            <Link href={`/employee/reports?expense=${model.draft.id}`}>
               View expense →
             </Link>
           )}
@@ -43,11 +43,10 @@ export function ExpenseForm() {
             </span>
             <div className="flex flex-col">
               <strong className="text-body-md text-on-primary-fixed">
-                Instant Neural Auto-Fill
+                Enter Your Expense Details
               </strong>
               <span className="text-body-sm text-on-surface-variant">
-                Automatic receipt extraction is not connected yet. Attach a
-                receipt on the left and enter the details below.
+                Use your receipt to enter the merchant, date, and amount below.
               </span>
             </div>
           </div>
@@ -63,7 +62,7 @@ export function ExpenseForm() {
               <AuraIcon className="text-xl">shield</AuraIcon>
               <span>
                 <strong>Policy review</strong>
-                <small>Policy clearance will be checked during approval.</small>
+                <small>Review your company’s expense policy before submitting.</small>
               </span>
             </div>
           </div>

@@ -1,11 +1,11 @@
 # Frontend architecture
 
+Next.js routes live in `frontend/app/`; its root layout loads fonts and styles, and `providers.tsx` restores browser state before mounting the expense provider. The existing feature components remain in `frontend/src/`.
+
 ## Folder map
 
 ```text
 frontend/src/
-  app/App.tsx                 Route definitions and expense provider
-  main.tsx                    React entry point
   features/
     overview/                 Overview page, summary, receipt shortcut, expense table
     expenses/                 New Expense page and the shared expense domain
@@ -14,7 +14,7 @@ frontend/src/
     analytics/                Supplied HTML sections, charts, card usage, funding, insights
   shared/
     components/               AuraIcon, Toast, Finance StatusBadge
-    layout/                   AppShell, Finance Sidebar/Header/SlideOutIconRail, navigation
+    layout/                   AppShell, Finance Sidebar/Header, navigation
     theme/                    Finance ThemeProvider and useTheme
     styles/                   Finance theme tokens, compatibility aliases, shared styles
     utils/                    Currency/date formatting and CSV export
@@ -26,7 +26,7 @@ Each implemented feature has a page entry, `components/`, `hooks/`, and `data/` 
 
 | Task                                        | Location                                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------------------- |
-| Routes and page loading                     | `frontend/src/app/App.tsx`                                                      |
+| Routes and page loading                     | `frontend/app/`                                                      |
 | Navigation labels and URLs                  | `frontend/src/shared/layout/navigation.ts`                                      |
 | Sidebar branding or profile                 | `frontend/src/shared/layout/Sidebar.tsx`                                        |
 | Sidebar sizes, icon rail, mobile layout     | `frontend/src/shared/styles/shell.css`                                          |

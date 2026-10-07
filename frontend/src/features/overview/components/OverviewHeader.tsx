@@ -5,10 +5,10 @@ export function OverviewHeader({ cycleFilter, exportExpenses }: Props) {
       <div className="space-y-1">
         <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps tracking-widest uppercase">
           <span className="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>
-          <span className="">Executive Portfolio • FY25 Q4</span>
+          <span className="">My Expenses</span>
         </div>
         <h1 className="font-display-lg text-display-lg text-on-surface tracking-tight">
-          Good morning, Rabil
+          Welcome, Rabil
         </h1>
       </div>
       <div className="flex flex-wrap items-center gap-space-sm">
@@ -19,7 +19,7 @@ export function OverviewHeader({ cycleFilter, exportExpenses }: Props) {
           <span className="material-symbols-outlined text-base text-on-surface-variant">
             calendar_today
           </span>
-          <span className="">This Month (Oct 1 – 31)</span>
+          <span className="">Oct 1 - 31, 2025</span>
           <span className="material-symbols-outlined text-sm text-on-surface-variant">
             keyboard_arrow_down
           </span>

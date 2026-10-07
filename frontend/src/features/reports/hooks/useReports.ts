@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useExpenses } from "../../expenses/data/ExpensesContext";
 import { reportName, isPersonal } from "../utils/reportTotals";
 import { exportCsv } from "../../../shared/utils/exportCsv";
 export function useReports() {
   const { expenses } = useExpenses();
-  const [params] = useSearchParams();
-  const navigate = useNavigate();
+  const params = useSearchParams();
+  const router = useRouter();
   const groups = [...new Set(expenses.map(reportName))];
   const [selected, setSelected] = useState(() =>
     reportName(
@@ -78,8 +78,8 @@ export function useReports() {
       color: "var(--chart-emerald)",
     },
     {
-      name: "Hardware & Gear",
-      description: "Monitors, Ergonomics",
+      name: "Equipment & Devices",
+      description: "Devices, Office equipment",
       categories: ["Office"],
       color: "var(--chart-amber)",
     },
@@ -127,7 +127,7 @@ export function useReports() {
     );
   }
   function addItem() {
-    navigate(`/employee/expenses/new?report=${encodeURIComponent(selected)}`);
+    router.push(`/employee/expenses/new?report=${encodeURIComponent(selected)}`);
   }
   function selectReport(name: string) {
     setSelected(name);

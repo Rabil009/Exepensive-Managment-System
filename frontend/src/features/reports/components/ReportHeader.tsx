@@ -34,7 +34,7 @@ export function ReportHeader({ model }: Props) {
             className="hover:text-primary transition-colors text-on-surface-variant font-medium"
             href="/employee/dashboard"
           >
-            Expense Management
+            Overview
           </a>
           <span className="opacity-60 text-xs">/</span>
           <a
@@ -82,7 +82,7 @@ export function ReportHeader({ model }: Props) {
           <span className="material-symbols-outlined text-base">
             picture_as_pdf
           </span>
-          <span>Download Summary PDF</span>
+          <span>Save Report as PDF</span>
         </button>
         <button
           type="button"
@@ -92,7 +92,7 @@ export function ReportHeader({ model }: Props) {
           <span className="material-symbols-outlined text-base text-primary">
             add_circle
           </span>
-          <span className="">Add Item</span>
+          <span className="">Add Expense</span>
         </button>
         <button
           type="button"
@@ -101,7 +101,7 @@ export function ReportHeader({ model }: Props) {
           onClick={recallReport}
         >
           <span className="material-symbols-outlined text-base">undo</span>
-          <span className="">Recall Submission</span>
+          <span className="">Withdraw Report</span>
         </button>
       </div>
     </section>

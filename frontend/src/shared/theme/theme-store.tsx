@@ -17,18 +17,19 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("light");
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    if (typeof window === "undefined") return "light";
+    const saved = localStorage.getItem("finpulse-theme");
+    return saved === "dark" ? "dark" : "light";
+  });
 
   useEffect(() => {
-    const saved = localStorage.getItem("finpulse-theme") as ThemeMode | null;
-    const initial = saved === "dark" || saved === "light" ? saved : "light";
-    setThemeState(initial);
-    if (initial === "dark") {
+    if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
-  }, []);
+  }, [theme]);
 
   const setTheme = (mode: ThemeMode) => {
     setThemeState(mode);

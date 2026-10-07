@@ -38,7 +38,7 @@ export function FundingSplit() {
             swap_horiz
           </span>
           <h2 className="font-headline-sm text-headline-sm text-on-surface">
-            Corporate vs Personal Funding Split
+            How I Paid for Expenses
           </h2>
         </div>
         <span className="font-label-caps text-label-caps uppercase px-2 py-0.5 rounded bg-surface-container-low text-outline font-semibold">

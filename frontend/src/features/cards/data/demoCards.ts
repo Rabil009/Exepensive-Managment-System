@@ -55,7 +55,7 @@ export const categories = [
     color: "pink",
   },
   {
-    label: "Equipment & Dev",
+    label: "Equipment & Devices",
     icon: "devices",
     spent: 599.25,
     limit: 1000,
@@ -66,26 +66,26 @@ export const controls = [
   {
     name: "Mobile Wallet",
     icon: "smartphone",
-    enabled: "Apple Pay Linked",
+    enabled: "Wallet enabled",
     disabled: "Wallet disabled",
   },
   {
-    name: "Travel Geo-Fence",
+    name: "Travel Location Limits",
     icon: "flight",
-    enabled: "SFO · HND Active",
-    disabled: "Geo-fence disabled",
+    enabled: "Travel restrictions on",
+    disabled: "Travel restrictions off",
   },
   {
-    name: "Dynamic 3DS",
+    name: "Online Payment Verification",
     icon: "security",
-    enabled: "Rolling CVV",
-    disabled: "3DS disabled",
+    enabled: "Verification on",
+    disabled: "Verification off",
   },
   {
-    name: "ATM Cash Lock",
+    name: "ATM Withdrawal Lock",
     icon: "local_atm",
     enabled: "Cash lock active",
-    disabled: "Corporate Blocked",
+    disabled: "Cash lock off",
   },
 ];
 export type CardState = {

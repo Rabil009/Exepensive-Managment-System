@@ -1,6 +1,6 @@
 import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
-import { Link } from "react-router";
+import Link from "next/link";
 type Props = { model: Pick<ExpenseFormModel, "save" | "submitted" | "ready"> };
 export function ExpenseFormHeader({ model }: Props) {
   const { save, submitted, ready } = model;
@@ -11,7 +11,7 @@ export function ExpenseFormHeader({ model }: Props) {
           className="flex items-center gap-2 text-label-md text-on-surface-variant pt-1"
           aria-label="Breadcrumb"
         >
-          <Link to="/employee/dashboard" className="hover:text-on-surface">
+          <Link href="/employee/dashboard" className="hover:text-on-surface">
             Overview
           </Link>
           <Icon className="text-xs">chevron_right</Icon>
@@ -20,11 +20,11 @@ export function ExpenseFormHeader({ model }: Props) {
         <div className="flex items-center gap-3">
           <h1 className="text-display-lg">New Expense</h1>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-fixed/60 text-primary text-label-caps font-semibold uppercase tracking-wider">
-            <Icon className="text-xs">auto_awesome</Icon>Smart Capture
+            <Icon className="text-xs">auto_awesome</Icon>Receipt Upload
           </span>
         </div>
         <p className="text-body-md text-on-surface-variant">
-          Drop a receipt, bill, or invoice and enter your expense details.
+          Attach a receipt and enter the details of your work expense.
         </p>
       </div>
       <div className="flex items-center gap-space-sm">
@@ -41,7 +41,7 @@ export function ExpenseFormHeader({ model }: Props) {
           disabled={!ready || submitted}
           type="submit"
         >
-          <Icon className="text-base">check</Icon>Submit
+          <Icon className="text-base">check</Icon>Submit Expense
         </button>
       </div>
     </div>

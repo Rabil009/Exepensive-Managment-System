@@ -44,10 +44,10 @@ export function ReportTransactions({ model }: Props) {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h3 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-              Included Transactions
+              Report Expenses
             </h3>
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Showing all {items.length} transactions associated with {selected}
+              {items.length} expenses in {selected}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -71,8 +71,8 @@ export function ReportTransactions({ model }: Props) {
               </span>
               <input
                 className="bg-transparent border-none outline-none font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant w-full"
-                aria-label="Filter merchant or code"
-                placeholder="Filter merchant, code..."
+                aria-label="Search report expenses"
+                placeholder="Search merchant or description..."
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -131,7 +131,7 @@ export function ReportTransactions({ model }: Props) {
               <th className="py-2.5 px-space-md">Merchant &amp; Details</th>
               <th className="py-2.5 px-space-md">Category</th>
               <th className="py-2.5 px-space-md">Payment Method</th>
-              <th className="py-2.5 px-space-md">Audit Status</th>
+              <th className="py-2.5 px-space-md">Receipt Status</th>
               <th className="py-2.5 px-space-md text-right rounded-r-lg">
                 Amount
               </th>
@@ -170,7 +170,7 @@ export function ReportTransactions({ model }: Props) {
                 </td>
                 <td className="py-3 px-space-md">
                   <StatusBadge tone={item.receipt ? "success" : "warning"}>
-                    {item.receipt || "Receipt missing"}
+                    {item.receipt === "Auto-Matched Invoice" ? "Invoice Attached" : item.receipt === "Verified Receipt" ? "Receipt Attached" : item.receipt || "Receipt missing"}
                   </StatusBadge>
                 </td>
                 <td

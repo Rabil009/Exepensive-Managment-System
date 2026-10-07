@@ -28,7 +28,7 @@ export function ExpenseAttendees({ model }: Props) {
       <div className="flex items-center justify-between">
         <h2 className="text-headline-sm">Attendees &amp; Notes</h2>
         <span className="text-label-caps text-on-surface-variant uppercase tracking-wider">
-          Compliance &amp; Audit
+          For meals and group expenses
         </span>
       </div>
       <div className="flex flex-col gap-1.5">
@@ -38,16 +38,16 @@ export function ExpenseAttendees({ model }: Props) {
         <input
           id="business-purpose"
           className={fieldClass}
-          placeholder="Provide business justification or client details..."
+          placeholder="Describe why this expense was needed for work"
           value={draft.purpose}
           onChange={(event) => update("purpose", event.target.value)}
         />
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <label className="text-label-md font-medium">Participants</label>
+          <label className="text-label-md font-medium">Attendees</label>
           <span className="text-label-caps px-2 py-0.5 rounded-full bg-surface-container-high">
-            {draft.attendees.length} Included
+            {draft.attendees.length} {draft.attendees.length === 1 ? "attendee" : "attendees"}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -66,7 +66,7 @@ export function ExpenseAttendees({ model }: Props) {
               <span className="text-body-sm font-medium">{name}</span>
               {index === 0 ? (
                 <span className="text-label-caps px-1.5 py-0.5 rounded bg-surface-container-high uppercase">
-                  Host
+                  Organizer
                 </span>
               ) : (
                 <button

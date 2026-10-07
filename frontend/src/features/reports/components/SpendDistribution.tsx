@@ -1,5 +1,5 @@
 import type { ReportsModel } from "../hooks/useReports";
-import { Link } from "react-router";
+import Link from "next/link";
 import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
 import { formatTotal } from "../utils/reportTotals";
 
@@ -13,17 +13,17 @@ export function SpendDistribution({ model }: Props) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Icon className="text-primary text-base">public</Icon>
-          <h2 className="text-headline-sm">Quarterly Spend Distribution</h2>
+          <h2 className="text-headline-sm">Your Spending by Category</h2>
         </div>
         <Link
           className="text-label-md text-primary hover:underline"
-          to="/employee/analytics"
+          href="/employee/analytics"
         >
-          Full Analytics →
+          View Analytics →
         </Link>
       </div>
       <p className="text-body-sm text-on-surface-variant">
-        INR expense receipts across your Q4 FY25 reports
+        Expenses across your October-December 2025 reports
       </p>
       <div className="flex h-2 rounded-full overflow-hidden bg-surface-container-high my-1">
         {distribution.map((group) => (

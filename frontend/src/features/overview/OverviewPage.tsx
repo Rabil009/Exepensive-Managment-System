@@ -1,3 +1,5 @@
+"use client";
+
 import { AppShell } from "../../shared/layout/AppShell";
 import { Toast } from "../../shared/components/Toast";
 import { useOverview } from "./hooks/useOverview";
@@ -17,7 +19,6 @@ export default function OverviewPage() {
         />
         <OverviewSummary />
         <QuickReceiptCapture
-          onScan={() => model.setNotice("Use New Expense to attach a receipt.")}
           onUpload={() =>
             model.setNotice(
               "Open New Expense to attach this receipt and enter its details.",

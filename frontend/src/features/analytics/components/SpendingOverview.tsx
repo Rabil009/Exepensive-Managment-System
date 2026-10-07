@@ -232,7 +232,7 @@ export function SpendingOverview() {
               Category Breakdown
             </h2>
             <span className="font-label-caps text-label-caps uppercase text-outline">
-              FY25
+              October 2025
             </span>
           </div>
         </div>
@@ -296,7 +296,7 @@ export function SpendingOverview() {
         <div className="flex flex-col gap-2 pt-1 font-body-sm text-body-sm">
           <div className="flex items-center justify-between p-1.5 rounded-lg bg-surface-container-low/40">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--chart-blue)] shrink-0"></span>
+              <span className="w-2.5 h-2.5 bg-[var(--chart-blue)] shrink-0"></span>
               <span className="truncate font-medium text-on-surface">
                 Travel &amp; Lodging
               </span>
@@ -307,7 +307,7 @@ export function SpendingOverview() {
           </div>
           <div className="flex items-center justify-between p-1.5 rounded-lg bg-surface-container-low/40">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-tertiary-container shrink-0"></span>
+              <span className="w-2.5 h-2.5 bg-tertiary-container shrink-0"></span>
               <span className="truncate font-medium text-on-surface">
                 Software &amp; SaaS
               </span>
@@ -318,7 +318,7 @@ export function SpendingOverview() {
           </div>
           <div className="flex items-center justify-between p-1.5 rounded-lg bg-surface-container-low/40">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-secondary shrink-0"></span>
+              <span className="w-2.5 h-2.5 bg-secondary shrink-0"></span>
               <span className="truncate font-medium text-on-surface">
                 Meals &amp; Entertainment
               </span>
@@ -329,9 +329,9 @@ export function SpendingOverview() {
           </div>
           <div className="flex items-center justify-between p-1.5 rounded-lg bg-surface-container-low/40">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--chart-violet)] shrink-0"></span>
+              <span className="w-2.5 h-2.5 bg-[var(--chart-violet)] shrink-0"></span>
               <span className="truncate font-medium text-on-surface">
-                Hardware &amp; Gear
+                Equipment &amp; Devices
               </span>
             </div>
             <span className="font-financial-tabular text-outline font-medium">

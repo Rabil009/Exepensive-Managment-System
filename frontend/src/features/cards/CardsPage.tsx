@@ -1,3 +1,5 @@
+"use client";
+
 import { AppShell } from "../../shared/layout/AppShell";
 import { useCardControls } from "./hooks/useCardControls";
 import { CardsHeader } from "./components/CardsHeader";

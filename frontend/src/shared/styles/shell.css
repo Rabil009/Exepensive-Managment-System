@@ -202,10 +202,6 @@
 .employee-content .aura-physical-card {
   color: #fff;
 }
-.employee-content .aura-card-control.wallet {
-  background: var(--text-primary);
-  color: var(--canvas-bg);
-}
 .employee-content
   .aura-physical-card
   :is(.text-on-primary, .text-on-surface, .aura-card-name) {

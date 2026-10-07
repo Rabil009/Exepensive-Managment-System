@@ -25,10 +25,10 @@ export function ReceiptCapture({ model }: Props) {
   return (
     <>
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-headline-sm">Receipt Ingestion</h2>
+        <h2 className="text-headline-sm">Expense Receipt</h2>
         <span className="inline-flex items-center gap-1.5 text-label-caps px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
           <span className="w-1.5 h-1.5 rounded-full bg-outline" />
-          {draft.receipt ? "Document Attached" : "Awaiting Document"}
+          {draft.receipt ? "Receipt Attached" : "No Receipt Attached"}
         </span>
       </div>
       <div
@@ -63,7 +63,7 @@ export function ReceiptCapture({ model }: Props) {
           </h3>
           <p className="text-body-sm text-on-surface-variant">
             {draft.receipt
-              ? "Receipt filename attached to this expense."
+              ? "Receipt selected. Review your expense details before submitting."
               : "PDF, PNG, JPG, or HEIC supported up to 25MB"}
           </p>
         </div>
@@ -85,7 +85,7 @@ export function ReceiptCapture({ model }: Props) {
               )
             }
           >
-            <Icon className="text-base">phone_iphone</Icon>Continuity Scan
+            <Icon className="text-base">phone_iphone</Icon>Upload Help
           </button>
         </div>
         <input
@@ -97,19 +97,18 @@ export function ReceiptCapture({ model }: Props) {
           onChange={(event) => attach(event.target.files?.[0])}
         />
         <p className="inline-flex items-center gap-1.5 text-[10px] text-on-surface-variant">
-          <Icon className="text-xs">lock</Icon>Receipt details stay in your
-          browser until a service is connected
+          <Icon className="text-xs">lock</Icon>This preview saves the receipt name, not the uploaded file.
         </p>
       </div>
       <div className="px-1 flex flex-col gap-2">
         <span className="text-label-caps text-on-surface-variant uppercase tracking-wider">
-          Engine Capabilities
+          Expense Checklist
         </span>
         <div className="flex flex-wrap gap-2 text-[10px] text-on-surface-variant">
           {[
-            ["psychology", "Neural OCR parsing"],
-            ["currency_exchange", "Multi-currency"],
-            ["link", "Card swipe auto-match"],
+            ["psychology", "Attach a receipt"],
+            ["currency_exchange", "Enter amount in INR"],
+            ["link", "Link a card transaction"],
           ].map(([icon, label]) => (
             <span
               key={label}

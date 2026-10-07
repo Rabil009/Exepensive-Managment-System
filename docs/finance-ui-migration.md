@@ -2,7 +2,7 @@
 
 Reference: `devlop-aditya` at `69b6ce57706b6bba400f9b692f9ead14c96bccef`.
 
-The reference portal uses Next.js. This Employee branch uses Vite and React Router, so its routes and runtime stay intact. Finance's presentational components are reused under `frontend/src/shared/` with props replacing their direct Finance-store dependencies.
+Both the reference Finance portal and Employee portal now use React and Next.js. Employee uses App Router routes while retaining its existing feature components and browser data. Finance's presentational components are reused under `frontend/src/shared/` with props replacing their direct Finance-store dependencies.
 
 ## Reused implementation
 
@@ -23,7 +23,7 @@ Employee class names in `global.css` are compatibility aliases to the Finance to
 - Shared layout: `AppShell.tsx`, `Sidebar.tsx`, `Header.tsx`, `SlideOutIconRail.tsx`, `navigation.ts`, and `navigation.types.ts` under `frontend/src/shared/layout/`; removed `AuraShell.tsx`.
 - Shared theme and styling: `shared/theme/theme-store.tsx`, `shared/styles/finance-theme.css`, `shared/styles/global.css`, and `shared/styles/shell.css`.
 - Shared components/utilities: `shared/components/StatusBadge.tsx` and `shared/utils/classes.ts`.
-- Provider integration: `frontend/src/main.tsx`.
+- Provider integration: `frontend/app/providers.tsx`.
 - Five feature page entries: `OverviewPage.tsx`, `NewExpensePage.tsx`, `ReportsPage.tsx`, `CardsPage.tsx`, and `AnalyticsPage.tsx`.
 - Employee section styling: `OverviewExpenseTable.tsx`, `CardTransactions.tsx`, `ApprovalWorkflow.tsx`, `ReportHeader.tsx`, `ReportTransactions.tsx`, `SpendDistribution.tsx`, and Analytics `SpendingOverview.tsx`.
 - Feature CSS: `features/expenses/styles/expense-form.css`, `features/cards/styles/cards.css`, and `features/reports/styles/reports.css`.
@@ -45,7 +45,7 @@ The former `AuraShell`, Aura sidebar/header implementations, and sidebar layout 
 
 ## Scope and remaining limits
 
-Finance and Manager routes do not exist in this Vite branch. Cross-role switching cannot be exercised here; the reusable UI is configured for Employee. Existing demo integrations and static Analytics controls remain as before. No Finance business data, stores, queue views, or navigation items were imported.
+Finance and Manager routes live in the separate Next.js Finance portal. Cross-role switching cannot be exercised here; the reusable UI is configured for Employee. Existing demo integrations and static Analytics controls remain as before. No Finance business data, stores, queue views, or navigation items were imported.
 
 Validate with `corepack pnpm build`, `corepack pnpm typecheck`, `corepack pnpm lint`, and `corepack pnpm format:check`. Check light/dark mode, all Employee routes, expense search, report filtering, card dialogs, sidebar close/reveal/pin, and mobile navigation.
 

@@ -32,4 +32,12 @@ The Finance Turbopack root points to the workspace root so Next.js can resolve p
 
 Employee now uses the latest Aditya sidebar geometry: 240px expanded, 64px collapsed, 40px navigation rows, and 16px icons. One sidebar component handles both states. Employee keeps its continuous navigation list, user identity, and gray theme.
 
-Employee `/login` and `/employee/login` open the shared Finance login page with `?portal=employee`, selecting Employee Portal automatically. Configure `VITE_LOGIN_URL` in Employee for deployments; both development servers must be running locally. Existing dashboard routes remain accessible directly. This adds shared login navigation, not authentication enforcement.
+Employee `/login` and `/employee/login` open the shared Finance login page with `?portal=employee`, selecting Employee Portal automatically. Configure `LOGIN_URL` in Employee for deployments; both development servers must be running locally. Existing dashboard routes remain accessible directly. This adds shared login navigation, not authentication enforcement.
+
+## Employee migration to Next.js
+
+The earlier Vite arrangement above describes the original merge. Both portals now use React and Next.js. Employee uses native App Router routes, `next/link`, and `next/navigation`; its old Vite entry points and React Router dependency were removed. Employee retains port 5173 and its storage keys, so existing browser records stay available. Its server login redirect reads `LOGIN_URL`.
+
+## Dependency alignment with Aditya
+
+Employee's dependency declarations now match `origin/devlop-aditya` (`288eadf`) for every package it uses: React/React DOM 19.2.8, Next.js 16.3.8, Lucide ^1.52.0, TypeScript ^5, Tailwind/PostCSS ^4, Node types ^20, React types ^19, and ESLint ^9 with eslint-config-next 16.3.8. Unused Finance libraries are not added to Employee. ESLint replaces Oxlint and uses Aditya's config with an additional ignore for the old Vite `dist/` output.

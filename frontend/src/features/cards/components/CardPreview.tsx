@@ -75,7 +75,7 @@ export function CardPreview({ model }: Props) {
             className="aura-card-control"
             onClick={() =>
               setMessage(
-                "PIN reset requires a connected card issuer. This card is a demo.",
+                "PIN reset is unavailable for sample cards.",
               )
             }
           >
@@ -86,7 +86,7 @@ export function CardPreview({ model }: Props) {
             className="aura-card-control wallet"
             onClick={() =>
               setMessage(
-                "Apple Wallet provisioning requires a connected card issuer. This card is a demo.",
+                "Adding a card to Apple Wallet is unavailable for sample cards.",
               )
             }
           >
@@ -103,13 +103,13 @@ export function CardPreview({ model }: Props) {
               <strong className="text-on-surface">
                 {state.frozen
                   ? "Frozen · Temporarily Paused"
-                  : "Active · Physical Linked"}
+                  : "Active · Physical Card"}
               </strong>
             </span>
           </span>
           <span className="aura-card-protection text-on-surface-variant flex items-center gap-1.5">
             <Icon className="text-sm text-tertiary">verified_user</Icon>
-            Protected
+            Security Settings
           </span>
         </div>
       </div>

@@ -1,5 +1,8 @@
 import { money } from "../../../shared/utils/format";
+import { useExpenses } from "../../expenses/data/ExpensesContext";
 export function AnalyticsInsights() {
+  const { expenses } = useExpenses();
+  const attached = expenses.filter((expense) => expense.receipt?.trim()).length;
   return (
     <section className="grid grid-cols-1 md:grid-cols-3 gap-5">
       <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex items-start gap-3.5 transition-all hover:shadow-md">
@@ -10,7 +13,7 @@ export function AnalyticsInsights() {
         </div>
         <div>
           <span className="font-label-caps text-label-caps uppercase text-outline font-semibold">
-            Highest-Spend Category
+            Top Spending Category
           </span>
           <div className="font-headline-sm text-headline-sm text-on-surface font-semibold mt-1">
             Travel &amp; Lodging
@@ -25,7 +28,7 @@ export function AnalyticsInsights() {
         </div>
         <div>
           <span className="font-label-caps text-label-caps uppercase text-outline font-semibold">
-            Largest Single Expense
+            Largest Expense
           </span>
           <div className="font-headline-sm text-headline-sm text-on-surface font-semibold mt-1">
             {money(1120.0)}
@@ -40,10 +43,10 @@ export function AnalyticsInsights() {
         </div>
         <div>
           <span className="font-label-caps text-label-caps uppercase text-outline font-semibold">
-            Missing Receipts
+            Receipt Coverage
           </span>
           <div className="font-headline-sm text-headline-sm text-tertiary font-semibold mt-1">
-            0 Missing
+            {attached} of {expenses.length} attached
           </div>
         </div>
       </div>

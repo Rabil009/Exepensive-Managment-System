@@ -32,7 +32,7 @@ export function CardTransactions({ model }: Props) {
   return (
     <section className={`${panel} overflow-hidden`}>
       <div className="p-space-lg flex items-center justify-between gap-space-md border-b border-outline-variant/20">
-        <h2 className="text-headline-lg">Included Transactions</h2>
+        <h2 className="text-headline-lg">Card Transactions</h2>
         <button
           type="button"
           className="aura-card-button"
@@ -47,7 +47,7 @@ export function CardTransactions({ model }: Props) {
           <input
             className="bg-transparent border-none outline-none text-body-sm w-full"
             aria-label="Filter transactions"
-            placeholder="Filter merchant, code..."
+            placeholder="Search merchant or purpose..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -139,7 +139,7 @@ export function CardTransactions({ model }: Props) {
       </div>
       <footer className="aura-transactions-footer">
         <span>
-          Showing {visible.length} of {transactions.length} report transactions
+          Showing {visible.length} of {transactions.length} card transactions
         </span>
         <strong>
           TOTAL:{" "}

@@ -1,8 +1,10 @@
+"use client";
+
 import { AppShell } from "../../shared/layout/AppShell";
 import { AnalyticsHeader } from "./components/AnalyticsHeader";
 import { SummaryMetrics } from "./components/SummaryMetrics";
 import { SpendingOverview } from "./components/SpendingOverview";
-import { CardAndApproval } from "./components/CardAndApproval";
+import { CardAndChecklist } from "./components/CardAndChecklist";
 import { FundingSplit } from "./components/FundingSplit";
 import { AnalyticsInsights } from "./components/AnalyticsInsights";
 import "./styles/analytics.css";
@@ -14,7 +16,7 @@ export default function AnalyticsPage() {
         <AnalyticsHeader />
         <SummaryMetrics />
         <SpendingOverview />
-        <CardAndApproval />
+        <CardAndChecklist />
         <FundingSplit />
         <AnalyticsInsights />
       </div>

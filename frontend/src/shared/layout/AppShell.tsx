@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from "react";
-import { useNavigate } from "react-router";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { SidebarUtilityDialog } from "./SidebarUtilityDialog";
 import { Header } from "./Header";
@@ -10,7 +10,7 @@ import "../styles/shell.css";
 const user = {
   name: "Rabil Khan",
   initials: "RK",
-  subtitle: "Employee · Executive Member",
+  subtitle: "Employee",
 };
 const sidebarNav = navigation.filter((item) => item.label !== "New Expense");
 
@@ -23,7 +23,7 @@ export function AppShell({
   active: string;
   onSearch?: (value: string) => void;
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     if (window.matchMedia("(max-width: 767px)").matches) return false;
     return localStorage.getItem("aura-sidebar-expanded") !== "false";
@@ -41,7 +41,7 @@ export function AppShell({
   }
   function onNavigate(label: string) {
     const item = navigation.find((item) => item.label === label);
-    if (item) navigate(item.path);
+    if (item) router.push(item.path);
     if (window.matchMedia("(max-width: 767px)").matches) setSidebarOpen(false);
   }
   const createExpense = () => onNavigate("New Expense");

@@ -14,12 +14,12 @@ export function CardsHeader({ model }: Props) {
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-label-caps uppercase tracking-wider text-primary font-semibold">
-            Governance · Fiscal Fleet
+            My Cards
           </span>
           <span className="w-1 h-1 rounded-full bg-outline-variant" />
           <span className="inline-flex items-center gap-1.5 bg-tertiary/10 text-tertiary px-2 py-0.5 rounded text-label-caps font-semibold">
             <span className="w-1.5 h-1.5 rounded-full bg-tertiary" />
-            Demo Card Controls
+            Sample Cards
           </span>
         </div>
         <h1 className="text-display-lg">Cards &amp; Spending Limits</h1>
@@ -51,7 +51,7 @@ export function CardsHeader({ model }: Props) {
           className="aura-card-button primary"
           onClick={() => openDialog("virtual")}
         >
-          <Icon className="text-base">add</Icon>Issue Virtual Card
+          <Icon className="text-base">add</Icon>Create Virtual Card
         </button>
       </div>
     </div>

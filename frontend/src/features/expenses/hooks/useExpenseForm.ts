@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router";
+import { useSearchParams } from "next/navigation";
 import { useExpenses } from "../data/ExpensesContext";
 import { draftKey, emptyDraft, type Draft } from "../data/expenseDraft";
 import type { ExpenseStatus } from "../types";
 import type { UnlinkedTransaction } from "../data/demoTransactions";
 export function useExpenseForm() {
-  const [params] = useSearchParams();
-  const { addExpense, removeDraft } = useExpenses();
+  const params = useSearchParams();
+  const { expenses, addExpense, removeDraft } = useExpenses();
   const [draft, setDraft] = useState<Draft>(() => {
+    const existing = expenses.find((expense) => expense.id === params.get("draft") && expense.status === "Draft");
+    if (existing) return {
+      ...emptyDraft(), ...existing, amount: String(existing.amount), currency: "INR",
+      report: existing.report || "Unassigned", paymentMethod: existing.paymentMethod || "Corporate Card (••4921)",
+      purpose: existing.description, attendees: existing.attendees || ["Rabil Khan"], receipt: existing.receipt || "",
+    };
     const report = params.get("report");
     try {
       const saved = localStorage.getItem(draftKey);
@@ -21,6 +27,7 @@ export function useExpenseForm() {
   });
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
+  const previewUrl = useRef("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [saved, setSaved] = useState(() => {
@@ -43,14 +50,10 @@ export function useExpenseForm() {
   );
 
   useEffect(() => {
-    if (!file?.type.startsWith("image/") || file.type === "image/heic") {
-      setPreview("");
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+    return () => {
+      if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+    };
+  }, []);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -70,6 +73,12 @@ export function useExpenseForm() {
       return;
     }
     setFile(next);
+    if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+    previewUrl.current =
+      next.type.startsWith("image/") && next.type !== "image/heic"
+        ? URL.createObjectURL(next)
+        : "";
+    setPreview(previewUrl.current);
     update("receipt", next.name);
     if (inputRef.current) inputRef.current.value = "";
   }
@@ -116,6 +125,9 @@ export function useExpenseForm() {
       localStorage.removeItem(draftKey);
       setDraft(emptyDraft());
       setFile(null);
+      if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+      previewUrl.current = "";
+      setPreview("");
       setError("");
       setMessage("");
       setSaved(false);

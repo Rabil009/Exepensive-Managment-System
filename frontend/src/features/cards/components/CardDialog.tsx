@@ -39,7 +39,7 @@ export function CardDialog({ model }: Props) {
           <h2>
             {dialogType === "limit"
               ? "Request limit increase"
-              : "Issue virtual card"}
+              : "Create virtual card"}
           </h2>
           <button
             type="button"
@@ -92,7 +92,7 @@ export function CardDialog({ model }: Props) {
             Cancel
           </button>
           <button type="submit" className="aura-card-button primary">
-            Save Demo {dialogType === "limit" ? "Request" : "Card"}
+            Save {dialogType === "limit" ? "Request" : "Card"}
           </button>
         </div>
       </form>

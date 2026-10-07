@@ -19,7 +19,7 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
               ...expense,
               currency: "INR",
             })),
-            ...initialExpenses,
+            ...initialExpenses.filter((base) => !(JSON.parse(saved) as Expense[]).some((expense) => expense.id === base.id)),
           ]
         : initialExpenses;
     } catch {
@@ -32,20 +32,20 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
       ...expenses.filter(
         (item) =>
           item.id !== expense.id &&
-          !initialExpenses.some((base) => base.id === item.id),
+          !initialExpenses.includes(item),
       ),
     ];
     localStorage.setItem(key, JSON.stringify(userExpenses));
-    setExpenses([...userExpenses, ...initialExpenses]);
+    setExpenses([...userExpenses, ...initialExpenses.filter((base) => !userExpenses.some((expense) => expense.id === base.id))]);
   };
   const removeDraft = (id: string) => {
     const userExpenses = expenses.filter(
       (item) =>
         !(item.id === id && item.status === "Draft") &&
-        !initialExpenses.some((base) => base.id === item.id),
+        !initialExpenses.includes(item),
     );
     localStorage.setItem(key, JSON.stringify(userExpenses));
-    setExpenses([...userExpenses, ...initialExpenses]);
+    setExpenses([...userExpenses, ...initialExpenses.filter((base) => !userExpenses.some((expense) => expense.id === base.id))]);
   };
   return (
     <Context.Provider value={{ expenses, addExpense, removeDraft }}>

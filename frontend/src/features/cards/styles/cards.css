@@ -131,10 +131,9 @@
   font-weight: 500;
   white-space: nowrap;
 }
-.aura-cards .aura-card-control:hover {
-  background: var(--surface-elevated);
-}
-.aura-cards .aura-card-control.wallet {
+.aura-cards .aura-card-control:hover,
+.aura-cards .aura-card-control:focus-visible,
+.aura-cards .aura-card-control:active {
   background: var(--text-primary);
   color: var(--canvas-bg);
 }
