@@ -1,2 +1,5 @@
 packages:
   - "frontend"
+  - "portals/finance"
+allowBuilds:
+  unrs-resolver: true

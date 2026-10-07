@@ -26,3 +26,13 @@ Open http://127.0.0.1:5173/. Run `corepack pnpm build` and `corepack pnpm lint` 
 ## Data
 
 Expense records and demo card settings are stored in this browser. Receipt OCR and card issuer services are not connected. Reports and Overview use the same expense records. Analytics reproduces the supplied HTML's static sample values and chart geometry; its filter and export controls are visual elements from that HTML.
+
+## Finance portal from Aditya
+
+The `devlop-aditya` Next.js app lives in `portals/finance/`. The Employee app in `frontend/` retains its UI, data, routes, and Vite commands.
+
+```sh
+corepack pnpm dev:finance
+```
+
+Open http://localhost:3000/ for the Finance login and http://localhost:3000/dashboard for its dashboard. `corepack pnpm build:finance` builds this portal. The default `corepack pnpm dev` continues to run Employee on port 5173.

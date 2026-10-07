@@ -13,7 +13,9 @@
     "typecheck": "corepack pnpm -r typecheck",
     "lint": "corepack pnpm --filter frontend lint",
     "format": "prettier --write frontend/src README.md docs/architecture.md docs/coding-standards.md",
-    "format:check": "prettier --check frontend/src README.md docs/architecture.md docs/coding-standards.md"
+    "format:check": "prettier --check frontend/src README.md docs/architecture.md docs/coding-standards.md",
+    "dev:finance": "corepack pnpm --filter finpulse dev --port 3000",
+    "build:finance": "corepack pnpm --filter finpulse build"
   },
   "devDependencies": {
     "prettier": "3.9.9"
