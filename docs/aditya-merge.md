@@ -12,9 +12,18 @@ The apps run separately. The login Employee Portal target now redirects to the e
 
 The Finance Turbopack root points to the workspace root so Next.js can resolve pnpm-linked dependencies. This is the only adaptation to the imported application configuration.
 
-## Verification
+## Initial merge verification
 
 - Employee build and lint passed.
 - Finance production build and TypeScript checks passed for all imported routes.
 - `git diff 52a09b5 -- frontend` is empty: all Employee frontend files are unchanged.
 - All 86 imported Finance files match the source branch byte for byte except the documented `next.config.ts` workspace root adjustment.
+
+## Latest Aditya update
+
+- Merged `origin/devlop-aditya` commit `288eadf` into `Rabil`.
+- Employee checkpoint before this update: `83164eb`.
+- Applied the source's login layout, profile avatars, and sidebar fixes to `portals/finance/`.
+- Removed Finance's old `SlideOutIconRail.tsx` as deleted upstream; its sidebar now handles collapse itself.
+- Retained all Employee files, gray controls, and the login redirect to the Employee dashboard.
+- Finance production build and TypeScript checks passed. All 12 upstream file changes match the source in the Finance portal, and Employee source matches the checkpoint exactly.
