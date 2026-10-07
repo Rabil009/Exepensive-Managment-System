@@ -18,6 +18,7 @@
   :root {
     --canvas-bg: #FAFAFA;
     --surface-card: #FFFFFF;
+    --surface-navigation: #F8F8F9;
     --surface-elevated: #F4F4F5;
     --border-hairline: rgba(0, 0, 0, 0.08);
     --text-primary: #18181B;
@@ -35,6 +36,7 @@
   .dark {
     --canvas-bg: #09090B;
     --surface-card: #111113;
+    --surface-navigation: #09090B;
     --surface-elevated: #18181B;
     --border-hairline: rgba(255, 255, 255, 0.07);
     --text-primary: #F4F4F5;
