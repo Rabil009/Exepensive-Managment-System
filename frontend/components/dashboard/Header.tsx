@@ -1,30 +1,47 @@
 "use client";
 
 import React from "react";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, PanelLeft } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 
 interface HeaderProps {
   title?: string;
   rightContent?: React.ReactNode;
+  onToggleSidebar?: () => void;
 }
 
 export function Header({
   title = "Finance Operations",
   rightContent,
+  onToggleSidebar,
 }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
   return (
-    <header className={`h-12 w-full border-b flex items-center justify-between px-6 shrink-0 select-none transition-colors ${
+    <header className={`h-12 w-full border-b flex items-center justify-between px-4 sm:px-6 shrink-0 select-none transition-colors ${
       isDark
         ? "bg-[#09090B] border-white/[0.08] text-[#F4F4F5]"
         : "bg-white border-zinc-200 text-zinc-900"
     }`}>
-      {/* Left Title */}
-      <div className="flex items-center gap-3">
-        <span className={`text-[14px] font-medium ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
+      {/* Left Title + Mobile Sidebar Toggle */}
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            title="Toggle Menu"
+            aria-label="Toggle Menu"
+            className={`md:hidden h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer ${
+              isDark
+                ? "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
+                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+            }`}
+          >
+            <PanelLeft className="h-4 w-4 stroke-[1.85]" />
+          </button>
+        )}
+        <span className={`text-[13.5px] sm:text-[14px] font-medium truncate ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
           {title}
         </span>
       </div>

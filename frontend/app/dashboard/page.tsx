@@ -49,6 +49,13 @@ function DashboardContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+  // Auto-collapse sidebar on mobile/tablet screens for clean full-width view
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setSidebarCollapsed(true);
+    }
+  }, []);
+
   // Modals state
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -93,6 +100,7 @@ function DashboardContent() {
         {/* Top Header with Single Filter Option in Top Right Corner */}
         <Header
           title={getPageTitle()}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
           rightContent={
             activeView === "Dashboard" ? (
               <GlobalFilters
@@ -105,7 +113,7 @@ function DashboardContent() {
         />
 
         {/* Scrollable Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Main Dashboard Overview View */}
           {activeView === "Dashboard" && (
             <>

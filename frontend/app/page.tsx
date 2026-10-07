@@ -205,29 +205,17 @@ export default function LoginPage() {
     }, 400);
   };
 
-  const handleSocialAuth = (provider: "Google" | "Apple") => {
-    const demoEmail = provider === "Google" ? "alex@payout.fi" : "alex@apple.com";
-    setEmail(demoEmail);
-    setPassword("••••••••••••");
-    setIsLoading(true);
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("payout_user_role", selectedPortal);
-      localStorage.setItem("payout_user_email", demoEmail);
-    }
-
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push(selectedPortal);
-    }, 300);
+  const handleSocialAuth = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Keep buttons present without triggering any redirect or action
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white text-neutral-900 relative flex items-center justify-center p-5 select-none">
+    <div className="min-h-screen w-full overflow-y-auto sm:overflow-hidden bg-white text-neutral-900 relative flex items-center justify-center p-4 sm:p-5 select-none">
       <StaticHalftoneBackground />
 
       {/* Top Left Brand Logo & Title */}
-      <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20 flex items-center gap-2.5">
+      <div className="absolute top-4 left-4 sm:top-8 sm:left-8 z-20 flex items-center gap-2.5">
         <div className="h-5 w-5 rounded-full border-[1.8px] border-zinc-900 flex items-center justify-center shrink-0">
           <div className="h-1.5 w-1.5 rounded-full bg-zinc-900" />
         </div>
@@ -236,7 +224,7 @@ export default function LoginPage() {
         </span>
       </div>
 
-      <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08)] p-8 sm:p-9">
+      <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08)] p-6 sm:p-9 my-14 sm:my-0">
         <div className="mb-6">
           <h1 className="text-3xl font-bold tracking-tight text-neutral-950">
             Sign In
@@ -249,7 +237,7 @@ export default function LoginPage() {
         <div className="space-y-2 mb-4">
           <button
             type="button"
-            onClick={() => handleSocialAuth("Google")}
+            onClick={handleSocialAuth}
             className="w-full h-10 px-4 rounded-full border border-neutral-200/90 hover:border-neutral-400 bg-white/95 text-neutral-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -275,7 +263,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => handleSocialAuth("Apple")}
+            onClick={handleSocialAuth}
             className="w-full h-10 px-4 rounded-full border border-neutral-200/90 hover:border-neutral-400 bg-white/95 text-neutral-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
           >
             <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 170 170">
