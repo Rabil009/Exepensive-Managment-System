@@ -5,7 +5,8 @@
   :root {
     --canvas-bg: #fafafa;
     --surface-card: #ffffff;
-    --surface-navigation: #ffffff;
+    /* Match the Mobile Wallet control row across Employee navigation bars. */
+    --surface-navigation: #f8f8f9;
     --surface-elevated: #f4f4f5;
     --border-hairline: rgba(0, 0, 0, 0.08);
     --text-primary: #18181b;

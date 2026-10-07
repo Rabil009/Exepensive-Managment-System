@@ -1,3 +1,10 @@
+.aura-cards {
+  --card-control-accent: #b8bbc2;
+}
+.dark .aura-cards {
+  --card-control-accent: #8b8f97;
+}
+
 .aura-cards .aura-card-button {
   height: 36px;
   padding: 0 12px;
@@ -189,17 +196,17 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--chart-blue);
+  background: var(--card-control-accent);
 }
 .aura-spend-track.small {
   height: 6px;
   margin-top: 4px;
 }
 .aura-spend-track.green span {
-  background: var(--chart-emerald);
+  background: var(--card-control-accent);
 }
 .aura-spend-track.gray span {
-  background: var(--text-secondary);
+  background: var(--card-control-accent);
 }
 .aura-category-icon {
   display: grid;
@@ -208,12 +215,12 @@
   height: 28px;
   border-radius: 8px;
   background: var(--surface-elevated);
-  color: var(--chart-blue);
+  color: var(--text-secondary);
   flex: none;
 }
 .aura-category-icon.green {
   background: var(--surface-elevated);
-  color: var(--chart-emerald);
+  color: var(--text-secondary);
 }
 .aura-category-icon.gray {
   background: var(--surface-elevated);
@@ -237,10 +244,13 @@
   box-shadow: 0 1px 2px var(--border-hairline);
 }
 .aura-card-switch.on {
-  background: var(--chart-blue);
+  background: var(--card-control-accent);
 }
 .aura-card-switch.on span {
   margin-left: auto;
+}
+.aura-cards .aura-card-status {
+  background: var(--surface-elevated);
 }
 .aura-transaction-filter {
   display: inline-flex;

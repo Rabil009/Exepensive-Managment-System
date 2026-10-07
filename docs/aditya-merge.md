@@ -8,7 +8,7 @@ The source branch uses Next.js while Employee uses Vite. Its frontend is retaine
 
 Merge conflicts in the original `frontend/` paths were resolved using the Employee checkpoint. The corresponding Finance files were retained in the new portal directory. The root package keeps existing commands and adds `dev:finance` and `build:finance`.
 
-The apps run separately. This merge does not connect role navigation, login state, or expense data between them.
+The apps run separately. The login Employee Portal target now redirects to the existing Employee dashboard through `/employee`. Login state and expense data remain separate between app origins. Configure `EMPLOYEE_PORTAL_URL` for deployed environments.
 
 The Finance Turbopack root points to the workspace root so Next.js can resolve pnpm-linked dependencies. This is the only adaptation to the imported application configuration.
 

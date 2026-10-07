@@ -36,3 +36,5 @@ corepack pnpm dev:finance
 ```
 
 Open http://localhost:3000/ for the Finance login and http://localhost:3000/dashboard for its dashboard. `corepack pnpm build:finance` builds this portal. The default `corepack pnpm dev` continues to run Employee on port 5173.
+
+Selecting **Employee Portal** and signing in redirects to the existing Employee dashboard. Run both apps locally. For deployment, configure `EMPLOYEE_PORTAL_URL` in the Finance app to the full deployed Employee dashboard URL before building.
