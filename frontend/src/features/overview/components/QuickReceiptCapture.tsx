@@ -1,31 +1,64 @@
+"use client";
+
+import React from "react";
+import { ScanLine, Upload } from "lucide-react";
+import { useTheme } from "@/lib/theme-store";
+
 type Props = { onUpload: () => void };
+
 export function QuickReceiptCapture({ onUpload }: Props) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   return (
-    <section className="relative rounded-xl bg-surface-container-lowest p-space-lg shadow-sm overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-space-lg">
-      <div className="flex items-center gap-space-lg">
-        <div className="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary-container shadow-inner flex-shrink-0">
-          <span className="material-symbols-outlined text-2xl">
-            document_scanner
-          </span>
+    <section
+      className={`rounded-xl p-4 border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+        isDark
+          ? "bg-[#111113] border-white/[0.07]"
+          : "bg-white border-zinc-200/80 shadow-xs"
+      }`}
+    >
+      <div className="flex items-center gap-3.5">
+        <div
+          className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border ${
+            isDark
+              ? "bg-[#18181D] border-white/[0.08] text-zinc-200"
+              : "bg-zinc-100 border-zinc-200/80 text-zinc-700"
+          }`}
+        >
+          <ScanLine className="h-5 w-5" />
         </div>
         <div>
-          <h2 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
-            <span className="">Add an Expense Receipt</span>
-            <span className="bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps px-2 py-0.5 rounded uppercase">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+              Add an Expense Receipt
+            </h2>
+            <span
+              className={`text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wide ${
+                isDark
+                  ? "bg-white/[0.06] border-white/[0.08] text-zinc-400"
+                  : "bg-zinc-100 border-zinc-200 text-zinc-600"
+              }`}
+            >
               Receipt Upload
             </span>
-          </h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
+          </div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             Upload a receipt, then review and enter your expense details.
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-space-sm w-full sm:w-auto justify-end">
-        <label className="cursor-pointer inline-flex items-center gap-2 px-space-md py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-headline-sm text-headline-sm transition-all shadow-sm active:scale-95">
-          <span className="material-symbols-outlined text-base">
-            upload_file
-          </span>
-          <span className="">Upload File</span>
+
+      <div className="flex items-center justify-end">
+        <label
+          className={`h-8 px-3 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
+            isDark
+              ? "bg-white text-black hover:bg-zinc-200"
+              : "bg-black text-white hover:bg-zinc-800"
+          }`}
+        >
+          <Upload className="h-3.5 w-3.5" />
+          <span>Upload File</span>
           <input
             accept=".pdf,image/*"
             aria-label="Quick receipt upload"
@@ -43,3 +76,4 @@ export function QuickReceiptCapture({ onUpload }: Props) {
     </section>
   );
 }
+export default QuickReceiptCapture;

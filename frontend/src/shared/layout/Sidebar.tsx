@@ -60,7 +60,14 @@ export function Sidebar({
   return (
     <aside
       aria-label={isCollapsed ? "Collapsed navigation" : "Main navigation"}
-      className={`shrink-0 h-dvh border-r flex flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 bg-[var(--surface-navigation)] ${isCollapsed ? "w-[64px]" : "w-[240px]"} ${isDark ? "border-white/[0.08] text-[#F4F4F5]" : "border-zinc-200/80 text-zinc-900"}`}
+      style={{ willChange: "width" }}
+      className={`shrink-0 h-dvh border-r flex flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-200 ease-in-out ${
+        isCollapsed ? "w-[64px]" : "w-[240px]"
+      } ${
+        isDark
+          ? "bg-[#09090B] border-white/[0.08] text-[#F4F4F5]"
+          : "bg-white border-zinc-200/80 text-zinc-900"
+      }`}
     >
       <div className="flex flex-col w-full min-h-0">
         <div

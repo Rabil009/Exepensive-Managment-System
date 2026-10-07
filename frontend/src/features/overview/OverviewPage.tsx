@@ -12,7 +12,7 @@ export default function OverviewPage() {
   const model = useOverview();
   return (
     <AppShell active="Overview" onSearch={model.setQuery}>
-      <div className="employee-page flex flex-col w-full gap-space-xl">
+      <div className="space-y-6 w-full">
         <OverviewHeader
           cycleFilter={model.cycleFilter}
           exportExpenses={model.exportExpenses}
