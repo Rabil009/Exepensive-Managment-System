@@ -72,6 +72,10 @@ flowchart LR
 - **Hold & Send-Back**: Temporarily freeze claims or return them to employees for revision.
 - **Disbursement & Payouts**: Record settlements via NEFT, RTGS, IMPS, or Corporate Card, attach bank UTR references, and automatically update department budgets.
 
+<p align="center">
+  <img src="docs/screenshots/finance-dashboard.png" alt="Finance Operations Dashboard" width="100%" />
+</p>
+
 ---
 
 ## 🛠️ Skills & Tech
