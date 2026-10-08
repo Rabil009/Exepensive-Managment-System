@@ -174,8 +174,8 @@ export function SpendingLimits({ model }: Props) {
 
                   <div className="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-white/[0.08] overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300"
-                      style={{ width: `${catPercent}%` }}
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ width: `${catPercent}%`, backgroundColor: item.color }}
                     />
                   </div>
 

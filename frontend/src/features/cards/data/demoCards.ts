@@ -38,28 +38,28 @@ export const categories = [
     icon: "flight_takeoff",
     spent: 1962.25,
     limit: 4000,
-    color: "amber",
+    color: "#5A78A6",
   },
   {
     label: "Meals & Per Diem",
     icon: "restaurant",
     spent: 219,
     limit: 1000,
-    color: "blue",
+    color: "#C98642",
   },
   {
     label: "Software & SaaS",
     icon: "cloud_sync",
     spent: 540,
     limit: 1500,
-    color: "pink",
+    color: "#3B9B78",
   },
   {
     label: "Equipment & Devices",
     icon: "devices",
     spent: 599.25,
     limit: 1000,
-    color: "violet",
+    color: "#8875B8",
   },
 ];
 export const controls = [
