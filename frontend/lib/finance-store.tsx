@@ -125,66 +125,37 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [budgets, setBudgets] = useState<DepartmentBudget[]>(MOCK_BUDGETS);
   const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>(INITIAL_REIMBURSEMENTS);
 
-  // Sync with live FastAPI backend when available, with Supabase fallback
-  React.useEffect(() => {
+  // Keep the UI's camelCase models while loading claims and budgets from Supabase.
+  useEffect(() => {
     let isMounted = true;
-    const fetchLiveFinanceData = async () => {
-      try {
-        const [claimsRes, budgetsRes, reimbsRes] = await Promise.all([
-          fetch(`${API_URL}/api/finance/claims`).catch(() => null),
-          fetch(`${API_URL}/api/finance/budgets`).catch(() => null),
-          fetch(`${API_URL}/api/finance/reimbursements`).catch(() => null),
-        ]);
-
-        let loadedClaims = false;
-        let loadedBudgets = false;
-
-        if (claimsRes && claimsRes.ok) {
-          const liveClaims = await claimsRes.json();
-          if (Array.isArray(liveClaims) && liveClaims.length > 0 && isMounted) {
-            setClaims(liveClaims);
-            loadedClaims = true;
-          }
-        }
-        if (budgetsRes && budgetsRes.ok) {
-          const liveBudgets = await budgetsRes.json();
-          if (Array.isArray(liveBudgets) && liveBudgets.length > 0 && isMounted) {
-            setBudgets(liveBudgets);
-            loadedBudgets = true;
-          }
-        }
-        if (reimbsRes && reimbsRes.ok) {
-          const liveReimbs = await reimbsRes.json();
-          if (Array.isArray(liveReimbs) && liveReimbs.length > 0 && isMounted) {
-            setReimbursements(liveReimbs);
-          }
-        }
-
-        // Direct Supabase fallback if backend returned empty
-        if (!loadedClaims) {
-          const directClaims = await getExpenseClaims();
-          if (isMounted && directClaims && directClaims.length > 0) {
-            setClaims(directClaims);
-          }
-        }
-        if (!loadedBudgets) {
-          const directBudgets = await getDepartmentBudgets();
-          if (isMounted && directBudgets && directBudgets.length > 0) {
-            setBudgets(directBudgets);
-          }
-        }
-      } catch {
-        // Fallback directly to Supabase
-        getExpenseClaims().then((fetched) => {
-          if (isMounted && fetched && fetched.length > 0) setClaims(fetched);
-        });
-        getDepartmentBudgets().then((fetchedBudgets) => {
-          if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) setBudgets(fetchedBudgets);
-        });
+    getExpenseClaims().then((fetched) => {
+      if (isMounted && fetched && fetched.length > 0) {
+        setClaims(fetched);
       }
-    };
-
-    fetchLiveFinanceData();
+    });
+    getDepartmentBudgets().then((fetchedBudgets) => {
+      if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) {
+        setBudgets(fetchedBudgets);
+      }
+    });
+    fetch(`${API_URL}/api/finance/reimbursements`)
+      .then((response) => response.ok ? response.json() : [])
+      .then((rows: Record<string, unknown>[]) => {
+        if (!isMounted || !Array.isArray(rows) || rows.length === 0) return;
+        setReimbursements(rows.map((row): ReimbursementItem => ({
+          id: String(row.id),
+          claimId: String(row.claim_id),
+          employee: String(row.employee_name ?? ""),
+          department: "",
+          amount: Number(row.eligible_personal_amount ?? 0),
+          currency: String(row.currency ?? "INR"),
+          completedDate: String(row.disbursed_at ?? row.created_at ?? ""),
+          paymentMethod: String(row.payment_method ?? ""),
+          paymentReference: String(row.payment_reference ?? ""),
+          status: row.status === "PAID" ? "Paid" : row.status === "PROCESSING" ? "Processing" : "Pending",
+        })));
+      })
+      .catch(() => {});
     return () => {
       isMounted = false;
     };

@@ -57,7 +57,6 @@ export async function getExpenseClaims(): Promise<ExpenseClaim[]> {
     return MOCK_CLAIMS;
   }
 }
-
 /**
  * Update an existing claim status & remarks in Supabase
  */
@@ -124,4 +123,3 @@ export async function getDepartmentBudgets(): Promise<DepartmentBudget[]> {
     return MOCK_BUDGETS;
   }
 }
-

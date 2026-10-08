@@ -14,7 +14,7 @@ class FinanceService:
 
             awaiting_verification = [c for c in claims if c.get("status") == "MANAGER_APPROVED" and not c.get("is_hold")]
             awaiting_high_priority = [c for c in awaiting_verification if (c.get("amount") or 0) > 10000 or c.get("policy_violation")]
-            
+
             finance_approved = [c for c in claims if c.get("status") == "FINANCE_APPROVED"]
             approved_amount_total = sum(c.get("amount", 0) for c in finance_approved)
 
@@ -235,4 +235,3 @@ class FinanceService:
         """Fetch all policy violation exceptions or held claims."""
         res = supabase.table("expense_claims").select("*").or_("is_hold.eq.true,policy_violation.not.is.null,is_duplicate_warning.eq.true").execute()
         return res.data or []
-

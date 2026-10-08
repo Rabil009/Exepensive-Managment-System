@@ -41,4 +41,3 @@ class FinanceMetricsResponse(BaseModel):
     paymentsPendingCount: int
     paymentsPendingAmount: float
     totalExceptions: int
-

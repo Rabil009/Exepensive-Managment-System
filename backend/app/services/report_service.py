@@ -4,13 +4,13 @@ from app.schemas.report import ReportMetricsModel
 class ReportService:
     def get_quarterly_metrics(self) -> ReportMetricsModel:
         claims = list(approval_service._claims_store.values())
-        
+
         approved = [c for c in claims if c["status"] == "Approved"]
         rejected = [c for c in claims if c["status"] == "Rejected"]
-        
+
         approved_sum = sum(c["amount"] for c in approved)
         rejected_sum = sum(c["amount"] for c in rejected)
-        
+
         total_decided = len(approved) + len(rejected)
         approval_rate = (len(approved) / total_decided * 100) if total_decided > 0 else 100.0
 

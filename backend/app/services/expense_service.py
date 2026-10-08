@@ -5,7 +5,7 @@ from app.schemas.expense import TeamSpendSummary, CategorySpendBreakdown
 class ExpenseService:
     def get_summary(self) -> TeamSpendSummary:
         claims = list(approval_service._claims_store.values())
-        
+
         approved_claims = [c for c in claims if c["status"] == "Approved"]
         pending_claims = [c for c in claims if c["status"] == "Pending"]
         rejected_claims = [c for c in claims if c["status"] == "Rejected"]

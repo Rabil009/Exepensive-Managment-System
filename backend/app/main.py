@@ -27,28 +27,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Register Manager sub-routers under /api/manager
-manager_prefix = f"{settings.API_PREFIX}/manager"
-app.include_router(approvals_router, prefix=manager_prefix)
-app.include_router(expenses_router, prefix=manager_prefix)
-app.include_router(budgets_router, prefix=manager_prefix)
-app.include_router(policies_router, prefix=manager_prefix)
-app.include_router(reports_router, prefix=manager_prefix)
-
-# Also expose direct aliases under /api/
-app.include_router(approvals_router, prefix=settings.API_PREFIX)
-app.include_router(expenses_router, prefix=settings.API_PREFIX)
-app.include_router(budgets_router, prefix=settings.API_PREFIX)
-app.include_router(policies_router, prefix=settings.API_PREFIX)
-app.include_router(reports_router, prefix=settings.API_PREFIX)
-
-# Include Finance Router
-app.include_router(finance_router)
-
-# Include Employee Routers
+# Register Employee Routers
 app.include_router(supabase_new_expense_router)
 app.include_router(employee_auth_router)
 app.include_router(employee_workspace_router)
+
+# Register Finance Router
+app.include_router(finance_router)
+
+# Register Manager sub-routers under /api/manager and /api/
+manager_prefix = f"{settings.API_PREFIX}/manager"
+for r in (approvals_router, expenses_router, budgets_router, policies_router, reports_router):
+    app.include_router(r, prefix=manager_prefix)
+    app.include_router(r, prefix=settings.API_PREFIX)
 
 @app.get("/health")
 def health_check():
