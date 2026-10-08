@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useExpenses } from "../../expenses/data/ExpensesContext";
 export function useOverview() {
-  const { expenses } = useExpenses();
+  const { expenses, summary, loading, error, refresh } = useExpenses();
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState("all");
   const [notice, setNotice] = useState("");
@@ -22,6 +22,10 @@ export function useOverview() {
     ).length;
   return {
     expenses,
+    summary,
+    loading,
+    error,
+    refresh,
     visible,
     query,
     setQuery,

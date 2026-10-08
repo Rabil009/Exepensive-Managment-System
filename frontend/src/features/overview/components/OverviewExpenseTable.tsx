@@ -30,6 +30,8 @@ type Props = {
     | "setTab"
     | "countFor"
     | "setNotice"
+    | "refresh"
+    | "loading"
     | "hideReceipt"
     | "setHideReceipt"
   >;
@@ -53,6 +55,8 @@ export function OverviewExpenseTable({ model }: Props) {
     setTab,
     countFor,
     setNotice,
+    refresh,
+    loading,
     hideReceipt,
     setHideReceipt,
   } = model;
@@ -132,7 +136,8 @@ export function OverviewExpenseTable({ model }: Props) {
             type="button"
             className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/[0.05] rounded-md transition-colors cursor-pointer"
             title="Refresh Expenses"
-            onClick={() => setNotice("Expense records are up to date.")}
+            disabled={loading}
+            onClick={() => void refresh().then(() => setNotice("Expense records refreshed."))}
           >
             <RotateCw className="h-3.5 w-3.5 text-zinc-400" />
           </button>

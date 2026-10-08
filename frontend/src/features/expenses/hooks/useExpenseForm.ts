@@ -8,7 +8,7 @@ import { discardNewExpense, loadNewExpense, saveNewExpense } from "../data/newEx
 export function useExpenseForm() {
   const params = useSearchParams();
   const draftParam = params.get("draft");
-  const { expenses, addExpense, removeDraft } = useExpenses();
+  const { expenses, refresh } = useExpenses();
   const [draft, setDraft] = useState<Draft>(() => {
     const existing = expenses.find((expense) => expense.id === params.get("draft") && expense.status === "Draft");
     if (existing) return {
@@ -129,20 +129,7 @@ export function useExpenseForm() {
       setSubmitted(status === "Pending");
       setMessage(status === "Draft" ? "Draft saved to Supabase." : "Expense submitted to Supabase for approval.");
       setFile(null);
-      try { addExpense({
-        id: draft.id,
-        date: draft.date || new Date().toISOString().slice(0, 10),
-        merchant: draft.merchant.trim() || "Untitled expense",
-        category: draft.category || "Other",
-        amount: Number(draft.amount) || 0,
-        status,
-        description: draft.purpose,
-        receipt: draft.receipt,
-        currency: draft.currency,
-        report: draft.report,
-        paymentMethod: draft.paymentMethod,
-        attendees: draft.attendees,
-      }); } catch { /* Browser cache is optional after Supabase confirms the save. */ }
+      await refresh();
       if (status === "Draft") {
         try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Optional cache. */ }
         try { localStorage.setItem(remoteDraftKey, draft.id); } catch { /* Optional cache. */ }
@@ -162,7 +149,7 @@ export function useExpenseForm() {
       setSaving(true);
       if (remoteDraft.current && !submitted) await discardNewExpense(draft.id);
       remoteDraft.current = false;
-      removeDraft(draft.id);
+      await refresh();
       localStorage.removeItem(draftKey);
       localStorage.removeItem(remoteDraftKey);
       setDraft(emptyDraft());
