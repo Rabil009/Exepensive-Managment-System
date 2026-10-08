@@ -72,7 +72,7 @@ export function CardSecurity({ model }: Props) {
                 aria-checked={isEnabled}
                 className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 flex items-center ${
                   isEnabled
-                    ? "bg-zinc-900 dark:bg-zinc-100 justify-end"
+                    ? "bg-[#3B9B78] justify-end"
                     : "bg-zinc-300 dark:bg-zinc-700 justify-start"
                 }`}
                 onClick={() =>
@@ -84,7 +84,9 @@ export function CardSecurity({ model }: Props) {
                   })
                 }
               >
-                <span className="w-4 h-4 rounded-full bg-white dark:bg-[#111113] shadow-xs pointer-events-none" />
+                <span className={`w-4 h-4 rounded-full shadow-xs pointer-events-none ${
+                  isEnabled ? "bg-white" : "bg-white dark:bg-[#111113]"
+                }`} />
               </button>
             </div>
           );
