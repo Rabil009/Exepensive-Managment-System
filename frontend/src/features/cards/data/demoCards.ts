@@ -89,6 +89,7 @@ export const controls = [
   },
 ];
 export type CardState = {
+  active: boolean;
   frozen: boolean;
   controls: boolean[];
   virtualCards: { name: string; limit: number; last4: string }[];
@@ -96,6 +97,7 @@ export type CardState = {
 };
 export const storageKey = "aura-demo-card-v1";
 export const defaultState: CardState = {
+  active: true,
   frozen: false,
   controls: [true, true, true, false],
   virtualCards: [],

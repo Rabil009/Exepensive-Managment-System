@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Eye, EyeOff, KeyRound, Wallet, ShieldCheck, CreditCard } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Power, ShieldCheck, CreditCard } from "lucide-react";
 import { CardStack } from "./CardStack";
 import type { CardControlsModel } from "../hooks/useCardControls";
 import { cardMoney as money } from "../utils/cardMoney";
@@ -9,12 +9,12 @@ import { cardMoney as money } from "../utils/cardMoney";
 type Props = {
   model: Pick<
     CardControlsModel,
-    "state" | "revealed" | "setRevealed" | "setMessage"
+    "state" | "update" | "revealed" | "setRevealed" | "setMessage"
   >;
 };
 
 export function CardPreview({ model }: Props) {
-  const { state, revealed, setRevealed, setMessage } = model;
+  const { state, update, revealed, setRevealed, setMessage } = model;
 
   return (
     <div className="min-w-0 flex flex-col gap-3">
@@ -22,7 +22,7 @@ export function CardPreview({ model }: Props) {
       <CardStack>
         <div
           className={`aura-physical-card ${
-            state.frozen ? "frozen opacity-60 grayscale" : ""
+            state.frozen || !state.active ? "frozen opacity-60 grayscale" : ""
           }`}
         >
           {/* Card Top: Chip + Contactless + Brand */}
@@ -113,16 +113,25 @@ export function CardPreview({ model }: Props) {
             <span className="truncate">Reset PIN</span>
           </button>
 
-          {/* Apple Wallet */}
+          {/* Activate/Deactivate Card */}
           <button
             type="button"
-            onClick={() =>
-              setMessage("Adding to digital wallet is managed via organization admin.")
-            }
+            aria-label={state.active ? "Deactivate card" : "Activate card"}
+            onClick={() => {
+              const nextActive = !state.active;
+              if (
+                update({
+                  ...state,
+                  active: nextActive,
+                  frozen: nextActive ? false : state.frozen,
+                })
+              )
+                setRevealed(false);
+            }}
             className="h-8 px-2.5 rounded-lg border text-xs font-medium bg-white dark:bg-[#18181D] border-zinc-200/80 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.05] transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
           >
-            <Wallet className="h-3.5 w-3.5 text-zinc-400" />
-            <span className="truncate">Apple Wallet</span>
+            <Power className="h-3.5 w-3.5 text-zinc-400" />
+            <span className="truncate">{state.active ? "Deactivate" : "Activate"}</span>
           </button>
         </div>
 
@@ -131,13 +140,15 @@ export function CardPreview({ model }: Props) {
           <div className="flex items-center gap-2">
             <span
               className={`h-2 w-2 rounded-full ${
-                state.frozen ? "bg-rose-500" : "bg-emerald-500"
+                !state.active || state.frozen ? "bg-rose-500" : "bg-emerald-500"
               }`}
             />
             <span className="text-zinc-500 dark:text-zinc-400">
               Card Status:{" "}
               <strong className="text-zinc-800 dark:text-zinc-200 font-semibold">
-                {state.frozen
+                {!state.active
+                  ? "Inactive · Physical Card"
+                  : state.frozen
                   ? "Frozen · Temporarily Paused"
                   : "Active · Physical Card"}
               </strong>
