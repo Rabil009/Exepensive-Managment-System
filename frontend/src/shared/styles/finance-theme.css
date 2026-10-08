@@ -1,0 +1,66 @@
+/* Shared Finance tokens from devlop-aditya @ 69b6ce5. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --canvas-bg: #fafafa;
+    --surface-card: #ffffff;
+    /* Match the Mobile Wallet control row across Employee navigation bars. */
+    --surface-navigation: #f8f8f9;
+    --surface-elevated: #f4f4f5;
+    --surface-muted: #f8f8f9;
+    --border-hairline: rgba(0, 0, 0, 0.08);
+    --text-primary: #18181b;
+    --text-secondary: #71717a;
+    --text-tertiary: #a1a1aa;
+
+    --chart-blue: #5a78a6;
+    --chart-emerald: #3b9b78;
+    --chart-amber: #c98642;
+    --chart-violet: #8875b8;
+    --chart-1: #5a78a6;
+    --chart-2: #3b9b78;
+  }
+
+  .dark {
+    --canvas-bg: #09090b;
+    --surface-card: #111113;
+    --surface-navigation: #09090b;
+    --surface-elevated: #18181b;
+    --surface-muted: #18181b;
+    --border-hairline: rgba(255, 255, 255, 0.07);
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+
+    --chart-blue: #6086d6;
+    --chart-emerald: #48b18b;
+    --chart-amber: #d4954a;
+    --chart-violet: #9d8bc9;
+    --chart-1: #6086d6;
+    --chart-2: #48b18b;
+  }
+
+  body {
+    font-family:
+      var(--font-sans),
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings:
+      "tnum" 1,
+      "cv05" 1,
+      "cv11" 1;
+  }
+}

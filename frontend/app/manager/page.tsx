@@ -277,7 +277,7 @@ function ManagerDashboardInner() {
   return (
     <div
       className={`flex h-screen w-full overflow-hidden font-sans antialiased transition-colors ${
-        isDark ? "bg-[#09090B] text-zinc-100" : "bg-[#FAFAFA] text-zinc-900"
+        isDark ? "bg-[#08080A] text-zinc-100" : "bg-[#FAFAFB] text-zinc-900"
       }`}
     >
       {/* Self-contained Manager Sidebar (Collapsible Rail & Full Expanded View) */}
@@ -321,34 +321,33 @@ function ManagerDashboardInner() {
             </div>
           )}
 
-          {/* Standardized Flat KPI Cards */}
+          {/* Standardized Flat KPI Cards Matching Finance Dashboard */}
           <section aria-label="Manager Key Metrics">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: Total Team Spend */}
               <div
                 onClick={() => setActiveView("Team Spend")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Team Total Spend
                   </span>
-                  <Wallet className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <Wallet className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     ₹3,84,500
                   </span>
@@ -358,28 +357,27 @@ function ManagerDashboardInner() {
               {/* Card 2: Awaiting Approval */}
               <div
                 onClick={() => setActiveView("Approvals")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Awaiting Verification
                   </span>
-                  <Clock className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <Clock className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     {pendingClaims.length}
                   </span>
@@ -389,28 +387,27 @@ function ManagerDashboardInner() {
               {/* Card 3: Approved This Month */}
               <div
                 onClick={() => setActiveView("Approvals")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Approved This Month
                   </span>
-                  <CheckCircle2 className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <CheckCircle2 className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     ₹2,48,200
                   </span>
@@ -420,28 +417,27 @@ function ManagerDashboardInner() {
               {/* Card 4: Policy Exceptions */}
               <div
                 onClick={() => setActiveView("Exceptions")}
-                className={`rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-150 cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                    : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                    isDark ? "text-zinc-400" : "text-slate-600"
+                  <span className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}>
                     Policy Exceptions
                   </span>
-                  <AlertTriangle className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                    isDark ? "text-zinc-500" : "text-slate-400"
+                  <AlertTriangle className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
                   }`} />
                 </div>
-                <div className="mt-4 flex items-center">
+                <div className="mt-3.5 flex items-center">
                   <span
-                    className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-white" : "text-zinc-950"
+                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                      isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
-                    style={{ fontSize: "32px", lineHeight: "1" }}
                   >
                     3
                   </span>
@@ -515,14 +511,14 @@ function ManagerDashboardInner() {
                         isDark ? "text-zinc-400 border-white/[0.06]" : "text-zinc-500 border-zinc-200/60"
                       }`}
                     >
-                      <th className="py-3 px-4 font-medium">Claim ID</th>
-                      <th className="py-3 px-4 font-medium">Employee</th>
-                      <th className="py-3 px-4 font-medium">Cost Center</th>
-                      <th className="py-3 px-4 font-medium">Description</th>
-                      <th className="py-3 px-4 font-medium text-right">Amount</th>
-                      <th className="py-3 px-4 font-medium">Date</th>
-                      <th className="py-3 px-4 font-medium">Status</th>
-                      <th className="py-3 px-4 font-medium text-right">1-Click Actions</th>
+                      <th className="py-2.5 px-4 font-medium">Claim ID</th>
+                      <th className="py-2.5 px-4 font-medium">Employee</th>
+                      <th className="py-2.5 px-4 font-medium">Cost Center</th>
+                      <th className="py-2.5 px-4 font-medium">Description</th>
+                      <th className="py-2.5 px-4 font-medium text-right">Amount</th>
+                      <th className="py-2.5 px-4 font-medium">Date</th>
+                      <th className="py-2.5 px-4 font-medium">Status</th>
+                      <th className="py-2.5 px-4 font-medium text-right">1-Click Actions</th>
                     </tr>
                   </thead>
                   <tbody className={`divide-y text-[13px] ${isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"}`}>
@@ -541,28 +537,28 @@ function ManagerDashboardInner() {
                           }`}
                           onClick={() => setInspectClaim(claim)}
                         >
-                          <td className="py-3 px-4 font-mono text-xs text-zinc-400">
+                          <td className="py-2.5 px-4 font-mono text-xs text-zinc-400">
                             {claim.id}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-2.5 px-4">
                             <EmployeeCell
                               name={claim.employeeName}
                               department={claim.department}
                             />
                           </td>
-                          <td className="py-3 px-4 font-mono text-xs text-zinc-500">
+                          <td className="py-2.5 px-4 font-mono text-xs text-zinc-500">
                             {claim.costCenter}
                           </td>
-                          <td className="py-3 px-4 max-w-xs truncate text-zinc-700 dark:text-zinc-300">
+                          <td className="py-2.5 px-4 max-w-xs truncate text-zinc-700 dark:text-zinc-300">
                             {claim.description}
                           </td>
-                          <td className="py-3 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                          <td className="py-2.5 px-4 text-right text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
                             ₹{claim.amount.toLocaleString("en-IN")}
                           </td>
-                          <td className="py-3 px-4 text-xs text-zinc-500 whitespace-nowrap">
+                          <td className="py-2.5 px-4 text-[13px] text-zinc-500 whitespace-nowrap">
                             {claim.date}
                           </td>
-                          <td className="py-3 px-4 whitespace-nowrap">
+                          <td className="py-2.5 px-4 whitespace-nowrap">
                             <StatusBadge
                               tone={
                                 claim.status === "Approved"
@@ -579,7 +575,7 @@ function ManagerDashboardInner() {
                                 : "Rejected"}
                             </StatusBadge>
                           </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-2.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             {claim.status === "Pending" ? (
                               <div className="flex items-center justify-end gap-1.5">
                                 <button
@@ -675,7 +671,7 @@ function ManagerDashboardInner() {
                               className="h-2.5 w-2.5 rounded-full"
                               style={{ backgroundColor: dept.color }}
                             />
-                            <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+                            <span className="font-medium text-[13px] text-zinc-900 dark:text-zinc-100">
                               {dept.name}
                             </span>
                           </div>
@@ -683,7 +679,7 @@ function ManagerDashboardInner() {
                         </div>
 
                         <div className="flex items-baseline justify-between mt-3">
-                          <span className="text-xl font-bold tracking-tight tabular-nums text-zinc-900 dark:text-zinc-100">
+                          <span className="text-base font-semibold tracking-tight tabular-nums text-zinc-900 dark:text-zinc-100">
                             ₹{dept.spent.toLocaleString("en-IN")}
                           </span>
                           <span className="text-xs text-zinc-500 tabular-nums">
@@ -704,13 +700,9 @@ function ManagerDashboardInner() {
 
                         <div className="flex items-center justify-between mt-2 text-xs">
                           <span className="text-zinc-500 font-medium tabular-nums">{percent}% utilized</span>
-                          <span
-                            className={
-                              percent > 85 ? "text-amber-500 font-medium" : "text-emerald-500 font-medium"
-                            }
-                          >
-                            {dept.status}
-                          </span>
+                          <StatusBadge tone={percent > 85 ? "warning" : "success"}>
+                            {percent > 85 ? "Near limit" : "Healthy"}
+                          </StatusBadge>
                         </div>
                       </div>
                     );
@@ -754,7 +746,7 @@ function ManagerDashboardInner() {
                       }`}
                     >
                       <div className="space-y-1 min-w-[200px]">
-                        <div className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+                        <div className="font-medium text-[13px] text-zinc-900 dark:text-zinc-100">
                           {dept.name}
                         </div>
                         <div className="text-xs text-zinc-500 tabular-nums">
@@ -781,15 +773,9 @@ function ManagerDashboardInner() {
                       </div>
 
                       <div className="flex items-center gap-3 shrink-0">
-                        <span
-                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                            percent > 80
-                              ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                              : "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
-                          }`}
-                        >
-                          {percent > 80 ? "Near Threshold" : "Healthy Buffer"}
-                        </span>
+                        <StatusBadge tone={percent > 80 ? "warning" : "success"}>
+                          {percent > 80 ? "Near limit" : "Healthy"}
+                        </StatusBadge>
                       </div>
                     </div>
                   );
@@ -819,7 +805,7 @@ function ManagerDashboardInner() {
                   </p>
                 </div>
                 <span
-                  className={`text-xs font-mono px-2.5 py-1 rounded-md border ${
+                  className={`text-xs font-medium tabular-nums px-2 py-0.5 rounded-md border ${
                     isDark ? "bg-[#18181D] text-zinc-300 border-white/[0.08]" : "bg-zinc-100 text-zinc-700 border-zinc-200"
                   }`}
                 >
@@ -834,7 +820,7 @@ function ManagerDashboardInner() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
+                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px]">
                         CLM-8827 &bull; Rohan Kapoor
                       </div>
                       <div className="text-xs text-zinc-500 mt-0.5">
@@ -868,7 +854,7 @@ function ManagerDashboardInner() {
                   <div className="flex items-start gap-3">
                     <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                     <div>
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
+                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px]">
                         CLM-8823 &bull; Arjun Reddy
                       </div>
                       <div className="text-xs text-zinc-500 mt-0.5">
@@ -985,7 +971,7 @@ function ManagerDashboardInner() {
                   <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500">
                     Claim Details &bull; {inspectClaim.id}
                   </span>
-                  <h3 className="text-base font-semibold mt-0.5 text-zinc-900 dark:text-zinc-100">
+                  <h3 className="text-sm font-semibold mt-0.5 text-zinc-900 dark:text-zinc-100">
                     {inspectClaim.description}
                   </h3>
                 </div>
@@ -1020,7 +1006,7 @@ function ManagerDashboardInner() {
                 </div>
                 <div className={`p-3 rounded-lg border ${isDark ? "bg-[#161619] border-white/[0.05]" : "bg-zinc-50 border-zinc-200/80"}`}>
                   <span className="text-[10px] uppercase font-mono text-zinc-500">Amount</span>
-                  <p className="text-sm font-bold mt-1 tabular-nums text-zinc-900 dark:text-zinc-100">
+                  <p className="text-sm font-semibold mt-1 tabular-nums text-zinc-900 dark:text-zinc-100">
                     ₹{inspectClaim.amount.toLocaleString("en-IN")}
                   </p>
                 </div>
@@ -1110,9 +1096,11 @@ function ManagerDashboardInner() {
 
 export default function ManagerDashboardPage() {
   return (
-    <React.Suspense fallback={<div className="h-screen w-full bg-transparent" />}>
-      <ManagerDashboardInner />
-    </React.Suspense>
+    <ThemeProvider>
+      <React.Suspense fallback={<div className="h-screen w-full bg-transparent" />}>
+        <ManagerDashboardInner />
+      </React.Suspense>
+    </ThemeProvider>
   );
 }
 

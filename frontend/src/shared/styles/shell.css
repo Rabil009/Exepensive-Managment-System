@@ -1,0 +1,279 @@
+.aura-app {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color-scheme: light;
+}
+.dark .aura-app {
+  color-scheme: dark;
+}
+.aura-app .material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+.aura-app button {
+  cursor: pointer;
+}
+.aura-app button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.aura-app :is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--chart-blue);
+  outline-offset: 2px;
+}
+.employee-content {
+  background: var(--canvas-bg);
+}
+.employee-content .employee-page {
+  gap: 24px;
+  padding-top: 0;
+}
+.employee-content .employee-page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  min-height: 88px;
+  padding: 0;
+  border-bottom: 0;
+}
+.employee-page-header > div:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 4px;
+}
+.employee-page-header > div:first-child > * {
+  margin-block: 0;
+}
+.employee-page-header > div:first-child > :first-child:not(h1) {
+  height: 20px;
+  min-height: 20px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.employee-page-header > div:first-child > div:has(h1) {
+  min-height: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.employee-page-header nav {
+  flex-wrap: wrap;
+  padding-top: 0;
+}
+.employee-page-header > div:last-child {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+.employee-page-header > div:last-child > button {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (min-width: 1100px) {
+  .employee-content .employee-page-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 24px;
+  }
+  .employee-page-header > div:last-child {
+    justify-content: flex-end;
+    padding-top: 24px;
+    flex-wrap: nowrap;
+  }
+}
+.employee-page-header > div:first-child > h1:only-child {
+  margin-top: 24px;
+}
+.employee-content h1 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.025em;
+}
+.employee-content :is(h2, h3) {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.aura-app .font-financial-display {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+}
+.aura-app .font-financial-tabular {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.aura-app .font-label-caps {
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.finance-sidebar-backdrop {
+  display: none;
+}
+.finance-primary-button {
+  background: var(--text-primary);
+  color: var(--canvas-bg);
+  border-color: transparent;
+}
+.employee-content
+  :is(section, div)[class~="bg-surface-container-lowest"][class~="rounded-xl"] {
+  border: 1px solid var(--border-hairline);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+}
+.employee-content .shadow-sm,
+.employee-content .shadow-md {
+  --tw-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+}
+.employee-content
+  :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-color: var(--border-hairline);
+  font-size: 13px;
+  border-radius: 8px;
+}
+.employee-content table {
+  font-size: 13px;
+}
+.employee-content thead {
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.employee-content th {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.employee-content td,
+.employee-content th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.employee-content tbody tr {
+  border-top: 1px solid var(--border-hairline);
+}
+.employee-content tbody tr:hover {
+  background: var(--surface-elevated);
+}
+.aura-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: var(--canvas-bg);
+  color: var(--text-secondary);
+}
+.aura-app .aura-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 80;
+  max-width: min(420px, calc(100vw - 48px));
+  padding: 12px 16px;
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.employee-content .aura-card-dialog {
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-color: var(--border-hairline);
+}
+.employee-content .aura-physical-card {
+  color: #fff;
+}
+.employee-content
+  .aura-physical-card
+  :is(.text-on-primary, .text-on-surface, .aura-card-name) {
+  color: #fff;
+}
+.employee-content
+  :is(.aura-draft-button, .aura-card-button, .aura-submit-button) {
+  font-size: 13px;
+  border-radius: 8px;
+}
+.employee-content .aura-card-button.primary,
+.employee-content .aura-submit-button {
+  background: var(--text-primary);
+  color: var(--canvas-bg);
+}
+.employee-content .aura-card-button.primary:hover,
+.employee-content .aura-submit-button:hover {
+  opacity: 0.9;
+  background: var(--text-primary);
+}
+.employee-content .aura-form-message {
+  color: var(--text-primary);
+  background: var(--surface-elevated);
+}
+.employee-content .aura-form-message.error {
+  color: #f43f5e;
+  background: var(--surface-elevated);
+}
+.employee-content .aura-policy-note {
+  color: var(--text-secondary);
+  background: var(--surface-elevated);
+}
+.employee-content .aura-receipt-dropzone {
+  background: var(--surface-card);
+}
+.employee-content .pasted-analytics {
+  padding-top: 0;
+}
+.employee-content :is(.font-bold, .font-semibold) {
+  font-weight: 600;
+}
+@media (max-width: 767px) {
+  .employee-page-header > div:first-child > :first-child:not(h1) {
+    height: auto;
+  }
+  .finance-sidebar-wrap {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 60;
+  }
+  .finance-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    background: rgb(0 0 0 / 0.35);
+  }
+  .finance-shell > div > header {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .employee-content {
+    padding: 16px;
+  }
+  .employee-content h1 {
+    font-size: 22px;
+  }
+  .employee-content > div,
+  .employee-content section,
+  .employee-content .grid {
+    min-width: 0;
+  }
+}

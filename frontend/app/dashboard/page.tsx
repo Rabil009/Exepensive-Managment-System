@@ -49,6 +49,13 @@ function DashboardContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
+  // Auto-collapse sidebar on mobile/tablet screens for clean full-width view
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setSidebarCollapsed(true);
+    }
+  }, []);
+
   // Modals state
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -75,9 +82,7 @@ function DashboardContent() {
   };
 
   return (
-    <div className={`flex h-screen w-screen overflow-hidden font-sans antialiased transition-colors ${
-      isDark ? "bg-[#09090B] text-zinc-100" : "bg-[#FAFAFA] text-zinc-900"
-    }`}>
+    <div className="flex h-screen w-full overflow-hidden font-sans antialiased transition-colors bg-[#FAFAFB] dark:bg-[#08080A] text-zinc-900 dark:text-zinc-100">
       {/* Static Left Vertical Sidebar (Expands to full or collapses to slim icon rail) */}
       <Sidebar
         isCollapsed={sidebarCollapsed}
@@ -89,10 +94,11 @@ function DashboardContent() {
       />
 
       {/* Main Application Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Top Header with Single Filter Option in Top Right Corner */}
         <Header
           title={getPageTitle()}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
           rightContent={
             activeView === "Dashboard" ? (
               <GlobalFilters
@@ -105,7 +111,7 @@ function DashboardContent() {
         />
 
         {/* Scrollable Main Content */}
-        <main className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Main Dashboard Overview View */}
           {activeView === "Dashboard" && (
             <>

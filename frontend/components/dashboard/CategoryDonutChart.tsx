@@ -46,7 +46,7 @@ export function CategoryDonutChart() {
       <div className="relative h-[190px] w-full my-2 flex items-center justify-center">
         {isMounted ? (
           <>
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={150}>
               <PieChart>
                 <Pie
                   data={CATEGORY_DATA}

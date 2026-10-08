@@ -293,32 +293,31 @@ function ApprovalsPageInner() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div
               onClick={() => setStatusFilter("Pending")}
-              className={`rounded-2xl p-5 sm:p-6 border transition-all duration-150 cursor-pointer ${
+              className={`rounded-xl px-5 py-4 border transition-colors cursor-pointer flex flex-col justify-between ${
                 statusFilter === "Pending"
                   ? isDark
                     ? "bg-[#161619] border-white/20 shadow-sm"
                     : "bg-zinc-50 border-zinc-400 shadow-xs"
                   : isDark
-                  ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                  : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                  isDark ? "text-zinc-400" : "text-slate-600"
+                <span className={`text-xs font-medium uppercase tracking-wider ${
+                  isDark ? "text-zinc-400" : "text-zinc-500"
                 }`}>
                   Awaiting Verification
                 </span>
-                <Clock className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                  isDark ? "text-zinc-500" : "text-slate-400"
+                <Clock className={`h-4 w-4 shrink-0 ${
+                  isDark ? "text-zinc-500" : "text-zinc-400"
                 }`} />
               </div>
-              <div className="mt-4 flex items-center">
+              <div className="mt-3.5 flex items-center">
                 <span
-                  className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                    isDark ? "text-white" : "text-zinc-950"
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                    isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
-                  style={{ fontSize: "32px", lineHeight: "1" }}
                 >
                   {pendingCount}
                 </span>
@@ -327,32 +326,31 @@ function ApprovalsPageInner() {
 
             <div
               onClick={() => setStatusFilter("Approved")}
-              className={`rounded-2xl p-5 sm:p-6 border transition-all duration-150 cursor-pointer ${
+              className={`rounded-xl px-5 py-4 border transition-colors cursor-pointer flex flex-col justify-between ${
                 statusFilter === "Approved"
                   ? isDark
                     ? "bg-[#161619] border-white/20 shadow-sm"
                     : "bg-zinc-50 border-zinc-400 shadow-xs"
                   : isDark
-                  ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                  : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                  isDark ? "text-zinc-400" : "text-slate-600"
+                <span className={`text-xs font-medium uppercase tracking-wider ${
+                  isDark ? "text-zinc-400" : "text-zinc-500"
                 }`}>
                   Approved Claims
                 </span>
-                <CheckCircle2 className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                  isDark ? "text-zinc-500" : "text-slate-400"
+                <CheckCircle2 className={`h-4 w-4 shrink-0 ${
+                  isDark ? "text-zinc-500" : "text-zinc-400"
                 }`} />
               </div>
-              <div className="mt-4 flex items-center">
+              <div className="mt-3.5 flex items-center">
                 <span
-                  className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                    isDark ? "text-white" : "text-zinc-950"
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                    isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
-                  style={{ fontSize: "32px", lineHeight: "1" }}
                 >
                   {approvedCount}
                 </span>
@@ -361,32 +359,31 @@ function ApprovalsPageInner() {
 
             <div
               onClick={() => setStatusFilter("Rejected")}
-              className={`rounded-2xl p-5 sm:p-6 border transition-all duration-150 cursor-pointer ${
+              className={`rounded-xl px-5 py-4 border transition-colors cursor-pointer flex flex-col justify-between ${
                 statusFilter === "Rejected"
                   ? isDark
                     ? "bg-[#161619] border-white/20 shadow-sm"
                     : "bg-zinc-50 border-zinc-400 shadow-xs"
                   : isDark
-                  ? "bg-[#111113] border-white/[0.08] hover:bg-[#161619] hover:border-white/15 shadow-sm"
-                  : "bg-white border-zinc-200/90 hover:border-zinc-300 hover:shadow-sm shadow-xs"
+                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-[12px] font-semibold uppercase tracking-wider ${
-                  isDark ? "text-zinc-400" : "text-slate-600"
+                <span className={`text-xs font-medium uppercase tracking-wider ${
+                  isDark ? "text-zinc-400" : "text-zinc-500"
                 }`}>
                   Returned / Rejected
                 </span>
-                <XCircle className={`h-[18px] w-[18px] shrink-0 stroke-[1.75] ${
-                  isDark ? "text-zinc-500" : "text-slate-400"
+                <XCircle className={`h-4 w-4 shrink-0 ${
+                  isDark ? "text-zinc-500" : "text-zinc-400"
                 }`} />
               </div>
-              <div className="mt-4 flex items-center">
+              <div className="mt-3.5 flex items-center">
                 <span
-                  className={`text-[32px] font-bold tracking-tight tabular-nums leading-none ${
-                    isDark ? "text-white" : "text-zinc-950"
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                    isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
-                  style={{ fontSize: "32px", lineHeight: "1" }}
                 >
                   {rejectedCount}
                 </span>
@@ -456,14 +453,14 @@ function ApprovalsPageInner() {
                       isDark ? "text-zinc-400 border-white/[0.06]" : "text-zinc-500 border-zinc-200/60"
                     }`}
                   >
-                    <th className="py-3 px-4 font-medium">Claim ID</th>
-                    <th className="py-3 px-4 font-medium">Employee</th>
-                    <th className="py-3 px-4 font-medium">Category</th>
-                    <th className="py-3 px-4 font-medium">Description</th>
-                    <th className="py-3 px-4 font-medium text-right">Amount</th>
-                    <th className="py-3 px-4 font-medium">Date</th>
-                    <th className="py-3 px-4 font-medium">Status</th>
-                    <th className="py-3 px-4 font-medium text-right">Action</th>
+                    <th className="py-2.5 px-4 font-medium">Claim ID</th>
+                    <th className="py-2.5 px-4 font-medium">Employee</th>
+                    <th className="py-2.5 px-4 font-medium">Category</th>
+                    <th className="py-2.5 px-4 font-medium">Description</th>
+                    <th className="py-2.5 px-4 font-medium text-right">Amount</th>
+                    <th className="py-2.5 px-4 font-medium">Date</th>
+                    <th className="py-2.5 px-4 font-medium">Status</th>
+                    <th className="py-2.5 px-4 font-medium text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className={`divide-y text-[13px] ${isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"}`}>
@@ -482,28 +479,28 @@ function ApprovalsPageInner() {
                           isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"
                         }`}
                       >
-                        <td className="py-3 px-4 font-mono text-xs text-zinc-400">
+                        <td className="py-2.5 px-4 font-mono text-xs text-zinc-400">
                           {claim.id}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-2.5 px-4">
                           <EmployeeCell
                             name={claim.employeeName}
                             department={claim.department}
                           />
                         </td>
-                        <td className="py-3 px-4 text-xs text-zinc-600 dark:text-zinc-300">
+                        <td className="py-2.5 px-4 text-xs text-zinc-600 dark:text-zinc-300">
                           {claim.category}
                         </td>
-                        <td className="py-3 px-4 max-w-xs truncate text-zinc-700 dark:text-zinc-300">
+                        <td className="py-2.5 px-4 max-w-xs truncate text-zinc-700 dark:text-zinc-300">
                           {claim.description}
                         </td>
-                        <td className="py-3 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                        <td className="py-2.5 px-4 text-right text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
                           ₹{claim.amount.toLocaleString("en-IN")}
                         </td>
-                        <td className="py-3 px-4 text-xs text-zinc-500 whitespace-nowrap">
+                        <td className="py-2.5 px-4 text-[13px] text-zinc-500 whitespace-nowrap">
                           {claim.date}
                         </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
+                        <td className="py-2.5 px-4 whitespace-nowrap">
                           <StatusBadge
                             tone={
                               claim.status === "Approved"
@@ -516,7 +513,7 @@ function ApprovalsPageInner() {
                             {claim.status}
                           </StatusBadge>
                         </td>
-                        <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-2.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           {claim.status === "Pending" ? (
                             <div className="flex items-center justify-end gap-1.5">
                               <button
@@ -575,9 +572,9 @@ function ApprovalsPageInner() {
               <div className="flex items-center justify-between pb-4 border-b dark:border-white/[0.08] border-zinc-200">
                 <div>
                   <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500">
-                    CLAIM AUDIT // {inspectClaim.id}
+                    Claim Details &bull; {inspectClaim.id}
                   </span>
-                  <h3 className="text-base font-semibold mt-0.5 text-zinc-900 dark:text-zinc-100">
+                  <h3 className="text-sm font-semibold mt-0.5 text-zinc-900 dark:text-zinc-100">
                     {inspectClaim.description}
                   </h3>
                 </div>
@@ -611,8 +608,8 @@ function ApprovalsPageInner() {
                   </p>
                 </div>
                 <div className={`p-3 rounded-lg border ${isDark ? "bg-[#161619] border-white/[0.05]" : "bg-zinc-50 border-zinc-200/80"}`}>
-                  <span className="text-[10px] uppercase font-mono text-zinc-500">Claim Amount</span>
-                  <p className="text-sm font-bold mt-1 tabular-nums text-zinc-900 dark:text-zinc-100">
+                  <span className="text-[10px] uppercase font-mono text-zinc-500">Amount</span>
+                  <p className="text-sm font-semibold mt-1 tabular-nums text-zinc-900 dark:text-zinc-100">
                     ₹{inspectClaim.amount.toLocaleString("en-IN")}
                   </p>
                 </div>
@@ -711,6 +708,10 @@ function ApprovalsPageInner() {
 }
 
 export default function ApprovalsPage() {
-  return <ApprovalsPageInner />;
+  return (
+    <ThemeProvider>
+      <ApprovalsPageInner />
+    </ThemeProvider>
+  );
 }
 

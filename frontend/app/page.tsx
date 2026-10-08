@@ -42,8 +42,8 @@ const PORTALS: PortalOption[] = [
   },
 ];
 
-// Static High-Fidelity Halftone Background Canvas (No motion, static render)
-function StaticHalftoneBackground() {
+// Senior High-Precision Halftone Dot Field (Retina High-DPI, uniform solid contrast, small dots)
+function HalftoneBackground() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -65,72 +65,59 @@ function StaticHalftoneBackground() {
       ctx.save();
       ctx.scale(dpr, dpr);
 
-      // Pure white base canvas
+      // Clean, bright white canvas base
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, width, height);
 
-      // Grid spacing matching the reference halftone raster
+      // Fine grid spacing (11px = tight, elegant print raster)
       const spacing = 11;
-      const cols = Math.ceil(width / spacing) + 2;
-      const rows = Math.ceil(height / spacing) + 2;
+      const cols = Math.ceil(width / spacing) + 1;
+      const rows = Math.ceil(height / spacing) + 1;
 
-      ctx.fillStyle = "#050505";
+      // Center of viewport (where login card sits)
+      const cx = width / 2;
+      const cy = height / 2;
 
-      for (let r = 0; r < rows; r++) {
+      // Uniform solid contrast across all dots (authentic halftone: diameter changes, not opacity)
+      ctx.fillStyle = "#18181b";
+
+      for (let r = 0; r <= rows; r++) {
         const y = r * spacing;
         const ny = y / height;
 
-        // Exact multi-harmonic organic boundary matching the screenshot's wave:
-        const curveOffset =
-          Math.sin(ny * Math.PI * 1.7 + 0.35) * (width * 0.12) +
-          Math.cos(ny * Math.PI * 3.1) * (width * 0.055) +
-          (1 - ny) * (width * 0.08);
-
-        const boundaryX = width * 0.42 + curveOffset;
-
-        for (let c = 0; c < cols; c++) {
+        for (let c = 0; c <= cols; c++) {
           const x = c * spacing;
+          const nx = x / width;
 
-          if (x < boundaryX - 45) continue;
+          // 1. Primary Top-Right Density Field (matching reference image)
+          const trField = Math.pow(Math.max(0, (nx * 1.15 + (1 - ny) * 0.95) - 0.55), 1.35) * 1.15;
 
-          const distIntoMass = (x - boundaryX) / (width * 0.48);
+          // 2. Secondary Left & Top Edge Density (matching reference image)
+          const leftField = Math.pow(Math.max(0, (1 - nx) * 0.85 + ny * 0.35), 1.8) * 0.55;
+          const topField = Math.pow(Math.max(0, (1 - ny) * 0.7), 1.6) * 0.45;
 
-          const harmonicMod =
-            Math.sin(x * 0.007 + y * 0.005) * 0.15 +
-            Math.cos(x * 0.012 - y * 0.008) * 0.1;
+          // 3. Subtle organic wave so the halftone flows naturally
+          const organicWave =
+            Math.sin(nx * 4.2 + ny * 3.0) * 0.05 +
+            Math.cos(nx * 3.2 - ny * 4.8) * 0.04;
 
-          const intensity = distIntoMass * 1.35 + harmonicMod;
+          const rawDensity = trField + leftField + topField + organicWave;
 
-          if (intensity <= 0.03) continue;
+          // 4. Optical Center Clearing around login card for eye comfort
+          const distFromCenter = Math.hypot((x - cx) / (width * 0.38), (y - cy) / (height * 0.42));
+          const centerClearing = Math.min(1, Math.max(0.12, Math.pow(distFromCenter, 1.25)));
 
-          const maxRadius = spacing * 0.65;
-          const radius = Math.min(
-            maxRadius,
-            Math.max(0.65, intensity * (spacing * 0.58))
-          );
+          const density = rawDensity * centerClearing;
 
-          if (intensity > 1.25) {
-            ctx.fillRect(x - spacing / 2, y - spacing / 2, spacing, spacing);
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(x, y, 1.15, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#050505";
-          } else if (intensity > 0.88 && (r + c) % 3 === 0) {
-            const arm = radius * 0.92;
-            ctx.lineWidth = 1.35;
-            ctx.strokeStyle = "#050505";
-            ctx.beginPath();
-            ctx.moveTo(x - arm, y);
-            ctx.lineTo(x + arm, y);
-            ctx.moveTo(x, y - arm);
-            ctx.lineTo(x, y + arm);
-            ctx.stroke();
-          } else {
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, Math.PI * 2);
-            ctx.fill();
-          }
+          // Only render dots above threshold
+          if (density <= 0.04) continue;
+
+          // Small, refined dot radii (0.45px micro-dot to 2.2px max)
+          const radius = Math.min(2.2, Math.max(0.45, density * 2.3));
+
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
 
@@ -205,43 +192,31 @@ export default function LoginPage() {
     }, 400);
   };
 
-  const handleSocialAuth = (provider: "Google" | "Apple") => {
-    const demoEmail = provider === "Google" ? "alex@payout.fi" : "alex@apple.com";
-    setEmail(demoEmail);
-    setPassword("••••••••••••");
-    setIsLoading(true);
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem("payout_user_role", selectedPortal);
-      localStorage.setItem("payout_user_email", demoEmail);
-    }
-
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push(selectedPortal);
-    }, 300);
+  const handleSocialAuth = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Keep buttons present without triggering any redirect or action
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white text-neutral-900 relative flex items-center justify-center p-5 select-none">
-      <StaticHalftoneBackground />
+    <div className="min-h-screen w-full overflow-y-auto sm:overflow-hidden bg-white text-zinc-900 relative flex items-center justify-center p-4 sm:p-5 select-none">
+      <HalftoneBackground />
 
-      {/* Top Left Brand Logo & Title */}
-      <div className="absolute top-6 left-6 sm:top-8 sm:left-8 z-20 flex items-center gap-2.5">
-        <div className="h-5 w-5 rounded-full border-[1.8px] border-zinc-900 flex items-center justify-center shrink-0">
-          <div className="h-1.5 w-1.5 rounded-full bg-zinc-900" />
+      {/* Top Left Brand Logo & Title with White Background */}
+      <div className="absolute top-5 left-5 sm:top-6 sm:left-8 z-20 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white border border-zinc-200/90 shadow-2xs">
+        <div className="h-6 w-6 rounded-full border-[2px] border-zinc-950 flex items-center justify-center shrink-0">
+          <div className="h-2 w-2 rounded-full bg-zinc-950" />
         </div>
-        <span className="text-[15px] font-semibold tracking-tight text-zinc-900">
+        <span className="text-[16px] sm:text-[17px] font-bold tracking-tight text-zinc-950">
           Payout
         </span>
       </div>
 
-      <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-neutral-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08)] p-8 sm:p-9">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold tracking-tight text-neutral-950">
-            Sign In
+      <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-zinc-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] p-6 sm:p-9 my-14 sm:my-0">
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
+            Welcome to Payout
           </h1>
-          <p className="text-xs font-mono text-neutral-500 tracking-tight mt-1">
+          <p className="text-xs font-mono text-zinc-500 tracking-tight mt-1">
             Continue to access your dashboard
           </p>
         </div>
@@ -249,8 +224,8 @@ export default function LoginPage() {
         <div className="space-y-2 mb-4">
           <button
             type="button"
-            onClick={() => handleSocialAuth("Google")}
-            className="w-full h-10 px-4 rounded-full border border-neutral-200/90 hover:border-neutral-400 bg-white/95 text-neutral-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
+            onClick={handleSocialAuth}
+            className="w-full h-10 px-4 rounded-full border border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
               <path
@@ -275,8 +250,8 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => handleSocialAuth("Apple")}
-            className="w-full h-10 px-4 rounded-full border border-neutral-200/90 hover:border-neutral-400 bg-white/95 text-neutral-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
+            onClick={handleSocialAuth}
+            className="w-full h-10 px-4 rounded-full border border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
           >
             <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 170 170">
               <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.5-7.79-11.44-14.14-5.63-9.06-10.08-19.16-13.34-30.28-3.26-11.13-4.9-21.84-4.9-32.14 0-14.28 3.58-25.92 10.74-34.92 7.16-9 16.32-13.62 27.48-13.87 4.8 0 10.23 1.34 16.29 4.03 6.06 2.68 10.02 4.09 11.89 4.22 1.5.13 5.72-1.34 12.67-4.42 6.94-3.08 12.87-4.47 17.79-4.17 13.43.76 23.96 5.86 31.59 15.3-11.87 7.21-17.65 17.06-17.34 29.56.32 9.87 4.17 18.25 11.56 25.12 7.39 6.87 16.29 10.78 26.7 11.75-2.23 6.74-4.7 13.25-7.41 19.53zM119.22 31.81c0-7.39 2.68-14.37 8.04-20.94 5.36-6.57 11.96-10.42 19.8-11.56.22 1.09.33 2.18.33 3.28 0 7.39-2.73 14.47-8.19 21.25-5.46 6.78-12.18 10.59-20.16 11.44-.22-1.09-.33-2.18-.33-3.47z" />
@@ -286,15 +261,15 @@ export default function LoginPage() {
         </div>
 
         <div className="relative my-4 flex items-center justify-center">
-          <div className="w-full border-t border-neutral-200" />
-          <span className="absolute bg-white px-3 font-mono text-[11px] text-neutral-400">
+          <div className="w-full border-t border-zinc-200" />
+          <span className="absolute bg-white px-3 font-mono text-[11px] text-zinc-400">
             or
           </span>
         </div>
 
         <form onSubmit={handleSignIn} className="space-y-3.5">
           <div className="space-y-1" ref={dropdownRef}>
-            <div className="text-[11px] font-medium text-neutral-700">
+            <div className="text-[11px] font-medium text-zinc-700">
               <span>Target Portal</span>
             </div>
 
@@ -302,23 +277,23 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setIsPortalDropdownOpen(!isPortalDropdownOpen)}
-                className="w-full h-9 px-3.5 rounded-full border border-neutral-200/90 bg-white/90 hover:bg-neutral-50 hover:border-neutral-300 text-xs text-neutral-900 flex items-center justify-between transition-colors cursor-pointer"
+                className="w-full h-9 px-3.5 rounded-full border border-zinc-200 bg-zinc-50/70 hover:bg-zinc-100/70 hover:border-zinc-300 text-xs text-zinc-900 flex items-center justify-between transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2 truncate">
-                  <currentPortal.icon className="w-3.5 h-3.5 text-neutral-600 shrink-0" />
-                  <span className="font-medium text-neutral-900 truncate">
+                  <currentPortal.icon className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                  <span className="font-medium text-zinc-900 truncate">
                     {currentPortal.title}
                   </span>
                 </div>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
+                  className={`w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 ${
                     isPortalDropdownOpen ? "rotate-180" : ""
                   }`}
                 />
               </button>
 
               {isPortalDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-2xl shadow-xl p-1 z-30 space-y-0.5">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-2xl shadow-xl p-1 z-30 space-y-0.5">
                   {PORTALS.map((portal) => {
                     const Icon = portal.icon;
                     const isSelected = selectedPortal === portal.id;
@@ -332,12 +307,12 @@ export default function LoginPage() {
                         }}
                         className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
                           isSelected
-                            ? "bg-neutral-100 text-neutral-950 font-medium"
-                            : "text-neutral-700 hover:bg-neutral-50"
+                            ? "bg-zinc-100 text-zinc-950 font-medium"
+                            : "text-zinc-700 hover:bg-zinc-50"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Icon className="w-3.5 h-3.5 text-neutral-600" />
+                          <Icon className="w-3.5 h-3.5 text-zinc-600" />
                           <span>{portal.title}</span>
                         </div>
                         {isSelected && <Check className="w-3.5 h-3.5 text-black" />}
@@ -350,7 +325,7 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="email" className="block text-[11px] font-medium text-neutral-700">
+            <label htmlFor="email" className="block text-[11px] font-medium text-zinc-700">
               Email
             </label>
             <input
@@ -359,13 +334,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full h-9 px-4 rounded-full border border-neutral-200/90 bg-white/95 placeholder:text-neutral-300 text-xs text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+              className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/80 placeholder:text-zinc-400 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 transition-all"
             />
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-[11px] font-medium text-neutral-700">
+              <label htmlFor="password" className="block text-[11px] font-medium text-zinc-700">
                 Password
               </label>
               <button
@@ -374,7 +349,7 @@ export default function LoginPage() {
                   setForgotSent(false);
                   setShowForgotModal(true);
                 }}
-                className="text-[11px] text-neutral-500 hover:text-black underline underline-offset-2 transition-colors cursor-pointer"
+                className="text-[11px] text-zinc-500 hover:text-zinc-950 underline underline-offset-2 transition-colors cursor-pointer"
               >
                 Forgot Password?
               </button>
@@ -386,12 +361,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full h-9 px-4 pr-10 rounded-full border border-neutral-200/90 bg-white/95 placeholder:text-neutral-300 text-xs text-neutral-900 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                className="w-full h-9 px-4 pr-10 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/80 placeholder:text-zinc-400 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 transition-colors p-0.5 cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 transition-colors p-0.5 cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -405,9 +380,9 @@ export default function LoginPage() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-3.5 h-3.5 rounded border-neutral-300 text-black accent-black cursor-pointer"
+                className="w-3.5 h-3.5 rounded border-zinc-300 text-black accent-black cursor-pointer"
               />
-              <span className="text-[11px] text-neutral-600">Remember me</span>
+              <span className="text-[11px] text-zinc-600">Remember me</span>
             </label>
           </div>
 
@@ -421,13 +396,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-10 mt-1 rounded-full bg-black text-white hover:bg-neutral-800 text-xs font-medium flex items-center justify-center transition-colors cursor-pointer active:scale-[0.99] disabled:opacity-75 shadow-xs"
+            className="w-full h-10 mt-1 rounded-full bg-zinc-950 hover:bg-black text-white text-xs font-medium flex items-center justify-center transition-colors cursor-pointer active:scale-[0.99] disabled:opacity-75 shadow-xs"
           >
             {isLoading ? "Authenticating..." : "Sign In"}
           </button>
         </form>
 
-        <div className="mt-5 text-center text-[11px] text-neutral-500">
+        <div className="mt-5 text-center text-[11px] text-zinc-500">
           <span>Don't have an account? </span>
           <button
             type="button"
@@ -435,7 +410,7 @@ export default function LoginPage() {
               setEmail("admin@acme-corp.com");
               setPassword("DemoPassword2026");
             }}
-            className="font-medium text-neutral-900 underline underline-offset-4 hover:text-black cursor-pointer"
+            className="font-medium text-zinc-900 underline underline-offset-4 hover:text-black cursor-pointer"
           >
             Create an Account
           </button>

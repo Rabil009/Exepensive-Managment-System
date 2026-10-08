@@ -16,8 +16,9 @@
 
 @layer base {
   :root {
-    --canvas-bg: #FAFAFA;
+    --canvas-bg: #FAFAFB;
     --surface-card: #FFFFFF;
+    --surface-navigation: #F7F7F8;
     --surface-elevated: #F4F4F5;
     --border-hairline: rgba(0, 0, 0, 0.08);
     --text-primary: #18181B;
@@ -33,8 +34,9 @@
   }
 
   .dark {
-    --canvas-bg: #09090B;
-    --surface-card: #111113;
+    --canvas-bg: #08080A;
+    --surface-card: #111114;
+    --surface-navigation: #131316;
     --surface-elevated: #18181B;
     --border-hairline: rgba(255, 255, 255, 0.07);
     --text-primary: #F4F4F5;

@@ -19,16 +19,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Forum&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Forum&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans antialiased text-zinc-900 dark:text-zinc-100 bg-[#FAFAFA] dark:bg-[#09090B] selection:bg-zinc-200 dark:selection:bg-white/20 overflow-x-hidden overscroll-none">
+      <body
+        className="font-sans antialiased text-zinc-900 dark:text-zinc-100 bg-[#FAFAFA] dark:bg-[#09090B] selection:bg-zinc-200 dark:selection:bg-white/20 overflow-x-hidden overscroll-none"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

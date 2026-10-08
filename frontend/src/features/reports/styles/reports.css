@@ -1,0 +1,11 @@
+/* Cleaned reports styles - replaced legacy classes with standard Tailwind */
+.aura-reports {
+  min-height: 100%;
+}
+
+@media print {
+  aside,
+  header {
+    display: none !important;
+  }
+}

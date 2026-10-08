@@ -149,7 +149,7 @@ export function BudgetVsActualChart({
       {/* Bar Chart Visual */}
       <div className="h-[210px] w-full pt-1">
         {isMounted ? (
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" debounce={150}>
             <BarChart
               data={BUDGET_TIMELINE_DATA}
               margin={{ top: 10, right: 10, left: -15, bottom: 0 }}

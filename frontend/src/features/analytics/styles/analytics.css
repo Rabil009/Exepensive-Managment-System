@@ -1,0 +1,4 @@
+/* Cleaned analytics styles - replaced legacy classes with standard Tailwind */
+.analytics-page-container {
+  min-height: 100%;
+}

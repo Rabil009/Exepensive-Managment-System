@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from "react";
 import {
@@ -128,15 +128,6 @@ export function QuarterlyFinancialStatements() {
             <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
               Quarterly Financial Statements
             </h3>
-            <span
-              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                isDark
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
-              }`}
-            >
-              Q2 2026 Audited
-            </span>
           </div>
           <p className="text-xs text-zinc-500 mt-0.5">
             Download verified GST reports and company expense reconciliations.
@@ -203,7 +194,7 @@ export function QuarterlyFinancialStatements() {
             </span>
           </div>
           <span
-            className={`text-[16px] font-semibold tracking-tight tabular-nums mt-0.5 block ${
+            className={`text-sm font-semibold tracking-tight tabular-nums mt-0.5 block ${
               isDark ? "text-zinc-200" : "text-zinc-800"
             }`}
           >
@@ -227,7 +218,7 @@ export function QuarterlyFinancialStatements() {
             </span>
           </div>
           <span
-            className={`text-[16px] font-semibold tracking-tight tabular-nums mt-0.5 block ${
+            className={`text-sm font-semibold tracking-tight tabular-nums mt-0.5 block ${
               isDark ? "text-zinc-100" : "text-zinc-900"
             }`}
           >
@@ -243,7 +234,7 @@ export function QuarterlyFinancialStatements() {
           >
             Tax Deductible (GST)
           </span>
-          <span className="text-[16px] font-semibold tracking-tight tabular-nums mt-0.5 block text-emerald-500">
+          <span className="text-sm font-semibold tracking-tight tabular-nums mt-0.5 block text-emerald-500">
             {activeRow.t}
           </span>
         </div>
@@ -258,7 +249,7 @@ export function QuarterlyFinancialStatements() {
           </span>
           <div className="flex items-center gap-2 mt-0.5">
             <span
-              className={`text-[14px] font-medium tracking-tight ${
+              className={`text-sm font-semibold tracking-tight tabular-nums ${
                 isDark ? "text-zinc-300" : "text-zinc-700"
               }`}
             >
@@ -406,7 +397,7 @@ export function QuarterlyFinancialStatements() {
                   }`}
                   title="Click to view chart for this month"
                 >
-                  <td className="py-3 px-4 font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                  <td className="py-2.5 px-4 font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${
                         isSelected
@@ -416,14 +407,14 @@ export function QuarterlyFinancialStatements() {
                     />
                     <span>{row.m}</span>
                   </td>
-                  <td className="py-3 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                  <td className="py-2.5 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
                     {row.d}
                   </td>
-                  <td className="py-3 px-4 text-zinc-500">{row.c}</td>
-                  <td className="py-3 px-4 text-right tabular-nums text-emerald-500 font-medium">
+                  <td className="py-2.5 px-4 text-zinc-500">{row.c}</td>
+                  <td className="py-2.5 px-4 text-right tabular-nums text-emerald-500 font-medium">
                     {row.t}
                   </td>
-                  <td className="py-3 px-4 text-right">
+                  <td className="py-2.5 px-4 text-right">
                     <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-800 dark:text-zinc-200">
                       <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                       <span>{row.s}</span>

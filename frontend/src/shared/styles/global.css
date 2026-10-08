@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@import "./finance-theme.css";
+
+@theme {
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --color-primary-fixed-dim: var(--surface-elevated);
+  --color-on-secondary-container: var(--text-secondary);
+  --color-secondary-fixed: var(--surface-elevated);
+  --color-inverse-surface: var(--text-primary);
+  --color-surface-container-low: var(--surface-elevated);
+  --color-on-surface: var(--text-primary);
+  --color-surface-bright: var(--canvas-bg);
+  --color-surface-container-high: var(--surface-elevated);
+  --color-on-primary-fixed: var(--text-secondary);
+  --color-primary-fixed: var(--surface-elevated);
+  --color-primary-container: var(--text-primary);
+  --color-inverse-on-surface: var(--text-primary);
+  --color-outline: var(--text-secondary);
+  --color-on-primary: var(--canvas-bg);
+  --color-surface-container-lowest: var(--surface-card);
+  --color-surface-variant: var(--surface-elevated);
+  --color-surface-tint: var(--surface-elevated);
+  --color-inverse-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-on-primary-container: var(--canvas-bg);
+  --color-outline-variant: var(--border-hairline);
+  --color-on-secondary-fixed-variant: var(--text-secondary);
+  --color-surface-dim: var(--canvas-bg);
+  --color-on-primary-fixed-variant: var(--text-secondary);
+  --color-on-tertiary: var(--canvas-bg);
+  --color-on-background: var(--text-primary);
+  --color-on-surface-variant: var(--text-secondary);
+  --color-primary: var(--text-primary);
+  --color-on-secondary: var(--canvas-bg);
+  --color-surface-container: var(--surface-elevated);
+  --color-tertiary-container: var(--chart-emerald);
+  --color-secondary-fixed-dim: var(--surface-elevated);
+  --color-on-tertiary-container: var(--canvas-bg);
+  --color-surface-container-highest: var(--surface-elevated);
+  --color-secondary-container: var(--surface-elevated);
+  --color-tertiary-fixed-dim: var(--surface-elevated);
+  --color-surface: var(--canvas-bg);
+  --color-on-tertiary-fixed: var(--text-secondary);
+  --color-tertiary: var(--chart-emerald);
+  --color-on-error: var(--canvas-bg);
+  --color-background: var(--canvas-bg);
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 0.75rem;
+  --spacing-space-lg: 1.25rem;
+  --spacing-space-xl: 2rem;
+  --font-headline-sm: var(--font-sans);
+  --font-headline-lg: var(--font-sans);
+  --font-financial-display: var(--font-sans);
+  --font-display-lg: var(--font-sans);
+  --font-display-md: var(--font-sans);
+  --font-label-md: var(--font-sans);
+  --font-label-caps: var(--font-sans);
+  --font-body-sm: var(--font-sans);
+  --font-financial-tabular: var(--font-sans);
+  --font-body-md: var(--font-sans);
+  --text-headline-sm: 14px;
+  --text-headline-lg: 16px;
+  --text-financial-display: 26px;
+  --text-display-lg: 24px;
+  --text-display-md: 24px;
+  --text-label-md: 12px;
+  --text-label-caps: 11px;
+  --text-body-sm: 12px;
+  --text-financial-tabular: 13px;
+  --text-body-md: 13px;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+body {
+  margin: 0;
+  background: var(--canvas-bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
