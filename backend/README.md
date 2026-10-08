@@ -55,3 +55,28 @@ then use that session to write to Supabase.
 
 Run the Supabase route tests with
 `.venv/Scripts/python.exe -m pytest -q tests/test_supabase_new_expense.py`.
+
+## Employee Workspace API
+
+All routes below require `Authorization: Bearer <employee Supabase access token>`.
+The backend verifies the user and Employee role; Supabase row security limits
+reads and writes to that Employee's records.
+
+- `GET /api/employee/overview` returns owned claims, drafts, and summary totals.
+- `GET /api/employee/analytics?month=YYYY-MM` returns monthly spend, category,
+  daily trend, funding, receipt compliance, and assigned card metrics.
+- `GET /api/employee/reports` groups owned claims and drafts by report name.
+- `POST /api/employee/reports/action` withdraws a fully submitted report or
+  resubmits a fully withdrawn one. Body: `{"name":"Trip","action":"withdraw"}`.
+- `GET /api/employee/cards` returns assigned cards, settled/pending card
+  transactions, and card requests.
+- `PATCH /api/employee/cards/{id}` updates an assigned card's app controls.
+- `POST /api/employee/cards/requests` stores a limit increase or virtual card
+  request. It does **not** change an issuer limit or issue a real card.
+
+Card and transaction tables start empty. Only an issuer/admin integration can
+provision cards and transactions; the Employee cannot fabricate those records.
+The existing Finance and Manager APIs are separate.
+
+Run focused tests with
+`.venv/Scripts/python.exe -m pytest -q tests/test_employee_workspace.py`.
