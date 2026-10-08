@@ -72,11 +72,11 @@ const FALLBACK_EXPENSES = [
 const FALLBACK_OVERVIEW = {
   expenses: FALLBACK_EXPENSES,
   summary: {
-    ready_for_reimbursement: "2,300",
-    pending_approval: "15,000",
-    card_spending_mtd: "22,700",
-    card_limit: "1,00,000",
-    card_limit_remaining: "77,300",
+    ready_for_reimbursement: "2300",
+    pending_approval: "15000",
+    card_spending_mtd: "22700",
+    card_limit: "100000",
+    card_limit_remaining: "77300",
     approved_count: 1,
     pending_count: 2,
   },

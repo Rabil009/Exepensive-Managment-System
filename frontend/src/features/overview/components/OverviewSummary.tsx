@@ -5,7 +5,13 @@ import { Wallet, Clock, CreditCard, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import type { ExpenseSummary } from "../../expenses/data/ExpensesContext";
 
-const rupees = (value?: string) => value === undefined ? "—" : `₹${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const rupees = (value?: string | number) => {
+  if (value === undefined || value === null || value === "") return "—";
+  const cleaned = typeof value === "string" ? value.replace(/,/g, "") : value;
+  const num = Number(cleaned);
+  if (isNaN(num)) return "—";
+  return `₹${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
 
 export function OverviewSummary({ summary }: { summary: ExpenseSummary | null }) {
   const { theme } = useTheme();
