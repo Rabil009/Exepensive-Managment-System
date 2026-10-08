@@ -44,9 +44,10 @@ Every Supabase request needs a valid Employee Supabase access token in the
 `Authorization: Bearer <token>` header. The backend verifies the user and
 Employee profile, then forwards the same token so Supabase row security checks
 the owner. A publishable key is sufficient; do not put a service role key in
-the browser. The current Team Blue project has no Employee profile and no
-Employee sign-in flow yet, so saves will show a session error until an Employee
-session is available. This route does not enable anonymous writes.
+the browser. The New Expense page can send an email sign-in link. After the
+Employee opens the link and returns to the page, Save Draft and Submit Expense
+can write to Supabase. New email signups get an Employee profile. An attached
+receipt must be selected again if the sign-in link reloads the page.
 
 Run the Supabase route tests with
 `.venv/Scripts/python.exe -m pytest -q tests/test_supabase_new_expense.py`.

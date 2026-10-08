@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useExpenses } from "../data/ExpensesContext";
-import { draftKey, emptyDraft, type Draft } from "../data/expenseDraft";
+import { draftKey, remoteDraftKey, emptyDraft, type Draft } from "../data/expenseDraft";
 import type { ExpenseStatus } from "../types";
 import type { UnlinkedTransaction } from "../data/demoTransactions";
 import { discardNewExpense, loadNewExpense, saveNewExpense } from "../data/newExpenseApi";
@@ -22,6 +22,7 @@ export function useExpenseForm() {
       const restored = saved
         ? { ...emptyDraft(), ...JSON.parse(saved), currency: "INR" }
         : emptyDraft();
+      if (localStorage.getItem(remoteDraftKey) !== restored.id) restored.receipt = "";
       return report ? { ...restored, report } : restored;
     } catch {
       return { ...emptyDraft(), ...(report ? { report } : {}) };
@@ -56,8 +57,7 @@ export function useExpenseForm() {
   useEffect(() => {
     let cachedId: string | null = null;
     try {
-      const cached = localStorage.getItem(draftKey);
-      if (cached) cachedId = (JSON.parse(cached) as Draft).id;
+      cachedId = localStorage.getItem(remoteDraftKey);
     } catch { /* Invalid browser cache is ignored. */ }
     const id = draftParam || cachedId;
     if (!id) return;
@@ -80,6 +80,12 @@ export function useExpenseForm() {
     });
     return () => { active = false; };
   }, [draftParam]);
+
+  useEffect(() => {
+    if (submitted || saved) return;
+    if (!draft.merchant && !draft.date && !draft.amount && !draft.category && !draft.purpose && !draft.receipt) return;
+    try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Keep editing in memory. */ }
+  }, [draft, submitted, saved]);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -139,8 +145,10 @@ export function useExpenseForm() {
       }); } catch { /* Browser cache is optional after Supabase confirms the save. */ }
       if (status === "Draft") {
         try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Optional cache. */ }
+        try { localStorage.setItem(remoteDraftKey, draft.id); } catch { /* Optional cache. */ }
       } else {
         try { localStorage.removeItem(draftKey); } catch { /* Optional cache. */ }
+        try { localStorage.removeItem(remoteDraftKey); } catch { /* Optional cache. */ }
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save the expense.");
@@ -156,6 +164,7 @@ export function useExpenseForm() {
       remoteDraft.current = false;
       removeDraft(draft.id);
       localStorage.removeItem(draftKey);
+      localStorage.removeItem(remoteDraftKey);
       setDraft(emptyDraft());
       setFile(null);
       if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);

@@ -104,3 +104,43 @@ def test_invalid_receipt_is_rejected_before_storage():
             assert False, "Invalid receipt was accepted"
     finally:
         gateway.close()
+
+
+def test_supabase_gateway_sends_receipt_and_claim_with_employee_token():
+    requests = []
+
+    def respond(request):
+        requests.append(request)
+        if request.url.path.startswith("/storage/v1/object/receipts/"):
+            return httpx.Response(200, json={"Key": request.url.path})
+        if request.url.path == "/rest/v1/expense_claims" and request.method == "GET":
+            return httpx.Response(200, json=[])
+        if request.url.path == "/rest/v1/expense_claims" and request.method == "POST":
+            return httpx.Response(201, json=[json.loads(request.content)])
+        if request.url.path == "/rest/v1/employee_expense_drafts" and request.method == "DELETE":
+            return httpx.Response(204)
+        raise AssertionError(f"Unexpected Supabase request: {request.method} {request.url}")
+
+    gateway = SupabaseExpenseGateway("employee-token")
+    gateway.client.close()
+    gateway.client = httpx.Client(
+        base_url="https://example.supabase.co",
+        headers={"Authorization": "Bearer employee-token"},
+        transport=httpx.MockTransport(respond),
+    )
+    employee = {"id": str(uuid4()), "name": "Employee", "department": "Engineering"}
+    expense_id = uuid4()
+    try:
+        receipt = gateway.upload(employee["id"], expense_id, "ticket.pdf", b"%PDF-1.7\nreceipt")
+        draft = {"merchant": "Train", "expense_date": "2026-10-08", "category": "Travel",
+                 "amount": "499.50", "payment_method": "Personal (Out-of-Pocket)",
+                 "business_purpose": "Client visit", "attendees": ["Employee"], **receipt}
+        claim = gateway.submit(expense_id, employee, draft)
+        assert claim["category"] == "TRAVEL"
+        assert claim["payment_method"] == "PERSONAL_OUT_OF_POCKET"
+        assert claim["receipt_path"] == receipt["receipt_path"]
+        assert claim["status"] == "SUBMITTED"
+        assert all(request.headers["Authorization"] == "Bearer employee-token" for request in requests)
+        assert any(request.url.path.endswith(receipt["receipt_path"]) for request in requests)
+    finally:
+        gateway.close()
