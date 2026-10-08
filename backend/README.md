@@ -30,3 +30,23 @@ The API is documented at `http://127.0.0.1:8000/docs`. The Employee routes are:
 - `DELETE /api/employee/expenses/{id}` — discard a draft.
 
 Run focused tests with `.venv/Scripts/python.exe -m pytest -q tests/test_expenses.py`.
+
+## Supabase Employee New Expense
+
+The New Expense page now calls `POST /api/employee/new-expense` on Save Draft or
+Submit Expense. The route writes drafts to `employee_expense_drafts`, submitted
+expenses to `expense_claims`, and optional receipt files to the private Supabase
+`receipts` bucket. `GET /api/employee/new-expense/{id}` reloads an owned draft;
+`DELETE /api/employee/new-expense/{id}` discards it. The previous SQLite demo
+routes above remain separate.
+
+Every Supabase request needs a valid Employee Supabase access token in the
+`Authorization: Bearer <token>` header. The backend verifies the user and
+Employee profile, then forwards the same token so Supabase row security checks
+the owner. A publishable key is sufficient; do not put a service role key in
+the browser. The current Team Blue project has no Employee profile and no
+Employee sign-in flow yet, so saves will show a session error until an Employee
+session is available. This route does not enable anonymous writes.
+
+Run the Supabase route tests with
+`.venv/Scripts/python.exe -m pytest -q tests/test_supabase_new_expense.py`.

@@ -4,8 +4,10 @@ import { useExpenses } from "../data/ExpensesContext";
 import { draftKey, emptyDraft, type Draft } from "../data/expenseDraft";
 import type { ExpenseStatus } from "../types";
 import type { UnlinkedTransaction } from "../data/demoTransactions";
+import { discardNewExpense, loadNewExpense, saveNewExpense } from "../data/newExpenseApi";
 export function useExpenseForm() {
   const params = useSearchParams();
+  const draftParam = params.get("draft");
   const { expenses, addExpense, removeDraft } = useExpenses();
   const [draft, setDraft] = useState<Draft>(() => {
     const existing = expenses.find((expense) => expense.id === params.get("draft") && expense.status === "Draft");
@@ -30,14 +32,10 @@ export function useExpenseForm() {
   const previewUrl = useRef("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [saved, setSaved] = useState(() => {
-    try {
-      return Boolean(localStorage.getItem(draftKey));
-    } catch {
-      return false;
-    }
-  });
+  const [saved, setSaved] = useState(false);
+  const remoteDraft = useRef(false);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [addingAttendee, setAddingAttendee] = useState(false);
   const [attendee, setAttendee] = useState("");
@@ -54,6 +52,34 @@ export function useExpenseForm() {
       if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
     };
   }, []);
+
+  useEffect(() => {
+    let cachedId: string | null = null;
+    try {
+      const cached = localStorage.getItem(draftKey);
+      if (cached) cachedId = (JSON.parse(cached) as Draft).id;
+    } catch { /* Invalid browser cache is ignored. */ }
+    const id = draftParam || cachedId;
+    if (!id) return;
+    let active = true;
+    loadNewExpense(id).then((stored) => {
+      if (!active) return;
+      setDraft({
+        ...emptyDraft(), id: stored.id, merchant: stored.merchant || "",
+        date: stored.expense_date || "", amount: String(stored.amount || ""),
+        category: stored.category || "", report: stored.report_name || "Unassigned",
+        paymentMethod: stored.payment_method || "Corporate Card (••4921)",
+        purpose: stored.business_purpose || "", attendees: stored.attendees || [],
+        receipt: stored.receipt_name || "",
+      });
+      setSaved(true);
+      remoteDraft.current = true;
+      setFile(null);
+    }).catch((cause: unknown) => {
+      if (active) setError(cause instanceof Error ? cause.message : "Could not load this draft.");
+    });
+    return () => { active = false; };
+  }, [draftParam]);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -82,15 +108,24 @@ export function useExpenseForm() {
     update("receipt", next.name);
     if (inputRef.current) inputRef.current.value = "";
   }
-  function save(status: ExpenseStatus) {
+  async function save(status: ExpenseStatus) {
+    if (saving) return;
     if (status === "Pending" && !ready) {
       setError("Enter a merchant, date, positive amount, and category.");
       return;
     }
+    setSaving(true);
+    setError("");
     try {
-      addExpense({
+      await saveNewExpense(draft, file, status === "Pending");
+      remoteDraft.current = status === "Draft";
+      setSaved(true);
+      setSubmitted(status === "Pending");
+      setMessage(status === "Draft" ? "Draft saved to Supabase." : "Expense submitted to Supabase for approval.");
+      setFile(null);
+      try { addExpense({
         id: draft.id,
-        date: draft.date || "2026-10-07",
+        date: draft.date || new Date().toISOString().slice(0, 10),
         merchant: draft.merchant.trim() || "Untitled expense",
         category: draft.category || "Other",
         amount: Number(draft.amount) || 0,
@@ -101,26 +136,24 @@ export function useExpenseForm() {
         report: draft.report,
         paymentMethod: draft.paymentMethod,
         attendees: draft.attendees,
-      });
+      }); } catch { /* Browser cache is optional after Supabase confirms the save. */ }
       if (status === "Draft") {
-        localStorage.setItem(draftKey, JSON.stringify(draft));
-        setSaved(true);
-        setMessage("Draft saved in this browser.");
+        try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Optional cache. */ }
       } else {
-        localStorage.removeItem(draftKey);
-        setSubmitted(true);
-        setSaved(true);
-        setMessage("Expense submitted for approval.");
+        try { localStorage.removeItem(draftKey); } catch { /* Optional cache. */ }
       }
-      setError("");
-    } catch {
-      setError(
-        "We couldn't save this expense. Check your browser storage and try again.",
-      );
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not save the expense.");
+    } finally {
+      setSaving(false);
     }
   }
-  function discard() {
+  async function discard() {
+    if (saving) return;
     try {
+      setSaving(true);
+      if (remoteDraft.current && !submitted) await discardNewExpense(draft.id);
+      remoteDraft.current = false;
       removeDraft(draft.id);
       localStorage.removeItem(draftKey);
       setDraft(emptyDraft());
@@ -132,10 +165,10 @@ export function useExpenseForm() {
       setMessage("");
       setSaved(false);
       setSubmitted(false);
-    } catch {
-      setError(
-        "We couldn't discard this draft. Check your browser storage and try again.",
-      );
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not discard this draft.");
+    } finally {
+      setSaving(false);
     }
   }
   function submit(event: FormEvent) {
@@ -174,6 +207,7 @@ export function useExpenseForm() {
     message,
     saved,
     submitted,
+    saving,
     dragging,
     setDragging,
     addingAttendee,
