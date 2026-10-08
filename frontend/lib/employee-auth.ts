@@ -117,10 +117,11 @@ export async function getEmployeeAccount(): Promise<EmployeeAccount | null> {
   if (typeof window !== "undefined") {
     const role = localStorage.getItem("payout_user_role");
     const email = localStorage.getItem("payout_user_email");
-    if (role === "/employee" && email) {
+    if (role === "/employee" || role === "/employee/dashboard" || role?.startsWith("/employee")) {
+      const userEmail = email || "adityadevlops@gmail.com";
       return {
-        user: { id: "emp-demo-001", email },
-        profile: { id: "emp-demo-001", name: email.split("@")[0] || "Employee", role: "EMPLOYEE" },
+        user: { id: "emp-demo-001", email: userEmail },
+        profile: { id: "emp-demo-001", name: userEmail.split("@")[0] || "Employee", role: "EMPLOYEE" },
       };
     }
   }
