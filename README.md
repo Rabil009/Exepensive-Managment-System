@@ -62,6 +62,10 @@ flowchart LR
 - **Budget Thresholds**: Track departmental caps and receive automated warnings when spending exceeds 80%.
 - **Policy Enforcement**: Automatic detection of accommodation over-caps, per diem meal breaches, and unauthorized luxury rentals.
 
+<p align="center">
+  <img src="docs/screenshots/manager-approvals.png" alt="Manager Approvals Dashboard" width="100%" />
+</p>
+
 ### 3. 💳 Finance & Treasury Portal (`/dashboard`)
 - **Treasury Overview**: Headline KPIs including Awaiting Verification count, Approved Amount Total, Pending Reimbursements, and Audit Exceptions.
 - **Audit & Compliance Queue**: Deep inspection of receipts, GSTIN verification, duplicate alerts, and tax compliance.
@@ -171,6 +175,8 @@ Exepensive-Managment-System/
 │   │       └── cards/               # Virtual corporate cards
 │   ├── package.json                 # Node dependencies & scripts
 │   └── .env.local.example           # Frontend environment template
+├── docs/                            # Documentation assets & screenshots
+│   └── screenshots/                 # Application screenshots
 ├── supabase/                        # Database migrations & schemas
 │   ├── schema_and_seed.sql          # Complete schema, RLS policies & initial seed
 │   └── seed.sql                     # Seed data for policies and budgets
