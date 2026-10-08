@@ -8,9 +8,14 @@ import {
   Banknote,
 } from "lucide-react";
 import type { CardControlsModel } from "../hooks/useCardControls";
-import { controls } from "../data/demoCards";
+const controls = [
+  { name: "Mobile Wallet", enabled: "Wallet enabled", disabled: "Wallet disabled" },
+  { name: "Travel Location Limits", enabled: "Travel restrictions on", disabled: "Travel restrictions off" },
+  { name: "Online Payment Verification", enabled: "Verification on", disabled: "Verification off" },
+  { name: "ATM Withdrawal Lock", enabled: "Cash lock active", disabled: "Cash lock off" },
+];
 
-type Props = { model: Pick<CardControlsModel, "state" | "update"> };
+type Props = { model: Pick<CardControlsModel, "state" | "update" | "card"> };
 
 function getControlIcon(name: string) {
   const n = name.toLowerCase();
@@ -21,7 +26,7 @@ function getControlIcon(name: string) {
 }
 
 export function CardSecurity({ model }: Props) {
-  const { state, update } = model;
+  const { state, update, card } = model;
   const activeCount = state.controls.filter(Boolean).length;
 
   return (
@@ -67,6 +72,7 @@ export function CardSecurity({ model }: Props) {
               {/* iOS / Linear style Toggle Switch */}
               <button
                 type="button"
+                disabled={!card}
                 role="switch"
                 aria-label={item.name}
                 aria-checked={isEnabled}
@@ -76,7 +82,7 @@ export function CardSecurity({ model }: Props) {
                     : "bg-zinc-300 dark:bg-zinc-700 justify-start"
                 }`}
                 onClick={() =>
-                  update({
+                  void update({
                     ...state,
                     controls: state.controls.map((value, position) =>
                       position === index ? !value : value,

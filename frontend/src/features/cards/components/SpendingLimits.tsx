@@ -9,11 +9,10 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import type { CardControlsModel } from "../hooks/useCardControls";
-import { categories } from "../data/demoCards";
 import { cardMoney as money } from "../utils/cardMoney";
 
 type Props = {
-  model: Pick<CardControlsModel, "state" | "spent" | "limit" | "percent">;
+  model: Pick<CardControlsModel, "spent" | "limit" | "percent" | "categories" | "month" | "card">;
 };
 
 function getCategoryIcon(label: string) {
@@ -27,7 +26,9 @@ function getCategoryIcon(label: string) {
 }
 
 export function SpendingLimits({ model }: Props) {
-  const { state, spent, limit, percent } = model;
+  const { spent, limit, percent, categories, month, card } = model;
+  const period = month ? new Date(`${month}-01T00:00:00`) : new Date();
+  const nextPeriod = new Date(period.getFullYear(), period.getMonth() + 1, 1);
   const available = Math.max(0, limit - spent);
 
   const kpis = [
@@ -61,12 +62,12 @@ export function SpendingLimits({ model }: Props) {
               Spending Period
             </span>
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
-              Oct 1 – Oct 31, 2026
+              {period.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
             </h2>
           </div>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-100 dark:bg-white/[0.05] border border-zinc-200/80 dark:border-white/[0.08] text-zinc-600 dark:text-zinc-400">
             <RotateCw className="h-3 w-3 text-zinc-400" />
-            <span>Resets Nov 1, 2026</span>
+            <span>Resets {nextPeriod.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
           </span>
         </div>
 
@@ -137,22 +138,22 @@ export function SpendingLimits({ model }: Props) {
               Spending Limits by Category
             </h3>
             <span className="text-xs text-zinc-500 dark:text-zinc-400 tabular-nums">
-              4 active categories
+              {categories.length} active categories
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {categories.map((item) => {
-              const Icon = getCategoryIcon(item.label);
+              const Icon = getCategoryIcon(item.name);
               const catPercent = Math.min(
                 100,
-                Math.round((item.spent / item.limit) * 100),
+                Number(item.limit) > 0 ? Math.round((Number(item.spent) / Number(item.limit)) * 100) : 0,
               );
-              const remaining = Math.max(0, item.limit - item.spent);
+              const remaining = Number(item.remaining);
 
               return (
                 <article
-                  key={item.label}
+                  key={item.category}
                   className="rounded-lg p-3 border bg-zinc-50/70 dark:bg-[#161619] border-zinc-200/70 dark:border-white/[0.06] flex flex-col gap-2"
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -161,13 +162,13 @@ export function SpendingLimits({ model }: Props) {
                         <Icon className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
                       </div>
                       <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                        {item.label}
+                        {item.name}
                       </span>
                     </div>
                     <div className="text-xs font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-                      {money(item.spent)}{" "}
+                      {money(Number(item.spent))}{" "}
                       <span className="font-normal text-zinc-400 text-[11px]">
-                        / {money(item.limit).replace(".00", "")}
+                        / {money(Number(item.limit)).replace(".00", "")}
                       </span>
                     </div>
                   </div>
@@ -175,7 +176,7 @@ export function SpendingLimits({ model }: Props) {
                   <div className="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-white/[0.08] overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-300"
-                      style={{ width: `${catPercent}%`, backgroundColor: item.color }}
+                      style={{ width: `${catPercent}%`, backgroundColor: item.category === "TRAVEL" ? "#5A78A6" : item.category === "SOFTWARE" ? "#3B9B78" : item.category === "FOOD" ? "#C98642" : "#8875B8" }}
                     />
                   </div>
 
@@ -189,11 +190,7 @@ export function SpendingLimits({ model }: Props) {
           </div>
         </div>
 
-        {state.requestedLimit && (
-          <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">
-            Limit increase requested: {money(state.requestedLimit)} · Processing with issuer
-          </p>
-        )}
+        {!card && <p className="text-xs text-zinc-500">No assigned card or spending limits.</p>}
       </section>
     </div>
   );

@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { CardControlsModel } from "../hooks/useCardControls";
-import { transactions } from "../data/demoCards";
 import { cardMoney as money } from "../utils/cardMoney";
 
 type Props = {
@@ -27,6 +26,7 @@ type Props = {
     | "status"
     | "setStatus"
     | "exportTransactions"
+    | "transactionCount"
   >;
 };
 
@@ -53,6 +53,7 @@ export function CardTransactions({ model }: Props) {
     status,
     setStatus,
     exportTransactions,
+    transactionCount,
   } = model;
 
   const totalAmount = visible.reduce((total, item) => total + item.amount, 0);
@@ -145,7 +146,7 @@ export function CardTransactions({ model }: Props) {
 
               return (
                 <tr
-                  key={item.merchant}
+                  key={item.id}
                   className="transition-colors hover:bg-zinc-50/80 dark:hover:bg-white/[0.03] cursor-pointer"
                 >
                   {/* Merchant & Purpose */}
@@ -180,7 +181,7 @@ export function CardTransactions({ model }: Props) {
                       )}
                       <span>
                         {isCorporate
-                          ? "Corporate Visa ••4921"
+                          ? `Corporate Card ••${item.cardLabel || "••••"}`
                           : "Personal (Reimbursable)"}
                       </span>
                     </div>
@@ -215,7 +216,7 @@ export function CardTransactions({ model }: Props) {
       {/* Footer */}
       <footer className="p-3 sm:px-5 flex items-center justify-between border-t border-zinc-200/60 dark:border-white/[0.06] text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-50/50 dark:bg-white/[0.01]">
         <span className="tabular-nums">
-          Showing {visible.length} of {transactions.length} card transactions
+          Showing {visible.length} of {transactionCount} card transactions
         </span>
         <div className="flex items-center gap-1.5 font-medium">
           <span className="uppercase text-[11px] tracking-wider text-zinc-400">Total:</span>

@@ -16,6 +16,7 @@ type Props = {
     | "requestedAmount"
     | "setRequestedAmount"
     | "dialogError"
+    | "limit"
   >;
 };
 
@@ -30,6 +31,7 @@ export function CardDialog({ model }: Props) {
     requestedAmount,
     setRequestedAmount,
     dialogError,
+    limit,
   } = model;
 
   if (!dialogType) return null;
@@ -42,7 +44,7 @@ export function CardDialog({ model }: Props) {
             <h3 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
               {dialogType === "limit"
                 ? "Request Limit Increase"
-                : "Create Virtual Card"}
+                : "Request Virtual Card"}
             </h3>
             <button
               type="button"
@@ -55,7 +57,7 @@ export function CardDialog({ model }: Props) {
           </div>
 
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Submit a request for your corporate Visa card account. Changes will update your active controls immediately.
+            Submit a request for review. Your active card and limit stay the same until approval.
           </p>
 
           {dialogType === "virtual" && (
@@ -78,7 +80,7 @@ export function CardDialog({ model }: Props) {
               : "Spending Limit (INR)"}
             <input
               type="number"
-              min={dialogType === "limit" ? "7500.01" : "0.01"}
+              min={dialogType === "limit" ? String(limit + 0.01) : "0.01"}
               step="0.01"
               value={requestedAmount}
               onChange={(event) => setRequestedAmount(event.target.value)}
@@ -105,7 +107,7 @@ export function CardDialog({ model }: Props) {
               type="submit"
               className="h-8 px-4 rounded-lg bg-black text-white dark:bg-white dark:text-black text-xs font-medium hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
             >
-              Save {dialogType === "limit" ? "Request" : "Card"}
+              Submit Request
             </button>
           </div>
         </form>
