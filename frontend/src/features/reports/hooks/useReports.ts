@@ -17,6 +17,7 @@ type Report = {
 export function useReports() {
   const { refresh: refreshExpenses } = useExpenses();
   const params = useSearchParams();
+  const expenseParam = params.get("expense");
   const router = useRouter();
   const [reports, setReports] = useState<Report[]>([]);
   const [selected, setSelected] = useState("");
@@ -32,9 +33,17 @@ export function useReports() {
     setReports(result.reports);
     setSelected((current) => current && result.reports.some((report) => report.name === current)
       ? current
-      : result.reports.find((report) => report.items.some((item) => item.id === params.get("expense")))?.name || result.reports[0]?.name || "");
+      : result.reports.find((report) => report.items.some((item) => item.id === expenseParam))?.name || result.reports[0]?.name || "");
   }
-  useEffect(() => { void refresh().catch((cause: unknown) => setNotice(cause instanceof Error ? cause.message : "Could not load reports.")); }, []);
+  useEffect(() => {
+    let active = true;
+    employeeJson<{ reports: Report[] }>("/reports").then((result) => {
+      if (!active) return;
+      setReports(result.reports);
+      setSelected(result.reports.find((report) => report.items.some((item) => item.id === expenseParam))?.name || result.reports[0]?.name || "");
+    }).catch((cause: unknown) => { if (active) setNotice(cause instanceof Error ? cause.message : "Could not load reports."); });
+    return () => { active = false; };
+  }, [expenseParam]);
 
   const groups = reports.map((report) => report.name);
   const currentReport = reports.find((report) => report.name === selected);

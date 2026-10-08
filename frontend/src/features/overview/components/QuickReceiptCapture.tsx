@@ -1,12 +1,11 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { ScanLine, Upload } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 
-type Props = { onUpload: () => void };
-
-export function QuickReceiptCapture({ onUpload }: Props) {
+export function QuickReceiptCapture() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -39,7 +38,7 @@ export function QuickReceiptCapture({ onUpload }: Props) {
       </div>
 
       <div className="flex items-center justify-end">
-        <label
+        <Link href="/employee/expenses/new"
           className={`h-8 px-3.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
             isDark
               ? "bg-white text-black hover:bg-zinc-200"
@@ -47,20 +46,8 @@ export function QuickReceiptCapture({ onUpload }: Props) {
           }`}
         >
           <Upload className="h-3.5 w-3.5" />
-          <span>Upload File</span>
-          <input
-            accept=".pdf,image/*"
-            aria-label="Quick receipt upload"
-            className="hidden"
-            type="file"
-            onChange={(event) => {
-              if (event.target.files?.[0]) {
-                onUpload();
-                event.target.value = "";
-              }
-            }}
-          />
-        </label>
+          <span>New Expense</span>
+        </Link>
       </div>
     </section>
   );

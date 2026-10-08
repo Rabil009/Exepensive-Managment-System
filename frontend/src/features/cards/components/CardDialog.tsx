@@ -7,7 +7,6 @@ import type { CardControlsModel } from "../hooks/useCardControls";
 type Props = {
   model: Pick<
     CardControlsModel,
-    | "dialogRef"
     | "dialogType"
     | "setDialogType"
     | "saveDialog"
@@ -22,7 +21,6 @@ type Props = {
 
 export function CardDialog({ model }: Props) {
   const {
-    dialogRef,
     dialogType,
     setDialogType,
     saveDialog,

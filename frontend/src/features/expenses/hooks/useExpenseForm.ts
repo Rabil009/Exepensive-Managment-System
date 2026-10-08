@@ -3,8 +3,7 @@ import { useSearchParams } from "next/navigation";
 import { useExpenses } from "../data/ExpensesContext";
 import { draftKey, remoteDraftKey, emptyDraft, type Draft } from "../data/expenseDraft";
 import type { ExpenseStatus } from "../types";
-import type { UnlinkedTransaction } from "../data/demoTransactions";
-import { discardNewExpense, loadNewExpense, saveNewExpense } from "../data/newExpenseApi";
+import { discardNewExpense, loadExpenseOptions, loadNewExpense, saveNewExpense, type ExpenseOptions } from "../data/newExpenseApi";
 export function useExpenseForm() {
   const params = useSearchParams();
   const draftParam = params.get("draft");
@@ -13,8 +12,8 @@ export function useExpenseForm() {
     const existing = expenses.find((expense) => expense.id === params.get("draft") && expense.status === "Draft");
     if (existing) return {
       ...emptyDraft(), ...existing, amount: String(existing.amount), currency: "INR",
-      report: existing.report || "Unassigned", paymentMethod: existing.paymentMethod || "Corporate Card (••4921)",
-      purpose: existing.description, attendees: existing.attendees || ["Rabil Khan"], receipt: existing.receipt || "",
+      report: existing.report || "Unassigned", paymentMethod: existing.paymentMethod || "Personal (Out-of-Pocket)",
+      purpose: existing.description, attendees: existing.attendees || [], receipt: existing.receipt || "",
     };
     const report = params.get("report");
     try {
@@ -29,6 +28,7 @@ export function useExpenseForm() {
     }
   });
   const [file, setFile] = useState<File | null>(null);
+  const [options, setOptions] = useState<ExpenseOptions>({ categories: [], reports: [], unlinked_transactions: [] });
   const [preview, setPreview] = useState("");
   const previewUrl = useRef("");
   const [error, setError] = useState("");
@@ -47,6 +47,13 @@ export function useExpenseForm() {
     draft.category &&
     Number(draft.amount) > 0,
   );
+
+  useEffect(() => {
+    let active = true;
+    loadExpenseOptions().then((result) => { if (active) setOptions(result); })
+      .catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "Could not load expense options."); });
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -68,9 +75,10 @@ export function useExpenseForm() {
         ...emptyDraft(), id: stored.id, merchant: stored.merchant || "",
         date: stored.expense_date || "", amount: String(stored.amount || ""),
         category: stored.category || "", report: stored.report_name || "Unassigned",
-        paymentMethod: stored.payment_method || "Corporate Card (••4921)",
+        paymentMethod: stored.payment_method || "Personal (Out-of-Pocket)",
         purpose: stored.business_purpose || "", attendees: stored.attendees || [],
         receipt: stored.receipt_name || "",
+        linkedTransactionId: stored.linked_transaction_id,
       });
       setSaved(true);
       remoteDraft.current = true;
@@ -88,7 +96,8 @@ export function useExpenseForm() {
   }, [draft, submitted, saved]);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
-    setDraft((current) => ({ ...current, [key]: value }));
+    setDraft((current) => ({ ...current, [key]: value,
+      ...(key === "paymentMethod" && value !== "Corporate Card" ? { linkedTransactionId: null } : {}) }));
     setSaved(false);
     setSubmitted(false);
     setMessage("");
@@ -130,6 +139,7 @@ export function useExpenseForm() {
       setMessage(status === "Draft" ? "Draft saved to Supabase." : "Expense submitted to Supabase for approval.");
       setFile(null);
       await refresh();
+      void loadExpenseOptions().then(setOptions).catch(() => {});
       if (status === "Draft") {
         try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Optional cache. */ }
         try { localStorage.setItem(remoteDraftKey, draft.id); } catch { /* Optional cache. */ }
@@ -150,6 +160,7 @@ export function useExpenseForm() {
       if (remoteDraft.current && !submitted) await discardNewExpense(draft.id);
       remoteDraft.current = false;
       await refresh();
+      void loadExpenseOptions().then(setOptions).catch(() => {});
       localStorage.removeItem(draftKey);
       localStorage.removeItem(remoteDraftKey);
       setDraft(emptyDraft());
@@ -180,23 +191,24 @@ export function useExpenseForm() {
     setAddingAttendee(false);
   }
 
-  function linkTransaction(transaction: UnlinkedTransaction) {
+  function linkTransaction(transaction: ExpenseOptions["unlinked_transactions"][number]) {
     setDraft((current) => ({
       ...current,
       merchant: transaction.merchant,
       amount: transaction.amount,
-      paymentMethod: transaction.payment,
-      date: transaction.date,
-      category: transaction.category,
+      paymentMethod: "Corporate Card",
+      date: transaction.transaction_date,
+      linkedTransactionId: transaction.id,
     }));
     setSaved(false);
     setSubmitted(false);
     setMessage(
-      "Sample card transaction linked. Review the details before submitting.",
+      "Card transaction selected. Choose a category and review the details before submitting.",
     );
   }
   return {
     draft,
+    options,
     file,
     preview,
     error,

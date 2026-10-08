@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { draftKey, remoteDraftKey, expenseCacheKey } from "@/features/expenses/data/expenseDraft";
+import { draftKey, remoteDraftKey } from "@/features/expenses/data/expenseDraft";
 
 const cacheOwnerKey = "employee-expense-cache-owner-v1";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -59,7 +59,6 @@ export function clearEmployeeCache() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(draftKey);
   localStorage.removeItem(remoteDraftKey);
-  localStorage.removeItem(expenseCacheKey);
   localStorage.removeItem(cacheOwnerKey);
 }
 

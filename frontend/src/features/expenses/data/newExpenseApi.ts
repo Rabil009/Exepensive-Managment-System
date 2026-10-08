@@ -12,7 +12,22 @@ type SavedDraft = {
   business_purpose: string | null;
   attendees: string[];
   receipt_name: string | null;
+  linked_transaction_id: string | null;
 };
+
+export type ExpenseOptions = {
+  categories: string[];
+  reports: string[];
+  unlinked_transactions: {
+    id: string; card_id: string; transaction_date: string; merchant: string;
+    purpose: string | null; amount: string; currency: string; status: string;
+  }[];
+};
+
+export async function loadExpenseOptions() {
+  const response = await employeeRequest("/new-expense/options");
+  return response.json() as Promise<ExpenseOptions>;
+}
 
 export async function saveNewExpense(draft: Draft, file: File | null, submit: boolean) {
   const body = new FormData();
@@ -27,6 +42,7 @@ export async function saveNewExpense(draft: Draft, file: File | null, submit: bo
     payment_method: draft.paymentMethod,
     purpose: draft.purpose,
     attendees: draft.attendees,
+    linked_transaction_id: draft.linkedTransactionId,
   }));
   if (file) body.set("file", file);
   const response = await employeeRequest("/new-expense", { method: "POST", body });
@@ -40,4 +56,16 @@ export async function loadNewExpense(id: string) {
 
 export async function discardNewExpense(id: string) {
   await employeeRequest(`/new-expense/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+export async function downloadExpenseReceipt(id: string, filename: string) {
+  const response = await employeeRequest(`/new-expense/receipts/${encodeURIComponent(id)}`);
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

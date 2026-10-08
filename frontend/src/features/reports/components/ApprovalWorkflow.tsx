@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CheckCircle2, Clock, CircleDot, Circle, GitCommit } from "lucide-react";
+import { CheckCircle2, Clock, Circle, GitCommit } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import type { ReportsModel } from "../hooks/useReports";
 import { StatusBadge } from "../../../shared/components/StatusBadge";

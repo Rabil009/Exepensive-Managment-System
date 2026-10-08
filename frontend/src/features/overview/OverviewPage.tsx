@@ -14,13 +14,7 @@ export default function OverviewPage() {
       <div className="space-y-4 sm:space-y-6 w-full">
         <OverviewSummary summary={model.summary} />
         {model.error && <p role="alert" className="text-sm text-rose-500">{model.error}</p>}
-        <QuickReceiptCapture
-          onUpload={() =>
-            model.setNotice(
-              "Open New Expense to attach this receipt and enter its details.",
-            )
-          }
-        />
+        <QuickReceiptCapture />
         <OverviewExpenseTable model={model} />
         <ComplianceBanner />
       </div>

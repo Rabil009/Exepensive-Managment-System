@@ -3,17 +3,14 @@
 import React from "react";
 import { Tag, FolderOpen, CreditCard, Wallet, ChevronDown } from "lucide-react";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
-import { categories } from "../data/categories";
 
-type Props = { model: Pick<ExpenseFormModel, "draft" | "update"> };
+type Props = { model: Pick<ExpenseFormModel, "draft" | "update" | "options"> };
 
 export function ExpenseCategorization({ model }: Props) {
-  const { draft, update } = model;
+  const { draft, update, options } = model;
 
   const paymentMethods = [
-    draft.paymentMethod.startsWith("Apple")
-      ? "Apple Card (••8814)"
-      : "Corporate Card (••4921)",
+    "Corporate Card",
     "Personal (Out-of-Pocket)",
   ];
 
@@ -44,7 +41,7 @@ export function ExpenseCategorization({ model }: Props) {
               required
             >
               <option value="">Select category...</option>
-              {categories.map((category) => (
+              {options.categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -70,12 +67,7 @@ export function ExpenseCategorization({ model }: Props) {
               value={draft.report}
               onChange={(event) => update("report", event.target.value)}
             >
-              {[
-                "Q4 Design Summit — SFO",
-                "Software & Stipends",
-                "Equipment & WFH",
-                "Unassigned",
-              ].map((report) => (
+              {[...new Set(["Unassigned", ...options.reports, draft.report])].map((report) => (
                 <option key={report} value={report}>
                   {report}
                 </option>

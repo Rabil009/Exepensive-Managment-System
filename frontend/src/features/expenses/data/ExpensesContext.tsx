@@ -45,7 +45,15 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    let active = true;
+    employeeJson<OverviewResponse>("/overview").then((response) => {
+      if (active) { setExpenses(response.expenses); setSummary(response.summary); setError(""); setLoading(false); }
+    }).catch((cause: unknown) => {
+      if (active) { setError(cause instanceof Error ? cause.message : "Could not load expenses."); setLoading(false); }
+    });
+    return () => { active = false; };
+  }, []);
 
   return <Context.Provider value={{ expenses, summary, loading, error, refresh }}>{children}</Context.Provider>;
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { employeeJson } from "@/lib/employee-api";
 import { exportCsv } from "../../../shared/utils/exportCsv";
 
@@ -28,12 +28,16 @@ export function useCardControls() {
   const [requestedAmount, setRequestedAmount] = useState("");
   const [virtualName, setVirtualName] = useState("");
   const [dialogError, setDialogError] = useState("");
-  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const refresh = useCallback(async () => {
     setData(await employeeJson<CardsResponse>("/cards"));
   }, []);
-  useEffect(() => { void refresh().catch((cause: unknown) => setMessage(cause instanceof Error ? cause.message : "Could not load cards.")); }, [refresh]);
+  useEffect(() => {
+    let active = true;
+    employeeJson<CardsResponse>("/cards").then((result) => { if (active) setData(result); })
+      .catch((cause: unknown) => { if (active) setMessage(cause instanceof Error ? cause.message : "Could not load cards."); });
+    return () => { active = false; };
+  }, []);
 
   const card = data?.cards[0] || null;
   const usage = data?.usage.cards.find((item) => item.id === card?.id);
@@ -88,7 +92,7 @@ export function useCardControls() {
   }
   return { card, cards: data?.cards || [], requests: data?.requests || [], categories: data?.usage.categories || [], month: data?.usage.month || "",
     state, query, setQuery, payment, setPayment, status, setStatus, message, setMessage, dialogType, setDialogType,
-    requestedAmount, setRequestedAmount, virtualName, setVirtualName, dialogError, dialogRef,
+    requestedAmount, setRequestedAmount, virtualName, setVirtualName, dialogError,
     spent, limit, percent, visible, transactionCount: transactions.length, update, openDialog, saveDialog, exportTransactions };
 }
 export type CardControlsModel = ReturnType<typeof useCardControls>;

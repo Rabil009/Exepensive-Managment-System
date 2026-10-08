@@ -20,6 +20,7 @@ import { displayDate, money } from "../../../shared/utils/format";
 import { tabs } from "../data/overview";
 import type { OverviewModel } from "../hooks/useOverview";
 import { useTheme } from "@/lib/theme-store";
+import { downloadExpenseReceipt } from "../../expenses/data/newExpenseApi";
 
 type Props = {
   model: Pick<
@@ -284,13 +285,13 @@ export function OverviewExpenseTable({ model }: Props) {
                                 : "text-zinc-400"
                             }`}
                           />
-                          <span>
+                          {item.receipt ? <button type="button" className="hover:underline" onClick={() => void downloadExpenseReceipt(item.id, item.receipt || "receipt").catch((cause: unknown) => setNotice(cause instanceof Error ? cause.message : "Could not download receipt."))}>
                             {item.receipt === "Auto-Matched Invoice"
                               ? "Invoice Attached"
                               : item.receipt === "Verified Receipt"
                               ? "Receipt Attached"
                               : item.receipt || "No receipt"}
-                          </span>
+                          </button> : <span>No receipt</span>}
                         </div>
                       </td>
                     )}
