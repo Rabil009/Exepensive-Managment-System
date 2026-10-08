@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useExpenses } from "../../expenses/data/ExpensesContext";
-import { exportCsv } from "../../../shared/utils/exportCsv";
-import { tabs } from "../data/overview";
 export function useOverview() {
   const { expenses } = useExpenses();
   const [query, setQuery] = useState("");
@@ -22,26 +20,6 @@ export function useOverview() {
         value === "all" ||
         item.status.toLowerCase() === (value === "drafts" ? "draft" : value),
     ).length;
-  function cycleFilter() {
-    setTab(
-      tabs[(tabs.findIndex((item) => item.value === tab) + 1) % tabs.length]
-        .value,
-    );
-  }
-  function exportExpenses() {
-    exportCsv(
-      "aura-expenses.csv",
-      ["Merchant", "Date", "Report", "Currency", "Amount", "Status"],
-      visible.map((item) => [
-        item.merchant,
-        item.date,
-        item.report || "Unassigned",
-        item.currency || "INR",
-        item.amount,
-        item.status,
-      ]),
-    );
-  }
   return {
     expenses,
     visible,
@@ -54,8 +32,6 @@ export function useOverview() {
     hideReceipt,
     setHideReceipt,
     countFor,
-    cycleFilter,
-    exportExpenses,
   };
 }
 export type OverviewModel = ReturnType<typeof useOverview>;
