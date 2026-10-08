@@ -13,6 +13,7 @@ export type Draft = {
 };
 export const draftKey = "aura-expense-draft-v1";
 export const remoteDraftKey = "aura-supabase-expense-draft-id-v1";
+export const expenseCacheKey = "employee-expenses-v1";
 export const emptyDraft = (): Draft => ({
   id: crypto.randomUUID(),
   merchant: "",

@@ -10,7 +10,6 @@ import { ExpenseDetailsFields } from "./ExpenseDetailsFields";
 import { ExpenseCategorization } from "./ExpenseCategorization";
 import { ExpenseAttendees } from "./ExpenseAttendees";
 import { ExpenseFormActions } from "./ExpenseFormActions";
-import { EmployeeExpenseSession } from "./EmployeeExpenseSession";
 import "../styles/expense-form.css";
 
 export function ExpenseForm() {
@@ -22,7 +21,6 @@ export function ExpenseForm() {
       onSubmit={model.submit}
     >
       <ExpenseFormHeader model={model} />
-      <EmployeeExpenseSession />
 
       {/* Message / Error Notification */}
       {(model.error || model.message) && (

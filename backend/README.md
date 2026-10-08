@@ -44,10 +44,11 @@ Every Supabase request needs a valid Employee Supabase access token in the
 `Authorization: Bearer <token>` header. The backend verifies the user and
 Employee profile, then forwards the same token so Supabase row security checks
 the owner. A publishable key is sufficient; do not put a service role key in
-the browser. The New Expense page can send an email sign-in link. After the
-Employee opens the link and returns to the page, Save Draft and Submit Expense
-can write to Supabase. New email signups get an Employee profile. An attached
-receipt must be selected again if the sign-in link reloads the page.
+the browser. On the existing Payout login page, selecting Employee Portal uses
+Supabase Auth email/password. It checks the `profiles` table for the Employee
+role before opening Employee pages. New Employee accounts are created there and
+must confirm their email if Supabase requires it. Save Draft and Submit Expense
+then use that session to write to Supabase.
 
 Run the Supabase route tests with
 `.venv/Scripts/python.exe -m pytest -q tests/test_supabase_new_expense.py`.

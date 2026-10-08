@@ -16,6 +16,8 @@ import {
   LogOut,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
+import { supabase } from "@/lib/supabase";
+import { clearEmployeeCache } from "@/lib/employee-auth";
 import type { NavigationItem } from "./navigation.types";
 
 interface SidebarProps {
@@ -64,12 +66,13 @@ export function Sidebar({
     };
   }, [isProfileOpen]);
 
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("payout_user_role");
-      localStorage.removeItem("payout_user_email");
-    }
-    router.push("/");
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) return;
+    clearEmployeeCache();
+    localStorage.removeItem("payout_user_role");
+    localStorage.removeItem("payout_user_email");
+    router.replace("/?portal=employee");
   };
 
   const mainNav = [
@@ -83,7 +86,7 @@ export function Sidebar({
     { label: "Reports", icon: ClipboardList, path: "/employee/reports" },
   ];
 
-  const renderNavButton = (item: { label: string; icon: any; path: string }) => {
+  const renderNavButton = (item: NavigationItem & { path: string }) => {
     const isActive = activeView === item.label;
     return (
       <button

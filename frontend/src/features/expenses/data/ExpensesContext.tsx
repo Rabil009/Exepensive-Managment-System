@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { initialExpenses } from "./demoExpenses";
+import { expenseCacheKey } from "./expenseDraft";
 import { type Expense } from "../types";
 
 type ExpenseStore = {
@@ -8,12 +9,11 @@ type ExpenseStore = {
   removeDraft: (id: string) => void;
 };
 const Context = createContext<ExpenseStore | null>(null);
-const key = "employee-expenses-v1";
 export function ExpensesProvider({ children }: { children: ReactNode }) {
   const [expenses, setExpenses] = useState<Expense[]>(() => {
     try {
       if (typeof window === "undefined") return initialExpenses;
-      const saved = localStorage.getItem(key);
+      const saved = localStorage.getItem(expenseCacheKey);
       return saved
         ? [
             ...(JSON.parse(saved) as Expense[]).map((expense) => ({
@@ -37,7 +37,7 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
       ),
     ];
     if (typeof window !== "undefined") {
-      localStorage.setItem(key, JSON.stringify(userExpenses));
+      localStorage.setItem(expenseCacheKey, JSON.stringify(userExpenses));
     }
     setExpenses([...userExpenses, ...initialExpenses.filter((base) => !userExpenses.some((expense) => expense.id === base.id))]);
   };
@@ -48,7 +48,7 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
         !initialExpenses.includes(item),
     );
     if (typeof window !== "undefined") {
-      localStorage.setItem(key, JSON.stringify(userExpenses));
+      localStorage.setItem(expenseCacheKey, JSON.stringify(userExpenses));
     }
     setExpenses([...userExpenses, ...initialExpenses.filter((base) => !userExpenses.some((expense) => expense.id === base.id))]);
   };
