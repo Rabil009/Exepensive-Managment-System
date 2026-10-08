@@ -129,6 +129,55 @@ def test_linked_transaction_amount_must_match():
         app.dependency_overrides.clear()
 
 
+def test_receipt_download_checks_owner_and_private_path():
+    gateway = FakeGateway()
+    expense_id = uuid4()
+    path = f"{gateway.profile['id']}/{expense_id}/receipt.pdf"
+    requested = []
+
+    class Response:
+        def __init__(self, rows=None, content=b""):
+            self.rows = rows
+            self.content = content
+
+        def json(self):
+            return self.rows
+
+    def request(method, url, **kwargs):
+        requested.append(url)
+        if url == "/rest/v1/expense_claims":
+            assert kwargs["params"]["employee_id"] == f"eq.{gateway.profile['id']}"
+            return Response([{"receipt_path": path, "receipt_name": "receipt.pdf", "receipt_content_type": "application/pdf"}])
+        if url == f"/storage/v1/object/authenticated/receipts/{path}":
+            return Response(content=b"%PDF-1.7\nreceipt")
+        raise AssertionError(url)
+
+    gateway.request = request
+    app.dependency_overrides[get_gateway] = lambda: gateway
+    try:
+        with TestClient(app) as client:
+            response = client.get(f"/api/employee/new-expense/receipts/{expense_id}")
+            assert response.status_code == 200
+            assert response.content.startswith(b"%PDF")
+            assert response.headers["content-type"] == "application/pdf"
+            assert requested[-1].startswith("/storage/v1/object/authenticated/receipts/")
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_receipt_download_rejects_foreign_storage_path():
+    gateway = FakeGateway()
+    gateway.request = lambda method, url, **kwargs: type("Response", (), {
+        "json": lambda self: [{"receipt_path": f"{uuid4()}/{uuid4()}/other.pdf", "receipt_name": "other.pdf"}],
+    })()
+    app.dependency_overrides[get_gateway] = lambda: gateway
+    try:
+        with TestClient(app) as client:
+            assert client.get(f"/api/employee/new-expense/receipts/{uuid4()}").status_code == 404
+    finally:
+        app.dependency_overrides.clear()
+
+
 def test_supabase_gateway_sends_receipt_and_claim_with_employee_token():
     requests = []
 
