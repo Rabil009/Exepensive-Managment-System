@@ -14,8 +14,8 @@ class FakeGateway:
     def expenses(self, owner):
         assert owner == "employee-1"
         return [
-            {"id": "claim-1", "date": "2026-10-08", "merchant": "Hotel", "category": "Accommodation", "amount": 8768.0, "status": "Pending", "raw_status": "SUBMITTED", "description": "Travel", "receipt": None, "currency": "INR", "report": "Trip", "paymentMethod": "Personal (Out-of-Pocket)"},
-            {"id": "draft-1", "date": "", "merchant": "Draft", "category": "Other", "amount": 2.0, "status": "Draft", "raw_status": "DRAFT", "description": "", "receipt": None, "currency": "INR", "report": "Trip", "paymentMethod": ""},
+            {"id": "claim-1", "date": "2026-10-08", "merchant": "Hotel", "category": "Accommodation", "amount": 8768.0, "status": "Pending", "raw_status": "SUBMITTED", "source": "claim", "description": "Travel", "receipt": None, "currency": "INR", "report": "Trip", "paymentMethod": "Personal (Out-of-Pocket)"},
+            {"id": "draft-1", "date": "", "merchant": "Draft", "category": "Other", "amount": 2.0, "status": "Draft", "raw_status": "DRAFT", "source": "draft", "description": "", "receipt": None, "currency": "INR", "report": "Trip", "paymentMethod": ""},
         ]
 
     def cards(self, owner):
@@ -24,10 +24,13 @@ class FakeGateway:
 
     def card_transactions(self, owner):
         assert owner == "employee-1"
-        return [{"transaction_date": "2026-10-07", "amount": "100.00", "status": "SETTLED"}]
+        return [{"transaction_date": "2026-10-07", "amount": "100.00", "status": "SETTLED", "card_id": "d66933cd-b2e4-41d1-82e4-b565a8861614", "category": "TRAVEL"}]
 
     def card_requests(self, owner):
         return []
+
+    def category_limits(self, owner):
+        return [{"category": "TRAVEL", "monthly_limit": "500.00"}]
 
     def request(self, method, path, **kwargs):
         self.patches.append((method, path, kwargs))
@@ -58,6 +61,9 @@ def test_employee_overview_analytics_and_reports_are_owner_scoped():
         assert analytics["receipt_compliance"] == {"attached": 0, "total": 1}
         reports = client.get("/api/employee/reports").json()
         assert reports["reports"][0]["count"] == 2
+        assert reports["reports"][0]["can_withdraw"] is False
+        cards = client.get("/api/employee/cards").json()
+        assert cards["usage"]["categories"][0]["remaining"] == "400.00"
     app.dependency_overrides.clear()
 
 

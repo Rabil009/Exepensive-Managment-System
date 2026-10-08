@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from app.services.employee_workspace import EmployeeWorkspaceGateway, analytics, current_month, report_groups
+from app.services.employee_workspace import EmployeeWorkspaceGateway, analytics, card_usage, current_month, report_groups
 
 
 router = APIRouter(prefix="/api/employee", tags=["employee-workspace"])
@@ -91,10 +91,13 @@ def change_report(data: ReportAction, gateway: EmployeeWorkspaceGateway = Depend
 @router.get("/cards")
 def cards(gateway: EmployeeWorkspaceGateway = Depends(workspace)):
     owner = employee_id(gateway)
+    assigned = gateway.cards(owner)
+    transactions = gateway.card_transactions(owner)
     return {
-        "cards": gateway.cards(owner),
-        "transactions": gateway.card_transactions(owner),
+        "cards": assigned,
+        "transactions": transactions,
         "requests": gateway.card_requests(owner),
+        "usage": card_usage(assigned, transactions, gateway.category_limits(owner), current_month()),
     }
 
 

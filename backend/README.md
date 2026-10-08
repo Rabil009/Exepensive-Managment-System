@@ -72,8 +72,8 @@ reads and writes to that Employee's records.
 - `GET /api/employee/reports` groups owned claims and drafts by report name.
 - `POST /api/employee/reports/action` withdraws a fully submitted report or
   resubmits a fully withdrawn one. Body: `{"name":"Trip","action":"withdraw"}`.
-- `GET /api/employee/cards` returns assigned cards, settled/pending card
-  transactions, and card requests.
+- `GET /api/employee/cards` returns assigned cards, card transactions, card
+  requests, and monthly card/category limit usage.
 - `PATCH /api/employee/cards/{id}` updates an assigned card's app controls.
 - `POST /api/employee/cards/requests` stores a limit increase or virtual card
   request. It does **not** change an issuer limit or issue a real card.
