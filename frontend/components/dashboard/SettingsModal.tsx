@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Settings, ShieldCheck, Check, Moon, Sun } from "lucide-react";
+import { X, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/lib/theme-store";
 
@@ -10,7 +10,7 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const [hotelCap, setHotelCap] = useState("5000");
@@ -64,7 +64,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
                   isDark ? "text-zinc-400" : "text-zinc-500"
                 }`}
               >
-                Approval thresholds and interface preferences
+                Approval thresholds and policy limits
               </p>
             </div>
           </div>
@@ -82,48 +82,7 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
         </div>
 
         <form onSubmit={handleSave} className="space-y-4">
-          {/* Appearance Theme Selector */}
-          <div>
-            <label
-              className={`block text-[12px] font-medium mb-1.5 ${
-                isDark ? "text-zinc-300" : "text-zinc-700"
-              }`}
-            >
-              Interface Theme
-            </label>
-            <div
-              className={`grid grid-cols-2 gap-2 p-1 rounded-xl border ${
-                isDark ? "bg-[#18181D] border-white/[0.06]" : "bg-zinc-50 border-zinc-200/80"
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => setTheme("light")}
-                className={`h-8 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  !isDark
-                    ? "bg-white text-zinc-900 shadow-xs border border-zinc-200/80 font-semibold"
-                    : "text-zinc-400 hover:text-zinc-200"
-                }`}
-              >
-                <Sun className="h-3.5 w-3.5 text-amber-500" />
-                <span>Light</span>
-                {!isDark && <Check className="h-3 w-3 text-zinc-900 ml-auto" />}
-              </button>
-              <button
-                type="button"
-                onClick={() => setTheme("dark")}
-                className={`h-8 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  isDark
-                    ? "bg-[#25252D] text-white shadow-xs border border-white/[0.1] font-semibold"
-                    : "text-zinc-600 hover:text-zinc-900"
-                }`}
-              >
-                <Moon className="h-3.5 w-3.5 text-blue-400" />
-                <span>Dark</span>
-                {isDark && <Check className="h-3 w-3 text-white ml-auto" />}
-              </button>
-            </div>
-          </div>
+
 
           {/* Currency */}
           <div>
