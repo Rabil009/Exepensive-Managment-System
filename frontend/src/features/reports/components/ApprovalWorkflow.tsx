@@ -4,15 +4,22 @@ import React from "react";
 import { CheckCircle2, Clock, CircleDot, Circle, GitCommit } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import type { ReportsModel } from "../hooks/useReports";
-import { steps } from "../data/demoWorkflow";
 import { StatusBadge } from "../../../shared/components/StatusBadge";
 
-type Props = { model: Pick<ReportsModel, "completed" | "recalled"> };
+type Props = { model: Pick<ReportsModel, "completed" | "recalled" | "workflowStage"> };
+
+const steps = [
+  { title: "Report Submitted", owner: "Employee" },
+  { title: "Manager Review", owner: "Manager" },
+  { title: "Finance Review", owner: "Finance team" },
+  { title: "Reimbursement", owner: "Finance team" },
+];
 
 export function ApprovalWorkflow({ model }: Props) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { completed, recalled } = model;
+  const { completed, recalled, workflowStage } = model;
+  const currentStep = workflowStage === "FINANCE_REVIEW" ? 2 : workflowStage === "COMPLETE" ? 4 : workflowStage === "DRAFT" ? 0 : 1;
 
   return (
     <section
@@ -44,16 +51,16 @@ export function ApprovalWorkflow({ model }: Props) {
             ? "Approved & Complete"
             : recalled
             ? "Draft · Withdrawn"
-            : "In Review · Step 2 of 4"}
+            : workflowStage === "REJECTED" ? "Rejected" : `In Review · Step ${currentStep + 1} of 4`}
         </span>
       </div>
 
       {/* 4 Connected Timeline Steps */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4">
         {steps.map((step, index) => {
-          const isDone = completed || (index === 0 && !recalled);
-          const isCurrent = index === 1 && !recalled && !completed;
-          const isUpcoming = index > 1 && !completed;
+          const isDone = completed || index < currentStep;
+          const isCurrent = index === currentStep && !completed && !recalled;
+          const isUpcoming = index > currentStep && !completed;
 
           return (
             <div
@@ -116,7 +123,7 @@ export function ApprovalWorkflow({ model }: Props) {
                       ? "Complete"
                       : recalled
                       ? "Not Submitted"
-                      : step.status}
+                      : isCurrent ? "In Review" : "Waiting"}
                   </StatusBadge>
                 </div>
 
@@ -128,7 +135,7 @@ export function ApprovalWorkflow({ model }: Props) {
                     ? "Completed"
                     : recalled
                     ? "Awaiting submission"
-                    : step.note}
+                    : isCurrent ? "Awaiting review" : "Waiting for the previous step"}
                 </p>
               </div>
             </div>
