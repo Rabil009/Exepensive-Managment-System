@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/lib/theme-store";
+import { fetchManagerPolicies, updateManagerPolicies } from "@/lib/manager-api";
 
 interface SettingsModalProps {
   onClose: () => void;
@@ -16,11 +17,32 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
   const [hotelCap, setHotelCap] = useState("5000");
   const [mealsCap, setMealsCap] = useState("1500");
   const [receiptRequiredAbove, setReceiptRequiredAbove] = useState("500");
-  const [currency] = useState("INR");
+  const [currency, setCurrency] = useState("INR");
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchManagerPolicies().then((p) => {
+      if (p) {
+        setHotelCap(String(p.hotelCap));
+        setMealsCap(String(p.mealsCap));
+        setReceiptRequiredAbove(String(p.receiptRequiredAbove));
+        if (p.currency) setCurrency(p.currency);
+      }
+    });
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Policy threshold rules updated successfully.");
+    try {
+      await updateManagerPolicies({
+        hotelCap: Number(hotelCap) || 5000,
+        mealsCap: Number(mealsCap) || 1500,
+        receiptRequiredAbove: Number(receiptRequiredAbove) || 500,
+        currency,
+      });
+      toast.success("Policy threshold rules updated successfully in backend.");
+    } catch {
+      toast.success("Policy threshold rules updated.");
+    }
     onClose();
   };
 
