@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   Building2,
   Download,
+  RefreshCw,
 } from "lucide-react";
 import { ManagerSidebar } from "@/components/manager/ManagerSidebar";
 import { ManagerHeader } from "@/components/manager/ManagerHeader";
@@ -25,6 +26,11 @@ import { SettingsModal } from "@/components/dashboard/SettingsModal";
 import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { useRouter } from "next/navigation";
+import {
+  fetchManagerClaims,
+  approveManagerClaim,
+  rejectManagerClaim,
+} from "@/lib/manager-api";
 
 interface ApprovalClaim {
   id: string;
@@ -170,10 +176,29 @@ function ApprovalsPageInner() {
 
   // Claims & Inspection
   const [claims, setClaims] = useState<ApprovalClaim[]>(INITIAL_APPROVAL_CLAIMS);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("Pending");
   const [searchQuery, setSearchQuery] = useState("");
   const [inspectClaim, setInspectClaim] = useState<ApprovalClaim | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
+
+  const refreshData = async () => {
+    try {
+      setIsRefreshing(true);
+      const fetched = await fetchManagerClaims();
+      if (fetched && fetched.length > 0) {
+        setClaims(fetched as any);
+      }
+    } catch (e) {
+      console.warn("Backend claims fetch notice:", e);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshData();
+  }, []);
 
   useEffect(() => {
     if (!inspectClaim) return;
@@ -189,7 +214,7 @@ function ApprovalsPageInner() {
     setTimeout(() => setFeedbackNotice(null), 3500);
   };
 
-  const handleApprove = (claim: ApprovalClaim) => {
+  const handleApprove = async (claim: ApprovalClaim) => {
     setClaims((prev) =>
       prev.map((c) => (c.id === claim.id ? { ...c, status: "Approved" as const } : c))
     );
@@ -197,15 +222,27 @@ function ApprovalsPageInner() {
     if (inspectClaim?.id === claim.id) {
       setInspectClaim({ ...claim, status: "Approved" });
     }
+
+    try {
+      await approveManagerClaim(claim.id, "Approved by Manager");
+    } catch (e) {
+      console.warn("Backend approve notice:", e);
+    }
   };
 
-  const handleReject = (claim: ApprovalClaim) => {
+  const handleReject = async (claim: ApprovalClaim) => {
     setClaims((prev) =>
       prev.map((c) => (c.id === claim.id ? { ...c, status: "Rejected" as const } : c))
     );
     notify(`Rejected claim ${claim.id} for ${claim.employeeName}`);
     if (inspectClaim?.id === claim.id) {
       setInspectClaim({ ...claim, status: "Rejected" });
+    }
+
+    try {
+      await rejectManagerClaim(claim.id, "Policy non-compliance or unauthorized expense");
+    } catch (e) {
+      console.warn("Backend reject notice:", e);
     }
   };
 
@@ -428,19 +465,35 @@ function ApprovalsPageInner() {
                 ))}
               </div>
 
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by name, claim ID, or dept..."
-                  className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all focus:outline-none ${
+              {/* Search & Backend Sync */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Filter by name, claim ID, or dept..."
+                    className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all focus:outline-none ${
+                      isDark
+                        ? "bg-[#18181D] border-white/[0.08] text-zinc-100 placeholder:text-zinc-500 focus:border-white/25"
+                        : "bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
+                    }`}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={refreshData}
+                  disabled={isRefreshing}
+                  title="Sync with backend database"
+                  className={`p-2 rounded-lg border transition-all cursor-pointer shrink-0 ${
                     isDark
-                      ? "bg-[#18181D] border-white/[0.08] text-zinc-100 placeholder:text-zinc-500 focus:border-white/25"
-                      : "bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
+                      ? "bg-[#18181D] border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.06]"
+                      : "bg-zinc-50 border-zinc-200 text-zinc-700 hover:text-black hover:bg-zinc-100"
                   }`}
-                />
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-blue-500" : ""}`} />
+                </button>
               </div>
             </div>
 
