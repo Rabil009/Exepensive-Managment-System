@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.api.finance import router as finance_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -21,6 +22,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include Routers
+app.include_router(finance_router)
+
 @app.get("/")
 def root():
     return {
@@ -33,4 +37,5 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
 

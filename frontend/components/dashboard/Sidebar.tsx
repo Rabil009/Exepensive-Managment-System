@@ -19,6 +19,7 @@ import {
   ChevronsUpDown,
   PanelLeft,
   LogOut,
+  X,
 } from "lucide-react";
 import { useFinanceStore } from "@/lib/finance-store";
 
@@ -26,6 +27,8 @@ interface SidebarProps {
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
   onToggleSidebar?: () => void;
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
   onQuickCreate?: () => void;
   onOpenSettings?: () => void;
   onOpenHelp?: () => void;
@@ -36,6 +39,8 @@ export function Sidebar({
   isCollapsed = false,
   onToggleCollapse,
   onToggleSidebar,
+  isMobileOpen = false,
+  onCloseMobile,
   onQuickCreate,
   onOpenSettings,
   onOpenHelp,
@@ -132,15 +137,16 @@ export function Sidebar({
   const handleToggle = onToggleCollapse || onToggleSidebar;
 
   return (
-    <aside
-      style={{ willChange: "width" }}
-      aria-label="Finance Navigation"
-      className={`shrink-0 h-screen border-r flex flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 ${
-        mounted ? "transition-[width] duration-300 ease-in-out" : ""
-      } ${
-        isCollapsed ? "w-[64px]" : "w-[240px]"
-      } bg-[#F7F7F8] dark:bg-[#131316] border-zinc-200/90 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5]`}
-    >
+    <>
+      <aside
+        style={{ willChange: "width" }}
+        aria-label="Finance Navigation"
+        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 ${
+          mounted ? "transition-[width] duration-300 ease-in-out" : ""
+        } ${
+          isCollapsed ? "w-[64px]" : "w-[240px]"
+        } bg-[#F7F7F8] dark:bg-[#131316] border-zinc-200/90 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5]`}
+      >
       {/* Top Group: Brand Header & Navigation */}
       <div className="flex flex-col w-full">
         {/* Workspace Brand Header */}
@@ -490,6 +496,174 @@ export function Sidebar({
         </div>
       </div>
     </aside>
+
+      {/* Mobile Drawer Backdrop */}
+      {isMobileOpen && (
+        <div
+          onClick={onCloseMobile}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden animate-in fade-in duration-200"
+        />
+      )}
+
+      {/* Mobile Slide-Over Drawer */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Mobile Finance Navigation"
+        className={`fixed inset-y-0 left-0 z-50 w-[270px] max-w-[85vw] flex flex-col justify-between overflow-y-auto select-none font-sans px-3 py-3.5 bg-[#F7F7F8] dark:bg-[#131316] border-r border-zinc-200/90 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5] shadow-2xl md:hidden transition-transform duration-300 ease-in-out ${
+          isMobileOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
+        }`}
+      >
+        <div className="flex flex-col w-full">
+          {/* Header with Close Button */}
+          <div className="flex items-center justify-between h-9 px-1 mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-5 w-5 rounded-full border-[1.8px] border-zinc-900 dark:border-white flex items-center justify-center shrink-0">
+                <div className="h-1.5 w-1.5 rounded-full bg-zinc-900 dark:bg-white" />
+              </div>
+              <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-white">
+                Payout
+              </span>
+            </div>
+            {onCloseMobile && (
+              <button
+                type="button"
+                onClick={onCloseMobile}
+                className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white hover:bg-zinc-200/60 dark:hover:bg-white/[0.08] transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Quick Create */}
+          {onQuickCreate && (
+            <button
+              type="button"
+              onClick={() => {
+                onQuickCreate();
+                onCloseMobile?.();
+              }}
+              className="group w-full flex items-center h-10 px-2 rounded-xl cursor-pointer transition-colors duration-150 text-zinc-900 hover:bg-black hover:text-white dark:text-zinc-200 dark:hover:bg-white dark:hover:text-black mb-1"
+            >
+              <div className="h-7 w-7 shrink-0 flex items-center justify-center">
+                <PlusCircle className="h-4 w-4 stroke-[2]" />
+              </div>
+              <span className="text-[13.5px] font-medium ml-2.5">Quick Create</span>
+            </button>
+          )}
+
+          {/* Main Nav Items */}
+          <nav className="space-y-1 w-full">
+            {mainNav.map((item) => {
+              const isActive = activeView === item.label;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => {
+                    setActiveView(item.label);
+                    onCloseMobile?.();
+                  }}
+                  className={`group w-full flex items-center justify-between h-10 px-2 rounded-xl cursor-pointer transition-colors duration-150 ${
+                    isActive
+                      ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs"
+                      : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-7 w-7 shrink-0 flex items-center justify-center">
+                      <item.icon className="h-4 w-4 stroke-[1.85]" />
+                    </div>
+                    <span className="text-[13.5px] font-medium">{item.label}</span>
+                  </div>
+                  {item.count && item.count > 0 && (
+                    <span
+                      className={`h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-medium leading-none ${
+                        isActive
+                          ? "bg-white/20 text-white dark:bg-black/15 dark:text-black"
+                          : "bg-[#E5E7EB] text-zinc-800 dark:bg-white/[0.12] dark:text-zinc-200"
+                      }`}
+                    >
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Documents */}
+          <div className="mt-4 w-full">
+            <p className="px-2 text-[12px] font-normal text-zinc-500 dark:text-zinc-400 mb-1">
+              Documents
+            </p>
+            <nav className="space-y-1 w-full">
+              {documentsNav.map((item) => {
+                const isActive = activeView === item.label;
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setActiveView(item.label);
+                      onCloseMobile?.();
+                    }}
+                    className={`group w-full flex items-center h-10 px-2 rounded-xl cursor-pointer transition-colors duration-150 ${
+                      isActive
+                        ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs"
+                        : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                    }`}
+                  >
+                    <div className="h-7 w-7 shrink-0 flex items-center justify-center">
+                      <item.icon className="h-4 w-4 stroke-[1.85]" />
+                    </div>
+                    <span className="text-[13.5px] font-medium ml-2.5">{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="w-full space-y-1 mt-4">
+          <div className="space-y-0.5">
+            {bottomItems.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => {
+                  item.action?.();
+                  onCloseMobile?.();
+                }}
+                className="w-full flex items-center h-9 px-2 rounded-xl cursor-pointer transition-colors duration-150 text-zinc-700 hover:text-zinc-950 hover:bg-zinc-200/60 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08]"
+              >
+                <div className="h-7 w-7 shrink-0 flex items-center justify-center">
+                  <item.icon className="h-4 w-4 stroke-[1.85]" />
+                </div>
+                <span className="text-[13.5px] font-medium ml-2.5">{item.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* User Profile Card in Drawer */}
+          <div className="pt-2 mt-2 border-t border-zinc-200/80 dark:border-white/[0.08] relative">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full flex items-center justify-between h-10 px-2 rounded-xl cursor-pointer text-left bg-red-50/50 hover:bg-red-50 text-red-600 dark:bg-red-500/10 dark:hover:bg-red-500/15 dark:text-red-400 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                <span className="text-[13px] font-medium">Log out (Aditya)</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
