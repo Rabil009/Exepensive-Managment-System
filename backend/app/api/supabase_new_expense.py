@@ -6,8 +6,10 @@ import re
 from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
+from pathlib import Path
+from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field, ValidationError
 
 from app.services.supabase_expenses import CATEGORIES, MAX_RECEIPT_BYTES, SupabaseExpenseGateway
@@ -24,7 +26,7 @@ class NewExpenseInput(BaseModel):
     payment_method: str = Field(default="", max_length=100)
     purpose: str = Field(default="", max_length=5000)
     attendees: list[str] = Field(default_factory=list, max_length=50)
-    linked_transaction_id: str | None = None
+    linked_transaction_id: UUID | None = None
 
     def draft_row(self):
         if self.category and self.category not in CATEGORIES:
@@ -49,7 +51,7 @@ class NewExpenseInput(BaseModel):
             "card_last4": last4,
             "business_purpose": self.purpose or None,
             "attendees": self.attendees,
-            "linked_transaction_id": self.linked_transaction_id,
+            "linked_transaction_id": str(self.linked_transaction_id) if self.linked_transaction_id else None,
         }
 
 
@@ -64,6 +66,52 @@ def get_gateway(authorization: Annotated[str | None, Header()] = None):
 
 
 router = APIRouter(prefix="/api/employee/new-expense", tags=["employee-new-expense-supabase"])
+
+
+@router.get("/options")
+def expense_options(gateway: SupabaseExpenseGateway = Depends(get_gateway)):
+    owner = gateway.employee()["id"]
+    transactions = gateway.request(
+        "GET", "/rest/v1/employee_card_transactions",
+        params={"employee_id": f"eq.{owner}", "select": "id,card_id,transaction_date,merchant,purpose,amount,currency,status",
+                "status": "in.(PENDING,SETTLED)", "order": "transaction_date.desc", "limit": 100},
+    ).json()
+    claims = gateway.request(
+        "GET", "/rest/v1/expense_claims",
+        params={"employee_id": f"eq.{owner}", "select": "report_name,linked_transaction_id"},
+    ).json()
+    drafts = gateway.request(
+        "GET", "/rest/v1/employee_expense_drafts",
+        params={"employee_id": f"eq.{owner}", "select": "report_name,linked_transaction_id"},
+    ).json()
+    linked = {row["linked_transaction_id"] for row in claims + drafts if row.get("linked_transaction_id")}
+    return {
+        "categories": list(CATEGORIES),
+        "reports": sorted({row["report_name"] for row in claims + drafts if row.get("report_name")}),
+        "unlinked_transactions": [row for row in transactions if row["id"] not in linked],
+    }
+
+
+@router.get("/receipts/{expense_id}")
+def download_receipt(expense_id: UUID, gateway: SupabaseExpenseGateway = Depends(get_gateway)):
+    owner = gateway.employee()["id"]
+    params = {"id": f"eq.{expense_id}", "employee_id": f"eq.{owner}",
+              "select": "receipt_path,receipt_name,receipt_content_type"}
+    claims = gateway.request("GET", "/rest/v1/expense_claims", params=params).json()
+    drafts = [] if claims else gateway.request("GET", "/rest/v1/employee_expense_drafts", params=params).json()
+    record = (claims or drafts or [None])[0]
+    if not record or not record.get("receipt_path"):
+        raise HTTPException(404, "Receipt not found")
+    path = record["receipt_path"]
+    if not path.startswith(f"{owner}/{expense_id}/"):
+        raise HTTPException(404, "Receipt not found")
+    file = gateway.request("GET", f"/storage/v1/object/authenticated/receipts/{path}")
+    filename = Path(record.get("receipt_name") or "receipt").name
+    return Response(
+        content=file.content,
+        media_type=record.get("receipt_content_type") or "application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"},
+    )
 
 
 @router.get("/{expense_id}")
@@ -92,6 +140,12 @@ def save_expense(
     ):
         raise HTTPException(422, "Merchant, date, category, and a positive amount are required")
     employee = gateway.employee()
+    if expense.linked_transaction_id:
+        transaction = gateway.linked_transaction(expense.linked_transaction_id, employee["id"])
+        if not transaction or transaction["status"] == "DECLINED" or Decimal(str(transaction["amount"])) != expense.amount:
+            raise HTTPException(422, "Linked card transaction is unavailable or its amount differs")
+        if transaction["currency"] != "INR":
+            raise HTTPException(422, "Linked card transaction must be in INR")
     existing = gateway.draft(expense.id)
     if existing and existing["employee_id"] != employee["id"]:
         raise HTTPException(404, "Draft not found")

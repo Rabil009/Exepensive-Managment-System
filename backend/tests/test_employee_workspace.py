@@ -85,3 +85,14 @@ def test_limit_request_requires_owned_card_and_higher_amount():
         assert response.status_code == 201
         assert response.json()["status"] == "PENDING"
     app.dependency_overrides.clear()
+
+
+def test_report_action_requires_employee_and_uses_rpc():
+    assert TestClient(app).post("/api/employee/reports/action", json={"name": "Trip", "action": "withdraw"}).status_code == 401
+    gateway = FakeGateway()
+    with client_with_gateway(gateway) as client:
+        response = client.post("/api/employee/reports/action", json={"name": "Trip", "action": "withdraw"})
+        assert response.status_code == 200
+        assert response.json() == {"changed": 2}
+        assert gateway.patches[-1][2]["json"] == {"p_report_name": "Trip", "p_action": "withdraw"}
+    app.dependency_overrides.clear()

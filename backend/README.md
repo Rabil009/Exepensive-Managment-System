@@ -39,6 +39,10 @@ expenses to `expense_claims`, and optional receipt files to the private Supabase
 `receipts` bucket. `GET /api/employee/new-expense/{id}` reloads an owned draft;
 `DELETE /api/employee/new-expense/{id}` discards it. The previous SQLite demo
 routes above remain separate.
+`GET /api/employee/new-expense/options` lists real Employee report names and
+unlinked card transactions. `GET /api/employee/new-expense/receipts/{id}`
+downloads an owned receipt from the private bucket. A linked transaction must
+belong to the Employee and match the expense amount and INR currency.
 
 Every Supabase request needs a valid Employee Supabase access token in the
 `Authorization: Bearer <token>` header. The backend verifies the user and

@@ -109,6 +109,14 @@ class SupabaseExpenseGateway:
         ).json()
         return rows[0] if rows else None
 
+    def linked_transaction(self, transaction_id: UUID, employee_id: str):
+        rows = self.request(
+            "GET", "/rest/v1/employee_card_transactions",
+            params={"id": f"eq.{transaction_id}", "employee_id": f"eq.{employee_id}",
+                    "select": "id,employee_id,amount,currency,status"},
+        ).json()
+        return rows[0] if rows else None
+
     def submit(self, expense_id: UUID, employee: dict, draft: dict):
         if not (draft.get("merchant") and draft.get("expense_date") and
                 draft.get("category") in CATEGORIES and float(draft.get("amount") or 0) > 0):

@@ -51,6 +51,10 @@ class FakeGateway:
     def remove_receipt(self, path):
         self.receipts.pop(path, None)
 
+    def linked_transaction(self, transaction_id, employee_id):
+        return {"id": str(transaction_id), "employee_id": employee_id,
+                "status": "SETTLED", "amount": "10.00", "currency": "INR"}
+
 
 def test_new_expense_requires_session():
     with TestClient(app) as client:
@@ -104,6 +108,25 @@ def test_invalid_receipt_is_rejected_before_storage():
             assert False, "Invalid receipt was accepted"
     finally:
         gateway.close()
+
+
+def test_linked_transaction_amount_must_match():
+    gateway = FakeGateway()
+    app.dependency_overrides[get_gateway] = lambda: gateway
+    try:
+        with TestClient(app) as client:
+            response = client.post(
+                "/api/employee/new-expense",
+                data={"action": "Submit", "data": json.dumps({
+                    "id": str(uuid4()), "merchant": "Hotel", "date": "2026-10-08",
+                    "amount": "20.00", "category": "Accommodation",
+                    "linked_transaction_id": str(uuid4()),
+                })},
+            )
+            assert response.status_code == 422
+            assert not gateway.claims
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_supabase_gateway_sends_receipt_and_claim_with_employee_token():
