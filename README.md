@@ -1,4 +1,4 @@
-# FinPulse — Expense Management System
+# Expense Management System
 
 An integrated Expense Management System featuring a multi-role workflow for **Employees**, **Managers**, and **Finance Admins**. The platform streamlines corporate spending from receipt capture to manager policy reviews, treasury verification, and bank disbursement settlement.
 
@@ -20,7 +20,7 @@ An integrated Expense Management System featuring a multi-role workflow for **Em
 
 ## 🔄 System Architecture & Lifecycle
 
-FinPulse connects all three enterprise personas through a single, unified data lifecycle:
+The system connects all three enterprise personas through a single, unified data lifecycle:
 
 ```mermaid
 flowchart LR
