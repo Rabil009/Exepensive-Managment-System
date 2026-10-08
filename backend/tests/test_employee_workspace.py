@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app.api.employee_workspace import workspace
 from app.main import app
+from app.services.employee_workspace import display_status
 
 
 class FakeGateway:
@@ -102,3 +103,9 @@ def test_report_action_requires_employee_and_uses_rpc():
         assert response.json() == {"changed": 2}
         assert gateway.patches[-1][2]["json"] == {"p_report_name": "Trip", "p_action": "withdraw"}
     app.dependency_overrides.clear()
+
+
+def test_approval_status_waits_for_finance():
+    assert display_status("MANAGER_APPROVED") == "Pending"
+    assert display_status("FINANCE_APPROVED") == "Approved"
+    assert display_status("PAID") == "Reimbursed"

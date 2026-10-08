@@ -7,8 +7,8 @@ from decimal import Decimal
 from app.services.supabase_expenses import SupabaseExpenseGateway
 
 
-PENDING = {"SUBMITTED", "MANAGER_APPROVED", "FINANCE_APPROVED", "PAYMENT_PENDING"}
-APPROVED = {"MANAGER_APPROVED", "FINANCE_APPROVED", "PAYMENT_PENDING"}
+PENDING = {"SUBMITTED", "MANAGER_APPROVED"}
+APPROVED = {"FINANCE_APPROVED", "PAYMENT_PENDING"}
 REIMBURSED = {"PAID", "DISBURSED", "CLOSED"}
 REJECTED = {"MANAGER_REJECTED", "FINANCE_REJECTED"}
 CATEGORY_NAMES = {
@@ -29,6 +29,8 @@ def display_status(value: str) -> str:
         return "Rejected"
     if value in APPROVED:
         return "Approved"
+    if value in PENDING:
+        return "Pending"
     if value == "DRAFT":
         return "Draft"
     return "Pending"
