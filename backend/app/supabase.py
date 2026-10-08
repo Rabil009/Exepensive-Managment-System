@@ -1,13 +1,13 @@
-import os
-from dotenv import load_dotenv
 from supabase import create_client, Client
+from app.core.config import settings
 
-load_dotenv()
+def get_supabase_client() -> Client:
+    """Returns a Supabase client configured with project credentials."""
+    return create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
+def get_supabase_admin_client() -> Client:
+    """Returns a Supabase admin client using the service role key if available."""
+    key = settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_KEY
+    return create_client(settings.SUPABASE_URL, key)
 
-supabase: Client | None = None
-
-if SUPABASE_URL and SUPABASE_KEY:
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase: Client = get_supabase_client()

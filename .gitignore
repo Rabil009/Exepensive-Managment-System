@@ -2,6 +2,7 @@
 .env
 .env*.local
 *.env
+.env.local
 
 # Dependencies
 node_modules/
@@ -18,15 +19,18 @@ dist/
 __pycache__/
 *.py[cod]
 *$py.class
-.venv/
+*.so
+.Python
 env/
 venv/
+ENV/
+.venv/
 
-# IDE / System
+# IDE / System / Temp
 .DS_Store
 Thumbs.db
 *.pem
 *.tsbuildinfo
 .temp/
 supabase/.temp/
-
+*.log

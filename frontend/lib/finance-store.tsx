@@ -117,25 +117,74 @@ const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
   },
 ];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [activeView, setActiveView] = useState("Dashboard");
   const [claims, setClaims] = useState<ExpenseClaim[]>(MOCK_CLAIMS);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>(MOCK_BUDGETS);
   const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>(INITIAL_REIMBURSEMENTS);
 
-  // Sync state from Supabase database
-  useEffect(() => {
+  // Sync with live FastAPI backend when available, with Supabase fallback
+  React.useEffect(() => {
     let isMounted = true;
-    getExpenseClaims().then((fetched) => {
-      if (isMounted && fetched && fetched.length > 0) {
-        setClaims(fetched);
+    const fetchLiveFinanceData = async () => {
+      try {
+        const [claimsRes, budgetsRes, reimbsRes] = await Promise.all([
+          fetch(`${API_URL}/api/finance/claims`).catch(() => null),
+          fetch(`${API_URL}/api/finance/budgets`).catch(() => null),
+          fetch(`${API_URL}/api/finance/reimbursements`).catch(() => null),
+        ]);
+
+        let loadedClaims = false;
+        let loadedBudgets = false;
+
+        if (claimsRes && claimsRes.ok) {
+          const liveClaims = await claimsRes.json();
+          if (Array.isArray(liveClaims) && liveClaims.length > 0 && isMounted) {
+            setClaims(liveClaims);
+            loadedClaims = true;
+          }
+        }
+        if (budgetsRes && budgetsRes.ok) {
+          const liveBudgets = await budgetsRes.json();
+          if (Array.isArray(liveBudgets) && liveBudgets.length > 0 && isMounted) {
+            setBudgets(liveBudgets);
+            loadedBudgets = true;
+          }
+        }
+        if (reimbsRes && reimbsRes.ok) {
+          const liveReimbs = await reimbsRes.json();
+          if (Array.isArray(liveReimbs) && liveReimbs.length > 0 && isMounted) {
+            setReimbursements(liveReimbs);
+          }
+        }
+
+        // Direct Supabase fallback if backend returned empty
+        if (!loadedClaims) {
+          const directClaims = await getExpenseClaims();
+          if (isMounted && directClaims && directClaims.length > 0) {
+            setClaims(directClaims);
+          }
+        }
+        if (!loadedBudgets) {
+          const directBudgets = await getDepartmentBudgets();
+          if (isMounted && directBudgets && directBudgets.length > 0) {
+            setBudgets(directBudgets);
+          }
+        }
+      } catch {
+        // Fallback directly to Supabase
+        getExpenseClaims().then((fetched) => {
+          if (isMounted && fetched && fetched.length > 0) setClaims(fetched);
+        });
+        getDepartmentBudgets().then((fetchedBudgets) => {
+          if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) setBudgets(fetchedBudgets);
+        });
       }
-    });
-    getDepartmentBudgets().then((fetchedBudgets) => {
-      if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) {
-        setBudgets(fetchedBudgets);
-      }
-    });
+    };
+
+    fetchLiveFinanceData();
     return () => {
       isMounted = false;
     };
@@ -167,6 +216,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       isHold: false,
     });
     toast.success(`Claim ${claimId} verified and approved for disbursement.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "approve", remark }),
+    }).catch(() => {});
   };
 
   // FR-10: Finance Reject
@@ -188,6 +242,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       financeRemark: reason,
     });
     toast.error(`Claim ${claimId} declined with reason: "${reason}".`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reject", reason }),
+    }).catch(() => {});
   };
 
   // FR-10: Send back for correction
@@ -209,6 +268,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       financeRemark: `Sent back: ${reason}`,
     });
     toast.info(`Claim ${claimId} sent back to employee for correction.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "send_back", reason }),
+    }).catch(() => {});
   };
 
   // FR-10: Place on Hold
@@ -233,6 +297,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       heldAt: now,
     });
     toast.warning(`Claim ${claimId} placed on audit hold.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "place_hold", reason }),
+    }).catch(() => {});
   };
 
   // FR-10: Release Hold
@@ -255,6 +324,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       holdReason: "",
     });
     toast.success(`Audit hold released on claim ${claimId}.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "release_hold" }),
+    }).catch(() => {});
   };
 
   // FR-12: Record Payment / Disbursement Settlement
@@ -299,6 +373,15 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
     setReimbursements((prev) => [newReimb, ...prev]);
     toast.success(`Settlement recorded! UTR: ${utr} for ${claim.employeeName}`);
+    fetch(`${API_URL}/api/finance/disburse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        claim_id: claimId,
+        payment_reference: utr,
+        payment_channel: channel,
+      }),
+    }).catch(() => {});
   };
 
   // Quick Create Expense Claim

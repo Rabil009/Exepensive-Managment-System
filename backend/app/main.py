@@ -7,14 +7,15 @@ from app.api.expenses import router as expenses_router
 from app.api.budgets import router as budgets_router
 from app.api.policies import router as policies_router
 from app.api.reports import router as reports_router
+from app.api.finance import router as finance_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Backend services for Expense Management System (Manager Module)",
+    description="Expense Management System API (Manager & Finance Modules)",
 )
 
-# Configure CORS
+# CORS Middleware for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -38,17 +39,23 @@ app.include_router(budgets_router, prefix=settings.API_PREFIX)
 app.include_router(policies_router, prefix=settings.API_PREFIX)
 app.include_router(reports_router, prefix=settings.API_PREFIX)
 
+# Include Finance Router
+app.include_router(finance_router)
+
 @app.get("/health")
 def health_check():
     return {
         "status": "healthy",
-        "service": "manager-backend",
+        "service": "expense-management-backend",
         "version": settings.VERSION,
     }
 
 @app.get("/")
 def root():
     return {
-        "message": "Expense Management System - Manager API is running",
+        "status": "online",
+        "project": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT,
         "docs": "/docs",
     }

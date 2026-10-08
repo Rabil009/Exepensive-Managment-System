@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Compass, CheckSquare, Receipt, Menu } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { GlobalFilters, FilterState, DEFAULT_FILTERS } from "@/components/dashboard/GlobalFilters";
@@ -47,6 +48,7 @@ function DashboardContent() {
   } = useFinanceStore();
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   // Auto-collapse sidebar on mobile/tablet screens for clean full-width view
@@ -83,10 +85,12 @@ function DashboardContent() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden font-sans antialiased transition-colors bg-[#FAFAFB] dark:bg-[#08080A] text-zinc-900 dark:text-zinc-100">
-      {/* Static Left Vertical Sidebar (Expands to full or collapses to slim icon rail) */}
+      {/* Sidebar with Desktop rail and Mobile slide-over drawer */}
       <Sidebar
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        isMobileOpen={mobileDrawerOpen}
+        onCloseMobile={() => setMobileDrawerOpen(false)}
         onQuickCreate={() => setShowQuickCreate(true)}
         onOpenSettings={() => setShowSettings(true)}
         onOpenHelp={() => setShowHelp(true)}
@@ -95,10 +99,10 @@ function DashboardContent() {
 
       {/* Main Application Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-        {/* Top Header with Single Filter Option in Top Right Corner */}
+        {/* Top Header with Mobile Hamburger and Actions */}
         <Header
           title={getPageTitle()}
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onToggleSidebar={() => setMobileDrawerOpen(true)}
           rightContent={
             activeView === "Dashboard" ? (
               <GlobalFilters
@@ -110,8 +114,8 @@ function DashboardContent() {
           }
         />
 
-        {/* Scrollable Main Content */}
-        <main className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 sm:space-y-6">
+        {/* Scrollable Main Content (optimized mobile padding) */}
+        <main className="flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
           {/* Main Dashboard Overview View */}
           {activeView === "Dashboard" && (
             <>
@@ -193,6 +197,54 @@ function DashboardContent() {
           {/* Reports View (PRD FR-18) */}
           {activeView === "Reports" && <ReportsView />}
         </main>
+
+        {/* Mobile Bottom Navigation Bar (Thumb Friendly) */}
+        <nav
+          aria-label="Mobile Navigation"
+          className="md:hidden shrink-0 border-t bg-white/95 dark:bg-[#131316]/95 backdrop-blur-md border-zinc-200/80 dark:border-white/[0.08] px-2 py-1.5 flex items-center justify-around z-30 select-none"
+        >
+          <button
+            type="button"
+            onClick={() => setActiveView("Dashboard")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              activeView === "Dashboard" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <Compass className="h-4 w-4" />
+            <span className="text-[10px]">Overview</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView("Verification")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium relative transition-colors ${
+              activeView === "Verification" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <CheckSquare className="h-4 w-4" />
+            {awaitingVerificationCount > 0 && (
+              <span className="absolute top-0.5 right-2 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#131316]" />
+            )}
+            <span className="text-[10px]">Verify</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView("Reimbursements")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              activeView === "Reimbursements" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <Receipt className="h-4 w-4" />
+            <span className="text-[10px]">Reimburse</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileDrawerOpen(true)}
+            className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors"
+          >
+            <Menu className="h-4 w-4" />
+            <span className="text-[10px]">Menu</span>
+          </button>
+        </nav>
       </div>
 
       {/* Interactive Modals */}
