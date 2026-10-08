@@ -29,7 +29,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="font-sans antialiased selection:bg-zinc-800 selection:text-white overflow-x-hidden"
+        className="font-sans antialiased text-zinc-900 dark:text-zinc-100 bg-[#FAFAFA] dark:bg-[#09090B] selection:bg-zinc-200 dark:selection:bg-white/20 overflow-x-hidden overscroll-none"
         suppressHydrationWarning
       >
         {children}

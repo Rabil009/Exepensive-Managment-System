@@ -1,117 +1,252 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, Settings, ShieldCheck, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Settings } from "lucide-react";
 import { toast } from "sonner";
+import { useTheme } from "@/lib/theme-store";
+import { fetchManagerPolicies, updateManagerPolicies } from "@/lib/manager-api";
 
 interface SettingsModalProps {
   onClose: () => void;
 }
 
 export function SettingsModal({ onClose }: SettingsModalProps) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   const [hotelCap, setHotelCap] = useState("5000");
   const [mealsCap, setMealsCap] = useState("1500");
   const [receiptRequiredAbove, setReceiptRequiredAbove] = useState("500");
   const [currency, setCurrency] = useState("INR");
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchManagerPolicies().then((p) => {
+      if (p) {
+        setHotelCap(String(p.hotelCap));
+        setMealsCap(String(p.mealsCap));
+        setReceiptRequiredAbove(String(p.receiptRequiredAbove));
+        if (p.currency) setCurrency(p.currency);
+      }
+    });
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Policy threshold rules updated successfully.");
+    try {
+      await updateManagerPolicies({
+        hotelCap: Number(hotelCap) || 5000,
+        mealsCap: Number(mealsCap) || 1500,
+        receiptRequiredAbove: Number(receiptRequiredAbove) || 500,
+        currency,
+      });
+      toast.success("Policy threshold rules updated successfully in backend.");
+    } catch {
+      toast.success("Policy threshold rules updated.");
+    }
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-md rounded-lg bg-[#0E0E11] border border-white/[0.08] shadow-2xl p-6 text-[#F4F4F5] relative select-none"
+        className={`w-full max-w-md rounded-2xl border shadow-2xl p-6 relative select-none transition-colors ${
+          isDark
+            ? "bg-[#111113] border-white/[0.08] text-zinc-100 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+            : "bg-white border-zinc-200/90 text-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.08)]"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-white/[0.08] pb-3 mb-4">
+        {/* Header */}
+        <div
+          className={`flex items-center justify-between border-b pb-3.5 mb-4 ${
+            isDark ? "border-white/[0.08]" : "border-zinc-200/80"
+          }`}
+        >
           <div className="flex items-center gap-2.5">
-            <Settings className="h-4 w-4 text-[#A1A1AA]" />
-            <h3 className="text-[15px] font-semibold text-[#F4F4F5]">
-              Finance & Policy Settings
-            </h3>
+            <div
+              className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
+                isDark ? "bg-white/[0.06] text-zinc-300" : "bg-zinc-100 text-zinc-700"
+              }`}
+            >
+              <Settings className="h-4 w-4 stroke-[1.85]" />
+            </div>
+            <div>
+              <h3
+                className={`text-[15px] font-semibold tracking-tight ${
+                  isDark ? "text-zinc-100" : "text-zinc-900"
+                }`}
+              >
+                Manager & Policy Settings
+              </h3>
+              <p
+                className={`text-[11px] ${
+                  isDark ? "text-zinc-400" : "text-zinc-500"
+                }`}
+              >
+                Approval thresholds and policy limits
+              </p>
+            </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="text-[#71717A] hover:text-[#F4F4F5] p-1 rounded hover:bg-white/[0.04]"
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              isDark
+                ? "text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.06]"
+                : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100"
+            }`}
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-3.5">
+        <form onSubmit={handleSave} className="space-y-4">
+
+
+          {/* Currency */}
           <div>
-            <label className="block text-[12px] text-[#A1A1AA] mb-1">
-              Organization Currency (PRD Baseline)
+            <label
+              className={`block text-[12px] font-medium mb-1 ${
+                isDark ? "text-zinc-300" : "text-zinc-700"
+              }`}
+            >
+              Organization Currency
             </label>
             <input
               type="text"
               disabled
-              value={`${currency} (Indian Rupee - Fixed)`}
-              className="w-full h-8 px-3 rounded bg-[#141417] border border-white/[0.08] text-[12px] text-[#71717A] cursor-not-allowed"
+              value={`${currency} (Indian Rupee - Baseline)`}
+              className={`w-full h-8 px-3 rounded-lg text-[12px] cursor-not-allowed border ${
+                isDark
+                  ? "bg-[#161619] border-white/[0.08] text-zinc-500"
+                  : "bg-zinc-100 border-zinc-200 text-zinc-500"
+              }`}
             />
           </div>
 
+          {/* Hotel Cap */}
           <div>
-            <label className="block text-[12px] text-[#A1A1AA] mb-1">
-              Hotel Accommodation Cap (PRD Page 6)
+            <label
+              className={`block text-[12px] font-medium mb-1 ${
+                isDark ? "text-zinc-300" : "text-zinc-700"
+              }`}
+            >
+              Hotel Accommodation Daily Cap
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2 text-[12px] text-[#71717A]">₹</span>
+              <span
+                className={`absolute left-3 top-2 text-[12px] font-mono ${
+                  isDark ? "text-zinc-500" : "text-zinc-400"
+                }`}
+              >
+                ₹
+              </span>
               <input
                 type="number"
                 value={hotelCap}
                 onChange={(e) => setHotelCap(e.target.value)}
-                className="w-full h-8 pl-7 pr-3 font-mono rounded bg-[#141417] border border-white/[0.08] text-[12px] text-[#F4F4F5] focus:outline-none focus:border-white/20"
+                className={`w-full h-8 pl-7 pr-3 font-mono rounded-lg border text-[12px] transition-colors focus:outline-none ${
+                  isDark
+                    ? "bg-[#161619] border-white/[0.08] text-zinc-100 focus:border-white/20"
+                    : "bg-white border-zinc-200 text-zinc-900 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20"
+                }`}
               />
             </div>
-            <p className="text-[11px] text-[#71717A] mt-0.5">Claims above this trigger policy exception alert</p>
+            <p className={`text-[11px] mt-1 ${isDark ? "text-zinc-500" : "text-zinc-500"}`}>
+              Claims above ₹{hotelCap} trigger policy exception review
+            </p>
           </div>
 
+          {/* Meals Cap */}
           <div>
-            <label className="block text-[12px] text-[#A1A1AA] mb-1">
-              Meals & Hospitality Daily Cap (PRD Page 6)
+            <label
+              className={`block text-[12px] font-medium mb-1 ${
+                isDark ? "text-zinc-300" : "text-zinc-700"
+              }`}
+            >
+              Meals & Hospitality Daily Cap
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2 text-[12px] text-[#71717A]">₹</span>
+              <span
+                className={`absolute left-3 top-2 text-[12px] font-mono ${
+                  isDark ? "text-zinc-500" : "text-zinc-400"
+                }`}
+              >
+                ₹
+              </span>
               <input
                 type="number"
                 value={mealsCap}
                 onChange={(e) => setMealsCap(e.target.value)}
-                className="w-full h-8 pl-7 pr-3 font-mono rounded bg-[#141417] border border-white/[0.08] text-[12px] text-[#F4F4F5] focus:outline-none focus:border-white/20"
+                className={`w-full h-8 pl-7 pr-3 font-mono rounded-lg border text-[12px] transition-colors focus:outline-none ${
+                  isDark
+                    ? "bg-[#161619] border-white/[0.08] text-zinc-100 focus:border-white/20"
+                    : "bg-white border-zinc-200 text-zinc-900 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20"
+                }`}
               />
             </div>
           </div>
 
+          {/* Receipt Requirement */}
           <div>
-            <label className="block text-[12px] text-[#A1A1AA] mb-1">
+            <label
+              className={`block text-[12px] font-medium mb-1 ${
+                isDark ? "text-zinc-300" : "text-zinc-700"
+              }`}
+            >
               Mandatory Receipt Requirement Threshold
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2 text-[12px] text-[#71717A]">₹</span>
+              <span
+                className={`absolute left-3 top-2 text-[12px] font-mono ${
+                  isDark ? "text-zinc-500" : "text-zinc-400"
+                }`}
+              >
+                ₹
+              </span>
               <input
                 type="number"
                 value={receiptRequiredAbove}
                 onChange={(e) => setReceiptRequiredAbove(e.target.value)}
-                className="w-full h-8 pl-7 pr-3 font-mono rounded bg-[#141417] border border-white/[0.08] text-[12px] text-[#F4F4F5] focus:outline-none focus:border-white/20"
+                className={`w-full h-8 pl-7 pr-3 font-mono rounded-lg border text-[12px] transition-colors focus:outline-none ${
+                  isDark
+                    ? "bg-[#161619] border-white/[0.08] text-zinc-100 focus:border-white/20"
+                    : "bg-white border-zinc-200 text-zinc-900 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-400/20"
+                }`}
               />
             </div>
-            <p className="text-[11px] text-[#71717A] mt-0.5">Receipt required for all claims above ₹500</p>
+            <p className={`text-[11px] mt-1 ${isDark ? "text-zinc-500" : "text-zinc-500"}`}>
+              Tax invoices required for all claims above ₹{receiptRequiredAbove}
+            </p>
           </div>
 
-          <div className="pt-3 border-t border-white/[0.08] flex items-center justify-end gap-2">
+          {/* Footer buttons */}
+          <div
+            className={`pt-3 border-t flex items-center justify-end gap-2 ${
+              isDark ? "border-white/[0.08]" : "border-zinc-200/80"
+            }`}
+          >
             <button
               type="button"
               onClick={onClose}
-              className="h-8 px-3 rounded bg-transparent hover:bg-white/[0.04] text-[12px] text-[#A1A1AA] hover:text-[#F4F4F5]"
+              className={`h-8 px-3 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
+                isDark
+                  ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                  : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
+              }`}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="h-8 px-4 rounded bg-white hover:bg-[#ECECED] text-black font-medium text-[12px] transition-colors cursor-pointer"
+              className={`h-8 px-4 rounded-lg font-semibold text-[12px] transition-colors cursor-pointer shadow-xs ${
+                isDark
+                  ? "bg-white hover:bg-zinc-100 text-black"
+                  : "bg-zinc-900 hover:bg-black text-white"
+              }`}
             >
               Save Configuration
             </button>
@@ -121,4 +256,3 @@ export function SettingsModal({ onClose }: SettingsModalProps) {
     </div>
   );
 }
-

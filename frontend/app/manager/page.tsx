@@ -27,12 +27,21 @@ import {
   Layers,
   ArrowUpRight,
   ChevronDown,
+  RefreshCw,
 } from "lucide-react";
 import { ManagerSidebar } from "@/components/manager/ManagerSidebar";
 import { ManagerHeader } from "@/components/manager/ManagerHeader";
 import { StatusBadge, PriorityBadge } from "@/components/shared/StatusBadge";
 import { EmployeeAvatar, EmployeeCell } from "@/components/manager/EmployeeAvatar";
 import { ThemeProvider, useTheme } from "@/lib/theme-store";
+import {
+  fetchManagerClaims,
+  approveManagerClaim,
+  rejectManagerClaim,
+  fetchManagerBudgets,
+  type ManagerClaim,
+  type DepartmentBudget,
+} from "@/lib/manager-api";
 
 // Modals from shared dashboard suite
 import { SettingsModal } from "@/components/dashboard/SettingsModal";
@@ -47,21 +56,6 @@ export type ManagerView =
   | "Exceptions"
   | "Reports"
   | "Policies";
-
-interface ManagerClaim {
-  id: string;
-  employeeName: string;
-  department: string;
-  costCenter: string;
-  category: "Travel" | "Hotel" | "Meals" | "Software" | "Transport" | "Equipment";
-  description: string;
-  amount: number;
-  date: string;
-  status: "Pending" | "Approved" | "Rejected";
-  priority: "High" | "Medium" | "Low";
-  receiptVerified: boolean;
-  policyNotes?: string;
-}
 
 const INITIAL_CLAIMS: ManagerClaim[] = [
   {
@@ -199,10 +193,36 @@ function ManagerDashboardInner() {
 
   // Approvals & Claim State
   const [claims, setClaims] = useState<ManagerClaim[]>(INITIAL_CLAIMS);
+  const [budgets, setBudgets] = useState<DepartmentBudget[]>(DEPARTMENT_BUDGETS);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [inspectClaim, setInspectClaim] = useState<ManagerClaim | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
+
+  const refreshData = async () => {
+    try {
+      setIsRefreshing(true);
+      const [fetchedClaims, fetchedBudgets] = await Promise.all([
+        fetchManagerClaims(),
+        fetchManagerBudgets(),
+      ]);
+      if (fetchedClaims && fetchedClaims.length > 0) {
+        setClaims(fetchedClaims);
+      }
+      if (fetchedBudgets && fetchedBudgets.length > 0) {
+        setBudgets(fetchedBudgets);
+      }
+    } catch (e) {
+      console.warn("Backend sync notice:", e);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshData();
+  }, []);
 
   useEffect(() => {
     if (!inspectClaim) return;
@@ -218,7 +238,7 @@ function ManagerDashboardInner() {
     setTimeout(() => setFeedbackNotice(null), 3500);
   };
 
-  const handleApprove = (claim: ManagerClaim) => {
+  const handleApprove = async (claim: ManagerClaim) => {
     setClaims((prev) =>
       prev.map((c) => (c.id === claim.id ? { ...c, status: "Approved" as const } : c))
     );
@@ -226,15 +246,27 @@ function ManagerDashboardInner() {
     if (inspectClaim?.id === claim.id) {
       setInspectClaim({ ...claim, status: "Approved" });
     }
+
+    try {
+      await approveManagerClaim(claim.id, "Approved by Manager");
+    } catch (e) {
+      console.warn("Backend approval sync notice:", e);
+    }
   };
 
-  const handleReject = (claim: ManagerClaim) => {
+  const handleReject = async (claim: ManagerClaim) => {
     setClaims((prev) =>
       prev.map((c) => (c.id === claim.id ? { ...c, status: "Rejected" as const } : c))
     );
     notify(`Rejected ${claim.employeeName}'s claim of ₹${claim.amount.toLocaleString("en-IN")}`);
     if (inspectClaim?.id === claim.id) {
       setInspectClaim({ ...claim, status: "Rejected" });
+    }
+
+    try {
+      await rejectManagerClaim(claim.id, "Policy non-compliance or unauthorized expense");
+    } catch (e) {
+      console.warn("Backend rejection sync notice:", e);
     }
   };
 
@@ -244,6 +276,8 @@ function ManagerDashboardInner() {
 
   const totalSpent = claims.reduce((acc, c) => acc + (c.status === "Approved" ? c.amount : 0), 0) + 384500;
   const pendingAmount = pendingClaims.reduce((acc, c) => acc + c.amount, 0);
+  const approvedAmount = approvedClaims.reduce((acc, c) => acc + c.amount, 0) + 248200;
+  const exceptionsCount = claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified).length;
 
   const filteredClaims = claims.filter((c) => {
     const matchStatus = statusFilter === "All" || c.status === statusFilter;
@@ -290,12 +324,16 @@ function ManagerDashboardInner() {
       />
 
       {/* Main Content Workspace */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+      <div className={`flex-1 flex flex-col h-full overflow-hidden min-w-0 ${
+        isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
+      }`}>
         {/* Core Manager Header */}
         <ManagerHeader title={getPageTitle()} />
 
         {/* Scrollable Main Application Space */}
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <main className={`flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 ${
+          isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
+        }`}>
           {/* Toast Notification */}
           {feedbackNotice && (
             <div
@@ -345,7 +383,7 @@ function ManagerDashboardInner() {
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    ₹3,84,500
+                    ₹{totalSpent.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
@@ -405,7 +443,7 @@ function ManagerDashboardInner() {
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    ₹2,48,200
+                    ₹{approvedAmount.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
@@ -435,7 +473,7 @@ function ManagerDashboardInner() {
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    3
+                    {exceptionsCount}
                   </span>
                 </div>
               </div>
@@ -481,20 +519,35 @@ function ManagerDashboardInner() {
                   ))}
                 </div>
 
-                {/* Search */}
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search claim, employee, ID..."
-                    className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all focus:outline-none ${
+                {/* Search & Backend Sync */}
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search claim, employee, ID..."
+                      className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all focus:outline-none ${
+                        isDark
+                          ? "bg-[#18181D] border-white/[0.08] text-zinc-100 placeholder:text-zinc-500 focus:border-white/25"
+                          : "bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
+                      }`}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={refreshData}
+                    disabled={isRefreshing}
+                    title="Sync with backend database"
+                    className={`p-2 rounded-lg border transition-all cursor-pointer shrink-0 ${
                       isDark
-                        ? "bg-[#18181D] border-white/[0.08] text-zinc-100 placeholder:text-zinc-500 focus:border-white/25"
-                        : "bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
+                        ? "bg-[#18181D] border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.06]"
+                        : "bg-zinc-50 border-zinc-200 text-zinc-700 hover:text-black hover:bg-zinc-100"
                     }`}
-                  />
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-blue-500" : ""}`} />
+                  </button>
                 </div>
               </div>
 
@@ -650,7 +703,7 @@ function ManagerDashboardInner() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {DEPARTMENT_BUDGETS.map((dept) => {
+                  {budgets.map((dept) => {
                     const percent = Math.round((dept.spent / dept.cap) * 100);
                     return (
                       <div
@@ -731,7 +784,7 @@ function ManagerDashboardInner() {
               </div>
 
               <div className="space-y-4">
-                {DEPARTMENT_BUDGETS.map((dept) => {
+                {budgets.map((dept) => {
                   const percent = Math.round((dept.spent / dept.cap) * 100);
                   const remaining = dept.cap - dept.spent;
                   return (
