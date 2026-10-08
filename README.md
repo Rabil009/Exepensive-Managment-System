@@ -56,6 +56,10 @@ flowchart LR
 - **Corporate Card Management**: View virtual cards, credit limits, card transactions, and request limit increases.
 - **Real-Time Tracking**: Monitor the live approval progress of submitted claims from Manager Review to Treasury Payout.
 
+<p align="center">
+  <img src="docs/screenshots/employee-portal.png" alt="Employee Portal Dashboard" width="100%" />
+</p>
+
 ### 2. 👔 Manager Portal (`/manager`)
 - **Approvals Review Queue** (`/manager/approvals`): Filter by status (`Pending`, `Approved`, `Rejected`), inspect receipts, view GST credentials, and approve or reject claims with custom manager remarks.
 - **Team Spend & Cost Centers**: Analyze departmental spend across cost centers (`CC-ENG-104`, `CC-PRD-201`, etc.).
