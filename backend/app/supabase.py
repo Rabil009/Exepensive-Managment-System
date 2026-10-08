@@ -11,3 +11,4 @@ def get_supabase_admin_client() -> Client:
     return create_client(settings.SUPABASE_URL, key)
 
 supabase: Client = get_supabase_client()
+
