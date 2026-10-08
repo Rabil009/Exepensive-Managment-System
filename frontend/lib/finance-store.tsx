@@ -119,25 +119,107 @@ const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const mapLiveClaim = (item: any): ExpenseClaim => {
+  const rawStatus = String(item.status || "SUBMITTED").toUpperCase();
+  let status: ClaimStatus = "SUBMITTED";
+  if (rawStatus === "PENDING" || rawStatus === "SUBMITTED") status = "SUBMITTED";
+  else if (rawStatus === "APPROVED" || rawStatus === "MANAGER_APPROVED") status = "MANAGER_APPROVED";
+  else if (rawStatus === "REJECTED" || rawStatus === "MANAGER_REJECTED") status = "MANAGER_REJECTED";
+  else if (rawStatus === "FINANCE_APPROVED") status = "FINANCE_APPROVED";
+  else if (rawStatus === "FINANCE_REJECTED") status = "FINANCE_REJECTED";
+  else if (rawStatus === "PAYMENT_PENDING") status = "PAYMENT_PENDING";
+  else if (rawStatus === "PAID" || rawStatus === "DISBURSED") status = "PAID";
+  else if (rawStatus === "CLOSED") status = "CLOSED";
+
+  return {
+    id: String(item.id),
+    employeeId: item.employee_id || item.employeeId || "u1",
+    employeeName: item.employee_name || item.employeeName || "Employee",
+    employeeDepartment: item.employee_department || item.department || "Engineering",
+    title: item.title || item.description || "Expense Claim",
+    description: item.description || "",
+    amount: Number(item.amount) || 0,
+    currency: item.currency || "INR",
+    category: (item.category || "OTHER").toUpperCase() as any,
+    paymentMethod: item.payment_method || (item.paymentMethod === "Corporate Card" ? "CORPORATE_CARD" : "PERSONAL_CARD"),
+    merchant: item.merchant,
+    receiptUrl: item.receipt_url || item.receiptUrl,
+    receiptName: item.receipt_name || item.receiptName || (item.receipt_url ? "receipt.pdf" : undefined),
+    status,
+    policyViolation: item.policy_violation || item.policyNotes,
+    policyExceededAmount: Number(item.policy_exceeded_amount || 0),
+    employeeExceptionReason: item.employee_exception_reason,
+    isDuplicateWarning: Boolean(item.is_duplicate_warning),
+    duplicateDetails: item.duplicate_details,
+    isHold: Boolean(item.is_hold),
+    holdReason: item.hold_reason,
+    heldAt: item.held_at,
+    submittedAt: item.submitted_at || item.created_at,
+    createdAt: item.created_at || new Date().toISOString(),
+    updatedAt: item.updated_at || new Date().toISOString(),
+    managerRemark: item.manager_remark || item.managerRemark,
+    financeRemark: item.finance_remark || item.financeRemark,
+    paymentReference: item.payment_reference || item.paymentReference,
+    disbursedAt: item.disbursed_at || item.disbursedAt,
+    paymentChannel: item.payment_channel || item.paymentChannel,
+  };
+};
+
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [activeView, setActiveView] = useState("Dashboard");
   const [claims, setClaims] = useState<ExpenseClaim[]>(MOCK_CLAIMS);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>(MOCK_BUDGETS);
   const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>(INITIAL_REIMBURSEMENTS);
 
-  // Keep the UI's camelCase models while loading claims and budgets from Supabase.
+  // Sync with live shared backend API (which serves unified data for Manager & Finance)
   useEffect(() => {
     let isMounted = true;
-    getExpenseClaims().then((fetched) => {
-      if (isMounted && fetched && fetched.length > 0) {
-        setClaims(fetched);
-      }
-    });
-    getDepartmentBudgets().then((fetchedBudgets) => {
-      if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) {
-        setBudgets(fetchedBudgets);
-      }
-    });
+
+    // 1. Fetch shared claims
+    fetch(`${API_URL}/api/finance/claims`)
+      .then((res) => res.ok ? res.json() : [])
+      .then((rows) => {
+        if (isMounted && Array.isArray(rows) && rows.length > 0) {
+          setClaims(rows.map(mapLiveClaim));
+        } else {
+          getExpenseClaims().then((fetched) => {
+            if (isMounted && fetched && fetched.length > 0) setClaims(fetched);
+          });
+        }
+      })
+      .catch(() => {
+        getExpenseClaims().then((fetched) => {
+          if (isMounted && fetched && fetched.length > 0) setClaims(fetched);
+        });
+      });
+
+    // 2. Fetch shared department budgets
+    fetch(`${API_URL}/api/finance/budgets`)
+      .then((res) => res.ok ? res.json() : [])
+      .then((rows) => {
+        if (isMounted && Array.isArray(rows) && rows.length > 0) {
+          setBudgets(rows.map((b: any) => ({
+            id: String(b.id || b.department),
+            name: b.name || b.department,
+            allocatedAmount: Number(b.allocated_amount || b.cap || 100000),
+            spentAmount: Number(b.spent_amount || b.spent || 0),
+            currency: b.currency || "INR",
+            fiscalPeriod: b.fiscal_period || "Q4-2026",
+            thresholdPercent: Number(b.threshold_percent || 80),
+          })));
+        } else {
+          getDepartmentBudgets().then((fetchedBudgets) => {
+            if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) setBudgets(fetchedBudgets);
+          });
+        }
+      })
+      .catch(() => {
+        getDepartmentBudgets().then((fetchedBudgets) => {
+          if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) setBudgets(fetchedBudgets);
+        });
+      });
+
+    // 3. Fetch reimbursements queue
     fetch(`${API_URL}/api/finance/reimbursements`)
       .then((response) => response.ok ? response.json() : [])
       .then((rows: Record<string, unknown>[]) => {
@@ -146,7 +228,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           id: String(row.id),
           claimId: String(row.claim_id),
           employee: String(row.employee_name ?? ""),
-          department: "",
+          department: String(row.employee_department ?? ""),
           amount: Number(row.eligible_personal_amount ?? 0),
           currency: String(row.currency ?? "INR"),
           completedDate: String(row.disbursed_at ?? row.created_at ?? ""),
@@ -156,6 +238,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         })));
       })
       .catch(() => {});
+
     return () => {
       isMounted = false;
     };

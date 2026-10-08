@@ -57,6 +57,20 @@ export interface QuarterlyReport {
 
 const FALLBACK_CLAIMS: ManagerClaim[] = [
   {
+    id: "CLM-001",
+    employeeName: "Aditya Kumar",
+    department: "Engineering",
+    costCenter: "CC-ENG-104",
+    category: "Hotel",
+    description: "The Oberoi Bengaluru - Client Architecture Sync",
+    amount: 6000,
+    date: "Oct 04, 2026",
+    status: "Pending",
+    priority: "Medium",
+    receiptVerified: true,
+    policyNotes: "Nightly accommodation cap exceeded. Standard threshold ₹5,000.",
+  },
+  {
     id: "CLM-8821",
     employeeName: "Rahul Sharma",
     department: "Engineering",
