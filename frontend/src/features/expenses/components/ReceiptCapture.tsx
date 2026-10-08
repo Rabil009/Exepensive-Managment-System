@@ -1,5 +1,9 @@
-import { AuraIcon as Icon } from "../../../shared/components/AuraIcon";
+"use client";
+
+import React from "react";
+import { UploadCloud, FileCheck, FileText } from "lucide-react";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
+
 type Props = {
   model: Pick<
     ExpenseFormModel,
@@ -9,9 +13,9 @@ type Props = {
     | "setDragging"
     | "attach"
     | "inputRef"
-    | "setMessage"
   >;
 };
+
 export function ReceiptCapture({ model }: Props) {
   const {
     draft,
@@ -20,19 +24,39 @@ export function ReceiptCapture({ model }: Props) {
     setDragging,
     attach,
     inputRef,
-    setMessage,
   } = model;
+
+  const hasReceipt = Boolean(draft.receipt);
+
   return (
-    <>
-      <div className="flex items-center justify-between px-1">
-        <h2 className="text-headline-sm">Expense Receipt</h2>
-        <span className="inline-flex items-center gap-1.5 text-label-caps px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant">
-          <span className="w-1.5 h-1.5 rounded-full bg-outline" />
-          {draft.receipt ? "Receipt Attached" : "No Receipt Attached"}
+    <div className="rounded-xl p-5 border border-zinc-200/80 dark:border-white/[0.07] bg-white dark:bg-[#111113] shadow-xs flex flex-col gap-4">
+      {/* Card Header */}
+      <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-white/[0.05]">
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4 text-zinc-400" />
+          <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Receipt Attachment
+          </h2>
+        </div>
+        <span
+          className={`text-[11px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-md border ${
+            hasReceipt
+              ? "bg-[#3B9B78]/10 text-[#3B9B78] border-[#3B9B78]/20"
+              : "border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181D] text-zinc-500"
+          }`}
+        >
+          {hasReceipt ? "Attached" : "Optional"}
         </span>
       </div>
+
+      {/* Modernized Clean Dropzone */}
       <div
-        className={`aura-receipt-dropzone bg-surface-container-lowest rounded-2xl p-space-xl border-2 border-dashed border-outline-variant/50 hover:border-primary-container/80 transition-all group flex flex-col items-center justify-center text-center gap-space-md shadow-sm ${dragging ? "is-dragging" : ""}`}
+        className={`rounded-lg p-6 sm:p-7 border-2 border-dashed transition-all group flex flex-col items-center justify-center text-center cursor-pointer ${
+          dragging
+            ? "border-blue-500 bg-blue-50/20 dark:bg-blue-950/20"
+            : "border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50/50 dark:bg-[#141418] hover:border-zinc-400 dark:hover:border-zinc-600"
+        }`}
+        onClick={() => inputRef.current?.click()}
         onDragOver={(event) => {
           event.preventDefault();
           setDragging(true);
@@ -41,85 +65,67 @@ export function ReceiptCapture({ model }: Props) {
         onDrop={(event) => {
           event.preventDefault();
           setDragging(false);
-          attach(event.dataTransfer.files[0]);
+          if (event.dataTransfer.files?.[0]) {
+            attach(event.dataTransfer.files[0]);
+          }
         }}
       >
         {preview ? (
           <img
-            className="aura-receipt-preview"
+            className="aura-receipt-preview my-2 max-h-[170px] rounded-lg border border-zinc-200 dark:border-white/[0.08] shadow-xs"
             src={preview}
-            alt="Attached receipt preview"
+            alt="Receipt preview"
           />
         ) : (
-          <div className="w-16 h-16 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary-container shadow-sm">
-            <Icon className="text-3xl">
-              {draft.receipt ? "description" : "document_scanner"}
-            </Icon>
+          <div className="w-10 h-10 rounded-xl bg-zinc-200/70 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-2 shadow-2xs">
+            {hasReceipt ? (
+              <FileCheck className="h-5 w-5 text-[#3B9B78]" />
+            ) : (
+              <UploadCloud className="h-5 w-5" />
+            )}
           </div>
         )}
-        <div className="flex flex-col gap-1 max-w-sm">
-          <h3 className="text-headline-lg font-semibold">
-            {draft.receipt || "Drag & drop your receipt or invoice"}
+
+        <div className="flex flex-col gap-0.5 max-w-xs">
+          <h3 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate max-w-[260px]">
+            {draft.receipt || "Drag and drop your receipt"}
           </h3>
-          <p className="text-body-sm text-on-surface-variant">
-            {draft.receipt
-              ? "Receipt selected. Review your expense details before submitting."
-              : "PDF, PNG, JPG, or HEIC supported up to 25MB"}
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+            {hasReceipt
+              ? "Click to change or replace file"
+              : "PDF, PNG, JPG, or HEIC up to 25MB"}
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-space-sm">
+
+        <div className="mt-3">
           <button
             type="button"
-            className="aura-submit-button"
-            onClick={() => inputRef.current?.click()}
+            className="h-7 px-3 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-xs cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              inputRef.current?.click();
+            }}
           >
-            <Icon className="text-base">upload_file</Icon>
-            {draft.receipt ? "Replace File" : "Browse Files"}
-          </button>
-          <button
-            type="button"
-            className="aura-draft-button inline-flex gap-1.5 items-center"
-            onClick={() =>
-              setMessage(
-                "Choose Browse Files to select a receipt from this device.",
-              )
-            }
-          >
-            <Icon className="text-base">phone_iphone</Icon>Upload Help
+            <UploadCloud className="h-3 w-3" />
+            <span>{hasReceipt ? "Change File" : "Browse Files"}</span>
           </button>
         </div>
+
         <input
           ref={inputRef}
           type="file"
           aria-label="Upload receipt"
           accept=".pdf,.png,.jpg,.jpeg,.heic"
           hidden
-          onChange={(event) => attach(event.target.files?.[0])}
+          onChange={(event) => {
+            if (event.target.files?.[0]) {
+              attach(event.target.files[0]);
+            }
+          }}
         />
-        <p className="inline-flex items-center gap-1.5 text-[10px] text-on-surface-variant">
-          <Icon className="text-xs">lock</Icon>This preview saves the receipt name, not the uploaded file.
-        </p>
       </div>
-      <div className="px-1 flex flex-col gap-2">
-        <span className="text-label-caps text-on-surface-variant uppercase tracking-wider">
-          Expense Checklist
-        </span>
-        <div className="flex flex-wrap gap-2 text-[10px] text-on-surface-variant">
-          {[
-            ["psychology", "Attach a receipt"],
-            ["currency_exchange", "Enter amount in INR"],
-            ["link", "Link a card transaction"],
-          ].map(([icon, label]) => (
-            <span
-              key={label}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-surface-container-low border border-outline-variant/30"
-            >
-              <Icon className="text-xs text-primary-container">{icon}</Icon>
-              {label}
-            </span>
-          ))}
-        </div>
-      </div>
-    </>
+    </div>
   );
 }
+
+export default ReceiptCapture;

@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Compass,
   CreditCard,
@@ -12,6 +13,7 @@ import {
   Search,
   PanelLeft,
   ChevronsUpDown,
+  LogOut,
 } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import type { NavigationItem } from "./navigation.types";
@@ -35,8 +37,40 @@ export function Sidebar({
   onOpenHelp,
   onOpenSearch,
 }: SidebarProps) {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsProfileOpen(false);
+      }
+    };
+    if (isProfileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isProfileOpen]);
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("payout_user_role");
+      localStorage.removeItem("payout_user_email");
+    }
+    router.push("/");
+  };
 
   const mainNav = [
     { label: "Overview", icon: Compass, path: "/employee/dashboard" },
@@ -104,8 +138,8 @@ export function Sidebar({
         isCollapsed ? "w-[64px]" : "w-[240px]"
       } ${
         isDark
-          ? "bg-[#09090B] border-white/[0.08] text-[#F4F4F5]"
-          : "bg-white border-zinc-200/80 text-zinc-900"
+          ? "bg-[#131316] border-white/[0.08] text-[#F4F4F5]"
+          : "bg-[#F7F7F8] border-zinc-200/90 text-zinc-900"
       }`}
     >
       {/* Top Group */}
@@ -303,22 +337,101 @@ export function Sidebar({
 
         {/* User Profile Card */}
         <div
-          className={`pt-2 mt-2 border-t ${
+          className={`pt-2 mt-2 border-t relative ${
             isDark ? "border-white/[0.08]" : "border-zinc-200/80"
           }`}
+          ref={profileRef}
         >
+          {isProfileOpen && (
+            <div
+              className={`z-50 bg-white dark:bg-[#18181B] border border-zinc-200 dark:border-white/[0.1] rounded-2xl shadow-xl shadow-black/10 dark:shadow-black/50 p-1.5 transition-all animate-in fade-in zoom-in-95 duration-150 ${
+                isCollapsed
+                  ? "fixed left-[72px] bottom-3 w-60"
+                  : "absolute bottom-[calc(100%+8px)] left-0 right-0"
+              }`}
+            >
+              {/* Profile info header */}
+              <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.04]">
+                <img
+                  src="/rabil.jpg"
+                  alt="Rabil Khan"
+                  className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20 shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src =
+                      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80";
+                  }}
+                />
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] font-semibold truncate text-zinc-900 dark:text-white leading-tight">
+                      Rabil Khan
+                    </span>
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-zinc-200/70 dark:bg-white/[0.1] text-zinc-700 dark:text-zinc-300">
+                      Employee
+                    </span>
+                  </div>
+                  <span className="text-[11px] truncate text-zinc-500 dark:text-zinc-400 mt-0.5">
+                    rabil@payout.finance
+                  </span>
+                </div>
+              </div>
+
+              <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
+
+              {/* Account Settings */}
+              {onOpenSettings && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    onOpenSettings();
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.08] rounded-xl transition-colors cursor-pointer"
+                >
+                  <Settings className="h-4 w-4 shrink-0 text-zinc-500 dark:text-zinc-400" />
+                  <span>Account Settings</span>
+                </button>
+              )}
+
+              {/* Divider */}
+              <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
+
+              {/* Log Out Button */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
+              >
+                <LogOut className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
+                <span>Log out</span>
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
-            onClick={onOpenSettings}
-            title={isCollapsed ? "Rabil Khan - Settings" : undefined}
+            onClick={() => setIsProfileOpen((prev) => !prev)}
+            title={isCollapsed ? "Rabil Khan - Profile & Logout" : undefined}
             className={`w-full flex items-center h-11 px-1 rounded-xl cursor-pointer text-left group transition-colors duration-150 ${
-              isDark
+              isProfileOpen
+                ? isDark
+                  ? "bg-white/[0.12] text-white"
+                  : "bg-zinc-200/70 text-zinc-950"
+                : isDark
                 ? "hover:bg-white hover:text-black text-white"
                 : "hover:bg-zinc-100 text-zinc-900"
             }`}
           >
-            <div className="h-8 w-8 shrink-0 flex items-center justify-center rounded-lg bg-zinc-200 dark:bg-zinc-800 ring-1 ring-zinc-300 dark:ring-white/20 text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-              RK
+            <div className="h-8 w-8 shrink-0 flex items-center justify-center">
+              <img
+                src="/rabil.jpg"
+                alt="Rabil Khan"
+                className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80";
+                }}
+              />
             </div>
 
             <div

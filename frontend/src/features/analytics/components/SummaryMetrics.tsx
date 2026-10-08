@@ -1,75 +1,83 @@
+"use client";
+
+import React from "react";
+import { Receipt, Clock, Landmark, CreditCard } from "lucide-react";
+import { useTheme } from "@/lib/theme-store";
 import { money } from "../../../shared/utils/format";
+
 export function SummaryMetrics() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const cards = [
+    {
+      label: "Total Spend",
+      value: money(38420.0),
+      icon: Receipt,
+    },
+    {
+      label: "Pending Approval",
+      value: money(2840.5),
+      icon: Clock,
+    },
+    {
+      label: "Reimbursed",
+      value: money(35100.0),
+      icon: Landmark,
+    },
+    {
+      label: "Corporate Card Spend",
+      value: money(3320.5),
+      icon: CreditCard,
+    },
+  ];
+
   return (
-    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between gap-4 transition-all hover:shadow-md">
-        <div className="flex items-center justify-between">
-          <span className="font-label-caps text-label-caps uppercase text-outline font-semibold">
-            Total Spend
-          </span>
-          <div className="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary-container">
-            <span className="material-symbols-outlined text-[18px]">
-              receipt_long
-            </span>
-          </div>
-        </div>
-        <div>
-          <div className="font-financial-display text-financial-display text-on-surface tracking-tight font-bold">
-            {money(38420.0)}
-          </div>
-        </div>
-      </div>
-      <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between gap-4 transition-all hover:shadow-md">
-        <div className="flex items-center justify-between">
-          <span className="font-label-caps text-label-caps uppercase text-outline font-semibold">
-            Pending Approval
-          </span>
-          <div className="w-8 h-8 rounded-lg bg-secondary-container/40 flex items-center justify-center text-secondary">
-            <span className="material-symbols-outlined text-[18px]">
-              schedule
-            </span>
-          </div>
-        </div>
-        <div>
-          <div className="font-financial-display text-financial-display text-secondary tracking-tight font-bold">
-            {money(2840.5)}
-          </div>
-        </div>
-      </div>
-      <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between gap-4 transition-all hover:shadow-md">
-        <div className="flex items-center justify-between">
-          <span className="font-label-caps text-label-caps uppercase text-outline font-semibold">
-            Reimbursed
-          </span>
-          <div className="w-8 h-8 rounded-lg bg-tertiary-container/10 flex items-center justify-center text-tertiary">
-            <span className="material-symbols-outlined text-[18px]">
-              account_balance
-            </span>
-          </div>
-        </div>
-        <div>
-          <div className="font-financial-display text-financial-display text-tertiary tracking-tight font-bold">
-            {money(35100.0)}
-          </div>
-        </div>
-      </div>
-      <div className="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between gap-4 transition-all hover:shadow-md">
-        <div className="flex items-center justify-between">
-          <span className="font-label-caps text-label-caps uppercase text-outline font-semibold">
-            Corporate Card Spend
-          </span>
-          <div className="w-8 h-8 rounded-lg bg-primary-fixed/40 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[18px]">
-              credit_card
-            </span>
-          </div>
-        </div>
-        <div>
-          <div className="font-financial-display text-financial-display text-primary tracking-tight font-bold">
-            {money(3320.5)}
-          </div>
-        </div>
+    <section aria-label="Summary Metrics">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {cards.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <div
+              key={idx}
+              className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors border ${
+                isDark
+                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
+              }`}
+            >
+              {/* Category Label + Icon */}
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
+                  }`}
+                >
+                  {card.label}
+                </span>
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
+                  }`}
+                />
+              </div>
+
+              {/* Metric Value */}
+              <div className="mt-3.5 flex items-center">
+                <span
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                    isDark ? "text-zinc-100" : "text-zinc-900"
+                  }`}
+                >
+                  {card.value}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
 }
+
+export default SummaryMetrics;

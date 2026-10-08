@@ -277,7 +277,7 @@ function ManagerDashboardInner() {
   return (
     <div
       className={`flex h-screen w-full overflow-hidden font-sans antialiased transition-colors ${
-        isDark ? "bg-[#09090B] text-zinc-100" : "bg-[#FAFAFA] text-zinc-900"
+        isDark ? "bg-[#08080A] text-zinc-100" : "bg-[#FAFAFB] text-zinc-900"
       }`}
     >
       {/* Self-contained Manager Sidebar (Collapsible Rail & Full Expanded View) */}

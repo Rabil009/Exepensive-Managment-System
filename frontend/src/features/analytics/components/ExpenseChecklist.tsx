@@ -1,28 +1,62 @@
-﻿"use client";
-import { useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
+import {
+  CheckCircle2,
+  AlertCircle,
+  FileCheck,
+  Upload,
+  ArrowRight,
+  Plus,
+} from "lucide-react";
+import { useTheme } from "@/lib/theme-store";
 import { useExpenses } from "../../expenses/data/ExpensesContext";
 import { displayDate, money } from "../../../shared/utils/format";
 import type { Expense } from "../../expenses/types";
 
 const missingReceipt = (expense: Expense) => !expense.receipt?.trim();
-const missingReport = (expense: Expense) => !expense.report?.trim() || expense.report === "Unassigned";
-const needsWork = (expense: Expense) => missingReceipt(expense) || expense.status === "Draft" || missingReport(expense);
+const missingReport = (expense: Expense) =>
+  !expense.report?.trim() || expense.report === "Unassigned";
+const needsWork = (expense: Expense) =>
+  missingReceipt(expense) || expense.status === "Draft" || missingReport(expense);
 
 export function ExpenseChecklist() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const { expenses, addExpense } = useExpenses();
   const [filter, setFilter] = useState("all");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
+
   const attention = expenses.filter(needsWork);
+  const hasItems = attention.length > 0;
+
   const filters = [
     { id: "all", label: "All", count: attention.length },
     { id: "receipts", label: "Receipts", count: attention.filter(missingReceipt).length },
-    { id: "drafts", label: "Drafts", count: attention.filter((expense) => expense.status === "Draft").length },
+    { id: "drafts", label: "Drafts", count: attention.filter((e) => e.status === "Draft").length },
     { id: "reports", label: "Reports", count: attention.filter(missingReport).length },
   ];
-  const visible = attention.filter((expense) => filter === "all" || (filter === "receipts" ? missingReceipt(expense) : filter === "drafts" ? expense.status === "Draft" : missingReport(expense)));
-  const reports = [...new Set(expenses.map((expense) => expense.report).filter((report): report is string => Boolean(report?.trim()) && report !== "Unassigned"))];
+
+  const visible = attention.filter((expense) =>
+    filter === "all"
+      ? true
+      : filter === "receipts"
+      ? missingReceipt(expense)
+      : filter === "drafts"
+      ? expense.status === "Draft"
+      : missingReport(expense)
+  );
+
+  const reports = [
+    ...new Set(
+      expenses
+        .map((expense) => expense.report)
+        .filter((r): r is string => Boolean(r?.trim()) && r !== "Unassigned")
+    ),
+  ];
+
   function updateExpense(expense: Expense, changes: Partial<Expense>, success: string) {
     try {
       addExpense({ ...expense, ...changes });
@@ -33,53 +67,246 @@ export function ExpenseChecklist() {
       setMessage("Could not save the change. Please try again.");
     }
   }
+
   function attachReceipt(expense: Expense, file?: File) {
     if (!file) return;
-    if (!/\.(pdf|png|jpe?g|heic)$/i.test(file.name) || file.size > 25 * 1024 * 1024) {
+    if (
+      !/\.(pdf|png|jpe?g|heic)$/i.test(file.name) ||
+      file.size > 25 * 1024 * 1024
+    ) {
       setError(true);
       setMessage("Choose a PDF, PNG, JPG, or HEIC receipt up to 25 MB.");
       return;
     }
-    updateExpense(expense, { receipt: file.name }, `Receipt name saved for ${expense.merchant}.`);
+    updateExpense(expense, { receipt: file.name }, `Receipt attached for ${expense.merchant}.`);
   }
+
   return (
-    <section aria-label="Expense Checklist" className="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="font-headline-sm text-headline-sm text-on-surface">Expenses to Complete</h2>
-        <span className="text-label-caps text-outline">{attention.length} need attention</span>
-      </div>
-      <p className="text-body-sm text-on-surface-variant">Add a receipt, assign a report, or continue a saved draft.</p>
-      <div role="group" aria-label="Filter expenses to complete" className="flex flex-wrap gap-2">
-        {filters.map((item) => <button key={item.id} type="button" aria-pressed={filter === item.id} onClick={() => setFilter(item.id)} className={`px-3 py-2 rounded-lg text-label-md font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${filter === item.id ? "bg-primary-container text-on-primary" : "bg-surface-container-low text-on-surface-variant hover:text-on-surface"}`}>{item.label} <span className="ml-1 tabular-nums">{item.count}</span></button>)}
-      </div>
-      {message && <p role={error ? "alert" : "status"} className={`text-body-sm ${error ? "text-error" : "text-tertiary"}`}>{message}</p>}
-      <div className="flex flex-col gap-3 flex-1 max-h-[320px] overflow-y-auto">
-        {visible.map((expense) => <article key={expense.id} className="rounded-xl bg-surface-container-low/60 p-3 flex flex-col gap-3">
-          <div className="flex justify-between items-start gap-3">
-            <div className="min-w-0"><h3 className="font-semibold text-body-md text-on-surface break-words">{expense.merchant}</h3><p className="text-body-sm text-on-surface-variant mt-1">{expense.date ? displayDate(expense.date) : "Date needed"} · {expense.category}</p></div>
-            <strong className="text-body-md tabular-nums whitespace-nowrap">{money(expense.amount)}</strong>
+    <section
+      aria-label="Expense Checklist"
+      className={`rounded-xl p-5 flex flex-col justify-between transition-colors border ${
+        isDark
+          ? "bg-[#111113] border-white/[0.07]"
+          : "bg-white border-zinc-200/80 shadow-xs"
+      }`}
+    >
+      {/* Header */}
+      <div>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            {hasItems ? (
+              <AlertCircle className="h-4 w-4 text-amber-500 shrink-0" />
+            ) : (
+              <FileCheck className="h-4 w-4 text-zinc-400 shrink-0" />
+            )}
+            <h2
+              className={`text-sm font-semibold tracking-tight ${
+                isDark ? "text-zinc-100" : "text-zinc-900"
+              }`}
+            >
+              Expenses to Complete
+            </h2>
           </div>
-          <div className="flex flex-wrap gap-2 text-label-caps text-outline">
-            {missingReceipt(expense) && <span>Receipt needed</span>}{expense.status === "Draft" && <span>Draft not submitted</span>}{missingReport(expense) && <span>Report needed</span>}
-          </div>
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 py-3 border-y border-outline-variant/20 text-body-sm">
-            <div className="min-w-0"><dt className="text-outline">Expense Report</dt><dd className="mt-1 font-medium text-on-surface break-words">{expense.report || "Not assigned"}</dd></div>
-            <div className="min-w-0"><dt className="text-outline">Payment Method</dt><dd className="mt-1 font-medium text-on-surface break-words">{expense.paymentMethod || "Not specified"}</dd></div>
-            <div><dt className="text-outline">Expense Status</dt><dd className="mt-1 font-medium text-on-surface">{expense.status}</dd></div>
-            <div><dt className="text-outline">Receipt</dt><dd className="mt-1 font-medium text-on-surface">{missingReceipt(expense) ? "Not attached" : "Attached"}</dd></div>
-          </dl>
-          <div className="flex flex-wrap gap-2 items-center">
-            {missingReceipt(expense) && <label className="cursor-pointer rounded-lg bg-primary-container text-on-primary px-3 py-2 text-label-md font-semibold focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary relative">Add Receipt<input type="file" aria-label={`Add receipt for ${expense.merchant}`} accept=".pdf,.png,.jpg,.jpeg,.heic" className="absolute inset-0 opacity-0 cursor-pointer w-full" onChange={(event) => { attachReceipt(expense, event.target.files?.[0]); event.target.value = ""; }} /></label>}
-            {missingReport(expense) && <select aria-label={`Assign report for ${expense.merchant}`} value="" onChange={(event) => updateExpense(expense, { report: event.target.value }, `Report assigned to ${expense.merchant}.`)} className="rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface px-3 py-2 text-label-md max-w-full"><option value="" disabled>Assign Report</option>{reports.map((report) => <option key={report} value={report}>{report}</option>)}</select>}
-            {expense.status === "Draft" && <Link href={`/employee/expenses/new?draft=${encodeURIComponent(expense.id)}`} className="rounded-lg border border-outline-variant px-3 py-2 text-label-md font-semibold text-primary hover:bg-surface-container-low">Continue Draft</Link>}
-          </div>
-        </article>)}
-        {!visible.length && <div className="p-4 rounded-xl bg-surface-container-low/60"><p className="text-body-md font-semibold text-on-surface">{attention.length ? "Nothing to complete in this category" : "You're all caught up"}</p><p className="text-body-sm text-on-surface-variant mt-1">{attention.length ? "Choose another filter to view the remaining expenses." : "Your saved expenses have receipts and reports, with no drafts left."}</p></div>}
+          <span
+            className={`text-[11px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-md border ${
+              hasItems
+                ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                : isDark
+                ? "bg-[#3B9B78]/10 text-[#3B9B78] border-[#3B9B78]/20"
+                : "bg-emerald-50 text-emerald-700 border-emerald-200"
+            }`}
+          >
+            {hasItems ? `${attention.length} Need Action` : "All Clear"}
+          </span>
+        </div>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+          {hasItems
+            ? "Add missing receipts, assign reports, or finalize draft items."
+            : "All submitted expenses have documentation and assigned reports."}
+        </p>
       </div>
-      <div className="flex justify-between items-center gap-3 flex-wrap pt-3 border-t border-outline-variant/20">
-        <span className="text-label-caps text-outline">Receipts save as filenames in this preview.</span>
-        <Link href="/employee/dashboard" className="text-label-md font-semibold text-primary hover:underline">View All Expenses →</Link>
+
+      {/* When there are actionable items: show filters and list */}
+      {hasItems ? (
+        <div className="my-3 flex-1 flex flex-col">
+          {/* Minimalist Filter Tabs */}
+          <div
+            role="group"
+            aria-label="Filter expenses to complete"
+            className="flex flex-wrap gap-1.5 mb-3"
+          >
+            {filters.map((item) => {
+              const isSelected = filter === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => setFilter(item.id)}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border ${
+                    isSelected
+                      ? isDark
+                        ? "bg-[#25252D] border-white/[0.1] text-zinc-100 shadow-xs"
+                        : "bg-zinc-900 border-zinc-900 text-white shadow-xs"
+                      : isDark
+                      ? "bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:text-zinc-200"
+                      : "bg-zinc-50 border-zinc-200/80 text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  {item.label}{" "}
+                  <span className="ml-1 tabular-nums font-semibold opacity-80">
+                    {item.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {message && (
+            <p
+              role={error ? "alert" : "status"}
+              className={`text-xs mb-2 font-medium ${
+                error ? "text-rose-500" : "text-emerald-500"
+              }`}
+            >
+              {message}
+            </p>
+          )}
+
+          {/* Actionable items list */}
+          <div className="flex flex-col gap-2.5 flex-1 max-h-[220px] overflow-y-auto pr-1">
+            {visible.map((expense) => (
+              <article
+                key={expense.id}
+                className={`rounded-lg p-3 flex flex-col gap-2 border transition-colors ${
+                  isDark
+                    ? "bg-[#161619] border-white/[0.05]"
+                    : "bg-zinc-50/70 border-zinc-200/60"
+                }`}
+              >
+                <div className="flex justify-between items-start gap-3">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-xs text-zinc-900 dark:text-zinc-100 truncate">
+                      {expense.merchant}
+                    </h3>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      {expense.date ? displayDate(expense.date) : "Date needed"} ·{" "}
+                      {expense.category}
+                    </p>
+                  </div>
+                  <strong className="text-xs font-semibold tabular-nums text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
+                    {money(expense.amount)}
+                  </strong>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-200/60 dark:border-white/[0.05]">
+                  {missingReceipt(expense) && (
+                    <label className="cursor-pointer rounded-md bg-[#5A78A6] hover:opacity-90 text-white px-2.5 py-1 text-xs font-medium transition-opacity flex items-center gap-1.5 relative shadow-xs">
+                      <Upload className="h-3 w-3" />
+                      <span>Attach Receipt</span>
+                      <input
+                        type="file"
+                        aria-label={`Add receipt for ${expense.merchant}`}
+                        accept=".pdf,.png,.jpg,.jpeg,.heic"
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                        onChange={(event) => {
+                          attachReceipt(expense, event.target.files?.[0]);
+                          event.target.value = "";
+                        }}
+                      />
+                    </label>
+                  )}
+                  {missingReport(expense) && (
+                    <select
+                      aria-label={`Assign report for ${expense.merchant}`}
+                      value=""
+                      onChange={(event) =>
+                        updateExpense(
+                          expense,
+                          { report: event.target.value },
+                          `Report assigned to ${expense.merchant}.`
+                        )
+                      }
+                      className="rounded-md border border-zinc-200/80 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100 px-2 py-1 text-xs font-medium cursor-pointer"
+                    >
+                      <option value="" disabled>
+                        Assign Report
+                      </option>
+                      {reports.map((report) => (
+                        <option key={report} value={report}>
+                          {report}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {expense.status === "Draft" && (
+                    <Link
+                      href={`/employee/expenses/new?draft=${encodeURIComponent(expense.id)}`}
+                      className="rounded-md border border-zinc-200/80 dark:border-white/[0.08] bg-white dark:bg-[#111113] px-2.5 py-1 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181D] transition-colors inline-flex items-center gap-1"
+                    >
+                      <span>Continue Draft</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* Empty State: Simple, clean, centered, no clutter */
+        <div className="my-6 py-6 flex flex-col items-center justify-center text-center">
+          <div className="w-11 h-11 rounded-full bg-[#3B9B78]/10 text-[#3B9B78] flex items-center justify-center mb-3 border border-[#3B9B78]/20">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+          <h3
+            className={`text-sm font-semibold tracking-tight ${
+              isDark ? "text-zinc-100" : "text-zinc-900"
+            }`}
+          >
+            You&apos;re all caught up
+          </h3>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-[280px]">
+            Every expense has a verified receipt attached and an assigned report.
+          </p>
+          <div className="mt-4 flex items-center gap-2">
+            <Link
+              href="/employee/expenses/new"
+              className="h-8 px-3 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-xs"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>New Expense</span>
+            </Link>
+            <Link
+              href="/employee/dashboard"
+              className="h-8 px-3 rounded-lg border text-xs font-medium bg-white dark:bg-[#161619] border-zinc-200/80 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#1E1E24] transition-colors flex items-center gap-1 shadow-xs"
+            >
+              <span>View All</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Clean Footer */}
+      <div
+        className={`flex justify-between items-center gap-3 pt-3 border-t text-xs ${
+          isDark ? "border-white/[0.06]" : "border-zinc-200/80"
+        }`}
+      >
+        <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          Receipts support PDF, PNG, JPG up to 25 MB
+        </span>
+        <Link
+          href="/employee/dashboard"
+          className="text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 inline-flex items-center gap-1 transition-colors"
+        >
+          <span>All Expenses</span>
+          <ArrowRight className="h-3 w-3" />
+        </Link>
       </div>
     </section>
   );
 }
+
+export default ExpenseChecklist;

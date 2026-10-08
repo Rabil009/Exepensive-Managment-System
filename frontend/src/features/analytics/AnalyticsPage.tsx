@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { AppShell } from "../../shared/layout/AppShell";
 import { AnalyticsHeader } from "./components/AnalyticsHeader";
 import { SummaryMetrics } from "./components/SummaryMetrics";
@@ -12,7 +13,7 @@ import "./styles/analytics.css";
 export default function AnalyticsPage() {
   return (
     <AppShell active="Analytics">
-      <div className="employee-page pasted-analytics flex flex-col w-full gap-6 pb-16">
+      <div className="flex flex-col w-full gap-6 pb-12">
         <AnalyticsHeader />
         <SummaryMetrics />
         <SpendingOverview />

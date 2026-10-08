@@ -13,33 +13,29 @@ export function OverviewSummary() {
       label: "Ready for Reimbursement",
       value: "₹2,480.50",
       icon: CheckCircle2,
-      dotColor: "bg-emerald-500",
-      subLeft: "Expected payment: Oct 28",
-      subRight: "2 approved reports",
+      subBadge: "2 approved",
+      subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Pending Approval",
       value: "₹840.00",
       icon: Clock,
-      dotColor: "bg-amber-500",
-      subLeft: "Awaiting manager review",
-      subRight: "1 report",
+      subBadge: "1 report",
+      subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Card Spending (MTD)",
       value: "₹3,320.50",
       icon: CreditCard,
-      dotColor: "bg-blue-500",
-      subLeft: "Monthly limit: ₹7,500",
-      subRight: "44% used",
+      subBadge: "of ₹7,500 limit",
+      subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Card Limit Remaining",
       value: "₹4,179.50",
       icon: Wallet,
-      dotColor: "bg-emerald-500",
-      subLeft: "Corporate Visa active",
-      subRight: "56% avail",
+      subBadge: "56% avail",
+      subColor: "text-zinc-500 dark:text-zinc-400",
     },
   ];
 
@@ -57,44 +53,38 @@ export function OverviewSummary() {
                   : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
-              <div>
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`text-xs font-medium uppercase tracking-wider ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}
-                  >
-                    {card.label}
-                  </span>
-                  <Icon
-                    className={`h-4 w-4 shrink-0 ${
-                      isDark ? "text-zinc-500" : "text-zinc-400"
-                    }`}
-                  />
-                </div>
-                <div className="mt-3.5 flex items-center">
-                  <span
-                    className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
-                      isDark ? "text-zinc-100" : "text-zinc-900"
-                    }`}
-                  >
-                    {card.value}
-                  </span>
-                </div>
+              {/* Category Label + Icon */}
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-xs font-medium uppercase tracking-wider ${
+                    isDark ? "text-zinc-400" : "text-zinc-500"
+                  }`}
+                >
+                  {card.label}
+                </span>
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${
+                    isDark ? "text-zinc-500" : "text-zinc-400"
+                  }`}
+                />
               </div>
 
-              <div
-                className={`mt-4 pt-3 flex items-center justify-between border-t text-xs ${
-                  isDark
-                    ? "border-white/[0.06] text-zinc-400"
-                    : "border-zinc-100 text-zinc-500"
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <span className={`h-1.5 w-1.5 rounded-full ${card.dotColor}`} />
-                  <span className="truncate">{card.subLeft}</span>
+              {/* Metric Value + Inline Context Sub-Badge */}
+              <div className="mt-3.5 flex items-baseline justify-between gap-2">
+                <span
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                    isDark ? "text-zinc-100" : "text-zinc-900"
+                  }`}
+                >
+                  {card.value}
                 </span>
-                <span className="tabular-nums shrink-0 ml-1">{card.subRight}</span>
+                <span
+                  className={`text-xs font-medium tabular-nums shrink-0 ${
+                    card.subColor
+                  }`}
+                >
+                  {card.subBadge}
+                </span>
               </div>
             </div>
           );

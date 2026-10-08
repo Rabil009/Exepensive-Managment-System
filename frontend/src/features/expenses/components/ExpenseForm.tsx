@@ -1,7 +1,8 @@
+"use client";
+
+import React from "react";
 import Link from "next/link";
-import { AuraIcon } from "../../../shared/components/AuraIcon";
 import { useExpenseForm } from "../hooks/useExpenseForm";
-import { panelClass } from "../styles/formClasses";
 import { ExpenseFormHeader } from "./ExpenseFormHeader";
 import { ReceiptCapture } from "./ReceiptCapture";
 import { UnlinkedTransactions } from "./UnlinkedTransactions";
@@ -10,65 +11,69 @@ import { ExpenseCategorization } from "./ExpenseCategorization";
 import { ExpenseAttendees } from "./ExpenseAttendees";
 import { ExpenseFormActions } from "./ExpenseFormActions";
 import "../styles/expense-form.css";
+
 export function ExpenseForm() {
   const model = useExpenseForm();
+
   return (
     <form
-      className="employee-page aura-expense-form flex flex-col w-full gap-space-lg"
+      className="flex flex-col w-full gap-5 pb-12"
       onSubmit={model.submit}
     >
       <ExpenseFormHeader model={model} />
+
+      {/* Message / Error Notification */}
       {(model.error || model.message) && (
         <div
-          className={`aura-form-message ${model.error ? "error" : ""}`}
+          className={`p-3 rounded-lg border text-xs flex items-center justify-between gap-3 ${
+            model.error
+              ? "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-200 border-rose-200 dark:border-rose-900/60"
+              : "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200 border-emerald-200 dark:border-emerald-900/60"
+          }`}
           role={model.error ? "alert" : "status"}
         >
-          {model.error || model.message}
+          <span>{model.error || model.message}</span>
           {model.submitted && (
-            <Link href={`/employee/reports?expense=${model.draft.id}`}>
+            <Link
+              href={`/employee/reports?expense=${model.draft.id}`}
+              className="font-medium underline hover:opacity-80"
+            >
               View expense →
             </Link>
           )}
         </div>
       )}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
-        <div className="lg:col-span-5 flex flex-col gap-space-md">
+
+      {/* 2-Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Left Column: Receipt & Unlinked Transactions (col-span-5) */}
+        <div className="lg:col-span-5 flex flex-col gap-4">
           <ReceiptCapture model={model} />
           <UnlinkedTransactions model={model} />
         </div>
-        <div className="lg:col-span-7 flex flex-col gap-space-md">
-          <div className="rounded-xl bg-primary-fixed/30 border border-primary-fixed-dim/60 p-space-md flex items-center gap-3">
-            <span className="w-9 h-9 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shrink-0 shadow-sm">
-              <AuraIcon className="text-lg">auto_awesome</AuraIcon>
-            </span>
-            <div className="flex flex-col">
-              <strong className="text-body-md text-on-primary-fixed">
-                Enter Your Expense Details
-              </strong>
-              <span className="text-body-sm text-on-surface-variant">
-                Use your receipt to enter the merchant, date, and amount below.
-              </span>
-            </div>
-          </div>
-          <div
-            className={`${panelClass} p-space-xl flex flex-col gap-space-lg`}
-          >
+
+        {/* Right Column: Details, Categories, Attendees & Actions (col-span-7) */}
+        <div className="lg:col-span-7 flex flex-col gap-4">
+          {/* Main Form Fields Card */}
+          <div className="bg-white dark:bg-[#111113] rounded-xl border border-zinc-200/80 dark:border-white/[0.07] p-5 sm:p-6 shadow-xs flex flex-col gap-5">
             <ExpenseDetailsFields model={model} />
-            <div className="h-px w-full bg-surface-container-high" />
+
+            <div className="h-px w-full bg-zinc-100 dark:bg-white/[0.05]" />
+
             <ExpenseCategorization model={model} />
-            <div className="h-px w-full bg-surface-container-high" />
+
+            <div className="h-px w-full bg-zinc-100 dark:bg-white/[0.05]" />
+
             <ExpenseAttendees model={model} />
-            <div className="aura-policy-note">
-              <AuraIcon className="text-xl">shield</AuraIcon>
-              <span>
-                <strong>Policy review</strong>
-                <small>Review your company’s expense policy before submitting.</small>
-              </span>
-            </div>
+
+            <div className="h-px w-full bg-zinc-100 dark:bg-white/[0.05]" />
+
+            <ExpenseFormActions model={model} />
           </div>
-          <ExpenseFormActions model={model} />
         </div>
       </div>
     </form>
   );
 }
+
+export default ExpenseForm;

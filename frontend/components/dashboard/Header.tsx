@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Sun, Moon, PanelLeft } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 
@@ -15,15 +15,15 @@ export function Header({
   rightContent,
   onToggleSidebar,
 }: HeaderProps) {
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === "dark";
+  const { toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    <header className={`h-12 w-full border-b flex items-center justify-between px-4 sm:px-6 shrink-0 select-none transition-colors ${
-      isDark
-        ? "bg-[#09090B] border-white/[0.08] text-[#F4F4F5]"
-        : "bg-white border-zinc-200 text-zinc-900"
-    }`}>
+    <header className="h-12 w-full border-b flex items-center justify-between px-4 sm:px-6 shrink-0 select-none transition-colors bg-white dark:bg-[#08080A] border-zinc-200 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5]">
       {/* Left Title + Mobile Sidebar Toggle */}
       <div className="flex items-center gap-2.5 sm:gap-3">
         {onToggleSidebar && (
@@ -32,16 +32,12 @@ export function Header({
             onClick={onToggleSidebar}
             title="Toggle Menu"
             aria-label="Toggle Menu"
-            className={`md:hidden h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer ${
-              isDark
-                ? "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
-                : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100"
-            }`}
+            className="md:hidden h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08]"
           >
             <PanelLeft className="h-4 w-4 stroke-[1.85]" />
           </button>
         )}
-        <span className={`text-[13.5px] sm:text-[14px] font-medium truncate ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
+        <span className="text-[13.5px] sm:text-[14px] font-medium truncate text-zinc-900 dark:text-zinc-100">
           {title}
         </span>
       </div>
@@ -55,17 +51,16 @@ export function Header({
           type="button"
           onClick={toggleTheme}
           aria-label="Toggle Theme"
-          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-            isDark
-              ? "bg-[#141418] hover:bg-[#1E1E24] text-amber-300 border border-white/[0.08]"
-              : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700"
-          }`}
+          title="Toggle Theme"
+          className="h-8 w-8 rounded-lg flex items-center justify-center transition-all cursor-pointer bg-zinc-100 hover:bg-zinc-200 text-zinc-700 dark:bg-[#141418] dark:hover:bg-[#1E1E24] dark:text-amber-300 dark:border dark:border-white/[0.08]"
         >
-          {isDark ? (
-            <Sun className="h-4 w-4 stroke-[2]" />
+          {mounted ? (
+            <>
+              <Sun className="h-4 w-4 stroke-[2] hidden dark:block" />
+              <Moon className="h-4 w-4 stroke-[2] block dark:hidden" />
+            </>
           ) : (
-            <Moon className="h-4 w-4 stroke-[2]" />
+            <span className="h-4 w-4" />
           )}
         </button>
       </div>

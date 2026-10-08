@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { AuraIcon } from "../../../shared/components/AuraIcon";
+import { User } from "lucide-react";
 
 /** Selectable demo previews; issuer controls below remain attached to Aura. */
 export function CardStack({ children }: { children: ReactNode }) {
@@ -34,7 +34,7 @@ export function CardStack({ children }: { children: ReactNode }) {
           >
             <div className="aura-stack-card-heading">
               <span className="flex items-center gap-2">
-                <AuraIcon className="text-lg">person</AuraIcon>Personal
+                <User className="h-4 w-4" />Personal
               </span>
               <span className="aura-stack-card-label">DEMO</span>
             </div>

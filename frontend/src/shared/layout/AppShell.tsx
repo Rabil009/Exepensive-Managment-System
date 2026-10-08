@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, type ReactNode } from "react";
+import React, { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { SettingsModal } from "@/components/dashboard/SettingsModal";
-import { SearchModal } from "@/components/dashboard/SearchModal";
+import { EmployeeSearchModal } from "../components/EmployeeSearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { useTheme } from "@/lib/theme-store";
 import { toast } from "sonner";
@@ -29,6 +29,18 @@ export function AppShell({
   const [showSettings, setShowSettings] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+
+  // Global Cmd+K / Ctrl+K shortcut for Search
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setShowSearch((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   function onNavigate(label: string) {
     switch (label) {
@@ -55,7 +67,7 @@ export function AppShell({
   return (
     <div
       className={`flex h-screen w-full overflow-hidden font-sans antialiased transition-colors ${
-        isDark ? "bg-[#09090B] text-zinc-100" : "bg-[#FAFAFA] text-zinc-900"
+        isDark ? "bg-[#08080A] text-zinc-100" : "bg-[#FAFAFB] text-zinc-900"
       }`}
     >
       {/* Left Vertical Sidebar */}
@@ -72,11 +84,21 @@ export function AppShell({
       {/* Main Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         <Header
-          title={active ? `Employee • ${active}` : "Employee Portal"}
-          searchRef={{ current: null }}
-          onSearch={onSearch}
+          title={
+            active === "Overview" || !active
+              ? "Employee Portal"
+              : active === "Cards & Limits"
+              ? "Corporate Cards & Limits"
+              : active === "Analytics"
+              ? "Spending Analytics"
+              : active === "New Expense"
+              ? "Submit New Expense"
+              : active === "Reports"
+              ? "Expense Reports"
+              : active
+          }
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-          onNotifications={() => toast.info("No new notifications")}
+          rightContent={active === "New Expense" ? null : undefined}
         />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
@@ -89,7 +111,7 @@ export function AppShell({
         <SettingsModal onClose={() => setShowSettings(false)} />
       )}
       {showSearch && (
-        <SearchModal onClose={() => setShowSearch(false)} />
+        <EmployeeSearchModal onClose={() => setShowSearch(false)} />
       )}
       {showHelp && (
         <HelpModal onClose={() => setShowHelp(false)} />

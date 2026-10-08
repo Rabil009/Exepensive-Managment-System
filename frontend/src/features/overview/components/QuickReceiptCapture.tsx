@@ -29,20 +29,9 @@ export function QuickReceiptCapture({ onUpload }: Props) {
           <ScanLine className="h-4 w-4" />
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-              Add an Expense Receipt
-            </h2>
-            <span
-              className={`text-[10px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wider ${
-                isDark
-                  ? "bg-white/[0.06] border-white/[0.08] text-zinc-400"
-                  : "bg-zinc-100 border-zinc-200 text-zinc-600"
-              }`}
-            >
-              Receipt Upload
-            </span>
-          </div>
+          <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Add an Expense Receipt
+          </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             Upload a receipt, then review and enter your expense details.
           </p>

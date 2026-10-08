@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -28,7 +28,10 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans antialiased selection:bg-zinc-800 selection:text-white overflow-x-hidden">
+      <body
+        className="font-sans antialiased selection:bg-zinc-800 selection:text-white overflow-x-hidden"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

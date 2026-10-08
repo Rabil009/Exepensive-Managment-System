@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { AppShell } from "../../shared/layout/AppShell";
 import { Toast } from "../../shared/components/Toast";
 import { useReports } from "./hooks/useReports";
@@ -9,19 +10,20 @@ import { ApprovalWorkflow } from "./components/ApprovalWorkflow";
 import { SpendDistribution } from "./components/SpendDistribution";
 import { ReportTransactions } from "./components/ReportTransactions";
 import "./styles/reports.css";
+
 export default function ReportsPage() {
   const model = useReports();
+
   return (
     <AppShell active="Reports" onSearch={model.setQuery}>
-      <div className="employee-page aura-reports flex flex-col w-full gap-space-xl">
+      <div className="flex flex-col w-full gap-5 pb-12">
         <ReportHeader model={model} />
-        <section className="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-lg">
-          <ReportSummary model={model} />
-          <ApprovalWorkflow model={model} />
-          <SpendDistribution model={model} />
-        </section>
+        <ReportSummary model={model} />
+        <ApprovalWorkflow model={model} />
+        <SpendDistribution model={model} />
         <ReportTransactions model={model} />
       </div>
+
       <Toast
         message={model.notice}
         onDismiss={() => model.setNotice("")}

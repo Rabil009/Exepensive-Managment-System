@@ -76,7 +76,7 @@ export function SearchModal({ onClose }: SearchModalProps) {
                   <span className="text-[13px] text-[#F4F4F5] font-normal">{c.title}</span>
                 </div>
                 <p className="text-[11px] text-[#71717A] mt-0.5">
-                  {c.employeeName} ({c.employeeDepartment}) • {c.paymentMethod.replace("_", " ")}
+                  {c.employeeName} ({c.employeeDepartment}) • {(c.paymentMethod || "").replace("_", " ")}
                 </p>
               </div>
               <div className="text-right">
