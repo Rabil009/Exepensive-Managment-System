@@ -46,8 +46,11 @@ Employee profile, then forwards the same token so Supabase row security checks
 the owner. A publishable key is sufficient; do not put a service role key in
 the browser. On the existing Payout login page, selecting Employee Portal uses
 Supabase Auth email/password. It checks the `profiles` table for the Employee
-role before opening Employee pages. New Employee accounts are created there and
-must confirm their email if Supabase requires it. Save Draft and Submit Expense
+role before opening Employee pages. The existing login form sends Employee
+email/password to `POST /api/auth/employee/login`. The backend checks Supabase
+Auth and the Employee profile before returning a session. Account creation uses
+`/api/auth/employee/signup`.
+New Employee accounts must confirm their email if Supabase requires it. Save Draft and Submit Expense
 then use that session to write to Supabase.
 
 Run the Supabase route tests with

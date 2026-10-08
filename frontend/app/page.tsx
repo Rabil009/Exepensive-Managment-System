@@ -1,8 +1,8 @@
 "use client";
 
-import React, { Suspense, useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { getEmployeeAccount, safeEmployeeReturnPath } from "@/lib/employee-auth";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { employeePasswordAuth, safeEmployeeReturnPath } from "@/lib/employee-auth";
 import { supabase } from "@/lib/supabase";
 import {
   Eye,
@@ -139,35 +139,26 @@ function HalftoneBackground() {
   );
 }
 
-function LoginPageContent() {
+export default function LoginPage() {
   const router = useRouter();
-  const queryParams = useSearchParams();
-  const [selectedPortal, setSelectedPortal] = useState<PortalType>(
-    queryParams.get("portal") === "employee" ? "/employee" : "/dashboard",
-  );
+  const [selectedPortal, setSelectedPortal] = useState<PortalType>("/dashboard");
   const [isPortalDropdownOpen, setIsPortalDropdownOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(
-    queryParams.get("reason") === "role"
-      ? "Use an Employee account to open the Employee Portal."
-      : queryParams.get("reason") === "profile"
-        ? "Could not check your Employee profile. Please sign in again."
-        : null,
-  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
-  const [employeeSignUp, setEmployeeSignUp] = useState(false);
-  const [employeeName, setEmployeeName] = useState("");
-  const [employeeMessage, setEmployeeMessage] = useState("");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("portal") === "employee") {
+      queueMicrotask(() => setSelectedPortal("/employee"));
+    }
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsPortalDropdownOpen(false);
@@ -183,7 +174,6 @@ function LoginPageContent() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-    setEmployeeMessage("");
 
     if (!email) {
       setErrorMessage("Please enter your email.");
@@ -195,42 +185,15 @@ function LoginPageContent() {
     }
 
     if (selectedPortal === "/employee") {
-      if (employeeSignUp && !employeeName.trim()) {
-        setErrorMessage("Please enter your name.");
-        return;
-      }
-      if (employeeSignUp && password.length < 8) {
-        setErrorMessage("Use a password with at least 8 characters.");
-        return;
-      }
       setIsLoading(true);
       try {
-        if (employeeSignUp) {
-          const { data, error } = await supabase.auth.signUp({
-            email: email.trim(),
-            password,
-            options: {
-              data: { name: employeeName.trim() },
-              emailRedirectTo: window.location.origin,
-            },
-          });
-          if (error) throw error;
-          if (!data.session) {
-            setEmployeeMessage("Check your email to confirm your account. Then return here and sign in.");
-            setEmployeeSignUp(false);
-            return;
-          }
-        } else {
-          const { error } = await supabase.auth.signInWithPassword({
-            email: email.trim(), password,
-          });
-          if (error) throw error;
-        }
-        const account = await getEmployeeAccount();
-        if (account?.profile?.role !== "EMPLOYEE") {
-          await supabase.auth.signOut();
-          throw new Error("This account is not an Employee account.");
-        }
+        const account = await employeePasswordAuth(email.trim(), password);
+        if (!account.access_token || !account.refresh_token) throw new Error("Employee session was not returned.");
+        const { error } = await supabase.auth.setSession({
+          access_token: account.access_token,
+          refresh_token: account.refresh_token,
+        });
+        if (error) throw error;
         const next = new URLSearchParams(window.location.search).get("next");
         router.push(safeEmployeeReturnPath(next));
       } catch (cause) {
@@ -259,6 +222,38 @@ function LoginPageContent() {
     // Keep buttons present without triggering any redirect or action
   };
 
+  const handleCreateAccount = async () => {
+    if (selectedPortal !== "/employee") {
+      setEmail("admin@acme-corp.com");
+      setPassword("DemoPassword2026");
+      return;
+    }
+    if (!email.trim() || !password) {
+      setErrorMessage("Enter your email and a password before creating an Employee account.");
+      return;
+    }
+    setErrorMessage(null);
+    setIsLoading(true);
+    try {
+      const result = await employeePasswordAuth(email.trim(), password, true);
+      if (result.confirmation_required) {
+        window.alert("Check your email to confirm your Employee account, then sign in.");
+        return;
+      }
+      if (!result.access_token || !result.refresh_token) throw new Error("Employee session was not returned.");
+      const { error } = await supabase.auth.setSession({
+        access_token: result.access_token,
+        refresh_token: result.refresh_token,
+      });
+      if (error) throw error;
+      router.push(safeEmployeeReturnPath(new URLSearchParams(window.location.search).get("next")));
+    } catch (cause) {
+      setErrorMessage(cause instanceof Error ? cause.message : "Could not create Employee account.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full overflow-y-auto sm:overflow-hidden bg-white text-zinc-900 relative flex items-center justify-center p-4 sm:p-5 select-none">
       <HalftoneBackground />
@@ -283,7 +278,7 @@ function LoginPageContent() {
           </p>
         </div>
 
-        {selectedPortal !== "/employee" && <><div className="space-y-2 mb-4">
+        <div className="space-y-2 mb-4">
           <button
             type="button"
             onClick={handleSocialAuth}
@@ -328,7 +323,6 @@ function LoginPageContent() {
             or
           </span>
         </div>
-        </>}
 
         <form onSubmit={handleSignIn} className="space-y-3.5">
           <div className="space-y-1" ref={dropdownRef}>
@@ -366,9 +360,6 @@ function LoginPageContent() {
                         type="button"
                         onClick={() => {
                           setSelectedPortal(portal.id);
-                          setEmployeeSignUp(false);
-                          setEmployeeMessage("");
-                          setErrorMessage(null);
                           setIsPortalDropdownOpen(false);
                         }}
                         className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
@@ -390,13 +381,6 @@ function LoginPageContent() {
             </div>
           </div>
 
-          {selectedPortal === "/employee" && employeeSignUp && (
-            <div className="space-y-1">
-              <label htmlFor="employee-name" className="block text-[11px] font-medium text-zinc-700">Full name</label>
-              <input id="employee-name" type="text" autoComplete="name" value={employeeName} onChange={(e) => setEmployeeName(e.target.value)} placeholder="Your name" className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950" />
-            </div>
-          )}
-
           <div className="space-y-1">
             <label htmlFor="email" className="block text-[11px] font-medium text-zinc-700">
               Email
@@ -404,7 +388,6 @@ function LoginPageContent() {
             <input
               id="email"
               type="email"
-              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
@@ -417,7 +400,7 @@ function LoginPageContent() {
               <label htmlFor="password" className="block text-[11px] font-medium text-zinc-700">
                 Password
               </label>
-              {selectedPortal !== "/employee" && <button
+              <button
                 type="button"
                 onClick={() => {
                   setForgotSent(false);
@@ -426,13 +409,12 @@ function LoginPageContent() {
                 className="text-[11px] text-zinc-500 hover:text-zinc-950 underline underline-offset-2 transition-colors cursor-pointer"
               >
                 Forgot Password?
-              </button>}
+              </button>
             </div>
             <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                autoComplete={selectedPortal === "/employee" && employeeSignUp ? "new-password" : "current-password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
@@ -449,7 +431,7 @@ function LoginPageContent() {
             </div>
           </div>
 
-          {selectedPortal !== "/employee" && <div className="pt-0.5 flex items-center justify-between">
+          <div className="pt-0.5 flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -459,9 +441,7 @@ function LoginPageContent() {
               />
               <span className="text-[11px] text-zinc-600">Remember me</span>
             </label>
-          </div>}
-
-          {employeeMessage && <div role="status" className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 p-2 rounded-xl">{employeeMessage}</div>}
+          </div>
 
           {errorMessage && (
             <div className="text-[11px] text-red-600 bg-red-50 border border-red-200 p-2 rounded-xl flex items-center gap-2">
@@ -475,27 +455,18 @@ function LoginPageContent() {
             disabled={isLoading}
             className="w-full h-10 mt-1 rounded-full bg-zinc-950 hover:bg-black text-white text-xs font-medium flex items-center justify-center transition-colors cursor-pointer active:scale-[0.99] disabled:opacity-75 shadow-xs"
           >
-            {isLoading ? "Authenticating..." : selectedPortal === "/employee" && employeeSignUp ? "Create Employee Account" : "Sign In"}
+            {isLoading ? "Authenticating..." : "Sign In"}
           </button>
         </form>
 
         <div className="mt-5 text-center text-[11px] text-zinc-500">
-          <span>{selectedPortal === "/employee" && employeeSignUp ? "Already have an account? " : "Don't have an account? "}</span>
+          <span>Don&apos;t have an account? </span>
           <button
             type="button"
-            onClick={() => {
-              if (selectedPortal === "/employee") {
-                setEmployeeSignUp((current) => !current);
-                setErrorMessage(null);
-                setEmployeeMessage("");
-                return;
-              }
-              setEmail("admin@acme-corp.com");
-              setPassword("DemoPassword2026");
-            }}
+            onClick={handleCreateAccount}
             className="font-medium text-zinc-900 underline underline-offset-4 hover:text-black cursor-pointer"
           >
-            {selectedPortal === "/employee" && employeeSignUp ? "Sign In" : "Create an Account"}
+            Create an Account
           </button>
         </div>
       </div>
@@ -571,13 +542,5 @@ function LoginPageContent() {
         </div>
       )}
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen bg-white" />}>
-      <LoginPageContent />
-    </Suspense>
   );
 }

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.expenses import router as employee_expenses_router
 from app.api.supabase_new_expense import router as supabase_new_expense_router
+from app.api.employee_auth import router as employee_auth_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -25,6 +26,7 @@ app.add_middleware(
 
 app.include_router(employee_expenses_router)
 app.include_router(supabase_new_expense_router)
+app.include_router(employee_auth_router)
 
 @app.get("/")
 def root():
