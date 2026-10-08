@@ -8,11 +8,14 @@ from app.api.budgets import router as budgets_router
 from app.api.policies import router as policies_router
 from app.api.reports import router as reports_router
 from app.api.finance import router as finance_router
+from app.api.supabase_new_expense import router as supabase_new_expense_router
+from app.api.employee_auth import router as employee_auth_router
+from app.api.employee_workspace import router as employee_workspace_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Expense Management System API (Manager & Finance Modules)",
+    description="Expense Management System API (Employee, Manager & Finance Modules)",
 )
 
 # CORS Middleware for Next.js frontend
@@ -41,6 +44,11 @@ app.include_router(reports_router, prefix=settings.API_PREFIX)
 
 # Include Finance Router
 app.include_router(finance_router)
+
+# Include Employee Routers
+app.include_router(supabase_new_expense_router)
+app.include_router(employee_auth_router)
+app.include_router(employee_workspace_router)
 
 @app.get("/health")
 def health_check():

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { employeePasswordAuth, safeEmployeeReturnPath } from "@/lib/employee-auth";
+import { supabase } from "@/lib/supabase";
 import {
   Eye,
   EyeOff,
@@ -154,6 +156,9 @@ export default function LoginPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("portal") === "employee") {
+      queueMicrotask(() => setSelectedPortal("/employee"));
+    }
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsPortalDropdownOpen(false);
@@ -166,7 +171,7 @@ export default function LoginPage() {
   const currentPortal =
     PORTALS.find((p) => p.id === selectedPortal) || PORTALS[0];
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
@@ -176,6 +181,26 @@ export default function LoginPage() {
     }
     if (!password) {
       setErrorMessage("Please enter your password.");
+      return;
+    }
+
+    if (selectedPortal === "/employee") {
+      setIsLoading(true);
+      try {
+        const account = await employeePasswordAuth(email.trim(), password);
+        if (!account.access_token || !account.refresh_token) throw new Error("Employee session was not returned.");
+        const { error } = await supabase.auth.setSession({
+          access_token: account.access_token,
+          refresh_token: account.refresh_token,
+        });
+        if (error) throw error;
+        const next = new URLSearchParams(window.location.search).get("next");
+        router.push(safeEmployeeReturnPath(next));
+      } catch (cause) {
+        setErrorMessage(cause instanceof Error ? cause.message : "Employee sign in failed.");
+      } finally {
+        setIsLoading(false);
+      }
       return;
     }
 
@@ -195,6 +220,38 @@ export default function LoginPage() {
   const handleSocialAuth = (e: React.MouseEvent) => {
     e.preventDefault();
     // Keep buttons present without triggering any redirect or action
+  };
+
+  const handleCreateAccount = async () => {
+    if (selectedPortal !== "/employee") {
+      setEmail("admin@acme-corp.com");
+      setPassword("DemoPassword2026");
+      return;
+    }
+    if (!email.trim() || !password) {
+      setErrorMessage("Enter your email and a password before creating an Employee account.");
+      return;
+    }
+    setErrorMessage(null);
+    setIsLoading(true);
+    try {
+      const result = await employeePasswordAuth(email.trim(), password, true);
+      if (result.confirmation_required) {
+        window.alert("Check your email to confirm your Employee account, then sign in.");
+        return;
+      }
+      if (!result.access_token || !result.refresh_token) throw new Error("Employee session was not returned.");
+      const { error } = await supabase.auth.setSession({
+        access_token: result.access_token,
+        refresh_token: result.refresh_token,
+      });
+      if (error) throw error;
+      router.push(safeEmployeeReturnPath(new URLSearchParams(window.location.search).get("next")));
+    } catch (cause) {
+      setErrorMessage(cause instanceof Error ? cause.message : "Could not create Employee account.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -403,13 +460,10 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-5 text-center text-[11px] text-zinc-500">
-          <span>Don't have an account? </span>
+          <span>Don&apos;t have an account? </span>
           <button
             type="button"
-            onClick={() => {
-              setEmail("admin@acme-corp.com");
-              setPassword("DemoPassword2026");
-            }}
+            onClick={handleCreateAccount}
             className="font-medium text-zinc-900 underline underline-offset-4 hover:text-black cursor-pointer"
           >
             Create an Account

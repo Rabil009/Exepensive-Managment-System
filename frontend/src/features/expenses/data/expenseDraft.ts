@@ -10,8 +10,10 @@ export type Draft = {
   purpose: string;
   attendees: string[];
   receipt: string;
+  linkedTransactionId: string | null;
 };
 export const draftKey = "aura-expense-draft-v1";
+export const remoteDraftKey = "aura-supabase-expense-draft-id-v1";
 export const emptyDraft = (): Draft => ({
   id: crypto.randomUUID(),
   merchant: "",
@@ -19,9 +21,10 @@ export const emptyDraft = (): Draft => ({
   amount: "",
   currency: "INR",
   category: "",
-  report: "Q4 Design Summit — SFO",
-  paymentMethod: "Corporate Card (••4921)",
+  report: "Unassigned",
+  paymentMethod: "Personal (Out-of-Pocket)",
   purpose: "",
-  attendees: ["Rabil Khan"],
+  attendees: [],
   receipt: "",
+  linkedTransactionId: null,
 });

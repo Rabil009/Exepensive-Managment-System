@@ -7,12 +7,12 @@ import type { CardControlsModel } from "../hooks/useCardControls";
 type Props = {
   model: Pick<
     CardControlsModel,
-    "state" | "update" | "setRevealed" | "openDialog"
+    "state" | "update" | "card" | "openDialog"
   >;
 };
 
 export function CardsHeader({ model }: Props) {
-  const { state, update, setRevealed, openDialog } = model;
+  const { state, update, card, openDialog } = model;
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -30,9 +30,9 @@ export function CardsHeader({ model }: Props) {
         <button
           type="button"
           aria-pressed={state.frozen}
+          disabled={!card}
           onClick={() => {
-            update({ ...state, frozen: !state.frozen });
-            setRevealed(false);
+            void update({ ...state, frozen: !state.frozen });
           }}
           className={`h-8 px-3 rounded-lg border text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs ${
             state.frozen
@@ -51,6 +51,7 @@ export function CardsHeader({ model }: Props) {
         {/* Request Limit Increase */}
         <button
           type="button"
+          disabled={!card}
           onClick={() => openDialog("limit")}
           className="h-8 px-3 rounded-lg border text-xs font-medium bg-white dark:bg-[#111113] border-zinc-200/80 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181D] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
         >
@@ -58,14 +59,14 @@ export function CardsHeader({ model }: Props) {
           <span>Request Limit Increase</span>
         </button>
 
-        {/* Create Virtual Card */}
+        {/* Request Virtual Card */}
         <button
           type="button"
           onClick={() => openDialog("virtual")}
           className="h-8 px-3 rounded-lg bg-black text-white dark:bg-white dark:text-black text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer shadow-xs"
         >
           <Plus className="h-3.5 w-3.5" />
-          <span>Create Virtual Card</span>
+          <span>Request Virtual Card</span>
         </button>
       </div>
     </div>

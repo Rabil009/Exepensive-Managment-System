@@ -71,8 +71,10 @@ export function ReceiptCapture({ model }: Props) {
         }}
       >
         {preview ? (
+          // Blob URLs are temporary local previews and cannot use the Next image optimizer.
+          // eslint-disable-next-line @next/next/no-img-element
           <img
-            className="aura-receipt-preview my-2 max-h-[170px] rounded-lg border border-zinc-200 dark:border-white/[0.08] shadow-xs"
+            className="my-2 max-h-[170px] max-w-full rounded-lg border border-zinc-200 dark:border-white/[0.08] shadow-xs object-contain"
             src={preview}
             alt="Receipt preview"
           />

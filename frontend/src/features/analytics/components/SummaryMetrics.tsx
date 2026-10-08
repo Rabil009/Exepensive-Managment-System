@@ -4,30 +4,31 @@ import React from "react";
 import { Receipt, Clock, Landmark, CreditCard } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import { money } from "../../../shared/utils/format";
+import type { AnalyticsData } from "../data/useEmployeeAnalytics";
 
-export function SummaryMetrics() {
+export function SummaryMetrics({ data }: { data: AnalyticsData | null }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const cards = [
     {
       label: "Total Spend",
-      value: money(38420.0),
+      value: money(Number(data?.totals.total_spend || 0)),
       icon: Receipt,
     },
     {
       label: "Pending Approval",
-      value: money(2840.5),
+      value: money(Number(data?.totals.pending_approval || 0)),
       icon: Clock,
     },
     {
       label: "Reimbursed",
-      value: money(35100.0),
+      value: money(Number(data?.totals.reimbursed || 0)),
       icon: Landmark,
     },
     {
       label: "Corporate Card Spend",
-      value: money(3320.5),
+      value: money(Number(data?.totals.corporate_card_spend || 0)),
       icon: CreditCard,
     },
   ];

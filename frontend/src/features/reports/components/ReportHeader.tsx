@@ -21,6 +21,10 @@ type Props = {
     | "recalled"
     | "completed"
     | "recallReport"
+    | "submitReport"
+    | "canWithdraw"
+    | "canSubmit"
+    | "workflowStage"
     | "addItem"
   >;
 };
@@ -33,6 +37,10 @@ export function ReportHeader({ model }: Props) {
     recalled,
     completed,
     recallReport,
+    submitReport,
+    canWithdraw,
+    canSubmit,
+    workflowStage,
     addItem,
   } = model;
 
@@ -66,9 +74,9 @@ export function ReportHeader({ model }: Props) {
               value={selected}
               onChange={(event) => selectReport(event.target.value)}
             >
-              {groups.map((name, index) => (
+              {groups.map((name) => (
                 <option key={name} value={name} className="dark:bg-[#18181D]">
-                  {`REP-2026-${String(index + 894).padStart(4, "0")}`} · {name}
+                  {name}
                 </option>
               ))}
             </select>
@@ -85,10 +93,10 @@ export function ReportHeader({ model }: Props) {
             tone={completed ? "success" : recalled ? "neutral" : "warning"}
           >
             {recalled
-              ? "Draft · Recalled"
+              ? "Draft"
               : completed
               ? "Reimbursed · Complete"
-              : "Submitted · In Review"}
+              : workflowStage === "REJECTED" ? "Rejected" : workflowStage === "FINANCE_REVIEW" ? "Finance Review" : "Manager Review"}
           </StatusBadge>
         </div>
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -119,12 +127,12 @@ export function ReportHeader({ model }: Props) {
 
         <button
           type="button"
-          disabled={completed || recalled}
-          onClick={recallReport}
+          disabled={!canWithdraw && !canSubmit}
+          onClick={canSubmit ? submitReport : recallReport}
           className="h-8 px-3 rounded-lg border text-xs font-medium bg-white dark:bg-[#111113] border-zinc-200/80 dark:border-white/[0.08] text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Undo2 className="h-3.5 w-3.5" />
-          <span>Withdraw Report</span>
+          <span>{canSubmit ? "Submit Report" : "Withdraw Report"}</span>
         </button>
       </div>
     </div>

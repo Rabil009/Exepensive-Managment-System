@@ -7,6 +7,7 @@ import type { ReportsModel } from "../hooks/useReports";
 import { StatusBadge } from "../../../shared/components/StatusBadge";
 import { displayDate, money } from "../../../shared/utils/format";
 import { formatTotal, isPersonal } from "../utils/reportTotals";
+import { downloadExpenseReceipt } from "../../expenses/data/newExpenseApi";
 
 type Props = {
   model: Pick<
@@ -24,6 +25,7 @@ type Props = {
     | "setStatus"
     | "exportTransactions"
     | "clearFilters"
+    | "setNotice"
   >;
 };
 
@@ -45,6 +47,7 @@ export function ReportTransactions({ model }: Props) {
     setStatus,
     exportTransactions,
     clearFilters,
+    setNotice,
   } = model;
 
   return (
@@ -222,13 +225,13 @@ export function ReportTransactions({ model }: Props) {
                 </td>
 
                 <td className="py-3.5 px-4">
-                  <StatusBadge tone={item.receipt ? "success" : "warning"}>
+                  {item.receipt ? <button type="button" onClick={() => void downloadExpenseReceipt(item.id, item.receipt || "receipt").catch((cause: unknown) => setNotice(cause instanceof Error ? cause.message : "Could not download receipt."))} className="hover:underline"><StatusBadge tone="success">
                     {item.receipt === "Auto-Matched Invoice"
                       ? "Invoice Attached"
                       : item.receipt === "Verified Receipt"
                       ? "Receipt Attached"
-                      : item.receipt || "Receipt Missing"}
-                  </StatusBadge>
+                      : item.receipt}
+                  </StatusBadge></button> : <StatusBadge tone="warning">Receipt Missing</StatusBadge>}
                 </td>
 
                 <td className="py-3.5 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100 whitespace-nowrap">

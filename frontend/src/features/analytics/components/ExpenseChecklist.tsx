@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   AlertCircle,
   FileCheck,
-  Upload,
   ArrowRight,
   Plus,
 } from "lucide-react";
@@ -14,6 +13,7 @@ import { useTheme } from "@/lib/theme-store";
 import { useExpenses } from "../../expenses/data/ExpensesContext";
 import { displayDate, money } from "../../../shared/utils/format";
 import type { Expense } from "../../expenses/types";
+import { completeSubmittedExpense } from "../../expenses/data/newExpenseApi";
 
 const missingReceipt = (expense: Expense) => !expense.receipt?.trim();
 const missingReport = (expense: Expense) =>
@@ -24,7 +24,7 @@ const needsWork = (expense: Expense) =>
 export function ExpenseChecklist() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { expenses, addExpense } = useExpenses();
+  const { expenses, refresh } = useExpenses();
   const [filter, setFilter] = useState("all");
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
@@ -49,36 +49,16 @@ export function ExpenseChecklist() {
       : missingReport(expense)
   );
 
-  const reports = [
-    ...new Set(
-      expenses
-        .map((expense) => expense.report)
-        .filter((r): r is string => Boolean(r?.trim()) && r !== "Unassigned")
-    ),
-  ];
-
-  function updateExpense(expense: Expense, changes: Partial<Expense>, success: string) {
+  async function complete(expense: Expense, update: { report?: string; file?: File }) {
     try {
-      addExpense({ ...expense, ...changes });
+      await completeSubmittedExpense(expense.id, update);
+      await refresh();
       setError(false);
-      setMessage(success);
-    } catch {
+      setMessage(`Updated ${expense.merchant}.`);
+    } catch (cause) {
       setError(true);
-      setMessage("Could not save the change. Please try again.");
+      setMessage(cause instanceof Error ? cause.message : "Could not update the expense.");
     }
-  }
-
-  function attachReceipt(expense: Expense, file?: File) {
-    if (!file) return;
-    if (
-      !/\.(pdf|png|jpe?g|heic)$/i.test(file.name) ||
-      file.size > 25 * 1024 * 1024
-    ) {
-      setError(true);
-      setMessage("Choose a PDF, PNG, JPG, or HEIC receipt up to 25 MB.");
-      return;
-    }
-    updateExpense(expense, { receipt: file.name }, `Receipt attached for ${expense.merchant}.`);
   }
 
   return (
@@ -162,16 +142,7 @@ export function ExpenseChecklist() {
             })}
           </div>
 
-          {message && (
-            <p
-              role={error ? "alert" : "status"}
-              className={`text-xs mb-2 font-medium ${
-                error ? "text-rose-500" : "text-emerald-500"
-              }`}
-            >
-              {message}
-            </p>
-          )}
+          {message && <p role={error ? "alert" : "status"} className={`text-xs mb-2 ${error ? "text-rose-500" : "text-emerald-500"}`}>{message}</p>}
 
           {/* Actionable items list */}
           <div className="flex flex-col gap-2.5 flex-1 max-h-[220px] overflow-y-auto pr-1">
@@ -200,45 +171,13 @@ export function ExpenseChecklist() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-200/60 dark:border-white/[0.05]">
-                  {missingReceipt(expense) && (
-                    <label className="cursor-pointer rounded-md bg-[#5A78A6] hover:opacity-90 text-white px-2.5 py-1 text-xs font-medium transition-opacity flex items-center gap-1.5 relative shadow-xs">
-                      <Upload className="h-3 w-3" />
-                      <span>Attach Receipt</span>
-                      <input
-                        type="file"
-                        aria-label={`Add receipt for ${expense.merchant}`}
-                        accept=".pdf,.png,.jpg,.jpeg,.heic"
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full"
-                        onChange={(event) => {
-                          attachReceipt(expense, event.target.files?.[0]);
-                          event.target.value = "";
-                        }}
-                      />
-                    </label>
-                  )}
-                  {missingReport(expense) && (
-                    <select
-                      aria-label={`Assign report for ${expense.merchant}`}
-                      value=""
-                      onChange={(event) =>
-                        updateExpense(
-                          expense,
-                          { report: event.target.value },
-                          `Report assigned to ${expense.merchant}.`
-                        )
-                      }
-                      className="rounded-md border border-zinc-200/80 dark:border-white/[0.08] bg-white dark:bg-[#111113] text-zinc-900 dark:text-zinc-100 px-2 py-1 text-xs font-medium cursor-pointer"
-                    >
-                      <option value="" disabled>
-                        Assign Report
-                      </option>
-                      {reports.map((report) => (
-                        <option key={report} value={report}>
-                          {report}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  {missingReceipt(expense) && expense.raw_status === "SUBMITTED" ? <label className="cursor-pointer rounded-md bg-[#5A78A6] text-white px-2.5 py-1 text-xs font-medium flex items-center gap-1.5 relative">
+                    <span>Attach Receipt</span><input type="file" aria-label={`Add receipt for ${expense.merchant}`} accept=".pdf,.png,.jpg,.jpeg,.heic" className="absolute inset-0 opacity-0 cursor-pointer w-full" onChange={(event) => { const file = event.target.files?.[0]; if (file) void complete(expense, { file }); event.target.value = ""; }} />
+                  </label> : missingReceipt(expense) && <span className="text-xs text-amber-500">Receipt needed</span>}
+                  {missingReport(expense) && expense.raw_status === "SUBMITTED" ? <form onSubmit={(event) => { event.preventDefault(); const input = event.currentTarget.elements.namedItem("report") as HTMLInputElement; if (input.value.trim()) void complete(expense, { report: input.value.trim() }); }} className="flex gap-1">
+                    <input name="report" aria-label={`Report for ${expense.merchant}`} placeholder="Report name" className="h-7 px-2 rounded border text-xs bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.08]" required />
+                    <button type="submit" className="h-7 px-2 rounded border text-xs border-zinc-200 dark:border-white/[0.08]">Assign</button>
+                  </form> : missingReport(expense) && <span className="text-xs text-amber-500">Report needed</span>}
                   {expense.status === "Draft" && (
                     <Link
                       href={`/employee/expenses/new?draft=${encodeURIComponent(expense.id)}`}

@@ -10,16 +10,11 @@ import { ComplianceBanner } from "./components/ComplianceBanner";
 export default function OverviewPage() {
   const model = useOverview();
   return (
-    <AppShell active="Overview" onSearch={model.setQuery}>
+    <AppShell active="Overview">
       <div className="space-y-4 sm:space-y-6 w-full">
-        <OverviewSummary />
-        <QuickReceiptCapture
-          onUpload={() =>
-            model.setNotice(
-              "Open New Expense to attach this receipt and enter its details.",
-            )
-          }
-        />
+        <OverviewSummary summary={model.summary} />
+        {model.error && <p role="alert" className="text-sm text-rose-500">{model.error}</p>}
+        <QuickReceiptCapture />
         <OverviewExpenseTable model={model} />
         <ComplianceBanner />
       </div>

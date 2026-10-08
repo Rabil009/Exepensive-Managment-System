@@ -3,38 +3,41 @@
 import React from "react";
 import { Wallet, Clock, CreditCard, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
+import type { ExpenseSummary } from "../../expenses/data/ExpensesContext";
 
-export function OverviewSummary() {
+const rupees = (value?: string) => value === undefined ? "—" : `₹${Number(value).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+export function OverviewSummary({ summary }: { summary: ExpenseSummary | null }) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const cards = [
     {
       label: "Ready for Reimbursement",
-      value: "₹2,480.50",
+      value: rupees(summary?.ready_for_reimbursement),
       icon: CheckCircle2,
-      subBadge: "2 approved",
+      subBadge: `${summary?.approved_count ?? 0} approved`,
       subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Pending Approval",
-      value: "₹840.00",
+      value: rupees(summary?.pending_approval),
       icon: Clock,
-      subBadge: "1 report",
+      subBadge: `${summary?.pending_count ?? 0} pending`,
       subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Card Spending (MTD)",
-      value: "₹3,320.50",
+      value: rupees(summary?.card_spending_mtd),
       icon: CreditCard,
-      subBadge: "of ₹7,500 limit",
+      subBadge: summary && Number(summary.card_limit) > 0 ? `of ${rupees(summary.card_limit)} limit` : "No card limit",
       subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Card Limit Remaining",
-      value: "₹4,179.50",
+      value: summary && Number(summary.card_limit) > 0 ? rupees(summary.card_limit_remaining) : "—",
       icon: Wallet,
-      subBadge: "56% avail",
+      subBadge: summary && Number(summary.card_limit) > 0 ? `${Math.round(100 * Number(summary.card_limit_remaining) / Number(summary.card_limit))}% available` : "No card assigned",
       subColor: "text-zinc-500 dark:text-zinc-400",
     },
   ];

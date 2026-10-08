@@ -9,16 +9,13 @@ import { SettingsModal } from "@/components/dashboard/SettingsModal";
 import { EmployeeSearchModal } from "../components/EmployeeSearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { useTheme } from "@/lib/theme-store";
-import { toast } from "sonner";
 
 export function AppShell({
   children,
   active,
-  onSearch,
 }: {
   children: ReactNode;
   active: string;
-  onSearch?: (value: string) => void;
 }) {
   const router = useRouter();
   const { theme } = useTheme();

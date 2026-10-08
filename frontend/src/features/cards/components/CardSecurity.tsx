@@ -8,9 +8,14 @@ import {
   Banknote,
 } from "lucide-react";
 import type { CardControlsModel } from "../hooks/useCardControls";
-import { controls } from "../data/demoCards";
+const controls = [
+  { name: "Mobile Wallet", enabled: "Wallet enabled", disabled: "Wallet disabled" },
+  { name: "Travel Location Limits", enabled: "Travel restrictions on", disabled: "Travel restrictions off" },
+  { name: "Online Payment Verification", enabled: "Verification on", disabled: "Verification off" },
+  { name: "ATM Withdrawal Lock", enabled: "Cash lock active", disabled: "Cash lock off" },
+];
 
-type Props = { model: Pick<CardControlsModel, "state" | "update"> };
+type Props = { model: Pick<CardControlsModel, "state" | "update" | "card"> };
 
 function getControlIcon(name: string) {
   const n = name.toLowerCase();
@@ -21,7 +26,7 @@ function getControlIcon(name: string) {
 }
 
 export function CardSecurity({ model }: Props) {
-  const { state, update } = model;
+  const { state, update, card } = model;
   const activeCount = state.controls.filter(Boolean).length;
 
   return (
@@ -67,16 +72,17 @@ export function CardSecurity({ model }: Props) {
               {/* iOS / Linear style Toggle Switch */}
               <button
                 type="button"
+                disabled={!card}
                 role="switch"
                 aria-label={item.name}
                 aria-checked={isEnabled}
                 className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 flex items-center ${
                   isEnabled
-                    ? "bg-zinc-900 dark:bg-zinc-100 justify-end"
+                    ? "bg-[#3B9B78] justify-end"
                     : "bg-zinc-300 dark:bg-zinc-700 justify-start"
                 }`}
                 onClick={() =>
-                  update({
+                  void update({
                     ...state,
                     controls: state.controls.map((value, position) =>
                       position === index ? !value : value,
@@ -84,7 +90,9 @@ export function CardSecurity({ model }: Props) {
                   })
                 }
               >
-                <span className="w-4 h-4 rounded-full bg-white dark:bg-[#111113] shadow-xs pointer-events-none" />
+                <span className={`w-4 h-4 rounded-full shadow-xs pointer-events-none ${
+                  isEnabled ? "bg-white" : "bg-white dark:bg-[#111113]"
+                }`} />
               </button>
             </div>
           );

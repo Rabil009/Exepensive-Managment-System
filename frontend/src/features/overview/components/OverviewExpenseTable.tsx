@@ -20,6 +20,7 @@ import { displayDate, money } from "../../../shared/utils/format";
 import { tabs } from "../data/overview";
 import type { OverviewModel } from "../hooks/useOverview";
 import { useTheme } from "@/lib/theme-store";
+import { downloadExpenseReceipt } from "../../expenses/data/newExpenseApi";
 
 type Props = {
   model: Pick<
@@ -30,6 +31,8 @@ type Props = {
     | "setTab"
     | "countFor"
     | "setNotice"
+    | "refresh"
+    | "loading"
     | "hideReceipt"
     | "setHideReceipt"
   >;
@@ -53,6 +56,8 @@ export function OverviewExpenseTable({ model }: Props) {
     setTab,
     countFor,
     setNotice,
+    refresh,
+    loading,
     hideReceipt,
     setHideReceipt,
   } = model;
@@ -132,7 +137,8 @@ export function OverviewExpenseTable({ model }: Props) {
             type="button"
             className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/[0.05] rounded-md transition-colors cursor-pointer"
             title="Refresh Expenses"
-            onClick={() => setNotice("Expense records are up to date.")}
+            disabled={loading}
+            onClick={() => void refresh().then(() => setNotice("Expense records refreshed."))}
           >
             <RotateCw className="h-3.5 w-3.5 text-zinc-400" />
           </button>
@@ -279,13 +285,13 @@ export function OverviewExpenseTable({ model }: Props) {
                                 : "text-zinc-400"
                             }`}
                           />
-                          <span>
+                          {item.receipt ? <button type="button" className="hover:underline" onClick={() => void downloadExpenseReceipt(item.id, item.receipt || "receipt").catch((cause: unknown) => setNotice(cause instanceof Error ? cause.message : "Could not download receipt."))}>
                             {item.receipt === "Auto-Matched Invoice"
                               ? "Invoice Attached"
                               : item.receipt === "Verified Receipt"
                               ? "Receipt Attached"
                               : item.receipt || "No receipt"}
-                          </span>
+                          </button> : <span>No receipt</span>}
                         </div>
                       </td>
                     )}

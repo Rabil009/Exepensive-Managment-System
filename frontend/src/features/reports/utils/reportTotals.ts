@@ -1,9 +1,5 @@
 import { money } from "../../../shared/utils/format";
 import { type Expense } from "../../expenses/types";
-export const reportName = (item: Expense) =>
-  item.report?.startsWith("Q4 Design Summit")
-    ? "Q4 Design Summit — SFO"
-    : item.report || "Unassigned";
 export const isPersonal = (item: Expense) =>
   /personal|pocket/i.test(item.paymentMethod || "");
 export const isPersonalCard = (item: Expense) =>

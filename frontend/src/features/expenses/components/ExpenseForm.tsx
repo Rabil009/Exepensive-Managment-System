@@ -10,7 +10,6 @@ import { ExpenseDetailsFields } from "./ExpenseDetailsFields";
 import { ExpenseCategorization } from "./ExpenseCategorization";
 import { ExpenseAttendees } from "./ExpenseAttendees";
 import { ExpenseFormActions } from "./ExpenseFormActions";
-import "../styles/expense-form.css";
 
 export function ExpenseForm() {
   const model = useExpenseForm();

@@ -34,3 +34,6 @@ Thumbs.db
 .temp/
 supabase/.temp/
 *.log
+
+# Agent configurations
+.agents/
