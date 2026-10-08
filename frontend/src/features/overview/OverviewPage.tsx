@@ -10,7 +10,7 @@ import { ComplianceBanner } from "./components/ComplianceBanner";
 export default function OverviewPage() {
   const model = useOverview();
   return (
-    <AppShell active="Overview" onSearch={model.setQuery}>
+    <AppShell active="Overview">
       <div className="space-y-4 sm:space-y-6 w-full">
         <OverviewSummary summary={model.summary} />
         {model.error && <p role="alert" className="text-sm text-rose-500">{model.error}</p>}

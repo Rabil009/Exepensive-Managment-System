@@ -231,7 +231,6 @@ export function useExpenseForm() {
     submit,
     addAttendee,
     linkTransaction,
-    setMessage,
   };
 }
 export type ExpenseFormModel = ReturnType<typeof useExpenseForm>;

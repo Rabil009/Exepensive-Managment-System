@@ -8,7 +8,6 @@ import { SpendingOverview } from "./components/SpendingOverview";
 import { CardAndChecklist } from "./components/CardAndChecklist";
 import { FundingSplit } from "./components/FundingSplit";
 import { AnalyticsInsights } from "./components/AnalyticsInsights";
-import "./styles/analytics.css";
 import { useEmployeeAnalytics } from "./data/useEmployeeAnalytics";
 
 export default function AnalyticsPage() {

@@ -18,6 +18,7 @@ import {
 import { useTheme } from "@/lib/theme-store";
 import { supabase } from "@/lib/supabase";
 import { clearEmployeeCache } from "@/lib/employee-auth";
+import { useEmployeeSession } from "@/lib/employee-session";
 import type { NavigationItem } from "./navigation.types";
 
 interface SidebarProps {
@@ -40,6 +41,10 @@ export function Sidebar({
   onOpenSearch,
 }: SidebarProps) {
   const router = useRouter();
+  const account = useEmployeeSession();
+  const profileName = account.profile.name?.trim() || account.user.email?.split("@")[0] || "Employee";
+  const email = account.user.email || "";
+  const initials = profileName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -355,26 +360,18 @@ export function Sidebar({
             >
               {/* Profile info header */}
               <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.04]">
-                <img
-                  src="/rabil.jpg"
-                  alt="Rabil Khan"
-                  className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20 shrink-0"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80";
-                  }}
-                />
+                <span className="h-8 w-8 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-semibold shrink-0">{initials}</span>
                 <div className="flex flex-col min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-semibold truncate text-zinc-900 dark:text-white leading-tight">
-                      Rabil Khan
+                      {profileName}
                     </span>
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-zinc-200/70 dark:bg-white/[0.1] text-zinc-700 dark:text-zinc-300">
                       Employee
                     </span>
                   </div>
                   <span className="text-[11px] truncate text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    rabil@payout.finance
+                    {email}
                   </span>
                 </div>
               </div>
@@ -414,7 +411,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={() => setIsProfileOpen((prev) => !prev)}
-            title={isCollapsed ? "Rabil Khan - Profile & Logout" : undefined}
+            title={isCollapsed ? `${profileName} - Profile & Logout` : undefined}
             className={`w-full flex items-center h-11 px-1 rounded-xl cursor-pointer text-left group transition-colors duration-150 ${
               isProfileOpen
                 ? isDark
@@ -426,15 +423,7 @@ export function Sidebar({
             }`}
           >
             <div className="h-8 w-8 shrink-0 flex items-center justify-center">
-              <img
-                src="/rabil.jpg"
-                alt="Rabil Khan"
-                className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80";
-                }}
-              />
+              <span className="h-8 w-8 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-semibold">{initials}</span>
             </div>
 
             <div
@@ -450,7 +439,7 @@ export function Sidebar({
                     isDark ? "text-white group-hover:text-black" : "text-zinc-900"
                   }`}
                 >
-                  Rabil Khan
+                  {profileName}
                 </span>
                 <span
                   className={`text-[11px] truncate leading-tight mt-0.5 ${
@@ -459,7 +448,7 @@ export function Sidebar({
                       : "text-zinc-500"
                   }`}
                 >
-                  rabil@payout.finance
+                  {email}
                 </span>
               </div>
               <ChevronsUpDown

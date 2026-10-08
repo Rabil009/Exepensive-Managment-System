@@ -15,7 +15,7 @@ export default function ReportsPage() {
   const model = useReports();
 
   return (
-    <AppShell active="Reports" onSearch={model.setQuery}>
+    <AppShell active="Reports">
       <div className="flex flex-col w-full gap-5 pb-12">
         {!model.groups.length && <p className="text-sm text-zinc-500">No expense reports yet. Add an expense to create one.</p>}
         <ReportHeader model={model} />

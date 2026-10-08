@@ -4,7 +4,7 @@ import { draftKey, remoteDraftKey } from "@/features/expenses/data/expenseDraft"
 const cacheOwnerKey = "employee-expense-cache-owner-v1";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-type EmployeeAccount = {
+export type EmployeeAccount = {
   user: { id: string; email: string | null };
   profile: { id: string; name: string | null; role: string };
 };

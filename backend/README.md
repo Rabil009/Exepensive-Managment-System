@@ -36,6 +36,9 @@ transactions. `GET /api/employee/new-expense/receipts/{id}` downloads an owned
 receipt. A linked transaction must belong to the Employee and match the
 expense amount and INR currency.
 
+`PATCH /api/employee/new-expense/claims/{id}` accepts a receipt and/or report
+name for an owned claim while it is still submitted and awaiting review.
+
 ## Workspace
 
 All Employee data routes require `Authorization: Bearer <Supabase access token>`.

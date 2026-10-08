@@ -5,7 +5,6 @@ import {
   Download,
   Search,
   CreditCard,
-  Receipt,
   Building2,
   Plane,
   Coffee,
@@ -21,8 +20,6 @@ type Props = {
     | "visible"
     | "query"
     | "setQuery"
-    | "payment"
-    | "setPayment"
     | "status"
     | "setStatus"
     | "exportTransactions"
@@ -48,8 +45,6 @@ export function CardTransactions({ model }: Props) {
     visible,
     query,
     setQuery,
-    payment,
-    setPayment,
     status,
     setStatus,
     exportTransactions,
@@ -83,18 +78,6 @@ export function CardTransactions({ model }: Props) {
               onChange={(event) => setQuery(event.target.value)}
             />
           </div>
-
-          {/* Payment Filter */}
-          <select
-            aria-label="Filter by payment"
-            value={payment}
-            onChange={(event) => setPayment(event.target.value)}
-            className="h-8 px-2.5 text-xs rounded-lg border bg-white dark:bg-[#18181D] border-zinc-200/80 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer"
-          >
-            <option value="All">All Cards</option>
-            <option value="Corporate">Corporate</option>
-            <option value="Personal">Personal</option>
-          </select>
 
           {/* Status Filter */}
           <select
@@ -136,7 +119,6 @@ export function CardTransactions({ model }: Props) {
           <tbody className="divide-y divide-zinc-200/50 dark:divide-white/[0.04] text-[13px]">
             {visible.map((item) => {
               const Icon = getMerchantIcon(item.merchant);
-              const isCorporate = item.payment === "Corporate";
               const tone =
                 item.status === "Success"
                   ? "success"
@@ -174,15 +156,9 @@ export function CardTransactions({ model }: Props) {
                   {/* Payment Card */}
                   <td className="py-2.5 px-4 whitespace-nowrap">
                     <div className="flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
-                      {isCorporate ? (
-                        <CreditCard className="h-3.5 w-3.5 text-zinc-400" />
-                      ) : (
-                        <Receipt className="h-3.5 w-3.5 text-zinc-400" />
-                      )}
+                      <CreditCard className="h-3.5 w-3.5 text-zinc-400" />
                       <span>
-                        {isCorporate
-                          ? `Corporate Card ••${item.cardLabel || "••••"}`
-                          : "Personal (Reimbursable)"}
+                        Corporate Card ••{item.cardLabel || "••••"}
                       </span>
                     </div>
                   </td>

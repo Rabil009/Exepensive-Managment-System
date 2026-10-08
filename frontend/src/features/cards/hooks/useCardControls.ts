@@ -21,7 +21,6 @@ type CardsResponse = {
 export function useCardControls() {
   const [data, setData] = useState<CardsResponse | null>(null);
   const [query, setQuery] = useState("");
-  const [payment, setPayment] = useState("All");
   const [status, setStatus] = useState("All");
   const [message, setMessage] = useState("");
   const [dialogType, setDialogType] = useState<"limit" | "virtual" | null>(null);
@@ -48,12 +47,12 @@ export function useCardControls() {
     controls: [card?.wallet_enabled ?? false, card?.travel_limits_enabled ?? false, card?.online_verification_enabled ?? false, card?.atm_lock_enabled ?? false] };
   const transactions = (data?.transactions || []).map((item) => ({
     id: item.id, date: item.transaction_date, merchant: item.merchant, purpose: item.purpose || "",
-    payment: "Corporate" as const, amount: Number(item.amount), currency: item.currency,
+    amount: Number(item.amount), currency: item.currency,
     cardLabel: data?.cards.find((assigned) => assigned.id === item.card_id)?.last4,
     status: item.status === "SETTLED" ? "Success" as const : item.status === "DECLINED" ? "Failed" as const : "Pending" as const,
   }));
   const visible = transactions.filter((item) =>
-    (payment === "All" || item.payment === payment) && (status === "All" || item.status === status) &&
+    (status === "All" || item.status === status) &&
     `${item.merchant} ${item.purpose}`.toLowerCase().includes(query.trim().toLowerCase()));
 
   async function update(next: typeof state) {
@@ -91,7 +90,7 @@ export function useCardControls() {
       visible.map((item) => [item.date, item.merchant, item.purpose, item.cardLabel || "", item.status, item.currency, item.amount]));
   }
   return { card, cards: data?.cards || [], requests: data?.requests || [], categories: data?.usage.categories || [], month: data?.usage.month || "",
-    state, query, setQuery, payment, setPayment, status, setStatus, message, setMessage, dialogType, setDialogType,
+    state, query, setQuery, status, setStatus, message, setMessage, dialogType, setDialogType,
     requestedAmount, setRequestedAmount, virtualName, setVirtualName, dialogError,
     spent, limit, percent, visible, transactionCount: transactions.length, update, openDialog, saveDialog, exportTransactions };
 }
