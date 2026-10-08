@@ -91,6 +91,43 @@ def test_supabase_draft_receipt_and_submit_flow():
         app.dependency_overrides.clear()
 
 
+def test_submitted_claim_can_add_receipt_and_report_but_reviewed_claim_cannot():
+    gateway = FakeGateway()
+    expense_id = str(uuid4())
+    gateway.claims[expense_id] = {"id": expense_id, "employee_id": gateway.profile["id"], "status": "SUBMITTED", "receipt_path": None}
+    patches = []
+
+    def request(method, path, **kwargs):
+        if method == "PATCH":
+            patches.append(kwargs)
+            gateway.claims[expense_id].update(kwargs["json"])
+        class Result:
+            def json(self):
+                return [gateway.claims[expense_id]]
+        return Result()
+
+    gateway.request = request
+    app.dependency_overrides[get_gateway] = lambda: gateway
+    try:
+        with TestClient(app) as client:
+            response = client.patch(
+                f"/api/employee/new-expense/claims/{expense_id}",
+                data={"report": "Client trip"},
+                files={"file": ("ticket.pdf", BytesIO(b"%PDF-1.7\nreceipt"), "application/pdf")},
+            )
+            assert response.status_code == 200
+            assert patches[0]["params"]["employee_id"] == f"eq.{gateway.profile['id']}"
+            assert patches[0]["params"]["status"] == "eq.SUBMITTED"
+            assert patches[0]["json"]["report_name"] == "Client trip"
+            assert response.json()["receipt_path"] in gateway.receipts
+
+            gateway.claims[expense_id]["status"] = "MANAGER_APPROVED"
+            assert client.patch(f"/api/employee/new-expense/claims/{expense_id}", data={"report": "Changed"}).status_code == 409
+            assert len(patches) == 1
+    finally:
+        app.dependency_overrides.clear()
+
+
 def test_invalid_receipt_is_rejected_before_storage():
     gateway = SupabaseExpenseGateway("test-token")
     gateway.client.close()

@@ -114,6 +114,62 @@ def download_receipt(expense_id: UUID, gateway: SupabaseExpenseGateway = Depends
     )
 
 
+@router.patch("/claims/{expense_id}")
+def complete_claim(
+    expense_id: UUID,
+    report: Annotated[str | None, Form()] = None,
+    file: UploadFile | None = File(default=None),
+    gateway: SupabaseExpenseGateway = Depends(get_gateway),
+):
+    """Let an Employee complete documentation while their claim awaits review."""
+    employee = gateway.employee()
+    if report is None and file is None:
+        raise HTTPException(422, "Choose a report or receipt to update")
+    rows = gateway.request(
+        "GET", "/rest/v1/expense_claims",
+        params={"id": f"eq.{expense_id}", "employee_id": f"eq.{employee['id']}",
+                "select": "id,status,receipt_path"},
+    ).json()
+    if not rows:
+        raise HTTPException(404, "Expense not found")
+    claim = rows[0]
+    previous_receipt_path = claim.get("receipt_path")
+    if claim["status"] != "SUBMITTED":
+        raise HTTPException(409, "Only submitted expenses awaiting review can be updated")
+    patch = {}
+    if report is not None:
+        if not report.strip() or len(report) > 200:
+            raise HTTPException(422, "Enter a valid report name")
+        patch["report_name"] = report.strip()
+    uploaded_path = None
+    if file is not None:
+        content = file.file.read(MAX_RECEIPT_BYTES + 1)
+        receipt = gateway.upload(employee["id"], expense_id, file.filename or "", content)
+        patch.update(receipt)
+        uploaded_path = receipt["receipt_path"]
+    try:
+        updated = gateway.request(
+            "PATCH", "/rest/v1/expense_claims",
+            params={"id": f"eq.{expense_id}", "employee_id": f"eq.{employee['id']}", "status": "eq.SUBMITTED"},
+            headers={"Prefer": "return=representation"}, json=patch,
+        ).json()
+        if not updated:
+            raise HTTPException(409, "Expense changed; reload and try again")
+    except Exception:
+        if uploaded_path:
+            try:
+                gateway.remove_receipt(uploaded_path)
+            except HTTPException:
+                logger.warning("Could not remove receipt after claim update failed")
+        raise
+    if uploaded_path and previous_receipt_path:
+        try:
+            gateway.remove_receipt(previous_receipt_path)
+        except HTTPException:
+            logger.warning("Could not remove replaced receipt for claim %s", expense_id)
+    return updated[0]
+
+
 @router.get("/{expense_id}")
 def get_draft(expense_id: UUID, gateway: SupabaseExpenseGateway = Depends(get_gateway)):
     employee = gateway.employee()

@@ -13,4 +13,6 @@ export type Expense = {
   report?: string;
   paymentMethod?: string;
   attendees?: string[];
+  raw_status?: string;
+  source?: "claim" | "draft";
 };

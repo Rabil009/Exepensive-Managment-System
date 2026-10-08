@@ -69,3 +69,11 @@ export async function downloadExpenseReceipt(id: string, filename: string) {
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+export async function completeSubmittedExpense(id: string, update: { report?: string; file?: File }) {
+  const body = new FormData();
+  if (update.report) body.set("report", update.report);
+  if (update.file) body.set("file", update.file);
+  const response = await employeeRequest(`/new-expense/claims/${encodeURIComponent(id)}`, { method: "PATCH", body });
+  return response.json();
+}

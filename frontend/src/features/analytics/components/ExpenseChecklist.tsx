@@ -13,6 +13,7 @@ import { useTheme } from "@/lib/theme-store";
 import { useExpenses } from "../../expenses/data/ExpensesContext";
 import { displayDate, money } from "../../../shared/utils/format";
 import type { Expense } from "../../expenses/types";
+import { completeSubmittedExpense } from "../../expenses/data/newExpenseApi";
 
 const missingReceipt = (expense: Expense) => !expense.receipt?.trim();
 const missingReport = (expense: Expense) =>
@@ -23,8 +24,10 @@ const needsWork = (expense: Expense) =>
 export function ExpenseChecklist() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { expenses } = useExpenses();
+  const { expenses, refresh } = useExpenses();
   const [filter, setFilter] = useState("all");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState(false);
 
   const attention = expenses.filter(needsWork);
   const hasItems = attention.length > 0;
@@ -45,6 +48,18 @@ export function ExpenseChecklist() {
       ? expense.status === "Draft"
       : missingReport(expense)
   );
+
+  async function complete(expense: Expense, update: { report?: string; file?: File }) {
+    try {
+      await completeSubmittedExpense(expense.id, update);
+      await refresh();
+      setError(false);
+      setMessage(`Updated ${expense.merchant}.`);
+    } catch (cause) {
+      setError(true);
+      setMessage(cause instanceof Error ? cause.message : "Could not update the expense.");
+    }
+  }
 
   return (
     <section
@@ -127,6 +142,8 @@ export function ExpenseChecklist() {
             })}
           </div>
 
+          {message && <p role={error ? "alert" : "status"} className={`text-xs mb-2 ${error ? "text-rose-500" : "text-emerald-500"}`}>{message}</p>}
+
           {/* Actionable items list */}
           <div className="flex flex-col gap-2.5 flex-1 max-h-[220px] overflow-y-auto pr-1">
             {visible.map((expense) => (
@@ -154,8 +171,13 @@ export function ExpenseChecklist() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-200/60 dark:border-white/[0.05]">
-                  {missingReceipt(expense) && <span className="text-xs text-amber-500">Receipt needed</span>}
-                  {missingReport(expense) && <span className="text-xs text-amber-500">Report needed</span>}
+                  {missingReceipt(expense) && expense.raw_status === "SUBMITTED" ? <label className="cursor-pointer rounded-md bg-[#5A78A6] text-white px-2.5 py-1 text-xs font-medium flex items-center gap-1.5 relative">
+                    <span>Attach Receipt</span><input type="file" aria-label={`Add receipt for ${expense.merchant}`} accept=".pdf,.png,.jpg,.jpeg,.heic" className="absolute inset-0 opacity-0 cursor-pointer w-full" onChange={(event) => { const file = event.target.files?.[0]; if (file) void complete(expense, { file }); event.target.value = ""; }} />
+                  </label> : missingReceipt(expense) && <span className="text-xs text-amber-500">Receipt needed</span>}
+                  {missingReport(expense) && expense.raw_status === "SUBMITTED" ? <form onSubmit={(event) => { event.preventDefault(); const input = event.currentTarget.elements.namedItem("report") as HTMLInputElement; if (input.value.trim()) void complete(expense, { report: input.value.trim() }); }} className="flex gap-1">
+                    <input name="report" aria-label={`Report for ${expense.merchant}`} placeholder="Report name" className="h-7 px-2 rounded border text-xs bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.08]" required />
+                    <button type="submit" className="h-7 px-2 rounded border text-xs border-zinc-200 dark:border-white/[0.08]">Assign</button>
+                  </form> : missingReport(expense) && <span className="text-xs text-amber-500">Report needed</span>}
                   {expense.status === "Draft" && (
                     <Link
                       href={`/employee/expenses/new?draft=${encodeURIComponent(expense.id)}`}
