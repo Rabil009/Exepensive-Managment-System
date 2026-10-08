@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { Compass, CreditCard, Receipt, Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { SettingsModal } from "@/components/dashboard/SettingsModal";
@@ -21,6 +22,7 @@ export function AppShell({
   const isDark = theme === "dark";
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Modals state
   const [showSettings, setShowSettings] = useState(false);
@@ -40,6 +42,7 @@ export function AppShell({
   }, []);
 
   function onNavigate(label: string) {
+    setMobileDrawerOpen(false);
     switch (label) {
       case "Overview":
         router.push("/employee/dashboard");
@@ -76,6 +79,8 @@ export function AppShell({
         onOpenSettings={() => setShowSettings(true)}
         onOpenHelp={() => setShowHelp(true)}
         onOpenSearch={() => setShowSearch(true)}
+        isMobileOpen={mobileDrawerOpen}
+        onCloseMobile={() => setMobileDrawerOpen(false)}
       />
 
       {/* Main Area */}
@@ -94,13 +99,55 @@ export function AppShell({
               ? "Expense Reports"
               : active
           }
-          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onToggleSidebar={() => setMobileDrawerOpen(true)}
           rightContent={active === "New Expense" ? null : undefined}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
           {children}
         </main>
+
+        {/* Mobile Sticky Bottom Navigation Bar */}
+        <nav className="md:hidden shrink-0 border-t bg-white/95 dark:bg-[#131316]/95 backdrop-blur-md border-zinc-200/80 dark:border-white/[0.08] px-2 py-1.5 flex items-center justify-around z-30 select-none">
+          <button
+            type="button"
+            onClick={() => onNavigate("Overview")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              active === "Overview" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <Compass className="h-4 w-4" />
+            <span className="text-[10px]">Overview</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate("Cards & Limits")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              active === "Cards & Limits" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <CreditCard className="h-4 w-4" />
+            <span className="text-[10px]">Cards</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate("New Expense")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              active === "New Expense" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <Receipt className="h-4 w-4" />
+            <span className="text-[10px]">New Expense</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileDrawerOpen(true)}
+            className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors"
+          >
+            <Menu className="h-4 w-4" />
+            <span className="text-[10px]">Menu</span>
+          </button>
+        </nav>
       </div>
 
       {/* Shared Dashboard Modals */}

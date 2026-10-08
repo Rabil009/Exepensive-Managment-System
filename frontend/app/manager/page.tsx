@@ -28,6 +28,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   RefreshCw,
+  Menu,
 } from "lucide-react";
 import { ManagerSidebar } from "@/components/manager/ManagerSidebar";
 import { ManagerHeader } from "@/components/manager/ManagerHeader";
@@ -185,6 +186,7 @@ function ManagerDashboardInner() {
   }, [searchParams]);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Modals state
   const [showSettings, setShowSettings] = useState(false);
@@ -320,6 +322,8 @@ function ManagerDashboardInner() {
         setActiveView={setActiveView}
         isCollapsed={!sidebarOpen}
         setIsCollapsed={(collapsed) => setSidebarOpen(!collapsed)}
+        isMobileOpen={mobileDrawerOpen}
+        onCloseMobile={() => setMobileDrawerOpen(false)}
         onOpenSettings={() => setShowSettings(true)}
       />
 
@@ -328,10 +332,13 @@ function ManagerDashboardInner() {
         isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
       }`}>
         {/* Core Manager Header */}
-        <ManagerHeader title={getPageTitle()} />
+        <ManagerHeader
+          title={getPageTitle()}
+          onToggleSidebar={() => setMobileDrawerOpen(true)}
+        />
 
         {/* Scrollable Main Application Space */}
-        <main className={`flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 ${
+        <main className={`flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 ${
           isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
         }`}>
           {/* Toast Notification */}
@@ -553,7 +560,7 @@ function ManagerDashboardInner() {
 
               {/* Flat Table */}
               <div className="overflow-x-auto px-2 pb-2">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[720px] text-left border-collapse">
                   <thead>
                     <tr
                       className={`text-xs font-medium border-b ${
@@ -999,6 +1006,48 @@ function ManagerDashboardInner() {
             </div>
           )}
         </main>
+
+        {/* Mobile Sticky Bottom Navigation Bar */}
+        <nav className="md:hidden shrink-0 border-t bg-white/95 dark:bg-[#131316]/95 backdrop-blur-md border-zinc-200/80 dark:border-white/[0.08] px-2 py-1.5 flex items-center justify-around z-30 select-none">
+          <button
+            type="button"
+            onClick={() => setActiveView("Approvals")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              activeView === "Approvals" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <CheckSquare className="h-4 w-4" />
+            <span className="text-[10px]">Approvals</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView("Team Spend")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              activeView === "Team Spend" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <Wallet className="h-4 w-4" />
+            <span className="text-[10px]">Team Spend</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveView("Budgets")}
+            className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium transition-colors ${
+              activeView === "Budgets" ? "text-zinc-950 dark:text-white" : "text-zinc-500 dark:text-zinc-400"
+            }`}
+          >
+            <PieChart className="h-4 w-4" />
+            <span className="text-[10px]">Budgets</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileDrawerOpen(true)}
+            className="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors"
+          >
+            <Menu className="h-4 w-4" />
+            <span className="text-[10px]">Menu</span>
+          </button>
+        </nav>
       </div>
 
       {/* Slide-out Claim Inspector Drawer */}

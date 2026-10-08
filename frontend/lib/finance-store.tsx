@@ -117,13 +117,15 @@ const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
   },
 ];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [activeView, setActiveView] = useState("Dashboard");
   const [claims, setClaims] = useState<ExpenseClaim[]>(MOCK_CLAIMS);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>(MOCK_BUDGETS);
   const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>(INITIAL_REIMBURSEMENTS);
 
-  // Sync state from Supabase database
+  // Keep the UI's camelCase models while loading claims and budgets from Supabase.
   useEffect(() => {
     let isMounted = true;
     getExpenseClaims().then((fetched) => {
@@ -136,6 +138,24 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         setBudgets(fetchedBudgets);
       }
     });
+    fetch(`${API_URL}/api/finance/reimbursements`)
+      .then((response) => response.ok ? response.json() : [])
+      .then((rows: Record<string, unknown>[]) => {
+        if (!isMounted || !Array.isArray(rows) || rows.length === 0) return;
+        setReimbursements(rows.map((row): ReimbursementItem => ({
+          id: String(row.id),
+          claimId: String(row.claim_id),
+          employee: String(row.employee_name ?? ""),
+          department: "",
+          amount: Number(row.eligible_personal_amount ?? 0),
+          currency: String(row.currency ?? "INR"),
+          completedDate: String(row.disbursed_at ?? row.created_at ?? ""),
+          paymentMethod: String(row.payment_method ?? ""),
+          paymentReference: String(row.payment_reference ?? ""),
+          status: row.status === "PAID" ? "Paid" : row.status === "PROCESSING" ? "Processing" : "Pending",
+        })));
+      })
+      .catch(() => {});
     return () => {
       isMounted = false;
     };
@@ -167,6 +187,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       isHold: false,
     });
     toast.success(`Claim ${claimId} verified and approved for disbursement.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "approve", remark }),
+    }).catch(() => {});
   };
 
   // FR-10: Finance Reject
@@ -188,6 +213,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       financeRemark: reason,
     });
     toast.error(`Claim ${claimId} declined with reason: "${reason}".`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reject", reason }),
+    }).catch(() => {});
   };
 
   // FR-10: Send back for correction
@@ -209,6 +239,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       financeRemark: `Sent back: ${reason}`,
     });
     toast.info(`Claim ${claimId} sent back to employee for correction.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "send_back", reason }),
+    }).catch(() => {});
   };
 
   // FR-10: Place on Hold
@@ -233,6 +268,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       heldAt: now,
     });
     toast.warning(`Claim ${claimId} placed on audit hold.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "place_hold", reason }),
+    }).catch(() => {});
   };
 
   // FR-10: Release Hold
@@ -255,6 +295,11 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       holdReason: "",
     });
     toast.success(`Audit hold released on claim ${claimId}.`);
+    fetch(`${API_URL}/api/finance/claims/${claimId}/hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "release_hold" }),
+    }).catch(() => {});
   };
 
   // FR-12: Record Payment / Disbursement Settlement
@@ -299,6 +344,15 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
     setReimbursements((prev) => [newReimb, ...prev]);
     toast.success(`Settlement recorded! UTR: ${utr} for ${claim.employeeName}`);
+    fetch(`${API_URL}/api/finance/disburse`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        claim_id: claimId,
+        payment_reference: utr,
+        payment_channel: channel,
+      }),
+    }).catch(() => {});
   };
 
   // Quick Create Expense Claim

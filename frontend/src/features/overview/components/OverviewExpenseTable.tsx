@@ -81,7 +81,7 @@ export function OverviewExpenseTable({ model }: Props) {
       >
         {/* Status Tabs */}
         <div
-          className={`flex items-center gap-1 p-1 rounded-lg border w-fit ${
+          className={`flex items-center gap-1 p-1 rounded-lg border max-w-full overflow-x-auto ${
             isDark
               ? "bg-[#18181D] border-white/[0.06]"
               : "bg-zinc-100 border-zinc-200/80"
@@ -98,7 +98,7 @@ export function OverviewExpenseTable({ model }: Props) {
                 type="button"
                 aria-pressed={isSelected}
                 onClick={() => setTab(value)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                   isSelected
                     ? isDark
                       ? "bg-white text-black shadow-xs font-semibold"
@@ -156,7 +156,7 @@ export function OverviewExpenseTable({ model }: Props) {
 
       {/* Flat Data Table */}
       <div className="overflow-x-auto px-2 pb-2">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full min-w-[700px] text-left border-collapse">
           <thead>
             <tr
               className={`text-xs font-medium border-b ${

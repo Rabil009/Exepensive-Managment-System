@@ -6,10 +6,12 @@ from app.api.budgets import router as budgets_router
 from app.api.employee_auth import router as employee_auth_router
 from app.api.employee_workspace import router as employee_workspace_router
 from app.api.expenses import router as expenses_router
+from app.api.finance import router as finance_router
 from app.api.policies import router as policies_router
 from app.api.reports import router as reports_router
 from app.api.supabase_new_expense import router as supabase_new_expense_router
 from app.core.config import settings
+from app.api.finance import router as finance_router
 
 
 app = FastAPI(
@@ -29,6 +31,7 @@ app.add_middleware(
 app.include_router(supabase_new_expense_router)
 app.include_router(employee_auth_router)
 app.include_router(employee_workspace_router)
+app.include_router(finance_router)
 
 manager_prefix = f"{settings.API_PREFIX}/manager"
 for router in (approvals_router, expenses_router, budgets_router, policies_router, reports_router):

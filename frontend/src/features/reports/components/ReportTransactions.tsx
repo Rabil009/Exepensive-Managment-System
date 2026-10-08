@@ -171,7 +171,7 @@ export function ReportTransactions({ model }: Props) {
 
       {/* Clean Financial Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full min-w-[650px] text-left border-collapse text-xs">
           <thead>
             <tr
               className={`border-b text-[11px] font-medium tracking-wider uppercase text-zinc-500 dark:text-zinc-400 ${
