@@ -44,3 +44,18 @@ def test_nonemployee_login_never_returns_session(monkeypatch):
 def test_me_requires_session():
     response = TestClient(app).get("/api/auth/employee/me")
     assert response.status_code == 401
+
+
+def test_login_with_missing_profile_returns_structured_error_without_tokens(monkeypatch):
+    def respond(request):
+        if request.url.path == "/auth/v1/token":
+            return httpx.Response(200, json={"access_token": "access", "refresh_token": "refresh"})
+        if request.url.path == "/auth/v1/user":
+            return httpx.Response(200, json={"id": "user-1", "email": "e@example.com"})
+        return httpx.Response(200, json=[])
+
+    monkeypatch.setattr(employee_auth, "_client", lambda: httpx.Client(transport=httpx.MockTransport(respond), base_url="https://test.supabase.co"))
+    response = TestClient(app).post("/api/auth/employee/login", json={"email": "e@example.com", "password": "secret"})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Employee profile not found"}
+    assert "access_token" not in response.text

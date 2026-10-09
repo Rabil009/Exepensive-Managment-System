@@ -29,7 +29,12 @@ def _employee(client: httpx.Client, access_token: str) -> dict:
     user_response = _request(client, "GET", "/auth/v1/user", headers=headers)
     if user_response.status_code != 200:
         raise HTTPException(401, "Employee session expired or invalid")
-    user = user_response.json()
+    try:
+        user = user_response.json()
+    except ValueError:
+        raise HTTPException(502, "Authentication service returned an invalid user record")
+    if not isinstance(user, dict):
+        raise HTTPException(502, "Authentication service returned an invalid user record")
     user_id = user.get("id")
     if not user_id:
         raise HTTPException(401, "Employee session expired or invalid")
@@ -38,22 +43,26 @@ def _employee(client: httpx.Client, access_token: str) -> dict:
         headers=headers,
         params={"id": f"eq.{user_id}", "select": "id,name,role"},
     )
-    if profile_response.status_code == 200:
+    if profile_response.status_code in (401, 403):
+        raise HTTPException(401, "Employee session expired or invalid")
+    if profile_response.status_code != 200:
+        raise HTTPException(502, "Employee profile service is unavailable")
+    try:
         profiles = profile_response.json()
-        if profiles and isinstance(profiles, list) and len(profiles) > 0:
-            profile = profiles[0]
-            if profile.get("role") and profile.get("role") != "EMPLOYEE":
-                raise HTTPException(403, "An Employee account is required")
-            return {
-                "user": {"id": user_id, "email": user.get("email")},
-                "profile": profile,
-            }
-    
-    # Resilient fallback matching Finance/Manager standard
-    email_name = (user.get("email") or "employee").split("@")[0].capitalize()
+    except ValueError:
+        raise HTTPException(502, "Employee profile service returned invalid data")
+    if not isinstance(profiles, list):
+        raise HTTPException(502, "Employee profile service returned invalid data")
+    if not profiles:
+        raise HTTPException(404, "Employee profile not found")
+    profile = profiles[0]
+    if not isinstance(profile, dict) or profile.get("id") != user_id:
+        raise HTTPException(502, "Employee profile service returned invalid data")
+    if profile.get("role") != "EMPLOYEE":
+        raise HTTPException(403, "An Employee account is required")
     return {
         "user": {"id": user_id, "email": user.get("email")},
-        "profile": {"id": user_id, "name": email_name, "role": "EMPLOYEE"},
+        "profile": profile,
     }
 
 

@@ -175,129 +175,143 @@ export default function LoginPage() {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!email) {
-      setErrorMessage("Please enter your email.");
-      return;
-    }
-    if (!password) {
-      setErrorMessage("Please enter your password.");
-      return;
-    }
-
-    if (selectedPortal === "/employee") {
-      setIsLoading(true);
-      try {
-        if (typeof window !== "undefined") {
-          localStorage.setItem("payout_user_role", "/employee");
-          localStorage.setItem("payout_user_email", email);
-        }
-
-        const account = await employeePasswordAuth(email.trim(), password);
-        if (
-          account?.access_token &&
-          account?.refresh_token &&
-          account.access_token.includes(".") &&
-          account.access_token.split(".").length === 3
-        ) {
-          try {
-            await supabase.auth.setSession({
-              access_token: account.access_token,
-              refresh_token: account.refresh_token,
-            });
-          } catch (jwtErr) {
-            console.warn("Supabase session note:", jwtErr);
-          }
-        }
-
-        const next = new URLSearchParams(window.location.search).get("next");
-        router.push(safeEmployeeReturnPath(next));
-      } catch (cause) {
-        setErrorMessage(cause instanceof Error ? cause.message : "Employee sign in failed.");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
-
+    // 1. REAL SUPABASE AUTHENTICATION FOR ALL PORTALS
     setIsLoading(true);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem("payout_user_role", selectedPortal);
-      localStorage.setItem("payout_user_email", email);
-    }
+      if (authError) {
+        throw new Error(authError.message || "Invalid email or password.");
+      }
 
-    setTimeout(() => {
+      const user = authData?.user;
+      if (!user) {
+        throw new Error("Authentication failed: No user returned.");
+      }
+
+      // 2. Fetch User Profile from Supabase
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id, name, role, department")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      const userRole = (profile?.role || user.user_metadata?.role || "EMPLOYEE").toUpperCase();
+      
+      // Determine redirection based on actual role or portal
+      let targetPath = selectedPortal;
+      if (selectedPortal === "/employee" && userRole !== "EMPLOYEE" && userRole !== "ADMIN") {
+        throw new Error(`This account has role '${userRole}'. Please select the appropriate portal.`);
+      }
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("payout_user_role", selectedPortal);
+        localStorage.setItem("payout_user_email", user.email || email);
+        if (profile?.name) localStorage.setItem("payout_user_name", profile.name);
+      }
+
+      router.push(targetPath);
+    } catch (cause) {
+      setErrorMessage(cause instanceof Error ? cause.message : "Sign in failed.");
+    } finally {
       setIsLoading(false);
-      router.push(selectedPortal);
-    }, 400);
+    }
   };
 
   const handleSocialAuth = (e: React.MouseEvent) => {
     e.preventDefault();
-    // Keep buttons present without triggering any redirect or action
   };
 
-  const handleCreateAccount = async () => {
-    if (selectedPortal !== "/employee") {
-      setEmail("admin@acme-corp.com");
-      setPassword("DemoPassword2026");
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
+  const [signUpName, setSignUpName] = useState("");
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [signUpPassword, setSignUpPassword] = useState("");
+  const [signUpRole, setSignUpRole] = useState<"EMPLOYEE" | "MANAGER" | "FINANCE">("EMPLOYEE");
+  const [signUpDepartment, setSignUpDepartment] = useState("Engineering");
+  const [signUpLoading, setSignUpLoading] = useState(false);
+  const [signUpError, setSignUpError] = useState<string | null>(null);
+
+  const handleRealSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignUpError(null);
+
+    if (!signUpName.trim()) {
+      setSignUpError("Please enter your full name.");
       return;
     }
-    if (!email.trim() || !password) {
-      setErrorMessage("Enter your email and a password before creating an Employee account.");
+    if (!signUpEmail.trim()) {
+      setSignUpError("Please enter a valid work email.");
       return;
     }
-    setErrorMessage(null);
-    setIsLoading(true);
+    if (signUpPassword.length < 6) {
+      setSignUpError("Password must be at least 6 characters.");
+      return;
+    }
+
+    setSignUpLoading(true);
     try {
+      // 1. Create real Supabase Auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: signUpEmail.trim().toLowerCase(),
+        password: signUpPassword,
+        options: {
+          data: {
+            name: signUpName.trim(),
+            role: signUpRole,
+            department: signUpDepartment,
+          },
+        },
+      });
+
+      if (authError) {
+        throw new Error(authError.message);
+      }
+
+      const newUser = authData.user;
+      if (!newUser) {
+        throw new Error("Could not create user account. Please try again.");
+      }
+
+      // 2. Ensure row in public.profiles table
+      const { error: profileError } = await supabase.from("profiles").upsert({
+        id: newUser.id,
+        email: signUpEmail.trim().toLowerCase(),
+        name: signUpName.trim(),
+        role: signUpRole,
+        department: signUpDepartment,
+        avatar_initials: signUpName.trim().slice(0, 2).toUpperCase(),
+      });
+
+      if (profileError) {
+        console.warn("Profile table note:", profileError.message);
+      }
+
+      // 3. Set local persistence & auto login
       if (typeof window !== "undefined") {
-        localStorage.setItem("payout_user_role", "/employee");
-        localStorage.setItem("payout_user_email", email);
+        const portalPath = signUpRole === "EMPLOYEE" ? "/employee" : signUpRole === "MANAGER" ? "/manager" : "/dashboard";
+        localStorage.setItem("payout_user_role", portalPath);
+        localStorage.setItem("payout_user_email", signUpEmail.trim());
+        localStorage.setItem("payout_user_name", signUpName.trim());
       }
 
-      const result = await employeePasswordAuth(email.trim(), password, true);
-      if (result.confirmation_required) {
-        window.alert("Check your email to confirm your Employee account, then sign in.");
-        return;
-      }
-
-      if (
-        result.access_token &&
-        result.refresh_token &&
-        result.access_token.includes(".") &&
-        result.access_token.split(".").length === 3
-      ) {
-        try {
-          await supabase.auth.setSession({
-            access_token: result.access_token,
-            refresh_token: result.refresh_token,
-          });
-        } catch (jwtErr) {
-          console.warn("Supabase session note:", jwtErr);
-        }
-      }
-
-      router.push(safeEmployeeReturnPath(new URLSearchParams(window.location.search).get("next")));
-    } catch (cause) {
-      setErrorMessage(cause instanceof Error ? cause.message : "Could not create Employee account.");
+      setShowSignUpModal(false);
+      window.alert("Account successfully created! You are now logging in.");
+      
+      const destination = signUpRole === "EMPLOYEE" ? "/employee" : signUpRole === "MANAGER" ? "/manager" : "/dashboard";
+      router.push(destination);
+    } catch (err) {
+      setSignUpError(err instanceof Error ? err.message : "Failed to create account.");
     } finally {
-      setIsLoading(false);
+      setSignUpLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen w-full overflow-y-auto sm:overflow-hidden bg-white text-zinc-900 relative flex items-center justify-center p-4 sm:p-5 select-none">
       <HalftoneBackground />
-
-      {/* Top Left Brand Logo & Title with White Background */}
-      <div className="absolute top-5 left-5 sm:top-6 sm:left-8 z-20 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white border border-zinc-200/90 shadow-2xs">
-        <div className="h-6 w-6 rounded-full border-[2px] border-zinc-950 flex items-center justify-center shrink-0">
-          <div className="h-2 w-2 rounded-full bg-zinc-950" />
-        </div>
-        <span className="text-[16px] sm:text-[17px] font-bold tracking-tight text-zinc-950">
-          Payout
-        </span>
-      </div>
 
       <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-zinc-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] p-6 sm:p-9 my-14 sm:my-0">
         <div className="mb-6 text-center">
@@ -494,13 +508,141 @@ export default function LoginPage() {
           <span>Don&apos;t have an account? </span>
           <button
             type="button"
-            onClick={handleCreateAccount}
+            onClick={() => {
+              setErrorMessage(null);
+              setSignUpError(null);
+              setShowSignUpModal(true);
+            }}
             className="font-medium text-zinc-900 underline underline-offset-4 hover:text-black cursor-pointer"
           >
             Create an Account
           </button>
         </div>
       </div>
+
+      {/* Real Supabase Sign Up Modal */}
+      {showSignUpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-zinc-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-1 border-b border-zinc-100">
+              <div>
+                <h3 className="font-bold text-lg text-zinc-950">Create an Account</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">Directly registers in Supabase database</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSignUpModal(false)}
+                className="text-zinc-400 hover:text-zinc-900 p-1.5 rounded-full hover:bg-zinc-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleRealSignUp} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={signUpName}
+                  onChange={(e) => setSignUpName(e.target.value)}
+                  placeholder="e.g. Rahul Sharma"
+                  className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                  Work Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={signUpEmail}
+                  onChange={(e) => setSignUpEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={signUpPassword}
+                  onChange={(e) => setSignUpPassword(e.target.value)}
+                  placeholder="Minimum 6 characters"
+                  className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                    System Role
+                  </label>
+                  <select
+                    value={signUpRole}
+                    onChange={(e) => setSignUpRole(e.target.value as any)}
+                    className="w-full h-9 px-3 rounded-full border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950"
+                  >
+                    <option value="EMPLOYEE">Employee</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="FINANCE">Finance Admin</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                    Department
+                  </label>
+                  <select
+                    value={signUpDepartment}
+                    onChange={(e) => setSignUpDepartment(e.target.value)}
+                    className="w-full h-9 px-3 rounded-full border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950"
+                  >
+                    <option value="Engineering">Engineering</option>
+                    <option value="Product">Product</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Operations">Operations</option>
+                  </select>
+                </div>
+              </div>
+
+              {signUpError && (
+                <div className="text-[11px] text-red-600 bg-red-50 border border-red-200 p-2 rounded-xl flex items-center gap-2">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{signUpError}</span>
+                </div>
+              )}
+
+              <div className="pt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSignUpModal(false)}
+                  className="flex-1 h-9 rounded-full border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={signUpLoading}
+                  className="flex-1 h-9 rounded-full bg-zinc-950 hover:bg-black text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-75"
+                >
+                  {signUpLoading ? "Creating..." : "Create Account"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {showForgotModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-2xs p-4">
