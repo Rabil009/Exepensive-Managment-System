@@ -58,112 +58,8 @@ export type ManagerView =
   | "Reports"
   | "Policies";
 
-const INITIAL_CLAIMS: ManagerClaim[] = [
-  {
-    id: "CLM-8821",
-    employeeName: "Rahul Sharma",
-    department: "Engineering",
-    costCenter: "CC-ENG-104",
-    category: "Travel",
-    description: "Bangalore client architectural sync flight",
-    amount: 8500,
-    date: "Oct 06, 2026",
-    status: "Pending",
-    priority: "High",
-    receiptVerified: true,
-    policyNotes: "Booked within 7-day domestic cap",
-  },
-  {
-    id: "CLM-8822",
-    employeeName: "Priya Nair",
-    department: "Product & UX",
-    costCenter: "CC-PRD-201",
-    category: "Hotel",
-    description: "Design sprint conference stay - Grand Hyatt",
-    amount: 4200,
-    date: "Oct 05, 2026",
-    status: "Pending",
-    priority: "Medium",
-    receiptVerified: true,
-    policyNotes: "Within Tier-1 metro nightly allowance",
-  },
-  {
-    id: "CLM-8823",
-    employeeName: "Arjun Reddy",
-    department: "Sales & Growth",
-    costCenter: "CC-SLS-305",
-    category: "Meals",
-    description: "Enterprise Q4 contract dinner with CFO",
-    amount: 6800,
-    date: "Oct 05, 2026",
-    status: "Pending",
-    priority: "High",
-    receiptVerified: true,
-    policyNotes: "Client attendees listed on invoice",
-  },
-  {
-    id: "CLM-8824",
-    employeeName: "Sneha Iyer",
-    department: "Marketing",
-    costCenter: "CC-MKT-402",
-    category: "Transport",
-    description: "Product launch shoot logistics transfers",
-    amount: 2300,
-    date: "Oct 04, 2026",
-    status: "Pending",
-    priority: "Low",
-    receiptVerified: true,
-    policyNotes: "Uber for Business verified route",
-  },
-  {
-    id: "CLM-8825",
-    employeeName: "Vikram Malhotra",
-    department: "Engineering",
-    costCenter: "CC-ENG-104",
-    category: "Software",
-    description: "Cloud GPU training credits on Lambda Labs",
-    amount: 14900,
-    date: "Oct 03, 2026",
-    status: "Approved",
-    priority: "Medium",
-    receiptVerified: true,
-    policyNotes: "Manager pre-approved on budget",
-  },
-  {
-    id: "CLM-8826",
-    employeeName: "Ananya Deshmukh",
-    department: "Product & UX",
-    costCenter: "CC-PRD-201",
-    category: "Equipment",
-    description: "Ergonomic vertical mouse & testing keyboard",
-    amount: 3400,
-    date: "Oct 02, 2026",
-    status: "Approved",
-    priority: "Low",
-    receiptVerified: true,
-  },
-  {
-    id: "CLM-8827",
-    employeeName: "Rohan Kapoor",
-    department: "Sales & Growth",
-    costCenter: "CC-SLS-305",
-    category: "Travel",
-    description: "Personal weekend rental upgrade (unauthorized)",
-    amount: 7200,
-    date: "Oct 01, 2026",
-    status: "Rejected",
-    priority: "High",
-    receiptVerified: false,
-    policyNotes: "Exceeds personal car rental ceiling",
-  },
-];
-
-const DEPARTMENT_BUDGETS = [
-  { name: "Engineering", spent: 184200, cap: 220000, members: 14, color: "#2563eb", status: "On Track" },
-  { name: "Product & UX", spent: 92400, cap: 120000, members: 6, color: "#10b981", status: "On Track" },
-  { name: "Sales & Growth", spent: 68400, cap: 100000, members: 5, color: "#a855f7", status: "On Track" },
-  { name: "Marketing", spent: 39500, cap: 60000, members: 3, color: "#f59e0b", status: "Review" },
-];
+const INITIAL_CLAIMS: ManagerClaim[] = [];
+const DEPARTMENT_BUDGETS: DepartmentBudget[] = [];
 
 function ManagerDashboardInner() {
   const { theme } = useTheme();
@@ -276,9 +172,9 @@ function ManagerDashboardInner() {
   const approvedClaims = claims.filter((c) => c.status === "Approved");
   const rejectedClaims = claims.filter((c) => c.status === "Rejected");
 
-  const totalSpent = claims.reduce((acc, c) => acc + (c.status === "Approved" ? c.amount : 0), 0) + 384500;
-  const pendingAmount = pendingClaims.reduce((acc, c) => acc + c.amount, 0);
-  const approvedAmount = approvedClaims.reduce((acc, c) => acc + c.amount, 0) + 248200;
+  const totalSpent = claims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
+  const pendingAmount = pendingClaims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
+  const approvedAmount = approvedClaims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
   const exceptionsCount = claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified).length;
 
   const filteredClaims = claims.filter((c) => {

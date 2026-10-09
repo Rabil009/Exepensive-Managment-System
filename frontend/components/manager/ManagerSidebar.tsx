@@ -15,6 +15,7 @@ import {
   LogOut,
   X,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export type ManagerView =
   | "Approvals"
@@ -47,6 +48,27 @@ export function ManagerSidebar({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  const [managerName, setManagerName] = useState("Manager");
+  const [managerEmail, setManagerEmail] = useState("manager@payout.finance");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedName = localStorage.getItem("payout_user_name");
+      const storedEmail = localStorage.getItem("payout_user_email");
+      if (storedName) setManagerName(storedName);
+      if (storedEmail) setManagerEmail(storedEmail);
+    }
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        if (user.email) setManagerEmail(user.email);
+        const name = user.user_metadata?.name || user.email?.split("@")[0] || "Manager";
+        setManagerName(name);
+      }
+    });
+  }, []);
+
+  const initials = managerName.slice(0, 2).toUpperCase();
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
@@ -68,19 +90,21 @@ export function ManagerSidebar({
     };
   }, [isProfileOpen]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("payout_user_role");
       localStorage.removeItem("payout_user_email");
+      localStorage.removeItem("payout_user_name");
     }
+    await supabase.auth.signOut().catch(() => {});
     router.push("/");
   };
 
   const mainNav: { label: ManagerView; icon: any; count: number | null }[] = [
-    { label: "Approvals", icon: CheckSquare, count: 12 },
+    { label: "Approvals", icon: CheckSquare, count: null },
     { label: "Team Spend", icon: Wallet, count: null },
     { label: "Budgets", icon: PieChart, count: null },
-    { label: "Exceptions", icon: AlertTriangle, count: 3 },
+    { label: "Exceptions", icon: AlertTriangle, count: null },
   ];
 
   const documentsNav: { label: ManagerView; icon: any }[] = [
@@ -284,26 +308,20 @@ export function ManagerSidebar({
             >
               {/* Profile info header */}
               <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.04]">
-                <img
-                  src="/tejaswini.jpg"
-                  alt="Tejaswini"
-                  className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20 shrink-0"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=faces&auto=format&q=80";
-                  }}
-                />
+                <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-700 flex items-center justify-center text-xs font-bold ring-1 ring-zinc-300 dark:ring-white/20 shrink-0">
+                  {initials}
+                </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-semibold truncate text-zinc-900 dark:text-white leading-tight">
-                      Tejaswini
+                      {managerName}
                     </span>
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-zinc-200/70 dark:bg-white/[0.1] text-zinc-700 dark:text-zinc-300">
                       Manager
                     </span>
                   </div>
                   <span className="text-[11px] truncate text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    tejaswini@payout.finance
+                    {managerEmail}
                   </span>
                 </div>
               </div>
@@ -343,7 +361,7 @@ export function ManagerSidebar({
           <button
             type="button"
             onClick={() => setIsProfileOpen((prev) => !prev)}
-            title={isCollapsed ? "Tejaswini - Profile & Logout" : undefined}
+            title={isCollapsed ? `${managerName} - Profile & Logout` : undefined}
             className={`w-full flex items-center h-11 px-1 rounded-xl cursor-pointer text-left group transition-colors duration-150 ${
               isProfileOpen
                 ? "bg-zinc-200/70 dark:bg-white/[0.12] text-zinc-950 dark:text-white"
@@ -351,15 +369,9 @@ export function ManagerSidebar({
             }`}
           >
             <div className="h-8 w-8 shrink-0 flex items-center justify-center">
-              <img
-                src="/tejaswini.jpg"
-                alt="Tejaswini"
-                className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=faces&auto=format&q=80";
-                }}
-              />
+              <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-700 flex items-center justify-center text-xs font-bold ring-1 ring-zinc-300 dark:ring-white/20 shrink-0">
+                {initials}
+              </div>
             </div>
 
             <div
@@ -371,10 +383,10 @@ export function ManagerSidebar({
             >
               <div className="flex flex-col min-w-0">
                 <span className="text-[13px] font-semibold truncate leading-tight text-zinc-900 dark:text-white dark:group-hover:text-black">
-                  Tejaswini
+                  {managerName}
                 </span>
                 <span className="text-[11px] truncate leading-tight mt-0.5 text-zinc-500 dark:text-zinc-400 dark:group-hover:text-zinc-600">
-                  tejaswini@payout.finance
+                  {managerEmail}
                 </span>
               </div>
               <ChevronsUpDown className="h-4 w-4 shrink-0 text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-black" />
@@ -522,7 +534,7 @@ export function ManagerSidebar({
             >
               <div className="flex items-center gap-2">
                 <LogOut className="h-4 w-4" />
-                <span className="text-[13px] font-medium">Log out (Tejaswini)</span>
+                <span className="text-[13px] font-medium">Log out ({managerName})</span>
               </div>
             </button>
           </div>
