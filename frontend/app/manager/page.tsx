@@ -194,8 +194,8 @@ function ManagerDashboardInner() {
   const [showHelp, setShowHelp] = useState(false);
 
   // Approvals & Claim State
-  const [claims, setClaims] = useState<ManagerClaim[]>(INITIAL_CLAIMS);
-  const [budgets, setBudgets] = useState<DepartmentBudget[]>(DEPARTMENT_BUDGETS);
+  const [claims, setClaims] = useState<ManagerClaim[]>([]);
+  const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -209,10 +209,10 @@ function ManagerDashboardInner() {
         fetchManagerClaims(),
         fetchManagerBudgets(),
       ]);
-      if (fetchedClaims && fetchedClaims.length > 0) {
+      if (fetchedClaims) {
         setClaims(fetchedClaims);
       }
-      if (fetchedBudgets && fetchedBudgets.length > 0) {
+      if (fetchedBudgets) {
         setBudgets(fetchedBudgets);
       }
     } catch (e) {

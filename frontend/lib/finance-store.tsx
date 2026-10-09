@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import type { ExpenseClaim, DepartmentBudget, ClaimStatus } from "@/types/finance";
-import { MOCK_CLAIMS, MOCK_BUDGETS } from "@/lib/mock-data";
 import { getExpenseClaims, updateClaimInDb, getDepartmentBudgets } from "@/lib/api";
 
 export interface ExceptionItem {
@@ -121,21 +120,21 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [activeView, setActiveView] = useState("Dashboard");
-  const [claims, setClaims] = useState<ExpenseClaim[]>(MOCK_CLAIMS);
-  const [budgets, setBudgets] = useState<DepartmentBudget[]>(MOCK_BUDGETS);
-  const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>(INITIAL_REIMBURSEMENTS);
+  const [claims, setClaims] = useState<ExpenseClaim[]>([]);
+  const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
+  const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>([]);
 
-  // Keep the UI's camelCase models while loading claims and budgets from Supabase.
+  // Load real claims and budgets directly from Supabase Cloud
   useEffect(() => {
     let isMounted = true;
     getExpenseClaims().then((fetched) => {
-      if (isMounted && fetched && fetched.length > 0) {
-        setClaims(fetched);
+      if (isMounted) {
+        setClaims(fetched || []);
       }
     });
     getDepartmentBudgets().then((fetchedBudgets) => {
-      if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) {
-        setBudgets(fetchedBudgets);
+      if (isMounted) {
+        setBudgets(fetchedBudgets || []);
       }
     });
     fetch(`${API_URL}/api/finance/reimbursements`)

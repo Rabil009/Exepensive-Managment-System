@@ -175,7 +175,7 @@ function ApprovalsPageInner() {
   const [showHelp, setShowHelp] = useState(false);
 
   // Claims & Inspection
-  const [claims, setClaims] = useState<ApprovalClaim[]>(INITIAL_APPROVAL_CLAIMS);
+  const [claims, setClaims] = useState<ApprovalClaim[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("Pending");
   const [searchQuery, setSearchQuery] = useState("");
@@ -186,7 +186,7 @@ function ApprovalsPageInner() {
     try {
       setIsRefreshing(true);
       const fetched = await fetchManagerClaims();
-      if (fetched && fetched.length > 0) {
+      if (fetched) {
         setClaims(fetched as any);
       }
     } catch (e) {

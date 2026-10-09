@@ -1,9 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import type { ExpenseClaim, DepartmentBudget } from "@/types/finance";
-import { MOCK_CLAIMS, MOCK_BUDGETS } from "@/lib/mock-data";
 
 /**
- * Fetch all expense claims from Supabase database, falling back to mock data if empty or table not yet created.
+ * Fetch all expense claims from Supabase database.
  */
 export async function getExpenseClaims(): Promise<ExpenseClaim[]> {
   try {
@@ -12,11 +11,13 @@ export async function getExpenseClaims(): Promise<ExpenseClaim[]> {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      if (error && error.code !== "PGRST205") {
-        console.warn("Supabase fetch error, using local data:", error.message);
-      }
-      return MOCK_CLAIMS;
+    if (error) {
+      console.warn("Supabase fetch error:", error.message);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      return [];
     }
 
     // Map database snake_case to frontend camelCase
@@ -54,9 +55,10 @@ export async function getExpenseClaims(): Promise<ExpenseClaim[]> {
     }));
   } catch (err) {
     console.error("Failed to query Supabase claims:", err);
-    return MOCK_CLAIMS;
+    return [];
   }
 }
+
 /**
  * Update an existing claim status & remarks in Supabase
  */
@@ -106,7 +108,7 @@ export async function getDepartmentBudgets(): Promise<DepartmentBudget[]> {
       .order("name");
 
     if (error || !data || data.length === 0) {
-      return MOCK_BUDGETS;
+      return [];
     }
 
     return data.map((b: any) => ({
@@ -120,6 +122,6 @@ export async function getDepartmentBudgets(): Promise<DepartmentBudget[]> {
     }));
   } catch (err) {
     console.error("Error fetching budgets:", err);
-    return MOCK_BUDGETS;
+    return [];
   }
 }
