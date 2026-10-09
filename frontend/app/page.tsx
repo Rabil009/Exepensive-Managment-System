@@ -46,98 +46,57 @@ const PORTALS: PortalOption[] = [
   },
 ];
 
-// Senior High-Precision Halftone Dot Field (Retina High-DPI, uniform solid contrast, small dots)
-function HalftoneBackground({ isDark = false }: { isDark?: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: false });
-    if (!ctx) return;
-
-    const render = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-
-      ctx.save();
-      ctx.scale(dpr, dpr);
-
-      // Clean canvas base
-      ctx.fillStyle = isDark ? "#09090b" : "#ffffff";
-      ctx.fillRect(0, 0, width, height);
-
-      // Fine grid spacing (11px = tight, elegant print raster)
-      const spacing = 11;
-      const cols = Math.ceil(width / spacing) + 1;
-      const rows = Math.ceil(height / spacing) + 1;
-
-      // Center of viewport (where login card sits)
-      const cx = width / 2;
-      const cy = height / 2;
-
-      // Dots contrast
-      ctx.fillStyle = isDark ? "#27272a" : "#18181b";
-
-      for (let r = 0; r <= rows; r++) {
-        const y = r * spacing;
-        const ny = y / height;
-
-        for (let c = 0; c <= cols; c++) {
-          const x = c * spacing;
-          const nx = x / width;
-
-          // 1. Primary Top-Right Density Field (matching reference image)
-          const trField = Math.pow(Math.max(0, (nx * 1.15 + (1 - ny) * 0.95) - 0.55), 1.35) * 1.15;
-
-          // 2. Secondary Left & Top Edge Density (matching reference image)
-          const leftField = Math.pow(Math.max(0, (1 - nx) * 0.85 + ny * 0.35), 1.8) * 0.55;
-          const topField = Math.pow(Math.max(0, (1 - ny) * 0.7), 1.6) * 0.45;
-
-          // 3. Subtle organic wave so the halftone flows naturally
-          const organicWave =
-            Math.sin(nx * 4.2 + ny * 3.0) * 0.05 +
-            Math.cos(nx * 3.2 - ny * 4.8) * 0.04;
-
-          const rawDensity = trField + leftField + topField + organicWave;
-
-          // 4. Optical Center Clearing around login card for eye comfort
-          const distFromCenter = Math.hypot((x - cx) / (width * 0.38), (y - cy) / (height * 0.42));
-          const centerClearing = Math.min(1, Math.max(0.12, Math.pow(distFromCenter, 1.25)));
-
-          const density = rawDensity * centerClearing;
-
-          // Only render dots above threshold
-          if (density <= 0.04) continue;
-
-          // Small, refined dot radii (0.45px micro-dot to 2.2px max)
-          const radius = Math.min(2.2, Math.max(0.45, density * 2.3));
-
-          ctx.beginPath();
-          ctx.arc(x, y, radius, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      ctx.restore();
-    };
-
-    render();
-    window.addEventListener("resize", render);
-    return () => window.removeEventListener("resize", render);
-  }, [isDark]);
-
+// Institutional Modern Fintech Background (Ambient Gradient Mesh + Precision Microgrid)
+function ModernFintechBackground({ isDark = false }: { isDark?: boolean }) {
   return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-    />
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none z-0">
+      {/* 1. Ambient Lighting Glow Mesh */}
+      <div
+        className={`absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full blur-[140px] transition-opacity duration-700 pointer-events-none ${
+          isDark
+            ? "bg-gradient-to-br from-indigo-600/15 via-blue-600/10 to-transparent opacity-90"
+            : "bg-gradient-to-br from-blue-400/20 via-indigo-300/15 to-transparent opacity-70"
+        }`}
+      />
+      <div
+        className={`absolute -bottom-32 -right-32 w-[640px] h-[640px] rounded-full blur-[140px] transition-opacity duration-700 pointer-events-none ${
+          isDark
+            ? "bg-gradient-to-tl from-cyan-500/10 via-blue-500/8 to-transparent opacity-75"
+            : "bg-gradient-to-tl from-sky-400/15 via-indigo-200/20 to-transparent opacity-70"
+        }`}
+      />
+      <div
+        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[720px] rounded-full blur-[160px] pointer-events-none ${
+          isDark ? "bg-indigo-500/[0.04]" : "bg-blue-500/[0.04]"
+        }`}
+      />
+
+      {/* 2. Micro-precision Architectural Grid */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: isDark
+            ? `linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+               linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px)`
+            : `linear-gradient(to right, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+               linear-gradient(to bottom, rgba(15, 23, 42, 0.045) 1px, transparent 1px)`,
+          backgroundSize: "36px 36px",
+          maskImage:
+            "radial-gradient(ellipse 75% 70% at 50% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 65%, transparent 100%)",
+          WebkitMaskImage:
+            "radial-gradient(ellipse 75% 70% at 50% 50%, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.25) 65%, transparent 100%)",
+        }}
+      />
+
+      {/* 3. Subtle Vignette Depth */}
+      <div
+        className={`absolute inset-0 ${
+          isDark
+            ? "bg-[radial-gradient(ellipse_at_center,transparent_45%,#09090b_95%)]"
+            : "bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(244,244,245,0.6)_100%)]"
+        }`}
+      />
+    </div>
   );
 }
 
@@ -185,6 +144,19 @@ export default function LoginPage() {
       }
       return next;
     });
+  };
+
+  const setThemeMode = (mode: "light" | "dark") => {
+    const isDarkTarget = mode === "dark";
+    setIsDark(isDarkTarget);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("finpulse-theme", mode);
+      if (isDarkTarget) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
   };
 
   useEffect(() => {
@@ -345,33 +317,76 @@ export default function LoginPage() {
     <div className={`min-h-screen w-full overflow-y-auto sm:overflow-hidden relative flex items-center justify-center p-4 sm:p-5 select-none transition-colors duration-200 ${
       isDark ? "bg-[#09090B] text-zinc-100" : "bg-white text-zinc-900"
     }`}>
-      {/* Floating Dark Mode Toggle */}
-      <div className="fixed top-4 right-4 sm:top-5 sm:right-6 z-50">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          className={`h-9 px-3.5 rounded-full border shadow-xs transition-all cursor-pointer flex items-center gap-2 text-xs font-medium backdrop-blur-md ${
-            isDark
-              ? "bg-[#18181D]/90 border-white/[0.12] text-zinc-200 hover:bg-[#222228] hover:text-white shadow-black/40"
-              : "bg-white/90 border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
-          }`}
-        >
-          {isDark ? (
-            <>
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
-              <span>Light Mode</span>
-            </>
-          ) : (
-            <>
-              <Moon className="w-3.5 h-3.5 text-zinc-600" />
-              <span>Dark Mode</span>
-            </>
-          )}
-        </button>
-      </div>
+      {/* Top Header Bar: Institutional Badge + Executive Theme Segmented Control */}
+      <header className="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 py-3.5 sm:py-4 flex items-center justify-between pointer-events-none">
+        {/* FinPulse Institutional Badge */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          <div
+            className={`flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border text-xs font-medium tracking-tight backdrop-blur-md shadow-xs transition-colors duration-200 ${
+              isDark
+                ? "bg-[#141418]/80 border-white/[0.08] text-zinc-300 shadow-black/30"
+                : "bg-white/85 border-zinc-200/80 text-zinc-700 shadow-zinc-950/5"
+            }`}
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className={`font-semibold tracking-tight ${isDark ? "text-white" : "text-zinc-900"}`}>FinPulse</span>
+            <span className={isDark ? "text-zinc-700" : "text-zinc-300"}>/</span>
+            <span className={`text-[11px] font-mono tracking-wide uppercase ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
+              Treasury OS
+            </span>
+          </div>
+        </div>
 
-      <HalftoneBackground isDark={isDark} />
+        {/* Executive Segmented Mode Switcher */}
+        <div className="pointer-events-auto">
+          <div
+            role="radiogroup"
+            aria-label="Theme mode"
+            className={`p-1 rounded-full border flex items-center gap-1 backdrop-blur-xl shadow-xs transition-colors duration-200 ${
+              isDark
+                ? "bg-[#141418]/90 border-white/[0.1] shadow-black/40"
+                : "bg-zinc-100/90 border-zinc-200/90 shadow-zinc-950/5"
+            }`}
+          >
+            {/* Light Segment */}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={!isDark}
+              onClick={() => setThemeMode("light")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                !isDark
+                  ? "bg-white text-zinc-900 shadow-xs font-semibold"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <Sun className={`w-3.5 h-3.5 transition-colors ${!isDark ? "text-amber-500" : "text-zinc-500"}`} />
+              <span>Light</span>
+            </button>
+
+            {/* Dark Segment */}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={isDark}
+              onClick={() => setThemeMode("dark")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                isDark
+                  ? "bg-[#222228] text-white shadow-xs font-semibold border border-white/[0.08]"
+                  : "text-zinc-500 hover:text-zinc-900"
+              }`}
+            >
+              <Moon className={`w-3.5 h-3.5 transition-colors ${isDark ? "text-blue-400" : "text-zinc-500"}`} />
+              <span>Dark</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <ModernFintechBackground isDark={isDark} />
 
       <div className={`relative z-10 max-w-[410px] w-full rounded-2xl border p-6 sm:p-9 my-14 sm:my-0 transition-all duration-200 ${
         isDark
