@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { useFinanceStore } from "@/lib/finance-store"
 
 import {
   Card,
@@ -122,10 +123,6 @@ const chartData = [
   { date: "2024-06-30", desktop: 446, mobile: 400 },
 ]
 
-import { useFinanceStore } from "@/lib/finance-store"
-
-export const description = "An interactive area chart"
-
 const chartConfig = {
   desktop: {
     label: "Corporate Cards",
@@ -145,7 +142,7 @@ export function ChartAreaInteractive() {
     if (!claims || claims.length === 0) return [];
 
     const map: Record<string, { date: string; desktop: number; mobile: number }> = {};
-    claims.forEach((c) => {
+    claims.forEach((c: any) => {
       const dateStr = c.createdAt ? c.createdAt.split("T")[0] : new Date().toISOString().split("T")[0];
       if (!map[dateStr]) {
         map[dateStr] = { date: dateStr, desktop: 0, mobile: 0 };
