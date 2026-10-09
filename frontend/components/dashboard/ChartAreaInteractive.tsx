@@ -122,9 +122,13 @@ const chartData = [
   { date: "2024-06-30", desktop: 446, mobile: 400 },
 ]
 
+import { useFinanceStore } from "@/lib/finance-store"
+
+export const description = "An interactive area chart"
+
 const chartConfig = {
   desktop: {
-    label: "Direct Clearings",
+    label: "Corporate Cards",
     color: "var(--chart-1)",
   },
   mobile: {
@@ -135,20 +139,40 @@ const chartConfig = {
 
 export function ChartAreaInteractive() {
   const [timeRange, setTimeRange] = React.useState("90d")
+  const { claims } = useFinanceStore()
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
-    let daysToSubtract = 90
-    if (timeRange === "30d") {
-      daysToSubtract = 30
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7
-    }
-    const startDate = new Date(referenceDate)
-    startDate.setDate(startDate.getDate() - daysToSubtract)
-    return date >= startDate
-  })
+  const liveChartData = React.useMemo(() => {
+    if (!claims || claims.length === 0) return [];
+
+    const map: Record<string, { date: string; desktop: number; mobile: number }> = {};
+    claims.forEach((c) => {
+      const dateStr = c.createdAt ? c.createdAt.split("T")[0] : new Date().toISOString().split("T")[0];
+      if (!map[dateStr]) {
+        map[dateStr] = { date: dateStr, desktop: 0, mobile: 0 };
+      }
+      if (c.paymentMethod === "CORPORATE_CARD") {
+        map[dateStr].desktop += Number(c.amount) || 0;
+      } else {
+        map[dateStr].mobile += Number(c.amount) || 0;
+      }
+    });
+
+    return Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
+  }, [claims]);
+
+  const filteredData = React.useMemo(() => {
+    if (liveChartData.length === 0) return [];
+    const latestDateStr = liveChartData[liveChartData.length - 1].date;
+    const referenceDate = new Date(latestDateStr);
+    let daysToSubtract = 90;
+    if (timeRange === "30d") daysToSubtract = 30;
+    else if (timeRange === "7d") daysToSubtract = 7;
+
+    const startDate = new Date(referenceDate);
+    startDate.setDate(startDate.getDate() - daysToSubtract);
+
+    return liveChartData.filter((item) => new Date(item.date) >= startDate);
+  }, [liveChartData, timeRange]);
 
   return (
     <Card className="rounded-xl overflow-hidden p-0 border">
@@ -180,6 +204,11 @@ export function ChartAreaInteractive() {
         </Select>
       </CardHeader>
       <CardContent className="px-5 pt-4 pb-5">
+        {filteredData.length === 0 ? (
+          <div className="h-[240px] flex items-center justify-center text-xs text-zinc-500">
+            No claims data registered in Supabase for the selected time range.
+          </div>
+        ) : (
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[240px] w-full"
@@ -262,6 +291,7 @@ export function ChartAreaInteractive() {
             <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
+        )}
       </CardContent>
     </Card>
   )

@@ -103,15 +103,37 @@ const COST_CENTER_BUDGETS: BudgetItem[] = [
 ];
 
 import { useTheme } from "@/lib/theme-store";
+import { useFinanceStore } from "@/lib/finance-store";
 
 export function BudgetBreakdownTable() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { budgets } = useFinanceStore();
   const [dimension, setDimension] = useState<"Department" | "Project" | "Cost Center">("Department");
+
+  const dynamicDeptBudgets: BudgetItem[] = React.useMemo(() => {
+    if (budgets && budgets.length > 0) {
+      return budgets.map((b) => {
+        const allocated = Number(b.allocatedAmount) || 0;
+        const spent = Number(b.spentAmount) || 0;
+        const remaining = allocated - spent;
+        const util = allocated > 0 ? (spent / allocated) * 100 : 0;
+        return {
+          id: b.id,
+          name: b.name,
+          allocated: `₹${allocated.toLocaleString("en-IN")}`,
+          spent: `₹${spent.toLocaleString("en-IN")}`,
+          remaining: `₹${remaining.toLocaleString("en-IN")}`,
+          utilizationPercent: Number(util.toFixed(1)),
+        };
+      });
+    }
+    return [];
+  }, [budgets]);
 
   const items =
     dimension === "Department"
-      ? DEPARTMENT_BUDGETS
+      ? dynamicDeptBudgets
       : dimension === "Project"
       ? PROJECT_BUDGETS
       : COST_CENTER_BUDGETS;

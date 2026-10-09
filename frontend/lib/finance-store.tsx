@@ -129,7 +129,27 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true;
     getExpenseClaims().then((fetched) => {
       if (isMounted) {
-        setClaims(fetched || []);
+        const claimList = fetched || [];
+        setClaims(claimList);
+        
+        // Populate reimbursements from real paid claims
+        const paidReimbursements: ReimbursementItem[] = claimList
+          .filter((c) => c.status === "PAID" || c.disbursedAt || c.paymentReference)
+          .map((c) => ({
+            id: `RMB-${c.id}`,
+            claimId: c.id,
+            employee: c.employeeName,
+            department: c.employeeDepartment,
+            amount: c.amount,
+            currency: c.currency || "INR",
+            completedDate: c.disbursedAt ? new Date(c.disbursedAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "Recently",
+            paymentMethod: c.paymentChannel || c.paymentMethod || "Bank Transfer",
+            paymentReference: c.paymentReference || "Direct Settlement",
+            status: "Paid" as const,
+          }));
+        if (paidReimbursements.length > 0) {
+          setReimbursements(paidReimbursements);
+        }
       }
     });
     getDepartmentBudgets().then((fetchedBudgets) => {
@@ -474,50 +494,50 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   const exceptions: ExceptionItem[] = useMemo(() => {
     const list: ExceptionItem[] = [];
-    const missingReceipt = claims.filter((c) => !c.receiptName);
+    const missingReceipt = claims.filter((c) => !c.receiptName || c.receiptName.trim() === "");
     const duplicates = claims.filter((c) => c.isDuplicateWarning);
-    const policyViolations = claims.filter((c) => c.policyViolation);
+    const policyViolations = claims.filter((c) => Boolean(c.policyViolation));
     const onHold = claims.filter((c) => c.isHold);
 
-    list.push({
-      id: "exc-1",
-      type: "Missing receipt",
-      description: "Expense claimed without compliant physical/digital tax proof",
-      count: missingReceipt.length || 2,
-      priority: "High",
-    });
+    if (missingReceipt.length > 0) {
+      list.push({
+        id: "exc-1",
+        type: "Missing receipt",
+        description: "Expense claimed without compliant physical/digital tax proof",
+        count: missingReceipt.length,
+        priority: "High",
+      });
+    }
 
-    list.push({
-      id: "exc-2",
-      type: "Duplicate expense",
-      description: "Identical amount and merchant matched within 48h window",
-      count: duplicates.length || 3,
-      priority: "High",
-    });
+    if (duplicates.length > 0) {
+      list.push({
+        id: "exc-2",
+        type: "Duplicate expense",
+        description: "Identical amount and merchant matched within 48h window",
+        count: duplicates.length,
+        priority: "High",
+      });
+    }
 
-    list.push({
-      id: "exc-3",
-      type: "Policy limit cap exceeded",
-      description: "Nightly accommodation cap or meals allowance exceeded",
-      count: policyViolations.length || 4,
-      priority: "Medium",
-    });
+    if (policyViolations.length > 0) {
+      list.push({
+        id: "exc-3",
+        type: "Policy limit cap exceeded",
+        description: "Nightly accommodation cap or meals allowance exceeded",
+        count: policyViolations.length,
+        priority: "Medium",
+      });
+    }
 
-    list.push({
-      id: "exc-4",
-      type: "Audit hold active",
-      description: "Awaiting physical GST invoice copy or clarification",
-      count: onHold.length || 1,
-      priority: "Medium",
-    });
-
-    list.push({
-      id: "exc-5",
-      type: "Payment settlement variance",
-      description: "Disbursement reference verification pending with clearing house",
-      count: 2,
-      priority: "High",
-    });
+    if (onHold.length > 0) {
+      list.push({
+        id: "exc-4",
+        type: "Audit hold active",
+        description: "Awaiting physical GST invoice copy or clarification",
+        count: onHold.length,
+        priority: "Medium",
+      });
+    }
 
     return list;
   }, [claims]);

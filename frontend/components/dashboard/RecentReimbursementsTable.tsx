@@ -4,6 +4,7 @@ import React from "react";
 import { ArrowRight } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { useTheme } from "@/lib/theme-store";
+import { useFinanceStore } from "@/lib/finance-store";
 
 export interface ReimbursementRow {
   id: string;
@@ -16,60 +17,29 @@ export interface ReimbursementRow {
   status: "Paid";
 }
 
-const DEFAULT_REIMBURSEMENTS: ReimbursementRow[] = [
-  {
-    id: "reimb-1",
-    employee: "Rahul Sharma",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "Engineering",
-    amount: "₹8,450",
-    completedDate: "Oct 06, 2026",
-    paymentMethod: "Bank Transfer (NEFT)",
-    status: "Paid",
-  },
-  {
-    id: "reimb-2",
-    employee: "Priya Singh",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "Product Design",
-    amount: "₹4,200",
-    completedDate: "Oct 06, 2026",
-    paymentMethod: "Bank Transfer (IMPS)",
-    status: "Paid",
-  },
-  {
-    id: "reimb-3",
-    employee: "Amit Kumar",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "Growth & Sales",
-    amount: "₹12,800",
-    completedDate: "Oct 05, 2026",
-    paymentMethod: "Bank Transfer (RTGS)",
-    status: "Paid",
-  },
-  {
-    id: "reimb-4",
-    employee: "Neha Verma",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "Marketing Ops",
-    amount: "₹3,650",
-    completedDate: "Oct 05, 2026",
-    paymentMethod: "Bank Transfer (NEFT)",
-    status: "Paid",
-  },
-];
-
 interface RecentReimbursementsTableProps {
   items?: ReimbursementRow[];
   onViewAll?: () => void;
 }
 
 export function RecentReimbursementsTable({
-  items = DEFAULT_REIMBURSEMENTS,
+  items,
   onViewAll,
 }: RecentReimbursementsTableProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { reimbursements } = useFinanceStore();
+
+  const displayItems: ReimbursementRow[] = items || reimbursements.map((r) => ({
+    id: r.id,
+    employee: r.employee,
+    avatar: r.avatar,
+    department: r.department,
+    amount: `₹${Number(r.amount).toLocaleString("en-IN")}`,
+    completedDate: r.completedDate || "Recent",
+    paymentMethod: r.paymentMethod || "Bank Transfer",
+    status: "Paid",
+  }));
 
   return (
     <div
@@ -107,7 +77,14 @@ export function RecentReimbursementsTable({
             </tr>
           </thead>
           <tbody className={`divide-y text-[13px] ${isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"}`}>
-            {items.map((row) => (
+            {displayItems.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-6 text-center text-xs text-zinc-500">
+                  No recent reimbursements found.
+                </td>
+              </tr>
+            ) : (
+              displayItems.map((row) => (
               <tr
                 key={row.id}
                 className={`transition-colors ${isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"}`}
