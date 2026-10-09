@@ -258,9 +258,9 @@ export function Sidebar({
                   }`}
                 >
                   <span className="text-[13.5px] font-medium truncate">{item.label}</span>
-                  {item.count && item.count > 0 && (
+                  {!isCollapsed && item.count !== undefined && item.count !== null && item.count > 0 && (
                     <span
-                      className={`h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-medium leading-none shrink-0 ${
+                      className={`h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-sans font-medium leading-none shrink-0 ${
                         isActive
                           ? "bg-white/20 text-white dark:bg-black/15 dark:text-black font-semibold"
                           : "bg-[#E5E7EB] text-zinc-800 group-hover:bg-white/20 group-hover:text-white dark:bg-white/[0.12] dark:text-zinc-200 dark:group-hover:bg-black/15 dark:group-hover:text-black"

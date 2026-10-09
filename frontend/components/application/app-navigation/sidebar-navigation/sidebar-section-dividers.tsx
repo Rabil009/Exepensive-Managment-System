@@ -85,7 +85,7 @@ export function SidebarNavigationSectionDividers({
                       >
                         <span>{sub.label}</span>
                         {sub.badge !== undefined && (
-                          <span className="h-4 min-w-4 px-1 rounded-full bg-[#27272A] text-[10px] font-mono text-[#A1A1AA] flex items-center justify-center">
+                          <span className="h-5 min-w-[20px] px-1.5 rounded-full bg-[#27272A] text-[11px] font-sans font-medium text-[#A1A1AA] flex items-center justify-center leading-none">
                             {sub.badge}
                           </span>
                         )}

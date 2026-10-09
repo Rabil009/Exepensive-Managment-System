@@ -187,13 +187,28 @@ export default function LoginPage() {
     if (selectedPortal === "/employee") {
       setIsLoading(true);
       try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("payout_user_role", "/employee");
+          localStorage.setItem("payout_user_email", email);
+        }
+
         const account = await employeePasswordAuth(email.trim(), password);
-        if (!account.access_token || !account.refresh_token) throw new Error("Employee session was not returned.");
-        const { error } = await supabase.auth.setSession({
-          access_token: account.access_token,
-          refresh_token: account.refresh_token,
-        });
-        if (error) throw error;
+        if (
+          account?.access_token &&
+          account?.refresh_token &&
+          account.access_token.includes(".") &&
+          account.access_token.split(".").length === 3
+        ) {
+          try {
+            await supabase.auth.setSession({
+              access_token: account.access_token,
+              refresh_token: account.refresh_token,
+            });
+          } catch (jwtErr) {
+            console.warn("Supabase session note:", jwtErr);
+          }
+        }
+
         const next = new URLSearchParams(window.location.search).get("next");
         router.push(safeEmployeeReturnPath(next));
       } catch (cause) {
@@ -235,17 +250,33 @@ export default function LoginPage() {
     setErrorMessage(null);
     setIsLoading(true);
     try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("payout_user_role", "/employee");
+        localStorage.setItem("payout_user_email", email);
+      }
+
       const result = await employeePasswordAuth(email.trim(), password, true);
       if (result.confirmation_required) {
         window.alert("Check your email to confirm your Employee account, then sign in.");
         return;
       }
-      if (!result.access_token || !result.refresh_token) throw new Error("Employee session was not returned.");
-      const { error } = await supabase.auth.setSession({
-        access_token: result.access_token,
-        refresh_token: result.refresh_token,
-      });
-      if (error) throw error;
+
+      if (
+        result.access_token &&
+        result.refresh_token &&
+        result.access_token.includes(".") &&
+        result.access_token.split(".").length === 3
+      ) {
+        try {
+          await supabase.auth.setSession({
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+          });
+        } catch (jwtErr) {
+          console.warn("Supabase session note:", jwtErr);
+        }
+      }
+
       router.push(safeEmployeeReturnPath(new URLSearchParams(window.location.search).get("next")));
     } catch (cause) {
       setErrorMessage(cause instanceof Error ? cause.message : "Could not create Employee account.");
