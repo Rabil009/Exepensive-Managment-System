@@ -289,16 +289,6 @@ export default function LoginPage() {
     <div className="min-h-screen w-full overflow-y-auto sm:overflow-hidden bg-white text-zinc-900 relative flex items-center justify-center p-4 sm:p-5 select-none">
       <HalftoneBackground />
 
-      {/* Top Left Brand Logo & Title with White Background */}
-      <div className="absolute top-5 left-5 sm:top-6 sm:left-8 z-20 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white border border-zinc-200/90 shadow-2xs">
-        <div className="h-6 w-6 rounded-full border-[2px] border-zinc-950 flex items-center justify-center shrink-0">
-          <div className="h-2 w-2 rounded-full bg-zinc-950" />
-        </div>
-        <span className="text-[16px] sm:text-[17px] font-bold tracking-tight text-zinc-950">
-          Payout
-        </span>
-      </div>
-
       <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-zinc-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] p-6 sm:p-9 my-14 sm:my-0">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-950">

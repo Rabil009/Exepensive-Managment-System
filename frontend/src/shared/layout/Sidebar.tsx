@@ -367,7 +367,11 @@ export function Sidebar({
             >
               {/* Profile info header */}
               <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.04]">
-                <span className="h-8 w-8 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-semibold shrink-0">{initials}</span>
+                <img
+                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80"
+                  alt={profileName}
+                  className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20 shrink-0"
+                />
                 <div className="flex flex-col min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-semibold truncate text-zinc-900 dark:text-white leading-tight">
@@ -430,7 +434,11 @@ export function Sidebar({
             }`}
           >
             <div className="h-8 w-8 shrink-0 flex items-center justify-center">
-              <span className="h-8 w-8 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-semibold">{initials}</span>
+              <img
+                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80"
+                alt={profileName}
+                className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20"
+              />
             </div>
 
             <div
