@@ -349,7 +349,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
     // Add to completed reimbursements ledger
     const newReimb: ReimbursementItem = {
-      id: `RMB-${Math.floor(100 + Math.random() * 900)}`,
+      id: `RMB-${claimId}`,
       claimId,
       employee: claim.employeeName,
       department: claim.employeeDepartment,

@@ -115,22 +115,7 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
         .select("*")
         .order("transaction_date", { ascending: false });
 
-      const cards = dbCards && dbCards.length > 0 ? dbCards : [
-        {
-          id: "CRD-CORP-01",
-          display_name: "Corporate Platinum Visa",
-          kind: "PHYSICAL",
-          network: "Visa",
-          last4: "4242",
-          monthly_limit: "100000",
-          active: true,
-          frozen: false,
-          wallet_enabled: true,
-          travel_limits_enabled: true,
-          online_verification_enabled: true,
-          atm_lock_enabled: false,
-        },
-      ];
+      const cards = dbCards || [];
 
       responseData = {
         cards,
@@ -209,7 +194,7 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           amount: Number(largest.amount),
           currency: "INR",
         } : null,
-        cards: [{ id: "CRD-01", name: "Corporate Platinum Visa", last4: "4242", limit: "100000" }],
+        cards: [],
       };
     } catch {
       responseData = { totals: { total_spend: "0", pending_approval: "0", reimbursed: "0", corporate_card_spend: "0" }, categories: [] };

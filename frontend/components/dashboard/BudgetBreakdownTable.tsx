@@ -13,102 +13,13 @@ export interface BudgetItem {
   utilizationPercent: number;
 }
 
-const DEPARTMENT_BUDGETS: BudgetItem[] = [
-  {
-    id: "dep-1",
-    name: "Engineering",
-    allocated: "₹8,00,000",
-    spent: "₹6,20,000",
-    remaining: "₹1,80,000",
-    utilizationPercent: 77.5,
-  },
-  {
-    id: "dep-2",
-    name: "Marketing",
-    allocated: "₹5,00,000",
-    spent: "₹3,10,000",
-    remaining: "₹1,90,000",
-    utilizationPercent: 62.0,
-  },
-  {
-    id: "dep-3",
-    name: "Operations",
-    allocated: "₹7,00,000",
-    spent: "₹6,40,000",
-    remaining: "₹60,000",
-    utilizationPercent: 91.4,
-  },
-  {
-    id: "dep-4",
-    name: "HR",
-    allocated: "₹5,00,000",
-    spent: "₹2,70,000",
-    remaining: "₹2,30,000",
-    utilizationPercent: 54.0,
-  },
-];
-
-const PROJECT_BUDGETS: BudgetItem[] = [
-  {
-    id: "proj-1",
-    name: "Project Phoenix (Core API)",
-    allocated: "₹10,00,000",
-    spent: "₹7,80,000",
-    remaining: "₹2,20,000",
-    utilizationPercent: 78.0,
-  },
-  {
-    id: "proj-2",
-    name: "Brand & Design Identity 2026",
-    allocated: "₹4,00,000",
-    spent: "₹2,30,000",
-    remaining: "₹1,70,000",
-    utilizationPercent: 57.5,
-  },
-  {
-    id: "proj-3",
-    name: "Cloud Security & Multi-AZ Migration",
-    allocated: "₹6,50,000",
-    spent: "₹6,10,000",
-    remaining: "₹40,000",
-    utilizationPercent: 93.8,
-  },
-];
-
-const COST_CENTER_BUDGETS: BudgetItem[] = [
-  {
-    id: "cc-1",
-    name: "CC-101 (Engineering Operations)",
-    allocated: "₹8,50,000",
-    spent: "₹6,40,000",
-    remaining: "₹2,10,000",
-    utilizationPercent: 75.3,
-  },
-  {
-    id: "cc-2",
-    name: "CC-202 (Marketing & Sales)",
-    allocated: "₹6,00,000",
-    spent: "₹3,90,000",
-    remaining: "₹2,10,000",
-    utilizationPercent: 65.0,
-  },
-  {
-    id: "cc-3",
-    name: "CC-303 (Enterprise Cloud & SaaS)",
-    allocated: "₹7,50,000",
-    spent: "₹7,10,000",
-    remaining: "₹40,000",
-    utilizationPercent: 94.6,
-  },
-];
-
 import { useTheme } from "@/lib/theme-store";
 import { useFinanceStore } from "@/lib/finance-store";
 
 export function BudgetBreakdownTable() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
-  const { budgets } = useFinanceStore();
+  const { budgets, claims } = useFinanceStore();
   const [dimension, setDimension] = useState<"Department" | "Project" | "Cost Center">("Department");
 
   const dynamicDeptBudgets: BudgetItem[] = React.useMemo(() => {
@@ -131,12 +42,32 @@ export function BudgetBreakdownTable() {
     return [];
   }, [budgets]);
 
+  const dynamicCostCenterBudgets: BudgetItem[] = React.useMemo(() => {
+    if (!claims || claims.length === 0) return [];
+    const ccMap: Record<string, number> = {};
+    claims.forEach((c) => {
+      const cc = (c as any).costCenter || c.employeeDepartment || "General";
+      ccMap[cc] = (ccMap[cc] || 0) + (Number(c.amount) || 0);
+    });
+    return Object.entries(ccMap).map(([cc, spent], idx) => {
+      const allocated = spent * 1.25; // estimated cap
+      return {
+        id: `cc-${idx}`,
+        name: cc,
+        allocated: `₹${Math.round(allocated).toLocaleString("en-IN")}`,
+        spent: `₹${spent.toLocaleString("en-IN")}`,
+        remaining: `₹${Math.round(allocated - spent).toLocaleString("en-IN")}`,
+        utilizationPercent: Number(((spent / allocated) * 100).toFixed(1)),
+      };
+    });
+  }, [claims]);
+
   const items =
     dimension === "Department"
       ? dynamicDeptBudgets
-      : dimension === "Project"
-      ? PROJECT_BUDGETS
-      : COST_CENTER_BUDGETS;
+      : dimension === "Cost Center"
+      ? dynamicCostCenterBudgets
+      : [];
 
   const getStatusBadge = (util: number) => {
     if (util > 100) {
@@ -208,7 +139,14 @@ export function BudgetBreakdownTable() {
             </tr>
           </thead>
           <tbody className={`divide-y text-[13px] ${isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"}`}>
-            {items.map((row) => (
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 text-center text-xs text-zinc-500">
+                  No {dimension.toLowerCase()} records found.
+                </td>
+              </tr>
+            ) : (
+              items.map((row) => (
               <tr
                 key={row.id}
                 className={`transition-colors ${isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"}`}
@@ -248,7 +186,8 @@ export function BudgetBreakdownTable() {
                   </div>
                 </td>
               </tr>
-            ))}
+            ))
+          )}
           </tbody>
         </table>
       </div>
