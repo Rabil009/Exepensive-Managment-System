@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, Query, status
+import logging
+
+from fastapi import APIRouter, HTTPException, Query
 from typing import Optional, List, Dict, Any
 from app.schemas.finance import (
     ClaimVerifyRequest,
@@ -10,14 +12,16 @@ from app.schemas.finance import (
 from app.services.finance_service import FinanceService
 
 router = APIRouter(prefix="/api/finance", tags=["Finance Admin"])
+logger = logging.getLogger(__name__)
 
 @router.get("/overview", response_model=FinanceMetricsResponse)
 def get_finance_overview():
     """Returns headline metrics for the Finance dashboard."""
-    metrics = FinanceService.get_overview_metrics()
-    if "error" in metrics and metrics.get("awaitingVerificationCount") == 0:
-        pass
-    return metrics
+    try:
+        return FinanceService.get_overview_metrics()
+    except Exception:
+        logger.exception("Failed to load finance overview")
+        raise HTTPException(status_code=503, detail="Finance overview is temporarily unavailable")
 
 @router.get("/claims")
 def list_finance_claims(
@@ -26,7 +30,11 @@ def list_finance_claims(
     category: Optional[str] = Query(None)
 ):
     """List all expense claims with optional filters for finance auditing."""
-    return FinanceService.get_claims(status=status, department=department, category=category)
+    try:
+        return FinanceService.get_claims(status=status, department=department, category=category)
+    except Exception:
+        logger.exception("Failed to load finance claims")
+        raise HTTPException(status_code=503, detail="Finance claims are temporarily unavailable")
 
 @router.get("/claims/{claim_id}")
 def get_claim_details(claim_id: str):

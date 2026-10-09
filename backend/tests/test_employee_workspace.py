@@ -1,8 +1,10 @@
 from fastapi.testclient import TestClient
+import httpx
 
 from app.api.employee_workspace import workspace
 from app.main import app
 from app.services.employee_workspace import display_status
+from app.services.employee_workspace import EmployeeWorkspaceGateway
 
 
 class FakeGateway:
@@ -109,3 +111,23 @@ def test_approval_status_waits_for_finance():
     assert display_status("MANAGER_APPROVED") == "Pending"
     assert display_status("FINANCE_APPROVED") == "Approved"
     assert display_status("PAID") == "Reimbursed"
+
+
+def test_workspace_missing_profile_returns_structured_error():
+    def respond(request):
+        if request.url.path == "/auth/v1/user":
+            return httpx.Response(200, json={"id": "user-1"})
+        return httpx.Response(200, json=[])
+
+    gateway = EmployeeWorkspaceGateway("token")
+    gateway.client.close()
+    gateway.client = httpx.Client(transport=httpx.MockTransport(respond), base_url="https://test.supabase.co")
+    app.dependency_overrides[workspace] = lambda: gateway
+    try:
+        with TestClient(app) as client:
+            response = client.get("/api/employee/overview")
+        assert response.status_code == 404
+        assert response.json() == {"detail": "Employee profile not found"}
+    finally:
+        app.dependency_overrides.clear()
+        gateway.close()

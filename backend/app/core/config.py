@@ -14,8 +14,10 @@ class Settings:
     SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
     CORS_ORIGINS: list[str] = [
+        "https://frontend-six-omega-8cs3dcwpjd.vercel.app",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "*",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ]
