@@ -57,7 +57,12 @@ class SupabaseExpenseGateway:
         return response
 
     def employee(self):
-        user = self.request("GET", "/auth/v1/user").json()
+        try:
+            user = self.request("GET", "/auth/v1/user").json()
+        except ValueError:
+            raise HTTPException(502, "Authentication service returned invalid data")
+        if not isinstance(user, dict):
+            raise HTTPException(502, "Authentication service returned invalid data")
         user_id = user.get("id")
         if not user_id:
             raise HTTPException(401, "Employee session required")
@@ -66,17 +71,18 @@ class SupabaseExpenseGateway:
                 "GET", "/rest/v1/profiles",
                 params={"id": f"eq.{user_id}", "select": "id,name,department,role"},
             ).json()
-            if rows and isinstance(rows, list) and len(rows) > 0:
-                if rows[0].get("role") and rows[0].get("role") != "EMPLOYEE":
-                    raise HTTPException(403, "An Employee profile is required")
-                return rows[0]
-        except HTTPException as e:
-            if e.status_code == 403:
-                raise
-        # Standard fallback profile
-        email = user.get("email") or "employee@company.com"
-        name = email.split("@")[0].capitalize()
-        return {"id": user_id, "name": name, "department": "General", "role": "EMPLOYEE"}
+        except ValueError:
+            raise HTTPException(502, "Employee profile service returned invalid data")
+        if not isinstance(rows, list):
+            raise HTTPException(502, "Employee profile service returned invalid data")
+        if not rows:
+            raise HTTPException(404, "Employee profile not found")
+        profile = rows[0]
+        if not isinstance(profile, dict) or profile.get("id") != user_id:
+            raise HTTPException(502, "Employee profile service returned invalid data")
+        if profile.get("role") != "EMPLOYEE":
+            raise HTTPException(403, "An Employee profile is required")
+        return profile
 
     def draft(self, expense_id: UUID):
         rows = self.request(

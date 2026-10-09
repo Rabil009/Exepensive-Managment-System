@@ -7,52 +7,38 @@ class FinanceService:
     @staticmethod
     def get_overview_metrics() -> Dict[str, Any]:
         """Calculates headline metrics for Finance Admin Dashboard."""
-        try:
-            # Fetch all claims
-            res = supabase.table("expense_claims").select("*").execute()
-            claims = res.data or []
+        res = supabase.table("expense_claims").select("*").execute()
+        claims = res.data or []
 
-            awaiting_verification = [c for c in claims if c.get("status") == "MANAGER_APPROVED" and not c.get("is_hold")]
-            awaiting_high_priority = [c for c in awaiting_verification if (c.get("amount") or 0) > 10000 or c.get("policy_violation")]
+        awaiting_verification = [c for c in claims if c.get("status") == "MANAGER_APPROVED" and not c.get("is_hold")]
+        awaiting_high_priority = [c for c in awaiting_verification if (c.get("amount") or 0) > 10000 or c.get("policy_violation")]
 
-            finance_approved = [c for c in claims if c.get("status") == "FINANCE_APPROVED"]
-            approved_amount_total = sum(c.get("amount", 0) for c in finance_approved)
+        finance_approved = [c for c in claims if c.get("status") == "FINANCE_APPROVED"]
+        approved_amount_total = sum(c.get("amount", 0) for c in finance_approved)
 
-            # Reimbursements pending (personal payment methods)
-            reimb_pending = [c for c in finance_approved if c.get("payment_method") != "CORPORATE_CARD"]
-            reimb_pending_count = len(reimb_pending)
-            reimb_pending_amount = sum(c.get("amount", 0) for c in reimb_pending)
+        # Reimbursements pending (personal payment methods)
+        reimb_pending = [c for c in finance_approved if c.get("payment_method") != "CORPORATE_CARD"]
+        reimb_pending_count = len(reimb_pending)
+        reimb_pending_amount = sum(c.get("amount", 0) for c in reimb_pending)
 
-            # Payments pending (corporate cards or awaiting disbursement)
-            payments_pending = [c for c in claims if c.get("status") in ("FINANCE_APPROVED", "PAYMENT_PENDING")]
-            payments_pending_count = len(payments_pending)
-            payments_pending_amount = sum(c.get("amount", 0) for c in payments_pending)
+        # Payments pending (corporate cards or awaiting disbursement)
+        payments_pending = [c for c in claims if c.get("status") in ("FINANCE_APPROVED", "PAYMENT_PENDING")]
+        payments_pending_count = len(payments_pending)
+        payments_pending_amount = sum(c.get("amount", 0) for c in payments_pending)
 
-            # Exceptions count
-            exceptions_count = len([c for c in claims if c.get("is_hold") or c.get("policy_violation") or c.get("is_duplicate_warning")])
+        # Exceptions count
+        exceptions_count = len([c for c in claims if c.get("is_hold") or c.get("policy_violation") or c.get("is_duplicate_warning")])
 
-            return {
-                "awaitingVerificationCount": len(awaiting_verification),
-                "awaitingHighPriorityCount": len(awaiting_high_priority),
-                "approvedAmountTotal": round(approved_amount_total, 2),
-                "reimbursementsPendingCount": reimb_pending_count,
-                "reimbursementsPendingAmount": round(reimb_pending_amount, 2),
-                "paymentsPendingCount": payments_pending_count,
-                "paymentsPendingAmount": round(payments_pending_amount, 2),
-                "totalExceptions": exceptions_count
-            }
-        except Exception as e:
-            return {
-                "error": str(e),
-                "awaitingVerificationCount": 0,
-                "awaitingHighPriorityCount": 0,
-                "approvedAmountTotal": 0.0,
-                "reimbursementsPendingCount": 0,
-                "reimbursementsPendingAmount": 0.0,
-                "paymentsPendingCount": 0,
-                "paymentsPendingAmount": 0.0,
-                "totalExceptions": 0
-            }
+        return {
+            "awaitingVerificationCount": len(awaiting_verification),
+            "awaitingHighPriorityCount": len(awaiting_high_priority),
+            "approvedAmountTotal": round(approved_amount_total, 2),
+            "reimbursementsPendingCount": reimb_pending_count,
+            "reimbursementsPendingAmount": round(reimb_pending_amount, 2),
+            "paymentsPendingCount": payments_pending_count,
+            "paymentsPendingAmount": round(payments_pending_amount, 2),
+            "totalExceptions": exceptions_count
+        }
 
     @staticmethod
     def get_claims(status: Optional[str] = None, department: Optional[str] = None, category: Optional[str] = None) -> List[Dict[str, Any]]:
