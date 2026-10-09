@@ -16,6 +16,8 @@ import {
   KeyRound,
   X,
   CheckCircle2,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 type PortalType = "/dashboard" | "/employee" | "/manager";
@@ -45,7 +47,7 @@ const PORTALS: PortalOption[] = [
 ];
 
 // Senior High-Precision Halftone Dot Field (Retina High-DPI, uniform solid contrast, small dots)
-function HalftoneBackground() {
+function HalftoneBackground({ isDark = false }: { isDark?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -67,8 +69,8 @@ function HalftoneBackground() {
       ctx.save();
       ctx.scale(dpr, dpr);
 
-      // Clean, bright white canvas base
-      ctx.fillStyle = "#ffffff";
+      // Clean canvas base
+      ctx.fillStyle = isDark ? "#09090b" : "#ffffff";
       ctx.fillRect(0, 0, width, height);
 
       // Fine grid spacing (11px = tight, elegant print raster)
@@ -80,8 +82,8 @@ function HalftoneBackground() {
       const cx = width / 2;
       const cy = height / 2;
 
-      // Uniform solid contrast across all dots (authentic halftone: diameter changes, not opacity)
-      ctx.fillStyle = "#18181b";
+      // Dots contrast
+      ctx.fillStyle = isDark ? "#27272a" : "#18181b";
 
       for (let r = 0; r <= rows; r++) {
         const y = r * spacing;
@@ -129,7 +131,7 @@ function HalftoneBackground() {
     render();
     window.addEventListener("resize", render);
     return () => window.removeEventListener("resize", render);
-  }, []);
+  }, [isDark]);
 
   return (
     <canvas
@@ -152,8 +154,38 @@ export default function LoginPage() {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("finpulse-theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const shouldBeDark = saved === "dark" || (!saved && prefersDark);
+      setIsDark(shouldBeDark);
+      if (shouldBeDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("finpulse-theme", next ? "dark" : "light");
+        if (next) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("portal") === "employee") {
@@ -310,15 +342,47 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto sm:overflow-hidden bg-white text-zinc-900 relative flex items-center justify-center p-4 sm:p-5 select-none">
-      <HalftoneBackground />
+    <div className={`min-h-screen w-full overflow-y-auto sm:overflow-hidden relative flex items-center justify-center p-4 sm:p-5 select-none transition-colors duration-200 ${
+      isDark ? "bg-[#09090B] text-zinc-100" : "bg-white text-zinc-900"
+    }`}>
+      {/* Floating Dark Mode Toggle */}
+      <div className="fixed top-4 right-4 sm:top-5 sm:right-6 z-50">
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          className={`h-9 px-3.5 rounded-full border shadow-xs transition-all cursor-pointer flex items-center gap-2 text-xs font-medium backdrop-blur-md ${
+            isDark
+              ? "bg-[#18181D]/90 border-white/[0.12] text-zinc-200 hover:bg-[#222228] hover:text-white shadow-black/40"
+              : "bg-white/90 border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-950"
+          }`}
+        >
+          {isDark ? (
+            <>
+              <Sun className="w-3.5 h-3.5 text-amber-400" />
+              <span>Light Mode</span>
+            </>
+          ) : (
+            <>
+              <Moon className="w-3.5 h-3.5 text-zinc-600" />
+              <span>Dark Mode</span>
+            </>
+          )}
+        </button>
+      </div>
 
-      <div className="relative z-10 max-w-[410px] w-full bg-white rounded-2xl border border-zinc-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)] p-6 sm:p-9 my-14 sm:my-0">
+      <HalftoneBackground isDark={isDark} />
+
+      <div className={`relative z-10 max-w-[410px] w-full rounded-2xl border p-6 sm:p-9 my-14 sm:my-0 transition-all duration-200 ${
+        isDark
+          ? "bg-[#121215] border-white/[0.08] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.8)]"
+          : "bg-white border-zinc-200/90 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.08),0_1px_3px_rgba(0,0,0,0.04)]"
+      }`}>
         <div className="mb-6 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
+          <h1 className={`text-3xl font-bold tracking-tight ${isDark ? "text-white" : "text-zinc-950"}`}>
             Welcome to Payout
           </h1>
-          <p className="text-xs font-mono text-zinc-500 tracking-tight mt-1">
+          <p className={`text-xs font-mono tracking-tight mt-1 ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
             Continue to access your dashboard
           </p>
         </div>
@@ -327,7 +391,11 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleSocialAuth}
-            className="w-full h-10 px-4 rounded-full border border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
+            className={`w-full h-10 px-4 rounded-full border text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs ${
+              isDark
+                ? "border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200"
+                : "border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800"
+            }`}
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
               <path
@@ -353,7 +421,11 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleSocialAuth}
-            className="w-full h-10 px-4 rounded-full border border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs"
+            className={`w-full h-10 px-4 rounded-full border text-xs font-medium flex items-center justify-center gap-2.5 transition-colors cursor-pointer active:scale-[0.99] shadow-2xs ${
+              isDark
+                ? "border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200"
+                : "border-zinc-200 hover:border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800"
+            }`}
           >
             <svg className="w-4 h-4 shrink-0 fill-current" viewBox="0 0 170 170">
               <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.5-7.79-11.44-14.14-5.63-9.06-10.08-19.16-13.34-30.28-3.26-11.13-4.9-21.84-4.9-32.14 0-14.28 3.58-25.92 10.74-34.92 7.16-9 16.32-13.62 27.48-13.87 4.8 0 10.23 1.34 16.29 4.03 6.06 2.68 10.02 4.09 11.89 4.22 1.5.13 5.72-1.34 12.67-4.42 6.94-3.08 12.87-4.47 17.79-4.17 13.43.76 23.96 5.86 31.59 15.3-11.87 7.21-17.65 17.06-17.34 29.56.32 9.87 4.17 18.25 11.56 25.12 7.39 6.87 16.29 10.78 26.7 11.75-2.23 6.74-4.7 13.25-7.41 19.53zM119.22 31.81c0-7.39 2.68-14.37 8.04-20.94 5.36-6.57 11.96-10.42 19.8-11.56.22 1.09.33 2.18.33 3.28 0 7.39-2.73 14.47-8.19 21.25-5.46 6.78-12.18 10.59-20.16 11.44-.22-1.09-.33-2.18-.33-3.47z" />
@@ -363,15 +435,15 @@ export default function LoginPage() {
         </div>
 
         <div className="relative my-4 flex items-center justify-center">
-          <div className="w-full border-t border-zinc-200" />
-          <span className="absolute bg-white px-3 font-mono text-[11px] text-zinc-400">
+          <div className={`w-full border-t ${isDark ? "border-white/[0.08]" : "border-zinc-200"}`} />
+          <span className={`absolute px-3 font-mono text-[11px] ${isDark ? "bg-[#121215] text-zinc-500" : "bg-white text-zinc-400"}`}>
             or
           </span>
         </div>
 
         <form onSubmit={handleSignIn} className="space-y-3.5">
           <div className="space-y-1" ref={dropdownRef}>
-            <div className="text-[11px] font-medium text-zinc-700">
+            <div className={`text-[11px] font-medium ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
               <span>Target Portal</span>
             </div>
 
@@ -379,11 +451,15 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setIsPortalDropdownOpen(!isPortalDropdownOpen)}
-                className="w-full h-9 px-3.5 rounded-full border border-zinc-200 bg-zinc-50/70 hover:bg-zinc-100/70 hover:border-zinc-300 text-xs text-zinc-900 flex items-center justify-between transition-colors cursor-pointer"
+                className={`w-full h-9 px-3.5 rounded-full border text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                  isDark
+                    ? "border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-zinc-100"
+                    : "border-zinc-200 bg-zinc-50/70 hover:bg-zinc-100/70 hover:border-zinc-300 text-zinc-900"
+                }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <currentPortal.icon className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
-                  <span className="font-medium text-zinc-900 truncate">
+                  <currentPortal.icon className={`w-3.5 h-3.5 shrink-0 ${isDark ? "text-zinc-400" : "text-zinc-600"}`} />
+                  <span className={`font-medium truncate ${isDark ? "text-white" : "text-zinc-900"}`}>
                     {currentPortal.title}
                   </span>
                 </div>
@@ -395,7 +471,9 @@ export default function LoginPage() {
               </button>
 
               {isPortalDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-zinc-200 rounded-2xl shadow-xl p-1 z-30 space-y-0.5">
+                <div className={`absolute top-full left-0 right-0 mt-1 rounded-2xl shadow-xl p-1 z-30 space-y-0.5 border ${
+                  isDark ? "bg-[#18181D] border-white/[0.1]" : "bg-white border-zinc-200"
+                }`}>
                   {PORTALS.map((portal) => {
                     const Icon = portal.icon;
                     const isSelected = selectedPortal === portal.id;
@@ -409,15 +487,19 @@ export default function LoginPage() {
                         }}
                         className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
                           isSelected
-                            ? "bg-zinc-100 text-zinc-950 font-medium"
+                            ? isDark
+                              ? "bg-white/[0.1] text-white font-medium"
+                              : "bg-zinc-100 text-zinc-950 font-medium"
+                            : isDark
+                            ? "text-zinc-300 hover:bg-white/[0.05]"
                             : "text-zinc-700 hover:bg-zinc-50"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Icon className="w-3.5 h-3.5 text-zinc-600" />
+                          <Icon className={`w-3.5 h-3.5 ${isDark ? "text-zinc-400" : "text-zinc-600"}`} />
                           <span>{portal.title}</span>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-black" />}
+                        {isSelected && <Check className={`w-3.5 h-3.5 ${isDark ? "text-white" : "text-black"}`} />}
                       </button>
                     );
                   })}
@@ -427,7 +509,7 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="email" className="block text-[11px] font-medium text-zinc-700">
+            <label htmlFor="email" className={`block text-[11px] font-medium ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
               Email
             </label>
             <input
@@ -436,13 +518,17 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/80 placeholder:text-zinc-400 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 transition-all"
+              className={`w-full h-9 px-4 rounded-full border text-xs transition-all ${
+                isDark
+                  ? "border-white/[0.1] bg-white/[0.04] text-white placeholder:text-zinc-500 focus:bg-[#18181D] focus:border-white/40 focus:ring-1 focus:ring-white/20"
+                  : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/80 placeholder:text-zinc-400 text-zinc-900 focus:bg-white focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+              }`}
             />
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <label htmlFor="password" className="block text-[11px] font-medium text-zinc-700">
+              <label htmlFor="password" className={`block text-[11px] font-medium ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                 Password
               </label>
               <button
@@ -451,7 +537,9 @@ export default function LoginPage() {
                   setForgotSent(false);
                   setShowForgotModal(true);
                 }}
-                className="text-[11px] text-zinc-500 hover:text-zinc-950 underline underline-offset-2 transition-colors cursor-pointer"
+                className={`text-[11px] underline underline-offset-2 transition-colors cursor-pointer ${
+                  isDark ? "text-zinc-400 hover:text-white" : "text-zinc-500 hover:text-zinc-950"
+                }`}
               >
                 Forgot Password?
               </button>
@@ -463,12 +551,18 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full h-9 px-4 pr-10 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/80 placeholder:text-zinc-400 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 transition-all"
+                className={`w-full h-9 px-4 pr-10 rounded-full border text-xs transition-all ${
+                  isDark
+                    ? "border-white/[0.1] bg-white/[0.04] text-white placeholder:text-zinc-500 focus:bg-[#18181D] focus:border-white/40 focus:ring-1 focus:ring-white/20"
+                    : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50/80 placeholder:text-zinc-400 text-zinc-900 focus:bg-white focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                }`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 transition-colors p-0.5 cursor-pointer"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors p-0.5 cursor-pointer ${
+                  isDark ? "text-zinc-400 hover:text-zinc-200" : "text-zinc-400 hover:text-zinc-700"
+                }`}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -484,12 +578,16 @@ export default function LoginPage() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-3.5 h-3.5 rounded border-zinc-300 text-black accent-black cursor-pointer"
               />
-              <span className="text-[11px] text-zinc-600">Remember me</span>
+              <span className={`text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-600"}`}>Remember me</span>
             </label>
           </div>
 
           {errorMessage && (
-            <div className="text-[11px] text-red-600 bg-red-50 border border-red-200 p-2 rounded-xl flex items-center gap-2">
+            <div className={`text-[11px] p-2 rounded-xl flex items-center gap-2 border ${
+              isDark
+                ? "text-rose-300 bg-rose-950/40 border-rose-800/60"
+                : "text-red-600 bg-red-50 border-red-200"
+            }`}>
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -498,13 +596,17 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full h-10 mt-1 rounded-full bg-zinc-950 hover:bg-black text-white text-xs font-medium flex items-center justify-center transition-colors cursor-pointer active:scale-[0.99] disabled:opacity-75 shadow-xs"
+            className={`w-full h-10 mt-1 rounded-full text-xs font-medium flex items-center justify-center transition-colors cursor-pointer active:scale-[0.99] disabled:opacity-75 shadow-xs ${
+              isDark
+                ? "bg-white text-zinc-950 hover:bg-zinc-200"
+                : "bg-zinc-950 hover:bg-black text-white"
+            }`}
           >
             {isLoading ? "Authenticating..." : "Sign In"}
           </button>
         </form>
 
-        <div className="mt-5 text-center text-[11px] text-zinc-500">
+        <div className={`mt-5 text-center text-[11px] ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
           <span>Don&apos;t have an account? </span>
           <button
             type="button"
@@ -513,7 +615,9 @@ export default function LoginPage() {
               setSignUpError(null);
               setShowSignUpModal(true);
             }}
-            className="font-medium text-zinc-900 underline underline-offset-4 hover:text-black cursor-pointer"
+            className={`font-medium underline underline-offset-4 cursor-pointer ${
+              isDark ? "text-white hover:text-zinc-200" : "text-zinc-900 hover:text-black"
+            }`}
           >
             Create an Account
           </button>
@@ -522,17 +626,23 @@ export default function LoginPage() {
 
       {/* Real Supabase Sign Up Modal */}
       {showSignUpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-zinc-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-1 border-b border-zinc-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className={`rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border space-y-4 animate-in fade-in zoom-in-95 duration-150 ${
+            isDark ? "bg-[#121215] border-white/[0.1]" : "bg-white border-zinc-200"
+          }`}>
+            <div className={`flex items-center justify-between pb-1 border-b ${
+              isDark ? "border-white/[0.08]" : "border-zinc-100"
+            }`}>
               <div>
-                <h3 className="font-bold text-lg text-zinc-950">Create an Account</h3>
-                <p className="text-xs text-zinc-500 mt-0.5">Directly registers in Supabase database</p>
+                <h3 className={`font-bold text-lg ${isDark ? "text-white" : "text-zinc-950"}`}>Create an Account</h3>
+                <p className={`text-xs mt-0.5 ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>Directly registers in Supabase database</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowSignUpModal(false)}
-                className="text-zinc-400 hover:text-zinc-900 p-1.5 rounded-full hover:bg-zinc-100 cursor-pointer"
+                className={`p-1.5 rounded-full cursor-pointer transition-colors ${
+                  isDark ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]" : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100"
+                }`}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -540,7 +650,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleRealSignUp} className="space-y-3.5">
               <div>
-                <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                <label className={`block text-[11px] font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                   Full Name
                 </label>
                 <input
@@ -549,12 +659,16 @@ export default function LoginPage() {
                   value={signUpName}
                   onChange={(e) => setSignUpName(e.target.value)}
                   placeholder="e.g. Rahul Sharma"
-                  className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                  className={`w-full h-9 px-4 rounded-full border text-xs transition-colors ${
+                    isDark
+                      ? "border-white/[0.1] bg-white/[0.04] text-white placeholder:text-zinc-500 focus:bg-[#18181D] focus:border-white/40 focus:ring-1 focus:ring-white/20"
+                      : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                <label className={`block text-[11px] font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                   Work Email
                 </label>
                 <input
@@ -563,12 +677,16 @@ export default function LoginPage() {
                   value={signUpEmail}
                   onChange={(e) => setSignUpEmail(e.target.value)}
                   placeholder="name@company.com"
-                  className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                  className={`w-full h-9 px-4 rounded-full border text-xs transition-colors ${
+                    isDark
+                      ? "border-white/[0.1] bg-white/[0.04] text-white placeholder:text-zinc-500 focus:bg-[#18181D] focus:border-white/40 focus:ring-1 focus:ring-white/20"
+                      : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                <label className={`block text-[11px] font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                   Password
                 </label>
                 <input
@@ -578,19 +696,27 @@ export default function LoginPage() {
                   value={signUpPassword}
                   onChange={(e) => setSignUpPassword(e.target.value)}
                   placeholder="Minimum 6 characters"
-                  className="w-full h-9 px-4 rounded-full border border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                  className={`w-full h-9 px-4 rounded-full border text-xs transition-colors ${
+                    isDark
+                      ? "border-white/[0.1] bg-white/[0.04] text-white placeholder:text-zinc-500 focus:bg-[#18181D] focus:border-white/40 focus:ring-1 focus:ring-white/20"
+                      : "border-zinc-200 bg-zinc-50/50 hover:bg-zinc-50 text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950"
+                  }`}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                  <label className={`block text-[11px] font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                     System Role
                   </label>
                   <select
                     value={signUpRole}
                     onChange={(e) => setSignUpRole(e.target.value as any)}
-                    className="w-full h-9 px-3 rounded-full border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950"
+                    className={`w-full h-9 px-3 rounded-full border text-xs ${
+                      isDark
+                        ? "border-white/[0.1] bg-[#18181D] text-white focus:border-white/40"
+                        : "border-zinc-200 bg-zinc-50/50 text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950"
+                    }`}
                   >
                     <option value="EMPLOYEE">Employee</option>
                     <option value="MANAGER">Manager</option>
@@ -599,13 +725,17 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-700 mb-1">
+                  <label className={`block text-[11px] font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                     Department
                   </label>
                   <select
                     value={signUpDepartment}
                     onChange={(e) => setSignUpDepartment(e.target.value)}
-                    className="w-full h-9 px-3 rounded-full border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950"
+                    className={`w-full h-9 px-3 rounded-full border text-xs ${
+                      isDark
+                        ? "border-white/[0.1] bg-[#18181D] text-white focus:border-white/40"
+                        : "border-zinc-200 bg-zinc-50/50 text-zinc-900 focus:bg-white focus:outline-none focus:border-zinc-950"
+                    }`}
                   >
                     <option value="Engineering">Engineering</option>
                     <option value="Product">Product</option>
@@ -617,7 +747,11 @@ export default function LoginPage() {
               </div>
 
               {signUpError && (
-                <div className="text-[11px] text-red-600 bg-red-50 border border-red-200 p-2 rounded-xl flex items-center gap-2">
+                <div className={`text-[11px] p-2 rounded-xl flex items-center gap-2 border ${
+                  isDark
+                    ? "text-rose-300 bg-rose-950/40 border-rose-800/60"
+                    : "text-red-600 bg-red-50 border-red-200"
+                }`}>
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{signUpError}</span>
                 </div>
@@ -627,14 +761,22 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowSignUpModal(false)}
-                  className="flex-1 h-9 rounded-full border border-zinc-200 text-xs font-medium text-zinc-700 hover:bg-zinc-50 cursor-pointer"
+                  className={`flex-1 h-9 rounded-full border text-xs font-medium cursor-pointer transition-colors ${
+                    isDark
+                      ? "border-white/[0.1] text-zinc-300 hover:bg-white/[0.05]"
+                      : "border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                  }`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={signUpLoading}
-                  className="flex-1 h-9 rounded-full bg-zinc-950 hover:bg-black text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-75"
+                  className={`flex-1 h-9 rounded-full text-xs font-medium transition-colors cursor-pointer disabled:opacity-75 ${
+                    isDark
+                      ? "bg-white text-zinc-950 hover:bg-zinc-200"
+                      : "bg-zinc-950 hover:bg-black text-white"
+                  }`}
                 >
                   {signUpLoading ? "Creating..." : "Create Account"}
                 </button>
@@ -645,16 +787,20 @@ export default function LoginPage() {
       )}
 
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-2xs p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-neutral-200 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-2xs p-4">
+          <div className={`rounded-3xl max-w-sm w-full p-6 shadow-2xl border space-y-4 ${
+            isDark ? "bg-[#121215] border-white/[0.1]" : "bg-white border-neutral-200"
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-neutral-900" />
-                <h3 className="font-bold text-sm text-neutral-900">Reset Password</h3>
+                <KeyRound className={`w-4 h-4 ${isDark ? "text-white" : "text-neutral-900"}`} />
+                <h3 className={`font-bold text-sm ${isDark ? "text-white" : "text-neutral-900"}`}>Reset Password</h3>
               </div>
               <button
                 onClick={() => setShowForgotModal(false)}
-                className="text-neutral-400 hover:text-neutral-900 p-1 cursor-pointer"
+                className={`p-1 cursor-pointer transition-colors ${
+                  isDark ? "text-zinc-400 hover:text-white" : "text-neutral-400 hover:text-neutral-900"
+                }`}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -662,15 +808,23 @@ export default function LoginPage() {
 
             {forgotSent ? (
               <div className="space-y-4 py-2">
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <div className="text-xs text-emerald-900">
+                <div className={`p-3 rounded-2xl flex items-start gap-2.5 border ${
+                  isDark
+                    ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-200"
+                    : "bg-emerald-50 border-emerald-200 text-emerald-900"
+                }`}>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <div className="text-xs">
                     Recovery link dispatched to <strong>{forgotEmail}</strong>.
                   </div>
                 </div>
                 <button
                   onClick={() => setShowForgotModal(false)}
-                  className="w-full h-9 rounded-full bg-black text-white text-xs font-medium cursor-pointer"
+                  className={`w-full h-9 rounded-full text-xs font-medium cursor-pointer transition-colors ${
+                    isDark
+                      ? "bg-white text-zinc-950 hover:bg-zinc-200"
+                      : "bg-black text-white"
+                  }`}
                 >
                   Back to Sign In
                 </button>
@@ -683,7 +837,7 @@ export default function LoginPage() {
                 }}
                 className="space-y-3"
               >
-                <p className="text-xs text-neutral-600 leading-relaxed">
+                <p className={`text-xs leading-relaxed ${isDark ? "text-zinc-400" : "text-neutral-600"}`}>
                   Enter your email to receive recovery instructions.
                 </p>
                 <input
@@ -692,19 +846,31 @@ export default function LoginPage() {
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   placeholder="name@company.com"
-                  className="w-full h-9 px-4 rounded-full border border-neutral-200 text-xs focus:outline-none focus:border-black"
+                  className={`w-full h-9 px-4 rounded-full border text-xs transition-colors ${
+                    isDark
+                      ? "border-white/[0.1] bg-white/[0.04] text-white placeholder:text-zinc-500 focus:bg-[#18181D] focus:border-white/40"
+                      : "border-neutral-200 text-xs focus:outline-none focus:border-black"
+                  }`}
                 />
                 <div className="flex gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="flex-1 h-9 rounded-full border border-neutral-200 text-xs font-medium text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+                    className={`flex-1 h-9 rounded-full border text-xs font-medium cursor-pointer transition-colors ${
+                      isDark
+                        ? "border-white/[0.1] text-zinc-300 hover:bg-white/[0.05]"
+                        : "border-neutral-200 text-neutral-700 hover:bg-neutral-50"
+                    }`}
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 h-9 rounded-full bg-black text-white text-xs font-medium hover:bg-neutral-800 cursor-pointer"
+                    className={`flex-1 h-9 rounded-full text-xs font-medium cursor-pointer transition-colors ${
+                      isDark
+                        ? "bg-white text-zinc-950 hover:bg-zinc-200"
+                        : "bg-black text-white hover:bg-neutral-800"
+                    }`}
                   >
                     Send Link
                   </button>
