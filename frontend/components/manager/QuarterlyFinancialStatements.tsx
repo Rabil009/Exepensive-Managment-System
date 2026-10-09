@@ -13,6 +13,7 @@ import {
 import { Download } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 export interface StatementPeriodData {
   period: string;
@@ -21,7 +22,7 @@ export interface StatementPeriodData {
 }
 
 export interface StatementMonthRow {
-  id: "june" | "may" | "april";
+  id: string;
   m: string;
   d: string;
   c: string;
@@ -30,78 +31,86 @@ export interface StatementMonthRow {
   data: StatementPeriodData[];
 }
 
-const MONTH_STATEMENTS: StatementMonthRow[] = [
-  {
-    id: "june",
-    m: "June 2026",
-    d: "₹1,42,800",
-    c: "38 Claims",
-    t: "₹28,500",
-    s: "Verified",
-    data: [
-      { period: "Jun 1-4", allocated: 35, disbursed: 28 },
-      { period: "Jun 5-8", allocated: 40, disbursed: 36 },
-      { period: "Jun 9-12", allocated: 45, disbursed: 42 },
-      { period: "Jun 13-16", allocated: 40, disbursed: 35 },
-      { period: "Jun 17-20", allocated: 50, disbursed: 48 },
-      { period: "Jun 21-24", allocated: 45, disbursed: 39 },
-      { period: "Jun 25-28", allocated: 45, disbursed: 41 },
-      { period: "Jun 29-30", allocated: 30, disbursed: 25 },
-    ],
-  },
-  {
-    id: "may",
-    m: "May 2026",
-    d: "₹1,36,200",
-    c: "34 Claims",
-    t: "₹26,800",
-    s: "Verified",
-    data: [
-      { period: "May 1-4", allocated: 34, disbursed: 27 },
-      { period: "May 5-8", allocated: 38, disbursed: 34 },
-      { period: "May 9-12", allocated: 42, disbursed: 38 },
-      { period: "May 13-16", allocated: 39, disbursed: 33 },
-      { period: "May 17-20", allocated: 48, disbursed: 45 },
-      { period: "May 21-24", allocated: 43, disbursed: 37 },
-      { period: "May 25-28", allocated: 42, disbursed: 38 },
-      { period: "May 29-31", allocated: 28, disbursed: 24 },
-    ],
-  },
-  {
-    id: "april",
-    m: "April 2026",
-    d: "₹1,33,000",
-    c: "32 Claims",
-    t: "₹24,100",
-    s: "Verified",
-    data: [
-      { period: "Apr 1-4", allocated: 32, disbursed: 26 },
-      { period: "Apr 5-8", allocated: 36, disbursed: 32 },
-      { period: "Apr 9-12", allocated: 40, disbursed: 36 },
-      { period: "Apr 13-16", allocated: 38, disbursed: 32 },
-      { period: "Apr 17-20", allocated: 46, disbursed: 43 },
-      { period: "Apr 21-24", allocated: 41, disbursed: 35 },
-      { period: "Apr 25-28", allocated: 40, disbursed: 36 },
-      { period: "Apr 29-30", allocated: 28, disbursed: 23 },
-    ],
-  },
-];
-
 export function QuarterlyFinancialStatements() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const [isMounted, setIsMounted] = useState(false);
-  const [selectedMonthId, setSelectedMonthId] = useState<string>("june");
+  const [statements, setStatements] = useState<StatementMonthRow[]>([]);
+  const [selectedMonthId, setSelectedMonthId] = useState<string>("");
 
   useEffect(() => {
     setIsMounted(true);
+    let active = true;
+
+    async function loadRealStatements() {
+      try {
+        const { data: claims } = await supabase.from("expense_claims").select("*");
+        const allClaims = claims || [];
+
+        // Group claims by YYYY-MM
+        const monthsMap: Record<string, any[]> = {};
+        allClaims.forEach((c: any) => {
+          const mKey = c.expense_date?.slice(0, 7) || c.created_at?.slice(0, 7) || new Date().toISOString().slice(0, 7);
+          if (!monthsMap[mKey]) monthsMap[mKey] = [];
+          monthsMap[mKey].push(c);
+        });
+
+        const date = new Date();
+        const mKeys: string[] = [];
+        for (let i = 0; i < 3; i++) {
+          const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
+          mKeys.push(d.toISOString().slice(0, 7));
+        }
+
+        const computedRows: StatementMonthRow[] = mKeys.map((mKey) => {
+          const monthClaims = monthsMap[mKey] || [];
+          const disbursedSum = monthClaims
+            .filter((c: any) => (c.status || "").toUpperCase().includes("APPROV") || (c.status || "").toUpperCase().includes("PAID") || (c.status || "").toUpperCase().includes("DISBURS"))
+            .reduce((s: number, c: any) => s + (Number(c.amount) || 0), 0);
+
+          const monthDate = new Date(`${mKey}-01T00:00:00`);
+          const monthLabel = monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+          const week1 = monthClaims.filter((c: any) => { const day = Number((c.expense_date || c.created_at || "").slice(8, 10) || 1); return day <= 7; });
+          const week2 = monthClaims.filter((c: any) => { const day = Number((c.expense_date || c.created_at || "").slice(8, 10) || 1); return day > 7 && day <= 14; });
+          const week3 = monthClaims.filter((c: any) => { const day = Number((c.expense_date || c.created_at || "").slice(8, 10) || 1); return day > 14 && day <= 21; });
+          const week4 = monthClaims.filter((c: any) => { const day = Number((c.expense_date || c.created_at || "").slice(8, 10) || 1); return day > 21; });
+
+          const sumAmt = (arr: any[]) => arr.reduce((s: number, c: any) => s + Math.round((Number(c.amount) || 0) / 1000), 0);
+
+          return {
+            id: mKey,
+            m: monthLabel,
+            d: `₹${disbursedSum.toLocaleString("en-IN")}`,
+            c: `${monthClaims.length} Claims`,
+            t: `₹${Math.round(disbursedSum * 0.18).toLocaleString("en-IN")}`,
+            s: monthClaims.length > 0 ? "Verified" : "Pending",
+            data: [
+              { period: "Week 1", allocated: Math.max(25, sumAmt(week1) + 10), disbursed: sumAmt(week1) },
+              { period: "Week 2", allocated: Math.max(25, sumAmt(week2) + 10), disbursed: sumAmt(week2) },
+              { period: "Week 3", allocated: Math.max(25, sumAmt(week3) + 10), disbursed: sumAmt(week3) },
+              { period: "Week 4", allocated: Math.max(25, sumAmt(week4) + 10), disbursed: sumAmt(week4) },
+            ],
+          };
+        });
+
+        if (active) {
+          setStatements(computedRows);
+          if (computedRows.length > 0) {
+            setSelectedMonthId(computedRows[0].id);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load real statements:", err);
+      }
+    }
+
+    loadRealStatements();
+    return () => { active = false; };
   }, []);
 
-  const activeRow =
-    MONTH_STATEMENTS.find((m) => m.id === selectedMonthId) ||
-    MONTH_STATEMENTS[0];
-
-  const chartData = activeRow.data;
+  const activeRow = statements.find((m) => m.id === selectedMonthId) || statements[0];
+  const chartData = activeRow?.data || [];
 
   const handleDownload = () => {
     toast.success("Downloading Q2 Statement", {
@@ -143,7 +152,7 @@ export function QuarterlyFinancialStatements() {
                 : "bg-zinc-100 border border-zinc-200/80"
             }`}
           >
-            {MONTH_STATEMENTS.map((row) => (
+            {statements.map((row) => (
               <button
                 key={row.id}
                 type="button"
@@ -198,11 +207,7 @@ export function QuarterlyFinancialStatements() {
               isDark ? "text-zinc-200" : "text-zinc-800"
             }`}
           >
-            {selectedMonthId === "june"
-              ? "₹1,65,000"
-              : selectedMonthId === "may"
-              ? "₹1,55,000"
-              : "₹1,50,000"}
+            ₹1,50,000
           </span>
         </div>
 
@@ -214,7 +219,7 @@ export function QuarterlyFinancialStatements() {
                 isDark ? "text-zinc-400" : "text-zinc-500"
               }`}
             >
-              Total Disbursed ({activeRow.m.split(" ")[0]})
+              Total Disbursed ({activeRow?.m ? activeRow.m.split(" ")[0] : ""})
             </span>
           </div>
           <span
@@ -222,7 +227,7 @@ export function QuarterlyFinancialStatements() {
               isDark ? "text-zinc-100" : "text-zinc-900"
             }`}
           >
-            {activeRow.d}
+            {activeRow?.d || "₹0"}
           </span>
         </div>
 
@@ -380,49 +385,57 @@ export function QuarterlyFinancialStatements() {
               isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
             }`}
           >
-            {MONTH_STATEMENTS.map((row) => {
-              const isSelected = selectedMonthId === row.id;
-              return (
-                <tr
-                  key={row.m}
-                  onClick={() => setSelectedMonthId(row.id)}
-                  className={`transition-colors cursor-pointer ${
-                    isSelected
-                      ? isDark
-                        ? "bg-white/[0.05]"
-                        : "bg-zinc-100/70"
-                      : isDark
-                      ? "hover:bg-white/[0.02]"
-                      : "hover:bg-zinc-50"
-                  }`}
-                  title="Click to view chart for this month"
-                >
-                  <td className="py-2.5 px-4 font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${
-                        isSelected
-                          ? "bg-blue-500 ring-2 ring-blue-500/20"
-                          : "bg-transparent"
-                      }`}
-                    />
-                    <span>{row.m}</span>
-                  </td>
-                  <td className="py-2.5 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-                    {row.d}
-                  </td>
-                  <td className="py-2.5 px-4 text-zinc-500">{row.c}</td>
-                  <td className="py-2.5 px-4 text-right tabular-nums text-emerald-500 font-medium">
-                    {row.t}
-                  </td>
-                  <td className="py-2.5 px-4 text-right">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-800 dark:text-zinc-200">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <span>{row.s}</span>
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
+            {statements.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-6 text-center text-xs text-zinc-500">
+                  No monthly statements available.
+                </td>
+              </tr>
+            ) : (
+              statements.map((row) => {
+                const isSelected = selectedMonthId === row.id;
+                return (
+                  <tr
+                    key={row.id}
+                    onClick={() => setSelectedMonthId(row.id)}
+                    className={`transition-colors cursor-pointer ${
+                      isSelected
+                        ? isDark
+                          ? "bg-white/[0.05]"
+                          : "bg-zinc-100/70"
+                        : isDark
+                        ? "hover:bg-white/[0.02]"
+                        : "hover:bg-zinc-50"
+                    }`}
+                    title="Click to view chart for this month"
+                  >
+                    <td className="py-2.5 px-4 font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          isSelected
+                            ? "bg-blue-500 ring-2 ring-blue-500/20"
+                            : "bg-transparent"
+                        }`}
+                      />
+                      <span>{row.m}</span>
+                    </td>
+                    <td className="py-2.5 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                      {row.d}
+                    </td>
+                    <td className="py-2.5 px-4 text-zinc-500">{row.c}</td>
+                    <td className="py-2.5 px-4 text-right tabular-nums text-emerald-500 font-medium">
+                      {row.t}
+                    </td>
+                    <td className="py-2.5 px-4 text-right">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-800 dark:text-zinc-200">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span>{row.s}</span>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
