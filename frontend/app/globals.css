@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+.login-gradient-background {
+  background: linear-gradient(180deg, #e5e5e5 0%, #b7b7b7 32%, #565656 65%, #080808 100%);
+}
+
 @utility font-forum {
   font-family: 'Forum', serif, Georgia, Cambria, Times, "Times New Roman";
 }
