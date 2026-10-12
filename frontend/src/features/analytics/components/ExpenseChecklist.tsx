@@ -19,7 +19,9 @@ const missingReceipt = (expense: Expense) => !expense.receipt?.trim();
 const missingReport = (expense: Expense) =>
   !expense.report?.trim() || expense.report === "Unassigned";
 const needsWork = (expense: Expense) =>
-  missingReceipt(expense) || expense.status === "Draft" || missingReport(expense);
+  missingReceipt(expense) ||
+  expense.status === "Draft" ||
+  missingReport(expense);
 
 export function ExpenseChecklist() {
   const { theme } = useTheme();
@@ -34,22 +36,37 @@ export function ExpenseChecklist() {
 
   const filters = [
     { id: "all", label: "All", count: attention.length },
-    { id: "receipts", label: "Receipts", count: attention.filter(missingReceipt).length },
-    { id: "drafts", label: "Drafts", count: attention.filter((e) => e.status === "Draft").length },
-    { id: "reports", label: "Reports", count: attention.filter(missingReport).length },
+    {
+      id: "receipts",
+      label: "Receipts",
+      count: attention.filter(missingReceipt).length,
+    },
+    {
+      id: "drafts",
+      label: "Drafts",
+      count: attention.filter((e) => e.status === "Draft").length,
+    },
+    {
+      id: "reports",
+      label: "Reports",
+      count: attention.filter(missingReport).length,
+    },
   ];
 
   const visible = attention.filter((expense) =>
     filter === "all"
       ? true
       : filter === "receipts"
-      ? missingReceipt(expense)
-      : filter === "drafts"
-      ? expense.status === "Draft"
-      : missingReport(expense)
+        ? missingReceipt(expense)
+        : filter === "drafts"
+          ? expense.status === "Draft"
+          : missingReport(expense),
   );
 
-  async function complete(expense: Expense, update: { report?: string; file?: File }) {
+  async function complete(
+    expense: Expense,
+    update: { report?: string; file?: File },
+  ) {
     try {
       await completeSubmittedExpense(expense.id, update);
       await refresh();
@@ -57,14 +74,18 @@ export function ExpenseChecklist() {
       setMessage(`Updated ${expense.merchant}.`);
     } catch (cause) {
       setError(true);
-      setMessage(cause instanceof Error ? cause.message : "Could not update the expense.");
+      setMessage(
+        cause instanceof Error
+          ? cause.message
+          : "Could not update the expense.",
+      );
     }
   }
 
   return (
     <section
       aria-label="Expense Checklist"
-      className={`rounded-xl p-5 flex flex-col justify-between transition-colors border ${
+      className={`rounded-xl p-5 flex flex-col transition-colors border ${
         isDark
           ? "bg-[#111113] border-white/[0.07]"
           : "bg-white border-zinc-200/80 shadow-xs"
@@ -92,8 +113,8 @@ export function ExpenseChecklist() {
               hasItems
                 ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                 : isDark
-                ? "bg-[#3B9B78]/10 text-[#3B9B78] border-[#3B9B78]/20"
-                : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  ? "bg-[#3B9B78]/10 text-[#3B9B78] border-[#3B9B78]/20"
+                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
             }`}
           >
             {hasItems ? `${attention.length} Need Action` : "All Clear"}
@@ -108,7 +129,7 @@ export function ExpenseChecklist() {
 
       {/* When there are actionable items: show filters and list */}
       {hasItems ? (
-        <div className="my-3 flex-1 flex flex-col">
+        <div className="mt-3 flex flex-col">
           {/* Minimalist Filter Tabs */}
           <div
             role="group"
@@ -129,8 +150,8 @@ export function ExpenseChecklist() {
                         ? "bg-[#25252D] border-white/[0.1] text-zinc-100 shadow-xs"
                         : "bg-zinc-900 border-zinc-900 text-white shadow-xs"
                       : isDark
-                      ? "bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:text-zinc-200"
-                      : "bg-zinc-50 border-zinc-200/80 text-zinc-600 hover:text-zinc-900"
+                        ? "bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:text-zinc-200"
+                        : "bg-zinc-50 border-zinc-200/80 text-zinc-600 hover:text-zinc-900"
                   }`}
                 >
                   {item.label}{" "}
@@ -142,10 +163,17 @@ export function ExpenseChecklist() {
             })}
           </div>
 
-          {message && <p role={error ? "alert" : "status"} className={`text-xs mb-2 ${error ? "text-rose-500" : "text-emerald-500"}`}>{message}</p>}
+          {message && (
+            <p
+              role={error ? "alert" : "status"}
+              className={`text-xs mb-2 ${error ? "text-rose-500" : "text-emerald-500"}`}
+            >
+              {message}
+            </p>
+          )}
 
           {/* Actionable items list */}
-          <div className="flex flex-col gap-2.5 flex-1 max-h-[220px] overflow-y-auto pr-1">
+          <div className="flex max-h-[220px] min-h-0 flex-col gap-2.5 overflow-y-auto pr-1">
             {visible.map((expense) => (
               <article
                 key={expense.id}
@@ -161,8 +189,8 @@ export function ExpenseChecklist() {
                       {expense.merchant}
                     </h3>
                     <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                      {expense.date ? displayDate(expense.date) : "Date needed"} ·{" "}
-                      {expense.category}
+                      {expense.date ? displayDate(expense.date) : "Date needed"}{" "}
+                      · {expense.category}
                     </p>
                   </div>
                   <strong className="text-xs font-semibold tabular-nums text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
@@ -171,13 +199,65 @@ export function ExpenseChecklist() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-200/60 dark:border-white/[0.05]">
-                  {missingReceipt(expense) && expense.raw_status === "SUBMITTED" ? <label className="cursor-pointer rounded-md bg-[#5A78A6] text-white px-2.5 py-1 text-xs font-medium flex items-center gap-1.5 relative">
-                    <span>Attach Receipt</span><input type="file" aria-label={`Add receipt for ${expense.merchant}`} accept=".pdf,.png,.jpg,.jpeg,.heic" className="absolute inset-0 opacity-0 cursor-pointer w-full" onChange={(event) => { const file = event.target.files?.[0]; if (file) void complete(expense, { file }); event.target.value = ""; }} />
-                  </label> : missingReceipt(expense) && <span className="text-xs text-amber-500">Receipt needed</span>}
-                  {missingReport(expense) && expense.raw_status === "SUBMITTED" ? <form onSubmit={(event) => { event.preventDefault(); const input = event.currentTarget.elements.namedItem("report") as HTMLInputElement; if (input.value.trim()) void complete(expense, { report: input.value.trim() }); }} className="flex gap-1">
-                    <input name="report" aria-label={`Report for ${expense.merchant}`} placeholder="Report name" className="h-7 px-2 rounded border text-xs bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.08]" required />
-                    <button type="submit" className="h-7 px-2 rounded border text-xs border-zinc-200 dark:border-white/[0.08]">Assign</button>
-                  </form> : missingReport(expense) && <span className="text-xs text-amber-500">Report needed</span>}
+                  {missingReceipt(expense) &&
+                  expense.raw_status === "SUBMITTED" ? (
+                    <label className="cursor-pointer rounded-md bg-[#5A78A6] text-white px-2.5 py-1 text-xs font-medium flex items-center gap-1.5 relative">
+                      <span>Attach Receipt</span>
+                      <input
+                        type="file"
+                        aria-label={`Add receipt for ${expense.merchant}`}
+                        accept=".pdf,.png,.jpg,.jpeg,.heic"
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) void complete(expense, { file });
+                          event.target.value = "";
+                        }}
+                      />
+                    </label>
+                  ) : (
+                    missingReceipt(expense) && (
+                      <span className="text-xs text-amber-500">
+                        Receipt needed
+                      </span>
+                    )
+                  )}
+                  {missingReport(expense) &&
+                  expense.raw_status === "SUBMITTED" ? (
+                    <form
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        const input = event.currentTarget.elements.namedItem(
+                          "report",
+                        ) as HTMLInputElement;
+                        if (input.value.trim())
+                          void complete(expense, {
+                            report: input.value.trim(),
+                          });
+                      }}
+                      className="flex gap-1"
+                    >
+                      <input
+                        name="report"
+                        aria-label={`Report for ${expense.merchant}`}
+                        placeholder="Report name"
+                        className="h-7 px-2 rounded border text-xs bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.08]"
+                        required
+                      />
+                      <button
+                        type="submit"
+                        className="h-7 px-2 rounded border text-xs border-zinc-200 dark:border-white/[0.08]"
+                      >
+                        Assign
+                      </button>
+                    </form>
+                  ) : (
+                    missingReport(expense) && (
+                      <span className="text-xs text-amber-500">
+                        Report needed
+                      </span>
+                    )
+                  )}
                   {expense.status === "Draft" && (
                     <Link
                       href={`/employee/expenses/new?draft=${encodeURIComponent(expense.id)}`}
@@ -194,7 +274,7 @@ export function ExpenseChecklist() {
         </div>
       ) : (
         /* Empty State: Simple, clean, centered, no clutter */
-        <div className="my-6 py-6 flex flex-col items-center justify-center text-center">
+        <div className="my-6 flex flex-col items-center justify-center py-6 text-center">
           <div className="w-11 h-11 rounded-full bg-[#3B9B78]/10 text-[#3B9B78] flex items-center justify-center mb-3 border border-[#3B9B78]/20">
             <CheckCircle2 className="h-5 w-5" />
           </div>
@@ -206,7 +286,8 @@ export function ExpenseChecklist() {
             You&apos;re all caught up
           </h3>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-[280px]">
-            Every expense has a verified receipt attached and an assigned report.
+            Every expense has a verified receipt attached and an assigned
+            report.
           </p>
           <div className="mt-4 flex items-center gap-2">
             <Link
@@ -229,7 +310,7 @@ export function ExpenseChecklist() {
 
       {/* Clean Footer */}
       <div
-        className={`flex justify-between items-center gap-3 pt-3 border-t text-xs ${
+        className={`mt-4 flex items-center justify-between gap-3 border-t pt-3 text-xs ${
           isDark ? "border-white/[0.06]" : "border-zinc-200/80"
         }`}
       >

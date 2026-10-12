@@ -17,13 +17,15 @@ import {
 } from "../data/newExpenseApi";
 import { scanReceiptFile } from "../utils/receiptScanner";
 
-function paymentMethodLabel(value: string | null | undefined) {
-  if (!value) return "Personal (Out-of-Pocket)";
-  const normalized = value.toLowerCase();
-  if (normalized.includes("card") || normalized.includes("corporate")) {
+function paymentMethodLabel(value?: string | null) {
+  const normalized = (value || "").toUpperCase();
+  if (normalized.includes("CORPORATE") || normalized.startsWith("CORP")) {
     return "Corporate Card";
   }
-  return "Personal (Out-of-Pocket)";
+  if (normalized.startsWith("PERSONAL") || !value) {
+    return "Personal (Out-of-Pocket)";
+  }
+  return value;
 }
 
 export function useExpenseForm() {
@@ -31,6 +33,10 @@ export function useExpenseForm() {
   const params = useSearchParams();
   const draftParam = params.get("draft");
   const { expenses, refresh, upsertDraft, removeDraft } = useExpenses();
+  const expensesRef = useRef(expenses);
+  useEffect(() => {
+    expensesRef.current = expenses;
+  }, [expenses]);
   const [draft, setDraft] = useState<Draft>(() => {
     const existing = expenses.find(
       (expense) =>
@@ -43,7 +49,7 @@ export function useExpenseForm() {
         amount: String(existing.amount),
         currency: "INR",
         report: existing.report || "Unassigned",
-        paymentMethod: existing.paymentMethod || "Personal (Out-of-Pocket)",
+        paymentMethod: paymentMethodLabel(existing.paymentMethod),
         purpose: existing.description,
         attendees: existing.attendees || [],
         receipt: existing.receipt || "",
@@ -121,8 +127,9 @@ export function useExpenseForm() {
     }
     const id = draftParam || cachedId;
     if (!id) return;
+    if (draftParam) window.scrollTo({ top: 0, behavior: "smooth" });
 
-    const listedDraft = expenses.find(
+    const listedDraft = expensesRef.current.find(
       (expense) => expense.id === id && expense.status === "Draft",
     );
     if (listedDraft) {
@@ -185,7 +192,7 @@ export function useExpenseForm() {
     return () => {
       active = false;
     };
-  }, [draftParam, expenses]);
+  }, [draftParam]);
 
   useEffect(() => {
     if (submitted || saved) return;
@@ -360,12 +367,7 @@ export function useExpenseForm() {
         } catch {
           /* Optional cache. */
         }
-        if (typeof window !== "undefined") {
-          window.location.href = "/employee/dashboard";
-        } else {
-          router.push("/employee/dashboard");
-        }
-        return;
+        router.replace("/employee/expenses/new");
       }
       await refresh();
       void loadExpenseOptions()

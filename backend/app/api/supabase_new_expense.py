@@ -72,24 +72,17 @@ router = APIRouter(prefix="/api/employee/new-expense", tags=["employee-new-expen
 @router.get("/options")
 def expense_options(gateway: SupabaseExpenseGateway = Depends(get_gateway)):
     owner = gateway.employee()["id"]
-    transactions = gateway.request(
-        "GET", "/rest/v1/employee_card_transactions",
-        params={"employee_id": f"eq.{owner}", "select": "id,card_id,transaction_date,merchant,purpose,amount,currency,status",
-                "status": "in.(PENDING,SETTLED)", "order": "transaction_date.desc", "limit": 100},
-    ).json()
     claims = gateway.request(
         "GET", "/rest/v1/expense_claims",
-        params={"employee_id": f"eq.{owner}", "select": "report_name,linked_transaction_id"},
+        params={"employee_id": f"eq.{owner}", "select": "report_name"},
     ).json()
     drafts = gateway.request(
         "GET", "/rest/v1/employee_expense_drafts",
-        params={"employee_id": f"eq.{owner}", "select": "report_name,linked_transaction_id"},
+        params={"employee_id": f"eq.{owner}", "select": "report_name"},
     ).json()
-    linked = {row["linked_transaction_id"] for row in claims + drafts if row.get("linked_transaction_id")}
     return {
         "categories": list(CATEGORIES),
         "reports": sorted({row["report_name"] for row in claims + drafts if row.get("report_name")}),
-        "unlinked_transactions": [row for row in transactions if row["id"] not in linked],
     }
 
 
