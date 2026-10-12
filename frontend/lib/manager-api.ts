@@ -55,6 +55,34 @@ export interface QuarterlyReport {
   topDepartment: string;
 }
 
+export function normalizeManagerClaimStatus(rawStatus?: string): "Pending" | "Approved" | "Rejected" {
+  const s = (rawStatus || "").toUpperCase().trim();
+  if (s.includes("REJECT")) {
+    return "Rejected";
+  }
+  if (
+    s.includes("APPROV") ||
+    s === "PAID" ||
+    s === "DISBURSED" ||
+    s === "CLOSED" ||
+    s === "SETTLED" ||
+    s === "PAYMENT_PENDING"
+  ) {
+    return "Approved";
+  }
+  return "Pending";
+}
+
+export function normalizeCategory(rawCat?: string): "Travel" | "Hotel" | "Meals" | "Software" | "Transport" | "Equipment" {
+  const c = (rawCat || "").toUpperCase();
+  if (c.includes("HOTEL") || c.includes("ACCOMMODATION")) return "Hotel";
+  if (c.includes("MEAL") || c.includes("FOOD")) return "Meals";
+  if (c.includes("SOFT") || c.includes("APP") || c.includes("CLOUD")) return "Software";
+  if (c.includes("TRANSPORT") || c.includes("UBER") || c.includes("CAB")) return "Transport";
+  if (c.includes("EQUIP") || c.includes("OFFICE") || c.includes("HARDWARE")) return "Equipment";
+  return "Travel";
+}
+
 /**
  * Fetch Manager Claims from FastAPI backend if reachable, otherwise direct Supabase Cloud query
  */
@@ -97,8 +125,8 @@ export async function fetchManagerClaims(params?: {
     if (!error && data) {
       let filtered = data;
       if (params?.status && params.status !== "All") {
-        const s = params.status.toUpperCase();
-        filtered = filtered.filter((item: any) => (item.status || "").toUpperCase().includes(s));
+        const target = params.status.toLowerCase();
+        filtered = filtered.filter((item: any) => normalizeManagerClaimStatus(item.status).toLowerCase() === target);
       }
       if (params?.department && params.department !== "All") {
         filtered = filtered.filter((item: any) => item.employee_department === params.department);
@@ -114,27 +142,21 @@ export async function fetchManagerClaims(params?: {
       }
 
       return filtered.map((item: any) => {
-        const rawStatus = (item.status || "Pending").toUpperCase();
-        const normStatus = rawStatus.includes("APPROV")
-          ? "Approved"
-          : rawStatus.includes("REJECT")
-          ? "Rejected"
-          : "Pending";
-
         return {
           id: item.id,
           employeeName: item.employee_name || "Employee",
           department: item.employee_department || "Engineering",
           costCenter: item.cost_center || "CC-ENG-104",
-          category: (item.category || "Travel") as any,
+          category: normalizeCategory(item.category),
           description: item.description || item.title || "",
           amount: Number(item.amount) || 0,
           date: item.created_at
             ? new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
             : "Today",
-          status: normStatus,
-          priority: Number(item.amount) > 5000 ? "High" : "Medium",
+          status: normalizeManagerClaimStatus(item.status),
+          priority: Number(item.amount) > 10000 ? "High" : Number(item.amount) > 3000 ? "Medium" : "Low",
           receiptVerified: Boolean(item.receipt_url || item.receipt_name),
+          merchant: item.merchant || item.title || "Merchant",
           policyNotes: item.policy_violation,
           managerRemark: item.manager_remark,
         };
@@ -254,11 +276,11 @@ export async function fetchManagerSpendSummary(): Promise<TeamSpendSummary | nul
     const all = claims || [];
     const totalSpent = all.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
     const pendingClaims = all.filter(
-      (c) => (c.status || "").toUpperCase().includes("SUBMIT") || (c.status || "").toUpperCase().includes("PEND")
+      (c) => normalizeManagerClaimStatus(c.status) === "Pending"
     );
     const pendingAmount = pendingClaims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
-    const approvedCount = all.filter((c) => (c.status || "").toUpperCase().includes("APPROV")).length;
-    const rejectedCount = all.filter((c) => (c.status || "").toUpperCase().includes("REJECT")).length;
+    const approvedCount = all.filter((c) => normalizeManagerClaimStatus(c.status) === "Approved").length;
+    const rejectedCount = all.filter((c) => normalizeManagerClaimStatus(c.status) === "Rejected").length;
 
     return {
       totalSpent,
