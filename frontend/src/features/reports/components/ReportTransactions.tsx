@@ -310,6 +310,11 @@ export function ReportTransactions({ model }: Props) {
           date={activeReceipt.date}
           category={activeReceipt.category}
           employeeName={activeReceipt.employee_name}
+          onReceiptUpdated={(newUrl, newName) => {
+            setActiveReceipt((prev) =>
+              prev ? { ...prev, receiptUrl: newUrl, receipt: newName } : null
+            );
+          }}
         />
       )}
     </section>

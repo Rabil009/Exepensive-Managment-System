@@ -59,6 +59,7 @@ export async function saveNewExpense(
       purpose: draft.purpose,
       attendees: draft.attendees,
       linked_transaction_id: draft.linkedTransactionId,
+      receipt: draft.receipt,
     }),
   );
   if (file) body.set("file", file);

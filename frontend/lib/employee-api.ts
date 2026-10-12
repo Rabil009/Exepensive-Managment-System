@@ -1135,7 +1135,8 @@ export async function employeeRequest(
               // Upload to storage bucket under employee folder to satisfy RLS
               const fileExt = file.name.split('.').pop() || 'png';
               const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-              const filePath = `${effectiveEmpId}/${Date.now()}_${cleanName}`;
+              const storageFolder = authUser?.id || effectiveEmpId || "receipts";
+              const filePath = `${storageFolder}/${Date.now()}_${cleanName}`;
               const { error: uploadError } = await supabase.storage
                 .from("receipts")
                 .upload(filePath, file, { contentType: file.type || "image/png", upsert: true });
@@ -1149,6 +1150,13 @@ export async function employeeRequest(
             } catch (convErr) {
               console.warn("Receipt upload notice:", convErr);
             }
+          }
+
+          if (!receiptUrl && parsed.receipt_url) {
+            receiptUrl = parsed.receipt_url;
+          }
+          if (!receiptName && (parsed.receipt || parsed.receipt_name)) {
+            receiptName = parsed.receipt || parsed.receipt_name;
           }
 
           if (action === "Draft") {

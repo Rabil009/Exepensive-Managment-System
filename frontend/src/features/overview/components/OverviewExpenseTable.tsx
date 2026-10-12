@@ -303,7 +303,14 @@ export function OverviewExpenseTable({ model }: Props) {
                                 : item.receipt || "No receipt"}
                             </button>
                           ) : (
-                            <span>No receipt</span>
+                            <button
+                              type="button"
+                              className="hover:underline text-xs text-amber-600 dark:text-amber-400 font-medium cursor-pointer"
+                              onClick={() => setActiveReceipt(item)}
+                              title="Upload receipt proof"
+                            >
+                              Upload receipt
+                            </button>
                           )}
                         </div>
                       </td>
@@ -388,6 +395,12 @@ export function OverviewExpenseTable({ model }: Props) {
           date={activeReceipt.date}
           category={activeReceipt.category}
           employeeName={activeReceipt.employee_name}
+          onReceiptUpdated={(newUrl, newName) => {
+            setActiveReceipt((prev) =>
+              prev ? { ...prev, receiptUrl: newUrl, receipt: newName } : null
+            );
+            void model.refresh();
+          }}
         />
       )}
     </div>

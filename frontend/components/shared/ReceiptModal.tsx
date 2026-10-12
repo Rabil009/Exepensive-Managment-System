@@ -29,6 +29,7 @@ export interface ReceiptModalProps {
   date?: string;
   employeeName?: string;
   category?: string;
+  onReceiptUpdated?: (newUrl: string, newName: string) => void;
 }
 
 export function ReceiptModal({
@@ -43,6 +44,7 @@ export function ReceiptModal({
   date,
   employeeName,
   category,
+  onReceiptUpdated,
 }: ReceiptModalProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -65,11 +67,9 @@ export function ReceiptModal({
         .then(({ data }) => {
           if (data?.receipt_url) {
             setLoadedUrl(data.receipt_url);
+            if (data.receipt_name) setLoadedName(data.receipt_name);
           } else {
-            setLoadedUrl(undefined);
-          }
-          if (data?.receipt_name) {
-            setLoadedName(data.receipt_name);
+            setLoadedUrl((prev) => prev || undefined);
           }
         });
     } else {
@@ -116,10 +116,11 @@ export function ReceiptModal({
       let finalUrl = dataUrl;
       try {
         const { data: sessionData } = await supabase.auth.getSession();
-        const userId = sessionData?.session?.user?.id || "receipts";
+        const userId = sessionData?.session?.user?.id;
         const fileExt = file.name.split('.').pop() || 'png';
         const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-        const filePath = `${userId}/${claimId || "claim"}_${Date.now()}.${fileExt}`;
+        const folder = userId || "anonymous";
+        const filePath = `${folder}/${claimId || "claim"}_${Date.now()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage
           .from("receipts")
           .upload(filePath, file, { contentType: file.type || "image/png", upsert: true });
@@ -129,13 +130,18 @@ export function ReceiptModal({
           if (publicData?.publicUrl) {
             finalUrl = publicData.publicUrl;
           }
+        } else {
+          console.warn("Storage upload note:", uploadError.message);
         }
       } catch (storageErr) {
         console.warn("Storage upload notice:", storageErr);
       }
 
+      setLoadedUrl(finalUrl);
+      setLoadedName(file.name);
+
       if (claimId) {
-        await supabase
+        const { error: dbError } = await supabase
           .from("expense_claims")
           .update({
             receipt_url: finalUrl,
@@ -144,7 +150,13 @@ export function ReceiptModal({
             receipt_size_bytes: file.size,
           })
           .eq("id", claimId);
+
+        if (dbError) {
+          console.error("Expense claim receipt update error:", dbError);
+        }
       }
+
+      onReceiptUpdated?.(finalUrl, file.name);
     } catch (err) {
       console.error("Receipt upload error:", err);
     } finally {
