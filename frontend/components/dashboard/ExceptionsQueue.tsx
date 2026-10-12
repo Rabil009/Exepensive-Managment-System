@@ -32,7 +32,7 @@ export function ExceptionsQueue({
   const displayExceptions = exceptions !== undefined ? exceptions : storeExceptions;
 
   return (
-    <div className={`rounded-xl overflow-hidden transition-colors h-full flex flex-col justify-between border ${
+    <div className={`rounded-xl overflow-hidden transition-colors h-full flex flex-col justify-start border ${
       isDark
         ? "bg-[#111113] border-white/[0.07]"
         : "bg-white border-zinc-200/80 shadow-xs"
