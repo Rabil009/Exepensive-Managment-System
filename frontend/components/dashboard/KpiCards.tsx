@@ -15,14 +15,14 @@ export interface FinanceKpis {
 }
 
 const DEFAULT_KPIS: FinanceKpis = {
-  awaitingVerificationCount: 24,
-  awaitingVerificationHighPriority: 8,
-  approvedAmount: "₹8,42,500",
+  awaitingVerificationCount: 0,
+  awaitingVerificationHighPriority: 0,
+  approvedAmount: "₹0.00",
   approvedPeriod: "This month",
-  reimbursementsPendingCount: 18,
-  reimbursementsPendingAmount: "₹1,24,800 total",
-  paymentsPendingCount: 12,
-  paymentsPendingAmount: "₹76,400 total",
+  reimbursementsPendingCount: 0,
+  reimbursementsPendingAmount: "₹0 total",
+  paymentsPendingCount: 0,
+  paymentsPendingAmount: "₹0 total",
 };
 
 interface KpiCardsProps {

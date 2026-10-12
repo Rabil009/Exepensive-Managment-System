@@ -234,7 +234,19 @@ export function ReimbursementsView() {
                 isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
               }`}
             >
-              {reimbursements.map((r) => (
+              {reimbursements.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className={`py-8 text-center text-xs ${
+                      isDark ? "text-zinc-500" : "text-zinc-400"
+                    }`}
+                  >
+                    No settled reimbursements yet. Disburse an approved claim above to record the first electronic settlement.
+                  </td>
+                </tr>
+              ) : (
+                reimbursements.map((r) => (
                 <tr
                   key={r.id}
                   className={`transition-colors ${
@@ -283,8 +295,9 @@ export function ReimbursementsView() {
                     </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
           </table>
         </div>
       </div>
