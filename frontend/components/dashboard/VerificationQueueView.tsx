@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, CreditCard } from "lucide-react";
 import { useFinanceStore } from "@/lib/finance-store";
 import { useTheme } from "@/lib/theme-store";
 import { formatCurrency, getEmployeeAvatar } from "@/lib";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { ExpenseClaim } from "@/types/finance";
+import {
+  fetchCardRequests,
+  approveCardRequest,
+  rejectCardRequest,
+  type CardApprovalRequest,
+} from "@/lib/manager-api";
 
 export function VerificationQueueView() {
   const {
@@ -21,12 +27,39 @@ export function VerificationQueueView() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  const [activeTab, setActiveTab] = useState<"CLAIMS" | "CARDS">("CLAIMS");
+  const [cardRequests, setCardRequests] = useState<CardApprovalRequest[]>([]);
   const [search, setSearch] = useState("");
   const [actionModal, setActionModal] = useState<{
     type: "REJECT" | "SEND_BACK" | "HOLD";
     claim: ExpenseClaim;
   } | null>(null);
   const [actionReason, setActionReason] = useState("");
+
+  const loadCards = async () => {
+    const list = await fetchCardRequests();
+    setCardRequests(list);
+  };
+
+  useEffect(() => {
+    loadCards();
+  }, []);
+
+  const handleApproveCard = async (req: CardApprovalRequest) => {
+    setCardRequests((prev) =>
+      prev.map((r) => (r.id === req.id ? { ...r, status: "Approved" as const } : r))
+    );
+    await approveCardRequest(req);
+    await loadCards();
+  };
+
+  const handleRejectCard = async (req: CardApprovalRequest) => {
+    setCardRequests((prev) =>
+      prev.map((r) => (r.id === req.id ? { ...r, status: "Rejected" as const } : r))
+    );
+    await rejectCardRequest(req.id);
+    await loadCards();
+  };
 
   const pendingClaims = claims.filter(
     (c) =>
@@ -41,6 +74,14 @@ export function VerificationQueueView() {
       c.title.toLowerCase().includes(search.toLowerCase()) ||
       c.id.toLowerCase().includes(search.toLowerCase()) ||
       (c.merchant && c.merchant.toLowerCase().includes(search.toLowerCase()))
+  );
+
+  const displayedCardRequests = cardRequests.filter(
+    (r) =>
+      !search.trim() ||
+      r.employeeName.toLowerCase().includes(search.toLowerCase()) ||
+      r.cardName.toLowerCase().includes(search.toLowerCase()) ||
+      r.department.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleConfirmAction = () => {
@@ -106,7 +147,55 @@ export function VerificationQueueView() {
         </div>
       </div>
 
-      {/* Claims Table */}
+      {/* Section Mode Toggle */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab("CLAIMS")}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 border ${
+            activeTab === "CLAIMS"
+              ? isDark
+                ? "bg-white text-black border-white shadow-xs font-bold"
+                : "bg-black text-white border-black shadow-xs font-bold"
+              : isDark
+              ? "bg-[#111113] text-zinc-400 border-white/[0.08] hover:text-white"
+              : "bg-white text-zinc-600 border-zinc-200 hover:text-black"
+          }`}
+        >
+          <span>Expense Claims Queue</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+            activeTab === "CLAIMS"
+              ? isDark ? "bg-black/10 text-black font-bold" : "bg-white/20 text-white font-bold"
+              : "bg-zinc-200 dark:bg-white/10 text-zinc-600 dark:text-zinc-300"
+          }`}>
+            {filtered.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("CARDS")}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 border ${
+            activeTab === "CARDS"
+              ? isDark
+                ? "bg-white text-black border-white shadow-xs font-bold"
+                : "bg-black text-white border-black shadow-xs font-bold"
+              : isDark
+              ? "bg-[#111113] text-zinc-400 border-white/[0.08] hover:text-white"
+              : "bg-white text-zinc-600 border-zinc-200 hover:text-black"
+          }`}
+        >
+          <CreditCard className="h-3.5 w-3.5" />
+          <span>Corporate Card &amp; Limit Requests</span>
+          {cardRequests.filter(r => r.status === "Pending").length > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500 text-white font-bold animate-pulse">
+              {cardRequests.filter(r => r.status === "Pending").length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Main Table Container */}
       <div
         className={`rounded-xl overflow-hidden border transition-colors ${
           isDark
@@ -114,8 +203,136 @@ export function VerificationQueueView() {
             : "bg-white border-zinc-200/80 shadow-xs"
         }`}
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {activeTab === "CARDS" ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  className={`text-xs font-medium border-b ${
+                    isDark
+                      ? "border-white/[0.06] text-zinc-400 bg-white/[0.01]"
+                      : "border-zinc-200/60 text-zinc-500 bg-zinc-50/50"
+                  }`}
+                >
+                  <th className="py-2.5 px-4 font-medium">Request Type</th>
+                  <th className="py-2.5 px-4 font-medium">Employee</th>
+                  <th className="py-2.5 px-4 font-medium">Card Name / Purpose</th>
+                  <th className="py-2.5 px-4 font-medium text-right">Requested Limit</th>
+                  <th className="py-2.5 px-4 font-medium">Requested On</th>
+                  <th className="py-2.5 px-4 font-medium">Status</th>
+                  <th className="py-2.5 px-4 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody
+                className={`divide-y text-xs ${
+                  isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
+                }`}
+              >
+                {displayedCardRequests.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className={`py-8 text-center text-xs ${
+                        isDark ? "text-zinc-500" : "text-zinc-400"
+                      }`}
+                    >
+                      No corporate card or limit requests match the current search.
+                    </td>
+                  </tr>
+                ) : (
+                  displayedCardRequests.map((req) => (
+                    <tr
+                      key={req.id}
+                      className={`transition-colors ${
+                        isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
+                      }`}
+                    >
+                      <td className="py-3 px-4">
+                        <span className={`inline-flex items-center gap-1.5 font-semibold text-xs ${
+                          req.requestType === "VIRTUAL_CARD" ? "text-blue-500" : "text-purple-500"
+                        }`}>
+                          <CreditCard className="h-3.5 w-3.5" />
+                          {req.requestType === "VIRTUAL_CARD" ? "Virtual Card" : "Limit Increase"}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative h-8 w-8 rounded-full overflow-hidden shrink-0 ring-1 ring-black/5 dark:ring-white/10 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                            <img
+                              src={getEmployeeAvatar(req.employeeName)}
+                              alt={req.employeeName}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className={`font-medium text-[13px] leading-tight truncate ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                              {req.employeeName}
+                            </span>
+                            <span className={`text-[11.5px] leading-tight mt-0.5 truncate ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
+                              {req.department}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className={`py-3 px-4 font-medium text-xs max-w-xs truncate ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
+                        {req.cardName}
+                      </td>
+                      <td className={`py-3 px-4 text-right font-semibold tabular-nums text-sm ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
+                        {formatCurrency(req.requestedLimit, "INR")}
+                      </td>
+                      <td className={`py-3 px-4 text-xs tabular-nums ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
+                        {req.createdAt}
+                      </td>
+                      <td className="py-3 px-4">
+                        <StatusBadge
+                          tone={
+                            req.status === "Approved"
+                              ? "success"
+                              : req.status === "Pending"
+                              ? "warning"
+                              : "danger"
+                          }
+                        >
+                          {req.status}
+                        </StatusBadge>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {req.status === "Pending" ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleApproveCard(req)}
+                              className="h-7 px-3 rounded-md text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors cursor-pointer shadow-xs"
+                            >
+                              {req.requestType === "VIRTUAL_CARD" ? "Issue Card" : "Approve Limit"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRejectCard(req)}
+                              className={`h-7 px-2.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                                isDark
+                                  ? "text-rose-400 hover:text-rose-300 hover:bg-rose-500/10"
+                                  : "text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                              }`}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-zinc-400">
+                            {req.status === "Approved" ? "Authorized" : "Declined"}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
             <thead>
               <tr
                 className={`text-xs font-medium border-b ${
@@ -286,6 +503,7 @@ export function VerificationQueueView() {
             </tbody>
           </table>
         </div>
+      )}
       </div>
 
       {/* Decision Reason Action Modal */}

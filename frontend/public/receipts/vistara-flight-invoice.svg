@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1050" width="800" height="1050" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <style>
+    .title { font-size: 22px; font-weight: 700; fill: #1e1b4b; }
+    .subtitle { font-size: 11px; fill: #6b7280; }
+    .label { font-size: 11px; font-weight: 600; fill: #4b5563; text-transform: uppercase; letter-spacing: 0.5px; }
+    .val { font-size: 13px; font-weight: 500; fill: #111827; }
+    .val-bold { font-size: 14px; font-weight: 700; fill: #111827; }
+    .th { font-size: 11px; font-weight: 600; fill: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+    .td { font-size: 12px; fill: #1f2937; }
+    .divider { stroke: #e5e7eb; stroke-width: 1; }
+    .badge { fill: #ecfdf5; stroke: #a7f3d0; stroke-width: 1; rx: 4; }
+    .badge-text { font-size: 10px; font-weight: 700; fill: #065f46; letter-spacing: 0.5px; }
+  </style>
+
+  <!-- Outer Border Container -->
+  <rect x="20" y="20" width="760" height="1010" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+
+  <!-- Top Accent Bar -->
+  <path d="M 20 28 Q 20 20 28 20 L 772 20 Q 780 20 780 28 L 780 32 L 20 32 Z" fill="#431407"/>
+  <rect x="20" y="32" width="760" height="4" fill="#9a3412"/>
+
+  <!-- Header -->
+  <g transform="translate(50, 65)">
+    <!-- Brand / Airline -->
+    <text x="0" y="22" class="title" fill="#7c2d12">Vistara</text>
+    <text x="0" y="38" class="subtitle">Tata SIA Airlines Limited &bull; A Tata &amp; Singapore Airlines Joint Venture</text>
+    <text x="0" y="52" class="subtitle">Regd. Office: Jeevan Bharati Tower 1, 124 Connaught Circus, New Delhi 110001</text>
+    <text x="0" y="66" class="subtitle">GSTIN: 07AABCT2345H1Z4 &bull; CIN: U62200DL2013PLC259837 &bull; SAC: 996411</text>
+
+    <!-- Invoice Badge -->
+    <rect x="520" y="2" width="180" height="64" rx="6" fill="#fafaf9" stroke="#e7e5e4" stroke-width="1"/>
+    <text x="535" y="24" class="label" fill="#78716c">TAX INVOICE</text>
+    <text x="535" y="42" class="val-bold" fill="#44403c">VST-DEL-2026-98124</text>
+    <text x="535" y="58" class="subtitle">Date: 12 Oct 2026</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="50" y1="155" x2="750" y2="155" class="divider"/>
+
+  <!-- Passenger & Booking Metadata -->
+  <g transform="translate(50, 175)">
+    <!-- Col 1 -->
+    <text x="0" y="0" class="label">PASSENGER NAME</text>
+    <text x="0" y="20" class="val-bold">Ahammed Rabil</text>
+    <text x="0" y="36" class="subtitle">Frequent Flyer: CV 84920194</text>
+
+    <!-- Col 2 -->
+    <text x="220" y="0" class="label">BOOKING REFERENCE (PNR)</text>
+    <text x="220" y="20" class="val-bold" fill="#9a3412">W8K4QP</text>
+    <text x="220" y="36" class="subtitle">E-Ticket: 228-9402194821</text>
+
+    <!-- Col 3 -->
+    <text x="440" y="0" class="label">CORPORATE GSTIN (BILLED TO)</text>
+    <text x="440" y="20" class="val-bold">FinPulse Technologies Ltd</text>
+    <text x="440" y="36" class="subtitle">GSTIN: 07AABCF8821K1ZX</text>
+  </g>
+
+  <!-- Flight Route Box -->
+  <g transform="translate(50, 245)">
+    <rect x="0" y="0" width="700" height="95" rx="6" fill="#fdfbf7" stroke="#fed7aa" stroke-width="1"/>
+
+    <!-- Departure -->
+    <text x="30" y="32" font-size="24" font-weight="800" fill="#7c2d12">DEL</text>
+    <text x="30" y="50" class="val-bold">New Delhi (T3)</text>
+    <text x="30" y="68" class="subtitle">12 Oct 2026 &bull; 08:15 AM</text>
+
+    <!-- Flight arrow indicator -->
+    <line x1="180" y1="42" x2="310" y2="42" stroke="#ea580c" stroke-width="2" stroke-dasharray="4,4"/>
+    <polygon points="310,42 302,38 302,46" fill="#ea580c"/>
+    <text x="215" y="32" class="subtitle" font-weight="600" fill="#9a3412">FLIGHT UK 955</text>
+    <text x="225" y="58" class="subtitle">2h 15m &bull; Non-Stop</text>
+
+    <!-- Arrival -->
+    <text x="360" y="32" font-size="24" font-weight="800" fill="#7c2d12">BOM</text>
+    <text x="360" y="50" class="val-bold">Mumbai (T2)</text>
+    <text x="360" y="68" class="subtitle">12 Oct 2026 &bull; 10:30 AM</text>
+
+    <!-- Seat / Class -->
+    <line x1="500" y1="15" x2="500" y2="80" stroke="#ffedd5" stroke-width="1"/>
+    <text x="530" y="30" class="label">CABIN CLASS</text>
+    <text x="530" y="48" class="val-bold">Premium Economy (V)</text>
+    <text x="530" y="66" class="subtitle">Seat: 4D &bull; Baggage: 20 KG</text>
+  </g>
+
+  <!-- Itemized Fare Table Header -->
+  <g transform="translate(50, 375)">
+    <rect x="0" y="0" width="700" height="32" rx="4" fill="#f3f4f6"/>
+    <text x="20" y="21" class="th">DESCRIPTION</text>
+    <text x="380" y="21" class="th">SAC CODE</text>
+    <text x="520" y="21" class="th text-right">RATE</text>
+    <text x="680" y="21" class="th" text-anchor="end">AMOUNT (INR)</text>
+  </g>
+
+  <!-- Table Rows -->
+  <g transform="translate(50, 420)">
+    <!-- Row 1: Base Fare -->
+    <text x="20" y="0" class="td" font-weight="600">Air Transportation Charges (Base Airfare)</text>
+    <text x="20" y="16" class="subtitle">Routing: DEL-BOM &bull; Fare Basis: PEOW01</text>
+    <text x="380" y="0" class="td">996411</text>
+    <text x="520" y="0" class="td">1</text>
+    <text x="680" y="0" class="td" font-weight="600" text-anchor="end">₹14,200.00</text>
+    <line x1="0" y1="28" x2="700" y2="28" class="divider"/>
+
+    <!-- Row 2: Aviation Security Fee -->
+    <text x="20" y="48" class="td" font-weight="600">Aviation Security Fee (ASF)</text>
+    <text x="380" y="48" class="td">996411</text>
+    <text x="520" y="48" class="td">1</text>
+    <text x="680" y="48" class="td" text-anchor="end">₹236.00</text>
+    <line x1="0" y1="66" x2="700" y2="66" class="divider"/>
+
+    <!-- Row 3: User Development Fee -->
+    <text x="20" y="86" class="td" font-weight="600">User Development Fee (UDF)</text>
+    <text x="380" y="86" class="td">996411</text>
+    <text x="520" y="86" class="td">1</text>
+    <text x="680" y="86" class="td" text-anchor="end">₹854.00</text>
+    <line x1="0" y1="104" x2="700" y2="104" class="divider"/>
+
+    <!-- Row 4: Convenience & Fuel -->
+    <text x="20" y="124" class="td" font-weight="600">Airline Fuel Charge (YQ)</text>
+    <text x="380" y="124" class="td">996411</text>
+    <text x="520" y="124" class="td">1</text>
+    <text x="680" y="124" class="td" text-anchor="end">₹500.00</text>
+    <line x1="0" y1="142" x2="700" y2="142" class="divider"/>
+
+    <!-- Row 5: CGST -->
+    <text x="20" y="162" class="td">Central GST (CGST @ 2.5%)</text>
+    <text x="380" y="162" class="td">996411</text>
+    <text x="520" y="162" class="td">2.5%</text>
+    <text x="680" y="162" class="td" text-anchor="end">₹355.00</text>
+    <line x1="0" y1="180" x2="700" y2="180" class="divider"/>
+
+    <!-- Row 6: SGST -->
+    <text x="20" y="200" class="td">State GST (SGST @ 2.5%)</text>
+    <text x="380" y="200" class="td">996411</text>
+    <text x="520" y="200" class="td">2.5%</text>
+    <text x="680" y="200" class="td" text-anchor="end">₹355.00</text>
+    <line x1="0" y1="218" x2="700" y2="218" stroke="#111827" stroke-width="1.5"/>
+  </g>
+
+  <!-- Total Summary Box -->
+  <g transform="translate(450, 660)">
+    <rect x="0" y="0" width="300" height="90" rx="6" fill="#fdfbf7" stroke="#fed7aa" stroke-width="1.5"/>
+    <text x="20" y="30" class="label">TOTAL INVOICE AMOUNT</text>
+    <text x="20" y="62" font-size="28" font-weight="800" fill="#7c2d12">₹16,500.00</text>
+    <text x="20" y="78" class="subtitle">Indian Rupees Sixteen Thousand Five Hundred Only</text>
+  </g>
+
+  <!-- Payment Status Stamp -->
+  <g transform="translate(80, 675)">
+    <rect x="0" y="0" width="160" height="52" rx="4" fill="#ecfdf5" stroke="#059669" stroke-width="1.5"/>
+    <text x="80" y="22" font-size="12" font-weight="800" fill="#047857" text-anchor="middle" letter-spacing="1">PAID ONLINE</text>
+    <text x="80" y="40" font-size="10" font-weight="600" fill="#065f46" text-anchor="middle">HDFC Visa **4242</text>
+  </g>
+
+  <!-- Footer & Compliance -->
+  <g transform="translate(50, 780)">
+    <line x1="0" y1="0" x2="700" y2="0" class="divider"/>
+    <text x="0" y="25" class="label">LEGAL &amp; TAX COMPLIANCE NOTICE</text>
+    <text x="0" y="45" class="subtitle">1. This document is a computer-generated Tax Invoice issued in compliance with Rule 46 of the CGST Rules, 2017.</text>
+    <text x="0" y="60" class="subtitle">2. Input Tax Credit (ITC) is permissible under Section 16 of the CGST Act for business travel purposes.</text>
+    <text x="0" y="75" class="subtitle">3. Air passenger travel services are subject to GST at 5% (2.5% CGST + 2.5% SGST) for economy and premium economy classes.</text>
+    <text x="0" y="90" class="subtitle">4. For flight reschedule or cancellation rules, please refer to airvistara.com or contact customer care at +91 9289228888.</text>
+
+    <!-- Barcode / QR placeholder -->
+    <rect x="0" y="120" width="700" height="40" fill="#f9fafb" stroke="#e5e7eb" rx="4"/>
+    <text x="350" y="145" font-family="Courier, monospace" font-size="14" font-weight="700" fill="#374151" text-anchor="middle" letter-spacing="4">*VST98124DELBOM20261012*</text>
+  </g>
+</svg>
+

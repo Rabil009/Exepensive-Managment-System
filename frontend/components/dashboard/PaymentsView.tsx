@@ -153,7 +153,19 @@ export function PaymentsView() {
                 isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
               }`}
             >
-              {filteredReimbursements.map((r) => (
+              {filteredReimbursements.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className={`py-8 text-center text-xs ${
+                      isDark ? "text-zinc-500" : "text-zinc-400"
+                    }`}
+                  >
+                    No settled disbursements found. Recorded bank payments will appear here.
+                  </td>
+                </tr>
+              ) : (
+                filteredReimbursements.map((r) => (
                 <tr
                   key={r.id}
                   className={`transition-colors ${
@@ -199,8 +211,9 @@ export function PaymentsView() {
                     </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
           </table>
         </div>
       </div>

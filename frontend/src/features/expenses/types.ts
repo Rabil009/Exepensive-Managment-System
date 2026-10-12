@@ -16,4 +16,5 @@ export type Expense = {
   attendees?: string[];
   raw_status?: string;
   source?: "claim" | "draft";
+  employee_name?: string;
 };

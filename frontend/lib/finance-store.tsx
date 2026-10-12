@@ -60,62 +60,6 @@ interface FinanceContextType {
 }
 
 const FinanceContext = createContext<FinanceContextType | null>(null);
-
-const INITIAL_REIMBURSEMENTS: ReimbursementItem[] = [
-  {
-    id: "RMB-101",
-    claimId: "CLM-006",
-    employee: "Rahul Sharma",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "Engineering",
-    amount: 8450,
-    currency: "INR",
-    completedDate: "Oct 06, 2026",
-    paymentMethod: "Bank Transfer (NEFT)",
-    paymentReference: "UTR-NEFT-2026-0925-8812",
-    status: "Paid",
-  },
-  {
-    id: "RMB-102",
-    claimId: "CLM-008",
-    employee: "Priya Singh",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "Operations",
-    amount: 4200,
-    currency: "INR",
-    completedDate: "Oct 06, 2026",
-    paymentMethod: "Bank Transfer (IMPS)",
-    paymentReference: "UPI-NPCI-2026-44192",
-    status: "Paid",
-  },
-  {
-    id: "RMB-103",
-    claimId: "CLM-004",
-    employee: "Amit Kumar",
-    avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "Sales",
-    amount: 12800,
-    currency: "INR",
-    completedDate: "Oct 05, 2026",
-    paymentMethod: "Bank Transfer (RTGS)",
-    paymentReference: "RTGS-RBI-2026-99120",
-    status: "Paid",
-  },
-  {
-    id: "RMB-104",
-    claimId: "CLM-010",
-    employee: "Neha Verma",
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces&auto=format&q=80",
-    department: "HR",
-    amount: 3650,
-    currency: "INR",
-    completedDate: "Oct 05, 2026",
-    paymentMethod: "Bank Transfer (NEFT)",
-    paymentReference: "UTR-HDFC-2026-3819",
-    status: "Paid",
-  },
-];
-
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const mapLiveClaim = (item: any): ExpenseClaim => {
@@ -282,6 +226,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
             ...c,
             status: newStatus,
             financeRemark: finalRemark,
+            policyViolation: undefined,
             isHold: false,
             updatedAt: new Date().toISOString(),
           };
@@ -293,6 +238,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       status: newStatus,
       financeRemark: finalRemark,
       isHold: false,
+      policyViolation: undefined,
     });
     toast.success(`Claim ${claimId} verified and approved for disbursement.`);
     fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {

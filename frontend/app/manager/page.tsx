@@ -31,6 +31,7 @@ import {
   ChevronDown,
   RefreshCw,
   Menu,
+  CreditCard,
 } from "lucide-react";
 import { ManagerSidebar } from "@/components/manager/ManagerSidebar";
 import { ManagerHeader } from "@/components/manager/ManagerHeader";
@@ -43,16 +44,20 @@ import {
   approveManagerClaim,
   rejectManagerClaim,
   fetchManagerBudgets,
+  fetchCardRequests,
+  approveCardRequest,
+  rejectCardRequest,
   type ManagerClaim,
   type DepartmentBudget,
+  type CardApprovalRequest,
 } from "@/lib/manager-api";
 
 // Modals from shared dashboard suite
 import { SettingsModal } from "@/components/dashboard/SettingsModal";
 import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
-import { QuarterlyFinancialStatements } from "@/components/manager/QuarterlyFinancialStatements";
 import { ReceiptModal } from "@/components/shared/ReceiptModal";
+import { QuarterlyFinancialStatements } from "@/components/manager/QuarterlyFinancialStatements";
 
 export type ManagerView =
   | "Approvals"
@@ -96,6 +101,7 @@ function ManagerDashboardInner() {
 
   // Approvals & Claim State
   const [claims, setClaims] = useState<ManagerClaim[]>([]);
+  const [cardRequests, setCardRequests] = useState<CardApprovalRequest[]>([]);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("All");
@@ -106,15 +112,19 @@ function ManagerDashboardInner() {
   const refreshData = async () => {
     try {
       setIsRefreshing(true);
-      const [fetchedClaims, fetchedBudgets] = await Promise.all([
+      const [fetchedClaims, fetchedBudgets, fetchedCards] = await Promise.all([
         fetchManagerClaims(),
         fetchManagerBudgets(),
+        fetchCardRequests(),
       ]);
       if (fetchedClaims) {
         setClaims(fetchedClaims);
       }
       if (fetchedBudgets) {
         setBudgets(fetchedBudgets);
+      }
+      if (fetchedCards) {
+        setCardRequests(fetchedCards);
       }
     } catch (e) {
       console.warn("Backend sync notice:", e);
@@ -174,6 +184,7 @@ function ManagerDashboardInner() {
 
     try {
       await approveManagerClaim(claim.id, "Approved by Manager");
+      await refreshData();
     } catch (e) {
       console.warn("Backend approval sync notice:", e);
     }
@@ -190,8 +201,35 @@ function ManagerDashboardInner() {
 
     try {
       await rejectManagerClaim(claim.id, "Policy non-compliance or unauthorized expense");
+      await refreshData();
     } catch (e) {
       console.warn("Backend rejection sync notice:", e);
+    }
+  };
+
+  const handleApproveCard = async (req: CardApprovalRequest) => {
+    setCardRequests((prev) =>
+      prev.map((r) => (r.id === req.id ? { ...r, status: "Approved" as const } : r))
+    );
+    notify(`Approved card request for ${req.employeeName}: ₹${req.requestedLimit.toLocaleString("en-IN")}`);
+    try {
+      await approveCardRequest(req);
+      await refreshData();
+    } catch (e) {
+      console.warn("Card approval sync notice:", e);
+    }
+  };
+
+  const handleRejectCard = async (req: CardApprovalRequest) => {
+    setCardRequests((prev) =>
+      prev.map((r) => (r.id === req.id ? { ...r, status: "Rejected" as const } : r))
+    );
+    notify(`Rejected card request for ${req.employeeName}`);
+    try {
+      await rejectCardRequest(req.id);
+      await refreshData();
+    } catch (e) {
+      console.warn("Card rejection sync notice:", e);
     }
   };
 
@@ -594,6 +632,127 @@ function ManagerDashboardInner() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Corporate Card & Limit Requests Queue */}
+              <div
+                className={`rounded-xl border transition-colors mt-6 ${
+                  isDark
+                    ? "bg-[#111113] border-white/[0.07]"
+                    : "bg-white border-zinc-200/80 shadow-xs"
+                }`}
+              >
+                <div
+                  className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b ${
+                    isDark ? "border-white/[0.06]" : "border-zinc-200/60"
+                  }`}
+                >
+                  <div>
+                    <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-blue-500" />
+                      <span>Corporate Card &amp; Limit Requests</span>
+                    </h3>
+                    <p className="text-xs text-zinc-500 mt-0.5">
+                      Review virtual corporate card requests and credit limit adjustments from team members.
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-zinc-100 dark:bg-white/[0.06] text-zinc-600 dark:text-zinc-300 self-start sm:self-auto">
+                    {cardRequests.filter((r) => r.status === "Pending").length} Pending
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto px-2 pb-2">
+                  <table className="w-full min-w-[700px] text-left border-collapse">
+                    <thead>
+                      <tr
+                        className={`text-xs font-medium border-b ${
+                          isDark ? "text-zinc-400 border-white/[0.06]" : "text-zinc-500 border-zinc-200/60"
+                        }`}
+                      >
+                        <th className="py-2.5 px-4 font-medium">Employee</th>
+                        <th className="py-2.5 px-4 font-medium">Department</th>
+                        <th className="py-2.5 px-4 font-medium">Request Type</th>
+                        <th className="py-2.5 px-4 font-medium">Card / Details</th>
+                        <th className="py-2.5 px-4 font-medium text-right">Requested Limit</th>
+                        <th className="py-2.5 px-4 font-medium">Status</th>
+                        <th className="py-2.5 px-4 font-medium text-right">1-Click Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className={`divide-y text-[13px] ${isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"}`}>
+                      {cardRequests.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-xs text-zinc-500">
+                            No corporate card requests found.
+                          </td>
+                        </tr>
+                      ) : (
+                        cardRequests.map((req) => (
+                          <tr
+                            key={req.id}
+                            className={`transition-colors ${
+                              isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"
+                            }`}
+                          >
+                            <td className="py-2.5 px-4 font-medium text-zinc-900 dark:text-zinc-100">
+                              {req.employeeName}
+                            </td>
+                            <td className="py-2.5 px-4 text-xs text-zinc-500">
+                              {req.department}
+                            </td>
+                            <td className="py-2.5 px-4 text-xs font-medium">
+                              <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-white/[0.06] text-zinc-700 dark:text-zinc-300">
+                                {req.requestType === "VIRTUAL_CARD" ? "Virtual Card" : "Limit Increase"}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-4 text-xs text-zinc-700 dark:text-zinc-300">
+                              {req.cardName}
+                            </td>
+                            <td className="py-2.5 px-4 text-right text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                              ₹{req.requestedLimit.toLocaleString("en-IN")}
+                            </td>
+                            <td className="py-2.5 px-4">
+                              {req.status === "Approved" ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                                  Approved
+                                </span>
+                              ) : req.status === "Rejected" ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25">
+                                  Rejected
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 animate-pulse">
+                                  Pending Review
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-2.5 px-4 text-right">
+                              {req.status === "Pending" ? (
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApproveCard(req)}
+                                    className="text-xs font-medium px-2.5 py-1 rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/25 transition-colors cursor-pointer"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRejectCard(req)}
+                                    className="text-xs font-medium px-2.5 py-1 rounded-md text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/25 transition-colors cursor-pointer"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              ) : (
+                                <span className="text-xs text-zinc-400">Processed</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           )}
 
@@ -865,7 +1024,7 @@ function ManagerDashboardInner() {
           )}
 
           {/* VIEW 5: Reports */}
-          {activeView === "Reports" && <QuarterlyFinancialStatements initialClaims={claims} />}
+          {activeView === "Reports" && <QuarterlyFinancialStatements />}
 
           {/* VIEW 6: Policies */}
           {activeView === "Policies" && (
@@ -1082,6 +1241,17 @@ function ManagerDashboardInner() {
                       </span>
                     </div>
                   )}
+                  <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
+                    <span className="text-zinc-500">Invoice Voucher:</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowReceiptModal(true)}
+                      className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      <span>{inspectClaim.receiptName || "View Tax Invoice & Receipt"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1124,6 +1294,7 @@ function ManagerDashboardInner() {
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showSearch && <SearchModal onClose={() => setShowSearch(false)} />}
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+
       {showReceiptModal && inspectClaim && (
         <ReceiptModal
           isOpen={showReceiptModal}
@@ -1131,7 +1302,7 @@ function ManagerDashboardInner() {
           claimId={inspectClaim.id}
           receiptName={inspectClaim.receiptName}
           receiptUrl={inspectClaim.receiptUrl}
-          merchant={inspectClaim.description || inspectClaim.category}
+          merchant={inspectClaim.merchant || inspectClaim.description}
           amount={inspectClaim.amount}
           currency="INR"
           date={inspectClaim.date}

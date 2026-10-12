@@ -7,7 +7,7 @@ import type { AnalyticsData } from "../data/useEmployeeAnalytics";
 export function CardLimitUsage({ data }: { data: AnalyticsData | null }) {
   const cards = data?.cards || [];
   const totalLimit = cards.reduce((sum, card) => sum + Number(card.limit), 0);
-  const spent = Number(data?.totals.corporate_card_spend || 0);
+  const spent = Number(data?.totals?.corporate_card_spend || 0);
   const utilization = totalLimit ? Math.min(100, spent / totalLimit * 100) : 0;
   return <section aria-label="Card Spending & Limits" className="rounded-xl p-5 border bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.07]">
     <h2 className="text-sm font-semibold flex items-center gap-2"><CreditCard className="h-4 w-4" />Card Spending &amp; Limits</h2>

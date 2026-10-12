@@ -79,7 +79,7 @@ export default function SystemAdminPage() {
             </div>
             <h3 className="text-sm font-semibold text-zinc-900">Expense Policy Engine</h3>
             <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-              Automated threshold rules ($5,000 threshold, weekend meal limits, receipt OCR validation).
+              Automated threshold rules (₹5,000 threshold, weekend meal limits, receipt OCR validation).
             </p>
             <span className="text-[11px] font-medium text-blue-600 mt-3 block">Configure policies &rarr;</span>
           </div>

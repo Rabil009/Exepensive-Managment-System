@@ -17,13 +17,34 @@ export type AnalyticsData = {
 export function useEmployeeAnalytics() {
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const refresh = async () => {
+    try {
+      const result = await employeeJson<AnalyticsData>(`/analytics?month=${encodeURIComponent(month)}`);
+      setData(result);
+      setError("");
+    } catch (cause: unknown) {
+      setError(cause instanceof Error ? cause.message : "Could not load analytics.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     let active = true;
+    setLoading(true);
     employeeJson<AnalyticsData>(`/analytics?month=${encodeURIComponent(month)}`).then((result) => {
-      if (active) { setData(result); setError(""); }
-    }).catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "Could not load analytics."); });
+      if (active) { setData(result); setError(""); setLoading(false); }
+    }).catch((cause: unknown) => {
+      if (active) {
+        setError(cause instanceof Error ? cause.message : "Could not load analytics.");
+        setLoading(false);
+      }
+    });
     return () => { active = false; };
   }, [month]);
-  return { data, month, setMonth, error };
+
+  return { data, month, setMonth, loading, error, refresh };
 }

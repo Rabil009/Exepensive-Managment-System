@@ -314,11 +314,49 @@ export function OverviewExpenseTable({ model }: Props) {
                       {money(item.amount, item.currency)}
                     </td>
 
-                    {/* Status with Dot */}
+                    {/* Status Badge with Distinct Color Badging */}
                     <td className="py-2.5 px-4 whitespace-nowrap text-left">
-                      <StatusBadge tone={tone}>
-                        {item.status}
-                      </StatusBadge>
+                      {item.raw_status === "MANAGER_APPROVED" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          <span>Manager Approved</span>
+                        </span>
+                      ) : item.raw_status === "MANAGER_REJECTED" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                          <span>Manager Rejected</span>
+                        </span>
+                      ) : item.raw_status === "FINANCE_APPROVED" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          <span>Finance Approved</span>
+                        </span>
+                      ) : item.raw_status === "FINANCE_REJECTED" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                          <span>Finance Rejected</span>
+                        </span>
+                      ) : item.status === "Approved" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          <span>Approved</span>
+                        </span>
+                      ) : item.status === "Rejected" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                          <span>Rejected</span>
+                        </span>
+                      ) : item.status === "Reimbursed" ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                          <span>Reimbursed</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          <span>Pending Approval</span>
+                        </span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -373,6 +411,7 @@ export function OverviewExpenseTable({ model }: Props) {
           currency={activeReceipt.currency}
           date={activeReceipt.date}
           category={activeReceipt.category}
+          employeeName={activeReceipt.employee_name}
         />
       )}
     </div>

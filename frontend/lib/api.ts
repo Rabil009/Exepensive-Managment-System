@@ -33,8 +33,8 @@ export async function getExpenseClaims(): Promise<ExpenseClaim[]> {
       category: item.category,
       paymentMethod: item.payment_method,
       merchant: item.merchant,
-      receiptUrl: item.receipt_url,
-      receiptName: item.receipt_name,
+      receiptUrl: item.receipt_url || item.receipt_path,
+      receiptName: item.receipt_name || (item.receipt_path ? item.receipt_path.split("/").pop() : undefined),
       status: item.status,
       policyViolation: item.policy_violation,
       policyExceededAmount: item.policy_exceeded_amount ? Number(item.policy_exceeded_amount) : 0,
@@ -80,6 +80,7 @@ export async function updateClaimInDb(
     if (updates.paymentReference !== undefined) dbUpdates.payment_reference = updates.paymentReference;
     if (updates.paymentChannel !== undefined) dbUpdates.payment_channel = updates.paymentChannel;
     if (updates.disbursedAt !== undefined) dbUpdates.disbursed_at = updates.disbursedAt;
+    if (updates.policyViolation !== undefined) dbUpdates.policy_violation = updates.policyViolation;
 
     const { error } = await supabase
       .from("expense_claims")

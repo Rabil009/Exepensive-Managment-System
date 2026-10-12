@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1050" width="800" height="1050" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <style>
+    .title { font-size: 20px; font-weight: 700; fill: #232f3e; }
+    .subtitle { font-size: 11px; fill: #545b64; }
+    .label { font-size: 11px; font-weight: 600; fill: #545b64; text-transform: uppercase; letter-spacing: 0.5px; }
+    .val { font-size: 13px; font-weight: 500; fill: #16191f; }
+    .val-bold { font-size: 14px; font-weight: 700; fill: #16191f; }
+    .th { font-size: 11px; font-weight: 600; fill: #232f3e; text-transform: uppercase; letter-spacing: 0.5px; }
+    .td { font-size: 12px; fill: #16191f; }
+    .divider { stroke: #eaeded; stroke-width: 1; }
+  </style>
+
+  <!-- Outer Border Container -->
+  <rect x="20" y="20" width="760" height="1010" rx="8" fill="#ffffff" stroke="#d5dbdb" stroke-width="1.5"/>
+
+  <!-- Top Accent Bar (AWS Orange) -->
+  <path d="M 20 28 Q 20 20 28 20 L 772 20 Q 780 20 780 28 L 780 32 L 20 32 Z" fill="#232f3e"/>
+  <rect x="20" y="32" width="760" height="4" fill="#ff9900"/>
+
+  <!-- Header -->
+  <g transform="translate(50, 65)">
+    <!-- AWS Brand -->
+    <text x="0" y="24" font-size="26" font-weight="900" fill="#232f3e">aws</text>
+    <text x="50" y="22" font-size="14" font-weight="600" fill="#545b64">| Tax Invoice</text>
+    <text x="0" y="42" class="subtitle">Amazon Web Services India Private Limited</text>
+    <text x="0" y="56" class="subtitle">Block 11 &amp; 12, Bagmane Tech Park, CV Raman Nagar, Bengaluru, Karnataka 560093</text>
+    <text x="0" y="70" class="subtitle">GSTIN: 27AAGCA4567J1Z8 &bull; CIN: U72900KA2016PTC098765 &bull; SAC: 998315</text>
+
+    <!-- Invoice Details Box -->
+    <rect x="520" y="0" width="180" height="74" rx="6" fill="#f8f9fa" stroke="#e9ecef" stroke-width="1"/>
+    <text x="535" y="20" class="label">INVOICE NUMBER</text>
+    <text x="535" y="38" class="val-bold" fill="#ff9900">AWS-IN-2026-449102</text>
+    <text x="535" y="52" class="subtitle">Date: 11 Oct 2026</text>
+    <text x="535" y="66" class="subtitle">Account ID: 4892-1049-9218</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="50" y1="160" x2="750" y2="160" class="divider"/>
+
+  <!-- Customer / Billed To Section -->
+  <g transform="translate(50, 180)">
+    <!-- Col 1: Customer -->
+    <text x="0" y="0" class="label">CUSTOMER DETAILS</text>
+    <text x="0" y="20" class="val-bold">FinPulse Technologies Ltd</text>
+    <text x="0" y="36" class="subtitle">Attention: Abhay (Engineering Dept)</text>
+    <text x="0" y="50" class="subtitle">Cyber City, DLF Phase 2, Gurugram, Haryana 122002</text>
+    <text x="0" y="64" class="subtitle">Customer GSTIN: 07AABCF8821K1ZX</text>
+
+    <!-- Col 2: Billing Period -->
+    <text x="440" y="0" class="label">BILLING CYCLE</text>
+    <text x="440" y="20" class="val-bold">01 Oct 2026 – 11 Oct 2026</text>
+    <text x="440" y="36" class="subtitle">Payment Method: Corporate Credit Card</text>
+    <text x="440" y="50" class="subtitle">Card ending: **** 4242</text>
+    <text x="440" y="64" class="subtitle">Transaction ID: TXN-AWS-984210</text>
+  </g>
+
+  <!-- Service Summary Box -->
+  <g transform="translate(50, 275)">
+    <rect x="0" y="0" width="700" height="50" rx="6" fill="#fbfcfd" stroke="#eaeded" stroke-width="1"/>
+    <text x="20" y="30" font-size="12" font-weight="600" fill="#232f3e">Region: Asia Pacific (Mumbai) ap-south-1 &bull; Cloud Infrastructure Service Consumption</text>
+  </g>
+
+  <!-- Table Header -->
+  <g transform="translate(50, 345)">
+    <rect x="0" y="0" width="700" height="32" rx="4" fill="#f2f3f3"/>
+    <text x="20" y="21" class="th">SERVICE DESCRIPTION</text>
+    <text x="380" y="21" class="th">SAC CODE</text>
+    <text x="500" y="21" class="th text-right">USAGE</text>
+    <text x="680" y="21" class="th" text-anchor="end">AMOUNT (INR)</text>
+  </g>
+
+  <!-- Table Rows -->
+  <g transform="translate(50, 390)">
+    <!-- Row 1: Amazon Elastic Compute Cloud -->
+    <text x="20" y="0" class="td" font-weight="600">Amazon Elastic Compute Cloud (EC2)</text>
+    <text x="20" y="16" class="subtitle">c6i.2xlarge Linux On Demand compute instances (ap-south-1)</text>
+    <text x="380" y="0" class="td">998315</text>
+    <text x="500" y="0" class="td">264 Hrs</text>
+    <text x="680" y="0" class="td" font-weight="600" text-anchor="end">₹14,200.00</text>
+    <line x1="0" y1="28" x2="700" y2="28" class="divider"/>
+
+    <!-- Row 2: Amazon Elastic Kubernetes Service -->
+    <text x="20" y="48" class="td" font-weight="600">Amazon Elastic Kubernetes Service (EKS)</text>
+    <text x="20" y="64" class="subtitle">Managed Kubernetes Cluster control plane charges</text>
+    <text x="380" y="48" class="td">998315</text>
+    <text x="500" y="48" class="td">1 Cluster</text>
+    <text x="680" y="48" class="td" font-weight="600" text-anchor="end">₹4,816.95</text>
+    <line x1="0" y1="76" x2="700" y2="76" class="divider"/>
+
+    <!-- Row 3: Amazon Simple Storage Service -->
+    <text x="20" y="96" class="td" font-weight="600">Amazon Virtual Private Cloud (VPC)</text>
+    <text x="20" y="112" class="subtitle">NAT Gateway and Data Processing transfers</text>
+    <text x="380" y="96" class="td">998315</text>
+    <text x="500" y="96" class="td">1.8 TB</text>
+    <text x="680" y="96" class="td" font-weight="600" text-anchor="end">₹2,000.00</text>
+    <line x1="0" y1="124" x2="700" y2="124" class="divider"/>
+
+    <!-- Subtotal -->
+    <text x="440" y="146" class="td" font-weight="600">Net Taxable Value:</text>
+    <text x="680" y="146" class="td" font-weight="600" text-anchor="end">₹21,016.95</text>
+    <line x1="440" y1="158" x2="700" y2="158" class="divider"/>
+
+    <!-- Integrated GST (IGST 18%) -->
+    <text x="440" y="178" class="td">Integrated GST (IGST @ 18%):</text>
+    <text x="680" y="178" class="td" text-anchor="end">₹3,783.05</text>
+    <line x1="0" y1="194" x2="700" y2="194" stroke="#232f3e" stroke-width="1.5"/>
+  </g>
+
+  <!-- Total Summary Box -->
+  <g transform="translate(450, 610)">
+    <rect x="0" y="0" width="300" height="90" rx="6" fill="#f8f9fa" stroke="#e9ecef" stroke-width="1.5"/>
+    <text x="20" y="30" class="label">TOTAL AMOUNT DUE &amp; PAID</text>
+    <text x="20" y="62" font-size="28" font-weight="800" fill="#232f3e">₹24,800.00</text>
+    <text x="20" y="78" class="subtitle">Indian Rupees Twenty Four Thousand Eight Hundred Only</text>
+  </g>
+
+  <!-- Payment Receipt Box -->
+  <g transform="translate(80, 625)">
+    <rect x="0" y="0" width="180" height="56" rx="4" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="90" y="24" font-size="12" font-weight="800" fill="#15803d" text-anchor="middle" letter-spacing="1">PAYMENT SETTLED</text>
+    <text x="90" y="42" font-size="10" font-weight="600" fill="#166534" text-anchor="middle">Corporate Card Auth #9812</text>
+  </g>
+
+  <!-- Legal & Tax Compliance Footer -->
+  <g transform="translate(50, 730)">
+    <line x1="0" y1="0" x2="700" y2="0" class="divider"/>
+    <text x="0" y="25" class="label">GST COMPLIANCE &amp; INVOICE NOTES</text>
+    <text x="0" y="45" class="subtitle">1. This electronic tax invoice is issued by Amazon Web Services India Private Limited under Section 31 of the CGST Act, 2017.</text>
+    <text x="0" y="60" class="subtitle">2. Tax has been charged at the rate of 18% Integrated Goods and Services Tax (IGST) under HSN/SAC code 998315.</text>
+    <text x="0" y="75" class="subtitle">3. Customer is entitled to claim Input Tax Credit (ITC) subject to applicable provisions of Section 16 &amp; 17 of the CGST Act.</text>
+    <text x="0" y="90" class="subtitle">4. For support inquiries regarding AWS billing or cloud resources, visit https://aws.amazon.com/contact-us or support portal.</text>
+
+    <!-- Barcode / Electronic Auth -->
+    <rect x="0" y="120" width="700" height="40" fill="#f8f9fa" stroke="#e9ecef" rx="4"/>
+    <text x="350" y="145" font-family="Courier, monospace" font-size="14" font-weight="700" fill="#545b64" text-anchor="middle" letter-spacing="4">*AWS449102BLR20261011*</text>
+  </g>
+</svg>
+

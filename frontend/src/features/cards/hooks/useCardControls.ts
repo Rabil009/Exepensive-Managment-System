@@ -35,7 +35,17 @@ export function useCardControls() {
     let active = true;
     employeeJson<CardsResponse>("/cards").then((result) => { if (active) setData(result); })
       .catch((cause: unknown) => { if (active) setMessage(cause instanceof Error ? cause.message : "Could not load cards."); });
-    return () => { active = false; };
+
+    const interval = setInterval(() => {
+      employeeJson<CardsResponse>("/cards")
+        .then((result) => { if (active) setData(result); })
+        .catch(() => {});
+    }, 4000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const card = data?.cards[0] || null;
@@ -58,32 +68,114 @@ export function useCardControls() {
   async function update(next: typeof state) {
     if (!card) return false;
     try {
-      const changed = await employeeJson<EmployeeCard>(`/cards/${card.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ active: next.active, frozen: next.frozen, wallet_enabled: next.controls[0],
-          travel_limits_enabled: next.controls[1], online_verification_enabled: next.controls[2], atm_lock_enabled: next.controls[3] }) });
-      setData((current) => current ? { ...current, cards: current.cards.map((item) => item.id === changed.id ? changed : item) } : current);
-      setMessage("Card controls saved.");
+      // Optimistic update for instant button and switch response
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              cards: current.cards.map((item) =>
+                item.id === card.id
+                  ? {
+                      ...item,
+                      active: next.active,
+                      frozen: next.frozen,
+                      wallet_enabled: next.controls[0],
+                      travel_limits_enabled: next.controls[1],
+                      online_verification_enabled: next.controls[2],
+                      atm_lock_enabled: next.controls[3],
+                    }
+                  : item,
+              ),
+            }
+          : current,
+      );
+
+      const changed = await employeeJson<EmployeeCard>(`/cards/${card.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          active: next.active,
+          frozen: next.frozen,
+          wallet_enabled: next.controls[0],
+          travel_limits_enabled: next.controls[1],
+          online_verification_enabled: next.controls[2],
+          atm_lock_enabled: next.controls[3],
+        }),
+      });
+
+      if (changed && changed.id) {
+        setData((current) =>
+          current
+            ? {
+                ...current,
+                cards: current.cards.map((item) =>
+                  item.id === changed.id ? { ...item, ...changed } : item,
+                ),
+              }
+            : current,
+        );
+      }
+      setMessage(
+        next.frozen
+          ? "Card is now frozen. Transactions will be declined until unfrozen."
+          : !next.active
+          ? "Card has been deactivated."
+          : "Card security controls saved.",
+      );
       return true;
-    } catch (cause) { setMessage(cause instanceof Error ? cause.message : "Could not save card controls."); return false; }
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : "Could not save card controls.");
+      await refresh();
+      return false;
+    }
   }
+
   function openDialog(type: "limit" | "virtual") {
-    setDialogError(""); setVirtualName(""); setRequestedAmount(type === "limit" ? String(limit + 1) : "500"); setDialogType(type);
+    setDialogError("");
+    setVirtualName("");
+    setRequestedAmount(type === "limit" ? String(Math.max(100000, limit) + 25000) : "50000");
+    setDialogType(type);
   }
+
   async function saveDialog(event: FormEvent) {
     event.preventDefault();
     const amount = Number(requestedAmount);
     if (!Number.isFinite(amount) || amount <= 0 || (dialogType === "limit" && amount <= limit)) {
-      setDialogError(dialogType === "limit" ? `Enter a requested limit above ₹${limit.toLocaleString("en-IN")}.` : "Enter a positive spending limit."); return;
+      setDialogError(
+        dialogType === "limit"
+          ? `Enter a requested limit above ₹${limit.toLocaleString("en-IN")}.`
+          : "Enter a positive spending limit.",
+      );
+      return;
     }
-    if (dialogType === "limit" && !card) { setDialogError("No card is assigned."); return; }
-    if (dialogType === "virtual" && !virtualName.trim()) { setDialogError("Enter a card purpose or name."); return; }
+    if (dialogType === "limit" && !card) {
+      setDialogError("No card is assigned.");
+      return;
+    }
+    if (dialogType === "virtual" && !virtualName.trim()) {
+      setDialogError("Enter a card purpose or name.");
+      return;
+    }
     try {
-      await employeeJson("/cards/requests", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dialogType === "limit"
-          ? { request_type: "LIMIT_INCREASE", requested_limit: amount, card_id: card?.id }
-          : { request_type: "VIRTUAL_CARD", requested_limit: amount, card_name: virtualName.trim() }) });
-      await refresh(); setDialogType(null); setMessage("Request submitted. The card and limit will change after approval.");
-    } catch (cause) { setDialogError(cause instanceof Error ? cause.message : "Could not submit request."); }
+      await employeeJson("/cards/requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          dialogType === "limit"
+            ? { request_type: "LIMIT_INCREASE", requested_limit: amount, card_id: card?.id }
+            : { request_type: "VIRTUAL_CARD", requested_limit: amount, card_name: virtualName.trim() },
+        ),
+      });
+      await refresh();
+      setDialogType(null);
+      setMessage(
+        dialogType === "limit"
+          ? `Limit increase request for ₹${amount.toLocaleString("en-IN")} submitted! Awaiting Manager & Finance authorization.`
+          : `Virtual card request for "${virtualName.trim()}" submitted! Awaiting Manager & Finance authorization.`,
+      );
+    } catch (cause) {
+      setDialogError(cause instanceof Error ? cause.message : "Could not submit request.");
+    }
   }
   function exportTransactions() {
     exportCsv("employee-card-transactions.csv", ["Date", "Merchant", "Purpose", "Card", "Status", "Currency", "Amount"],

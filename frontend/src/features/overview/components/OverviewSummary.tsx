@@ -17,6 +17,11 @@ export function OverviewSummary({ summary }: { summary: ExpenseSummary | null })
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  const cardLimitNum = Number(summary?.card_limit) || 100000;
+  const cardSpentNum = Number(summary?.card_spending_mtd) || 0;
+  const cardRemainingNum = Number(summary?.card_limit_remaining) ?? Math.max(0, cardLimitNum - cardSpentNum);
+  const isOverLimit = cardSpentNum > cardLimitNum;
+
   const cards = [
     {
       label: "Ready for Reimbursement",
@@ -36,14 +41,21 @@ export function OverviewSummary({ summary }: { summary: ExpenseSummary | null })
       label: "Card Spending (MTD)",
       value: rupees(summary?.card_spending_mtd),
       icon: CreditCard,
-      subBadge: summary && Number(summary.card_limit) > 0 ? `of ${rupees(summary.card_limit)} limit` : "No card limit",
-      subColor: "text-zinc-500 dark:text-zinc-400",
+      subBadge: isOverLimit
+        ? `Exceeded limit of ${rupees(cardLimitNum)}`
+        : `Limit: ${rupees(cardLimitNum)}`,
+      subColor: isOverLimit
+        ? "text-amber-500 dark:text-amber-400 font-medium"
+        : "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Card Limit Remaining",
-      value: summary && Number(summary.card_limit) > 0 ? rupees(summary.card_limit_remaining) : "—",
+      value: rupees(cardRemainingNum),
       icon: Wallet,
-      subBadge: summary && Number(summary.card_limit) > 0 ? `${Math.round(100 * Number(summary.card_limit_remaining) / Number(summary.card_limit))}% available` : "No card assigned",
+      subBadge:
+        cardLimitNum > 0
+          ? `${Math.max(0, Math.round((100 * cardRemainingNum) / cardLimitNum))}% available`
+          : "No card assigned",
       subColor: "text-zinc-500 dark:text-zinc-400",
     },
   ];
@@ -56,16 +68,16 @@ export function OverviewSummary({ summary }: { summary: ExpenseSummary | null })
           return (
             <div
               key={idx}
-              className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors border ${
+              className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors border min-w-0 overflow-hidden ${
                 isDark
                   ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
                   : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
               {/* Category Label + Icon */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2 min-w-0">
                 <span
-                  className={`text-xs font-medium uppercase tracking-wider ${
+                  className={`text-[11px] font-semibold uppercase tracking-wider truncate ${
                     isDark ? "text-zinc-400" : "text-zinc-500"
                   }`}
                 >
@@ -78,22 +90,21 @@ export function OverviewSummary({ summary }: { summary: ExpenseSummary | null })
                 />
               </div>
 
-              {/* Metric Value + Inline Context Sub-Badge */}
-              <div className="mt-3.5 flex items-baseline justify-between gap-2">
-                <span
-                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+              {/* Metric Value + Inline Context Sub-Badge (Stacked to guarantee no card boundary overflow) */}
+              <div className="mt-3 flex flex-col gap-1 min-w-0">
+                <div
+                  className={`text-2xl sm:text-[25px] font-bold tracking-tight tabular-nums leading-tight truncate ${
                     isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
+                  title={card.value}
                 >
                   {card.value}
-                </span>
-                <span
-                  className={`text-xs font-medium tabular-nums shrink-0 ${
-                    card.subColor
-                  }`}
-                >
-                  {card.subBadge}
-                </span>
+                </div>
+                <div className="flex items-center justify-between text-xs min-w-0">
+                  <span className={`truncate tabular-nums ${card.subColor}`}>
+                    {card.subBadge}
+                  </span>
+                </div>
               </div>
             </div>
           );

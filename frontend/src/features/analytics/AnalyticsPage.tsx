@@ -16,7 +16,12 @@ export default function AnalyticsPage() {
     <AppShell active="Analytics">
       <div className="flex flex-col w-full gap-6 pb-12">
         <AnalyticsHeader model={model} />
-        {model.error && <p role="alert" className="text-sm text-rose-500">{model.error}</p>}
+        {model.error && (
+          <div role="alert" className="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 text-xs flex items-center justify-between">
+            <span>{model.error}</span>
+            <button onClick={model.refresh} className="underline font-semibold ml-2 hover:opacity-80">Retry</button>
+          </div>
+        )}
         <SummaryMetrics data={model.data} />
         <SpendingOverview data={model.data} />
         <CardAndChecklist data={model.data} />

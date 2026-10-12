@@ -60,9 +60,9 @@ export async function discardNewExpense(id: string) {
 }
 
 function dataUriToBlob(dataUri: string): Blob {
-  const [header, base64] = dataUri.split(",");
-  const mime = header.split(";")[0].replace("data:", "") || "application/octet-stream";
-  const binary = atob(base64);
+  const parts = dataUri.split(",");
+  const mime = parts[0]?.match(/:(.*?);/)?.[1] || "application/octet-stream";
+  const binary = atob(parts[1] || "");
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);

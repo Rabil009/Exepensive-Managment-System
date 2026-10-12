@@ -2,16 +2,16 @@
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 20px;
+  padding: 16px 18px;
   width: 100%;
-  max-width: 420px;
-  aspect-ratio: 1.586;
+  max-width: 380px;
+  aspect-ratio: 1.62;
   align-self: flex-start;
-  background: linear-gradient(135deg, #18181b, #121214, #09090b);
+  background: linear-gradient(135deg, #18181b 0%, #121214 60%, #09090b 100%);
   color: #fff;
-  box-shadow: 0 20px 30px -15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.45);
   transition: filter 0.2s, opacity 0.2s;
 }
 
@@ -24,16 +24,16 @@
 }
 
 .aura-physical-card::before {
-  width: 230px;
-  height: 230px;
-  right: -80px;
-  top: -100px;
+  width: 180px;
+  height: 180px;
+  right: -60px;
+  top: -80px;
 }
 
 .aura-physical-card::after {
-  width: 240px;
-  height: 200px;
-  left: -90px;
-  bottom: -90px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%);
+  width: 200px;
+  height: 160px;
+  left: -70px;
+  bottom: -70px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.14), transparent 70%);
 }

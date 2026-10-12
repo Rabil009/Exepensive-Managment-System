@@ -18,6 +18,8 @@ export interface ManagerClaim {
   receiptVerified: boolean;
   receiptUrl?: string;
   receiptName?: string;
+  merchant?: string;
+  gstNumber?: string;
   policyNotes?: string;
   managerRemark?: string;
 }
@@ -57,26 +59,37 @@ export interface QuarterlyReport {
   topDepartment: string;
 }
 
-const isClaimPending = (status: string) => {
-  const s = (status || "").toUpperCase();
-  return s === "SUBMITTED" || s === "PENDING" || s === "DRAFT";
-};
-
-const isClaimApproved = (status: string) => {
-  const s = (status || "").toUpperCase();
-  return (
+export function normalizeManagerClaimStatus(rawStatus?: string): "Pending" | "Approved" | "Rejected" {
+  const s = (rawStatus || "").toUpperCase().trim();
+  if (s.includes("REJECT")) {
+    return "Rejected";
+  }
+  if (
     s.includes("APPROV") ||
     s === "PAID" ||
     s === "CLOSED" ||
     s === "DISBURSED" ||
+    s === "SETTLED" ||
     s === "PAYMENT_PENDING"
-  );
-};
+  ) {
+    return "Approved";
+  }
+  return "Pending";
+}
 
-const isClaimRejected = (status: string) => {
-  const s = (status || "").toUpperCase();
-  return s.includes("REJECT");
-};
+export function normalizeCategory(rawCat?: string): "Travel" | "Hotel" | "Meals" | "Software" | "Transport" | "Equipment" {
+  const c = (rawCat || "").toUpperCase();
+  if (c.includes("HOTEL") || c.includes("ACCOMMODATION")) return "Hotel";
+  if (c.includes("MEAL") || c.includes("FOOD")) return "Meals";
+  if (c.includes("SOFT") || c.includes("APP") || c.includes("CLOUD")) return "Software";
+  if (c.includes("TRANSPORT") || c.includes("UBER") || c.includes("CAB")) return "Transport";
+  if (c.includes("EQUIP") || c.includes("OFFICE") || c.includes("HARDWARE")) return "Equipment";
+  return "Travel";
+}
+
+const isClaimPending = (status: string) => normalizeManagerClaimStatus(status) === "Pending";
+const isClaimApproved = (status: string) => normalizeManagerClaimStatus(status) === "Approved";
+const isClaimRejected = (status: string) => normalizeManagerClaimStatus(status) === "Rejected";
 
 /**
  * Fetch Manager Claims directly from Supabase Cloud first (source of truth for employee submissions),
@@ -296,11 +309,11 @@ export async function fetchManagerSpendSummary(): Promise<TeamSpendSummary | nul
     const all = claims || [];
     const totalSpent = all.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
     const pendingClaims = all.filter(
-      (c) => (c.status || "").toUpperCase().includes("SUBMIT") || (c.status || "").toUpperCase().includes("PEND")
+      (c) => normalizeManagerClaimStatus(c.status) === "Pending"
     );
     const pendingAmount = pendingClaims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
-    const approvedCount = all.filter((c) => (c.status || "").toUpperCase().includes("APPROV")).length;
-    const rejectedCount = all.filter((c) => (c.status || "").toUpperCase().includes("REJECT")).length;
+    const approvedCount = all.filter((c) => normalizeManagerClaimStatus(c.status) === "Approved").length;
+    const rejectedCount = all.filter((c) => normalizeManagerClaimStatus(c.status) === "Rejected").length;
 
     return {
       totalSpent,
@@ -391,3 +404,145 @@ export async function fetchManagerQuarterlyReport(): Promise<QuarterlyReport | n
   return null;
 }
 
+export interface CardApprovalRequest {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  department: string;
+  cardId?: string;
+  requestType: "VIRTUAL_CARD" | "LIMIT_INCREASE";
+  cardName: string;
+  requestedLimit: number;
+  status: "Pending" | "Approved" | "Rejected";
+  createdAt: string;
+}
+
+export async function fetchCardRequests(): Promise<CardApprovalRequest[]> {
+  try {
+    const { data: requests, error } = await supabase
+      .from("employee_card_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !requests) return [];
+
+    // Query profiles, expense claims, and employee cards to reliably resolve employee identity
+    const [{ data: profiles }, { data: claims }, { data: cards }] = await Promise.all([
+      supabase.from("profiles").select("id, name, department"),
+      supabase.from("expense_claims").select("employee_id, employee_name, employee_department"),
+      supabase.from("employee_cards").select("employee_id, display_name"),
+    ]);
+
+    const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+    const claimMap = new Map((claims || []).map((c: any) => [c.employee_id, c]));
+    const cardMap = new Map((cards || []).map((c: any) => [c.employee_id, c]));
+
+    return requests.map((r: any) => {
+      const p = profileMap.get(r.employee_id);
+      const claim = claimMap.get(r.employee_id);
+      const card = cardMap.get(r.employee_id);
+
+      let employeeName = p?.name || claim?.employee_name;
+      if (!employeeName && card?.display_name) {
+        employeeName = card.display_name.split(" - ")[0];
+      }
+      if (!employeeName) {
+        employeeName = "Employee";
+      }
+
+      const department = p?.department || claim?.employee_department || "Engineering";
+      const rawStatus = (r.status || "PENDING").toUpperCase();
+      const status: "Pending" | "Approved" | "Rejected" =
+        rawStatus === "APPROVED" ? "Approved" : rawStatus === "REJECTED" ? "Rejected" : "Pending";
+
+      return {
+        id: r.id,
+        employeeId: r.employee_id,
+        employeeName,
+        department,
+        cardId: r.card_id,
+        requestType: r.request_type,
+        cardName: r.card_name || (r.request_type === "VIRTUAL_CARD" ? "Virtual Corporate Card" : "Card Limit Increase"),
+        requestedLimit: Number(r.requested_limit) || 50000,
+        status,
+        createdAt: r.created_at ? new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Today",
+      };
+    });
+  } catch (err) {
+    console.error("fetchCardRequests error:", err);
+    return [];
+  }
+}
+
+export async function approveCardRequest(req: CardApprovalRequest): Promise<boolean> {
+  try {
+    if (req.requestType === "VIRTUAL_CARD") {
+      const last4 = Math.floor(1000 + Math.random() * 9000).toString();
+      const { error: cardErr } = await supabase.from("employee_cards").insert({
+        employee_id: req.employeeId,
+        display_name: req.cardName || `${req.employeeName} - Virtual Card`,
+        kind: "VIRTUAL",
+        network: "Mastercard Virtual",
+        last4,
+        currency: "INR",
+        monthly_limit: req.requestedLimit,
+        active: true,
+        frozen: false,
+        wallet_enabled: true,
+        travel_limits_enabled: false,
+        online_verification_enabled: true,
+        atm_lock_enabled: false,
+      });
+      if (cardErr) console.error("Error creating approved card:", cardErr);
+    } else if (req.requestType === "LIMIT_INCREASE") {
+      let query = supabase.from("employee_cards").update({
+        monthly_limit: req.requestedLimit,
+        updated_at: new Date().toISOString(),
+      });
+      if (req.cardId) {
+        query = query.eq("id", req.cardId).eq("employee_id", req.employeeId);
+      } else {
+        query = query.eq("employee_id", req.employeeId);
+      }
+      const { data: updatedCards, error: limitErr } = await query.select();
+      if (!updatedCards || updatedCards.length === 0) {
+        // Fallback: update employee card by employee_id
+        await supabase
+          .from("employee_cards")
+          .update({
+            monthly_limit: req.requestedLimit,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("employee_id", req.employeeId);
+      }
+      if (limitErr) console.error("Error updating approved limit:", limitErr);
+    }
+
+    const { error: reqErr } = await supabase
+      .from("employee_card_requests")
+      .update({ status: "APPROVED" })
+      .eq("id", req.id);
+
+    if (reqErr) {
+      console.error("Error updating card request status:", reqErr);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Failed to approve card request:", err);
+    return false;
+  }
+}
+
+export async function rejectCardRequest(reqId: string): Promise<boolean> {
+  try {
+    await supabase
+      .from("employee_card_requests")
+      .update({ status: "REJECTED" })
+      .eq("id", reqId);
+    return true;
+  } catch {
+    return false;
+  }
+}

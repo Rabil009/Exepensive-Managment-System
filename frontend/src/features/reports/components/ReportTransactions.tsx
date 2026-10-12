@@ -233,8 +233,8 @@ export function ReportTransactions({ model }: Props) {
                     <button
                       type="button"
                       onClick={() => setActiveReceipt(item)}
-                      title="Click to view and download receipt"
                       className="hover:underline cursor-pointer"
+                      title="Click to view and download receipt"
                     >
                       <StatusBadge tone="success">
                         {item.receipt === "Auto-Matched Invoice"
@@ -309,6 +309,7 @@ export function ReportTransactions({ model }: Props) {
           currency={activeReceipt.currency || "INR"}
           date={activeReceipt.date}
           category={activeReceipt.category}
+          employeeName={activeReceipt.employee_name}
         />
       )}
     </section>

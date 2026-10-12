@@ -72,7 +72,6 @@ export function CardSecurity({ model }: Props) {
               {/* iOS / Linear style Toggle Switch */}
               <button
                 type="button"
-                disabled={!card}
                 role="switch"
                 aria-label={item.name}
                 aria-checked={isEnabled}
