@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useExpenses } from "../data/ExpensesContext";
 import { draftKey, remoteDraftKey, emptyDraft, type Draft } from "../data/expenseDraft";
 import type { ExpenseStatus } from "../types";
 import { discardNewExpense, loadExpenseOptions, loadNewExpense, saveNewExpense, type ExpenseOptions } from "../data/newExpenseApi";
 export function useExpenseForm() {
+  const router = useRouter();
   const params = useSearchParams();
   const draftParam = params.get("draft");
   const { expenses, refresh } = useExpenses();
@@ -146,6 +147,7 @@ export function useExpenseForm() {
       } else {
         try { localStorage.removeItem(draftKey); } catch { /* Optional cache. */ }
         try { localStorage.removeItem(remoteDraftKey); } catch { /* Optional cache. */ }
+        router.push("/employee/dashboard");
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save the expense.");
@@ -172,6 +174,7 @@ export function useExpenseForm() {
       setMessage("");
       setSaved(false);
       setSubmitted(false);
+      router.push("/employee/dashboard");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not discard this draft.");
     } finally {
