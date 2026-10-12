@@ -44,9 +44,8 @@ export function ReceiptCapture({ model }: Props) {
           </h2>
         </div>
         {scanning ? (
-          <span className="text-[11px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-md border bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 flex items-center gap-1.5">
+          <span className="px-2.5 py-0.5 rounded-md border bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 flex items-center justify-center">
             <Spiral className="size-3 text-blue-600 dark:text-blue-400" />
-            <span>Scanning...</span>
           </span>
         ) : hasReceipt ? (
           <span className="text-[11px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-md border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-1.5">

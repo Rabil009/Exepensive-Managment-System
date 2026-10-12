@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { employeePasswordAuth, safeEmployeeReturnPath } from "@/lib/employee-auth";
 import { supabase } from "@/lib/supabase";
+import { Spiral } from "@/components/ui/spiral";
 import {
   Eye,
   EyeOff,
@@ -587,7 +588,7 @@ export default function LoginPage() {
                 : "bg-zinc-950 hover:bg-black text-white"
             }`}
           >
-            {isLoading ? "Authenticating..." : "Sign In"}
+            {isLoading ? <Spiral className="size-4" /> : "Sign In"}
           </button>
         </form>
 
@@ -763,7 +764,7 @@ export default function LoginPage() {
                       : "bg-zinc-950 hover:bg-black text-white"
                   }`}
                 >
-                  {signUpLoading ? "Creating..." : "Create Account"}
+                  {signUpLoading ? <Spiral className="size-4" /> : "Create Account"}
                 </button>
               </div>
             </form>

@@ -4,48 +4,68 @@ import React from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+interface SpiralProps extends React.ComponentProps<"span"> {
+  dots?: number;
+  radius?: number;
+  speed?: number;
+}
+
 function Spiral({
   dots = 8,
-  radius = 31.25,
+  radius = 35,
+  speed = 1.2,
   className,
   ...props
-}: React.ComponentProps<"span"> & { dots?: number; radius?: number }) {
+}: SpiralProps) {
   return (
     <span
       role="status"
-      className={cn("relative inline-block size-5", className)}
+      aria-label="Loading"
+      className={cn(
+        "relative inline-flex items-center justify-center size-8 shrink-0 select-none",
+        className
+      )}
       {...props}
     >
-      {Array.from({ length: dots }, (_, index) => {
-        const angle = (index / dots) * (2 * Math.PI);
-        const x = `${50 + radius * Math.cos(angle)}%`;
-        const y = `${50 + radius * Math.sin(angle)}%`;
+      <motion.span
+        className="relative block w-full h-full"
+        animate={{ rotate: 360 }}
+        transition={{
+          duration: speed * 2,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      >
+        {Array.from({ length: dots }, (_, index) => {
+          const angle = (index / dots) * (2 * Math.PI);
+          const x = 50 + radius * Math.cos(angle);
+          const y = 50 + radius * Math.sin(angle);
 
-        return (
-          <motion.span
-            key={index}
-            aria-hidden="true"
-            className="absolute inline-block rounded-full bg-current"
-            style={{
-              left: x,
-              top: y,
-              translate: "-50% -50%",
-              width: `${150 / dots}%`,
-              height: `${150 / dots}%`,
-            }}
-            animate={{
-              scale: [0, 1, 0],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              delay: (index / dots) * 1.5,
-              ease: "easeInOut",
-            }}
-          />
-        );
-      })}
+          return (
+            <motion.span
+              key={index}
+              aria-hidden="true"
+              className="absolute rounded-full bg-current -translate-x-1/2 -translate-y-1/2"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                width: `${Math.max(18, 220 / dots)}%`,
+                height: `${Math.max(18, 220 / dots)}%`,
+              }}
+              animate={{
+                scale: [0.45, 1.25, 0.45],
+                opacity: [0.25, 1, 0.25],
+              }}
+              transition={{
+                duration: speed,
+                repeat: Infinity,
+                delay: (index / dots) * speed,
+                ease: "easeInOut",
+              }}
+            />
+          );
+        })}
+      </motion.span>
       <span className="sr-only">Loading</span>
     </span>
   );
@@ -53,4 +73,3 @@ function Spiral({
 
 export { Spiral };
 export default Spiral;
-

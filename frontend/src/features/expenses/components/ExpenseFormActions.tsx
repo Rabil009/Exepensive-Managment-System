@@ -43,14 +43,16 @@ export function ExpenseFormActions({ model }: Props) {
         <button
           type="submit"
           disabled={!ready || submitted || saving}
-          className="h-8 px-3.5 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
+          className="h-8 px-3.5 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed min-w-[110px]"
         >
           {saving ? (
             <Spiral className="size-3.5 text-white dark:text-zinc-900" />
           ) : (
-            <Send className="h-3.5 w-3.5" />
+            <>
+              <Send className="h-3.5 w-3.5" />
+              <span>Submit Expense</span>
+            </>
           )}
-          <span>{saving ? "Submitting..." : "Submit Expense"}</span>
         </button>
       </div>
     </div>
