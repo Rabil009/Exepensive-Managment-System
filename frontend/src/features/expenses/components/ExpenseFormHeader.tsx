@@ -54,7 +54,7 @@ export function ExpenseFormHeader({ model }: Props) {
           className="h-8 px-3.5 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Send className="h-3.5 w-3.5" />
-          <span>Submit Expense</span>
+          <span>{saving ? "Submitting..." : "Submit Expense"}</span>
         </button>
       </div>
     </div>

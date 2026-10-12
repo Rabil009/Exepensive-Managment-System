@@ -138,16 +138,23 @@ export function useExpenseForm() {
       setSaved(true);
       setSubmitted(status === "Pending");
       setMessage(status === "Draft" ? "Draft saved to Supabase." : "Expense submitted to Supabase for approval.");
-      setFile(null);
-      await refresh();
-      void loadExpenseOptions().then(setOptions).catch(() => {});
       if (status === "Draft") {
+        setFile(null);
+        await refresh();
+        void loadExpenseOptions().then(setOptions).catch(() => {});
         try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Optional cache. */ }
         try { localStorage.setItem(remoteDraftKey, draft.id); } catch { /* Optional cache. */ }
       } else {
         try { localStorage.removeItem(draftKey); } catch { /* Optional cache. */ }
         try { localStorage.removeItem(remoteDraftKey); } catch { /* Optional cache. */ }
-        router.push("/employee/dashboard");
+        setDraft(emptyDraft());
+        setFile(null);
+        if (typeof window !== "undefined") {
+          window.location.href = "/employee/dashboard";
+        } else {
+          router.push("/employee/dashboard");
+        }
+        return;
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not save the expense.");
@@ -161,8 +168,6 @@ export function useExpenseForm() {
       setSaving(true);
       if (remoteDraft.current && !submitted) await discardNewExpense(draft.id);
       remoteDraft.current = false;
-      await refresh();
-      void loadExpenseOptions().then(setOptions).catch(() => {});
       localStorage.removeItem(draftKey);
       localStorage.removeItem(remoteDraftKey);
       setDraft(emptyDraft());
@@ -174,7 +179,11 @@ export function useExpenseForm() {
       setMessage("");
       setSaved(false);
       setSubmitted(false);
-      router.push("/employee/dashboard");
+      if (typeof window !== "undefined") {
+        window.location.href = "/employee/dashboard";
+      } else {
+        router.push("/employee/dashboard");
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not discard this draft.");
     } finally {
