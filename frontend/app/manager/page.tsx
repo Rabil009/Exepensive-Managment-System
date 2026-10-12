@@ -38,6 +38,7 @@ import { ManagerHeader } from "@/components/manager/ManagerHeader";
 import { StatusBadge, PriorityBadge } from "@/components/shared/StatusBadge";
 import { EmployeeAvatar, EmployeeCell } from "@/components/manager/EmployeeAvatar";
 import { ThemeProvider, useTheme } from "@/lib/theme-store";
+import { supabase } from "@/lib/supabase";
 import {
   fetchManagerClaims,
   approveManagerClaim,
@@ -134,6 +135,28 @@ function ManagerDashboardInner() {
 
   useEffect(() => {
     refreshData();
+
+    // 1. Polling fallback for guaranteed responsiveness
+    const interval = setInterval(() => {
+      refreshData();
+    }, 4000);
+
+    // 2. Real-time Supabase postgres_changes listener for instant live update
+    const channel = supabase
+      .channel("manager-dashboard-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "expense_claims" },
+        () => {
+          refreshData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -1197,6 +1220,19 @@ function ManagerDashboardInner() {
                       {inspectClaim.receiptVerified ? "Verified (GST Compliant)" : "Missing / Non-Compliant"}
                     </span>
                   </div>
+                  {inspectClaim.receiptVerified && (
+                    <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
+                      <span className="text-zinc-500">Document:</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        {inspectClaim.receiptName || "View Receipt & Tax Invoice"}
+                      </button>
+                    </div>
+                  )}
                   {inspectClaim.policyNotes && (
                     <div className="flex items-start justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
                       <span className="text-zinc-500">Audit Heuristic:</span>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { UploadCloud, FileCheck, FileText } from "lucide-react";
+import { UploadCloud, FileCheck, FileText, Loader2, Sparkles } from "lucide-react";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
 
 type Props = {
@@ -13,6 +13,8 @@ type Props = {
     | "setDragging"
     | "attach"
     | "inputRef"
+    | "scanning"
+    | "scanNotice"
   >;
 };
 
@@ -24,6 +26,8 @@ export function ReceiptCapture({ model }: Props) {
     setDragging,
     attach,
     inputRef,
+    scanning,
+    scanNotice,
   } = model;
 
   const hasReceipt = Boolean(draft.receipt);
@@ -38,20 +42,26 @@ export function ReceiptCapture({ model }: Props) {
             Receipt Attachment
           </h2>
         </div>
-        <span
-          className={`text-[11px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-md border ${
-            hasReceipt
-              ? "bg-[#3B9B78]/10 text-[#3B9B78] border-[#3B9B78]/20"
-              : "border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181D] text-zinc-500"
-          }`}
-        >
-          {hasReceipt ? "Attached" : "Optional"}
-        </span>
+        {scanning ? (
+          <span className="text-[11px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-md border bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 flex items-center gap-1.5 animate-pulse">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            <span>Scanning...</span>
+          </span>
+        ) : hasReceipt ? (
+          <span className="text-[11px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-md border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3" />
+            <span>Attached &amp; Scanned</span>
+          </span>
+        ) : (
+          <span className="text-[11px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-md border border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50 dark:bg-[#18181D] text-zinc-500">
+            Optional
+          </span>
+        )}
       </div>
 
       {/* Modernized Clean Dropzone */}
       <div
-        className={`rounded-lg p-6 sm:p-7 border-2 border-dashed transition-all group flex flex-col items-center justify-center text-center cursor-pointer ${
+        className={`relative rounded-lg p-6 sm:p-7 border-2 border-dashed transition-all group flex flex-col items-center justify-center text-center cursor-pointer overflow-hidden ${
           dragging
             ? "border-blue-500 bg-blue-50/20 dark:bg-blue-950/20"
             : "border-zinc-200/80 dark:border-white/[0.08] bg-zinc-50/50 dark:bg-[#141418] hover:border-zinc-400 dark:hover:border-zinc-600"
@@ -71,17 +81,28 @@ export function ReceiptCapture({ model }: Props) {
         }}
       >
         {preview ? (
-          // Blob URLs are temporary local previews and cannot use the Next image optimizer.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            className="my-2 max-h-[170px] max-w-full rounded-lg border border-zinc-200 dark:border-white/[0.08] shadow-xs object-contain"
-            src={preview}
-            alt="Receipt preview"
-          />
+          <div className="relative my-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className={`max-h-[170px] max-w-full rounded-lg border border-zinc-200 dark:border-white/[0.08] shadow-xs object-contain transition-opacity ${
+                scanning ? "opacity-40" : "opacity-100"
+              }`}
+              src={preview}
+              alt="Receipt preview"
+            />
+            {scanning && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 rounded-lg backdrop-blur-2xs text-white">
+                <Loader2 className="h-6 w-6 animate-spin text-emerald-400" />
+                <span className="text-xs font-semibold">Reading receipt...</span>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="w-10 h-10 rounded-xl bg-zinc-200/70 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-2 shadow-2xs">
-            {hasReceipt ? (
-              <FileCheck className="h-5 w-5 text-[#3B9B78]" />
+            {scanning ? (
+              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+            ) : hasReceipt ? (
+              <FileCheck className="h-5 w-5 text-emerald-600" />
             ) : (
               <UploadCloud className="h-5 w-5" />
             )}
@@ -93,9 +114,11 @@ export function ReceiptCapture({ model }: Props) {
             {draft.receipt || "Drag and drop your receipt"}
           </h3>
           <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-            {hasReceipt
+            {scanning
+              ? "Scanning document & auto-filling form..."
+              : hasReceipt
               ? "Click to change or replace file"
-              : "PDF, PNG, JPG, or HEIC up to 25MB"}
+              : "Drop receipt (PDF, PNG, JPG) to auto-fill details"}
           </p>
         </div>
 
@@ -126,6 +149,19 @@ export function ReceiptCapture({ model }: Props) {
           }}
         />
       </div>
+
+      {/* OCR Auto-fill Notification Badge */}
+      {scanNotice && (
+        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-start gap-2 animate-in fade-in duration-200">
+          <Sparkles className="h-4 w-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+          <div className="flex-1">
+            <span className="font-semibold block">OCR Auto-Fill Complete</span>
+            <span className="text-[11px] leading-relaxed opacity-90 block mt-0.5">
+              {scanNotice}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -30,6 +30,7 @@ import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { ReceiptModal } from "@/components/shared/ReceiptModal";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import {
   fetchManagerClaims,
   approveManagerClaim,
@@ -52,11 +53,11 @@ interface ApprovalClaim {
   status: "Pending" | "Approved" | "Rejected";
   priority: "High" | "Medium" | "Low";
   receiptVerified: boolean;
-  merchant: string;
-  gstNumber?: string;
-  policyNotes?: string;
   receiptUrl?: string;
   receiptName?: string;
+  merchant?: string;
+  gstNumber?: string;
+  policyNotes?: string;
 }
 
 const INITIAL_APPROVAL_CLAIMS: ApprovalClaim[] = [];
@@ -125,6 +126,28 @@ function ApprovalsPageInner() {
 
   useEffect(() => {
     refreshData();
+
+    // 1. Polling fallback for guaranteed responsiveness
+    const interval = setInterval(() => {
+      refreshData();
+    }, 3500);
+
+    // 2. Real-time Supabase postgres_changes listener for instant live update
+    const channel = supabase
+      .channel("manager-approvals-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "expense_claims" },
+        () => {
+          refreshData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
@@ -798,6 +821,19 @@ function ApprovalsPageInner() {
                       {inspectClaim.receiptVerified ? "Original Tax Invoice Attached" : "Missing Receipt"}
                     </span>
                   </div>
+                  {inspectClaim.receiptVerified && (
+                    <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
+                      <span className="text-zinc-500">Document:</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        {inspectClaim.receiptName || "View Receipt & Tax Invoice"}
+                      </button>
+                    </div>
+                  )}
                   {inspectClaim.policyNotes && (
                     <div className="pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
                       <span className="text-zinc-500 block mb-0.5">Policy Assessment:</span>

@@ -1,4 +1,5 @@
 import { employeeRequest } from "@/lib/employee-api";
+import { supabase } from "@/lib/supabase";
 import type { Draft } from "./expenseDraft";
 
 type SavedDraft = {
@@ -57,8 +58,6 @@ export async function loadNewExpense(id: string) {
 export async function discardNewExpense(id: string) {
   await employeeRequest(`/new-expense/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
-
-import { supabase } from "@/lib/supabase";
 
 function dataUriToBlob(dataUri: string): Blob {
   const parts = dataUri.split(",");

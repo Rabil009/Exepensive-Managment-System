@@ -10,5 +10,5 @@ def get_supabase_admin_client() -> Client:
     key = settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_KEY
     return create_client(settings.SUPABASE_URL, key)
 
-supabase = get_supabase_client()
+supabase: Client = get_supabase_client()
 

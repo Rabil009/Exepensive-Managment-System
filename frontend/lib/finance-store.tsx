@@ -62,45 +62,133 @@ interface FinanceContextType {
 const FinanceContext = createContext<FinanceContextType | null>(null);
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+const mapLiveClaim = (item: any): ExpenseClaim => {
+  const rawStatus = String(item.status || "SUBMITTED").toUpperCase();
+  let status: ClaimStatus = "SUBMITTED";
+  if (rawStatus === "PENDING" || rawStatus === "SUBMITTED") status = "SUBMITTED";
+  else if (rawStatus === "APPROVED" || rawStatus === "MANAGER_APPROVED") status = "MANAGER_APPROVED";
+  else if (rawStatus === "REJECTED" || rawStatus === "MANAGER_REJECTED") status = "MANAGER_REJECTED";
+  else if (rawStatus === "FINANCE_APPROVED") status = "FINANCE_APPROVED";
+  else if (rawStatus === "FINANCE_REJECTED") status = "FINANCE_REJECTED";
+  else if (rawStatus === "PAYMENT_PENDING") status = "PAYMENT_PENDING";
+  else if (rawStatus === "PAID" || rawStatus === "DISBURSED") status = "PAID";
+  else if (rawStatus === "CLOSED") status = "CLOSED";
+
+  return {
+    id: String(item.id),
+    employeeId: item.employee_id || item.employeeId || "u1",
+    employeeName: item.employee_name || item.employeeName || "Employee",
+    employeeDepartment: item.employee_department || item.department || "Engineering",
+    title: item.title || item.description || "Expense Claim",
+    description: item.description || "",
+    amount: Number(item.amount) || 0,
+    currency: item.currency || "INR",
+    category: (item.category || "OTHER").toUpperCase() as any,
+    paymentMethod: item.payment_method || (item.paymentMethod === "Corporate Card" ? "CORPORATE_CARD" : "PERSONAL_CARD"),
+    merchant: item.merchant,
+    receiptUrl: item.receipt_url || item.receiptUrl,
+    receiptName: item.receipt_name || item.receiptName || (item.receipt_url ? "receipt.pdf" : undefined),
+    status,
+    policyViolation: item.policy_violation || item.policyNotes,
+    policyExceededAmount: Number(item.policy_exceeded_amount || 0),
+    employeeExceptionReason: item.employee_exception_reason,
+    isDuplicateWarning: Boolean(item.is_duplicate_warning),
+    duplicateDetails: item.duplicate_details,
+    isHold: Boolean(item.is_hold),
+    holdReason: item.hold_reason,
+    heldAt: item.held_at,
+    submittedAt: item.submitted_at || item.created_at,
+    createdAt: item.created_at || new Date().toISOString(),
+    updatedAt: item.updated_at || new Date().toISOString(),
+    managerRemark: item.manager_remark || item.managerRemark,
+    financeRemark: item.finance_remark || item.financeRemark,
+    paymentReference: item.payment_reference || item.paymentReference,
+    disbursedAt: item.disbursed_at || item.disbursedAt,
+    paymentChannel: item.payment_channel || item.paymentChannel,
+  };
+};
+
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [activeView, setActiveView] = useState("Dashboard");
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
   const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>([]);
 
-  // Load real claims and budgets directly from Supabase Cloud
+  // Sync claims, budgets, and reimbursements from live backend & Supabase Cloud
   useEffect(() => {
     let isMounted = true;
-    getExpenseClaims().then((fetched) => {
-      if (isMounted) {
-        const claimList = fetched || [];
-        setClaims(claimList);
-        
-        // Populate reimbursements from real paid claims
-        const paidReimbursements: ReimbursementItem[] = claimList
-          .filter((c) => c.status === "PAID" || c.disbursedAt || c.paymentReference)
-          .map((c) => ({
-            id: `RMB-${c.id}`,
-            claimId: c.id,
-            employee: c.employeeName,
-            department: c.employeeDepartment,
-            amount: c.amount,
-            currency: c.currency || "INR",
-            completedDate: c.disbursedAt ? new Date(c.disbursedAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "Recently",
-            paymentMethod: c.paymentChannel || c.paymentMethod || "Bank Transfer",
-            paymentReference: c.paymentReference || "Direct Settlement",
-            status: "Paid" as const,
-          }));
-        if (paidReimbursements.length > 0) {
-          setReimbursements(paidReimbursements);
+
+    const processClaims = (claimList: ExpenseClaim[]) => {
+      if (!isMounted) return;
+      setClaims(claimList);
+      const paidReimbursements: ReimbursementItem[] = claimList
+        .filter((c) => c.status === "PAID" || c.disbursedAt || c.paymentReference)
+        .map((c) => ({
+          id: `RMB-${c.id}`,
+          claimId: c.id,
+          employee: c.employeeName,
+          department: c.employeeDepartment,
+          amount: c.amount,
+          currency: c.currency || "INR",
+          completedDate: c.disbursedAt
+            ? new Date(c.disbursedAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
+            : "Recently",
+          paymentMethod: c.paymentChannel || c.paymentMethod || "Bank Transfer",
+          paymentReference: c.paymentReference || "Direct Settlement",
+          status: "Paid" as const,
+        }));
+      if (paidReimbursements.length > 0) {
+        setReimbursements(paidReimbursements);
+      }
+    };
+
+    // 1. Fetch claims (prefer FastAPI shared store if reachable, else Supabase Cloud)
+    fetch(`${API_URL}/api/finance/claims`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((rows) => {
+        if (isMounted && Array.isArray(rows) && rows.length > 0) {
+          processClaims(rows.map(mapLiveClaim));
+        } else {
+          getExpenseClaims().then((fetched) => {
+            if (isMounted && fetched) processClaims(fetched);
+          });
         }
-      }
-    });
-    getDepartmentBudgets().then((fetchedBudgets) => {
-      if (isMounted) {
-        setBudgets(fetchedBudgets || []);
-      }
-    });
+      })
+      .catch(() => {
+        getExpenseClaims().then((fetched) => {
+          if (isMounted && fetched) processClaims(fetched);
+        });
+      });
+
+    // 2. Fetch shared department budgets
+    fetch(`${API_URL}/api/finance/budgets`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((rows) => {
+        if (isMounted && Array.isArray(rows) && rows.length > 0) {
+          setBudgets(
+            rows.map((b: any) => ({
+              id: String(b.id || b.department),
+              name: b.name || b.department,
+              allocatedAmount: Number(b.allocated_amount || b.cap || 100000),
+              spentAmount: Number(b.spent_amount || b.spent || 0),
+              currency: b.currency || "INR",
+              fiscalPeriod: b.fiscal_period || "Q4-2026",
+              thresholdPercent: Number(b.threshold_percent || 80),
+            }))
+          );
+        } else {
+          getDepartmentBudgets().then((fetchedBudgets) => {
+            if (isMounted && fetchedBudgets) setBudgets(fetchedBudgets);
+          });
+        }
+      })
+      .catch(() => {
+        getDepartmentBudgets().then((fetchedBudgets) => {
+          if (isMounted && fetchedBudgets) setBudgets(fetchedBudgets);
+        });
+      });
+
+    // 3. Fetch reimbursements queue
     fetch(`${API_URL}/api/finance/reimbursements`)
       .then((response) => response.ok ? response.json() : [])
       .then((rows: Record<string, unknown>[]) => {
@@ -109,7 +197,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
           id: String(row.id),
           claimId: String(row.claim_id),
           employee: String(row.employee_name ?? ""),
-          department: "",
+          department: String(row.employee_department ?? ""),
           amount: Number(row.eligible_personal_amount ?? 0),
           currency: String(row.currency ?? "INR"),
           completedDate: String(row.disbursed_at ?? row.created_at ?? ""),
@@ -119,6 +207,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
         })));
       })
       .catch(() => {});
+
     return () => {
       isMounted = false;
     };

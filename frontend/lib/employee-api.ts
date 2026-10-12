@@ -137,12 +137,35 @@ export async function resolveCurrentEmployee(): Promise<{
   return null;
 }
 
+export function fileToDataUrl(file: File | Blob): Promise<string> {
+  if (typeof FileReader !== "undefined") {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+  return file.arrayBuffer().then((buf) => {
+    let binary = "";
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const mime = (file as any).type || "application/octet-stream";
+    return `data:${mime};base64,${btoa(binary)}`;
+  });
+}
+
 export async function employeeRequest(
   path: string,
   init: RequestInit = {}
 ): Promise<Response> {
   const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData?.session?.access_token || "";
+  let token = sessionData?.session?.access_token || "";
+  if (!token && typeof window !== "undefined") {
+    token = localStorage.getItem("payout_employee_token") || "";
+  }
   const authUser = sessionData?.session?.user;
   const currentEmp = await resolveCurrentEmployee();
   const employeeId = currentEmp?.id;
@@ -897,10 +920,19 @@ export async function employeeRequest(
                 id: c.id,
                 date: c.expense_date || (c.created_at || "").slice(0, 10),
                 merchant: c.merchant || c.title,
+                description: c.description || "",
                 category: c.category,
                 amount: Number(c.amount) || 0,
                 status: normalizeClaimStatus(c.status),
                 currency: c.currency || "INR",
+                receipt: c.receipt_name || null,
+                receiptUrl: c.receipt_url || null,
+                employee_name: c.employee_name || null,
+                paymentMethod: (c.payment_method || "")
+                  .toUpperCase()
+                  .includes("CORPORATE")
+                  ? "Corporate Card"
+                  : "Personal (Out-of-Pocket)",
               })),
             };
           }
@@ -984,23 +1016,12 @@ export async function employeeRequest(
           let receiptUrl: string | null = null;
           let receiptName: string | null = null;
 
-          if (file && file.size > 0 && submitEmployeeId) {
+          if (file && file.size > 0) {
+            receiptName = file.name;
             try {
-              const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-              const filePath = `${submitEmployeeId}/${Date.now()}-${safeName}`;
-              const { error: uploadError } = await supabase.storage
-                .from("receipts")
-                .upload(filePath, file, { upsert: true });
-
-              if (!uploadError) {
-                const { data: urlData } = supabase.storage
-                  .from("receipts")
-                  .getPublicUrl(filePath);
-                receiptUrl = urlData?.publicUrl || null;
-                receiptName = file.name;
-              }
-            } catch (storageErr) {
-              console.warn("Storage upload note:", storageErr);
+              receiptUrl = await fileToDataUrl(file);
+            } catch (convErr) {
+              console.warn("Receipt conversion error:", convErr);
             }
           }
 
@@ -1034,13 +1055,31 @@ export async function employeeRequest(
           else if (rawPm.includes("CASH")) paymentMethod = "PERSONAL_CASH";
 
           const claimId = `CLM-${Date.now().toString().slice(-6)}`;
+          const effectiveEmpId =
+            submitEmployeeId ||
+            authUser?.id ||
+            "7881beaf-b8ab-4600-afd8-4543deb2a24b";
+
+          let finalEmpName = employeeName;
+          if (!finalEmpName || finalEmpName === "Employee") {
+            if (authUser?.user_metadata?.name) {
+              finalEmpName = authUser.user_metadata.name;
+            } else if (typeof window !== "undefined") {
+              finalEmpName =
+                localStorage.getItem("payout_user_name") ||
+                localStorage.getItem("payout_user_email")?.split("@")[0] ||
+                "Employee";
+            }
+          }
+
+          const nowIso = new Date().toISOString();
 
           const { error: insertError } = await supabase
             .from("expense_claims")
             .insert({
               id: claimId,
-              employee_id: submitEmployeeId,
-              employee_name: employeeName,
+              employee_id: effectiveEmpId,
+              employee_name: finalEmpName,
               employee_department: employeeDept,
               title: parsed.merchant || "Expense",
               merchant: parsed.merchant || "Vendor",
@@ -1053,13 +1092,43 @@ export async function employeeRequest(
               report_name: parsed.report || "General",
               receipt_url: receiptUrl,
               receipt_name: receiptName,
-              expense_date: parsed.date || new Date().toISOString().slice(0, 10),
-              submitted_at: new Date().toISOString(),
+              receipt_content_type: file?.type || null,
+              receipt_size_bytes: file?.size || null,
+              expense_date: parsed.date || nowIso.slice(0, 10),
+              submitted_at: nowIso,
+              created_at: nowIso,
             });
 
           if (insertError) {
             console.error("Direct Supabase claim insertion error:", insertError);
             throw new Error(insertError.message);
+          }
+
+          // Also sync to FastAPI backend if available
+          if (apiUrl) {
+            try {
+              const fd = new FormData();
+              fd.set("action", "Submit");
+              fd.set("data", JSON.stringify({
+                id: claimId,
+                merchant: parsed.merchant,
+                date: parsed.date,
+                amount: String(parsed.amount || "0"),
+                category,
+                report: parsed.report,
+                payment_method: paymentMethod,
+                purpose: parsed.purpose,
+                attendees: parsed.attendees || [],
+                receipt_name: receiptName,
+                receipt_url: receiptUrl,
+              }));
+              if (file) fd.set("file", file);
+              await fetch(`${apiUrl}/api/employee/new-expense`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: fd,
+              });
+            } catch {}
           }
 
           responseData = { id: claimId, status: "Pending" };
@@ -1072,6 +1141,79 @@ export async function employeeRequest(
         status: "Failed",
         error: err instanceof Error ? err.message : "Error",
       };
+    }
+  }
+
+  // RECEIPT DOWNLOAD: Serve receipt directly from Supabase
+  else if (path.startsWith("/new-expense/receipts/")) {
+    const expenseId = path.replace("/new-expense/receipts/", "");
+    try {
+      const { data } = await supabase
+        .from("expense_claims")
+        .select("receipt_url, receipt_name, receipt_content_type")
+        .eq("id", expenseId)
+        .maybeSingle();
+
+      if (data?.receipt_url && data.receipt_url.startsWith("data:")) {
+        const parts = data.receipt_url.split(",");
+        const header = parts[0];
+        const base64 = parts[1];
+        const mime = header.split(";")[0].replace("data:", "") || "application/octet-stream";
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new Response(bytes, {
+          status: 200,
+          headers: {
+            "Content-Type": mime,
+            "Content-Disposition": `attachment; filename="${data.receipt_name || "receipt"}"`,
+          },
+        });
+      } else if (data?.receipt_url && data.receipt_url.startsWith("http")) {
+        const fetchRes = await fetch(data.receipt_url);
+        if (fetchRes.ok) return fetchRes;
+      }
+    } catch (err) {
+      console.warn("Receipt fetch error:", err);
+    }
+    return new Response(new Uint8Array(0), { status: 404 });
+  }
+
+  // CLAIM UPDATE / ATTACH RECEIPT: Patch existing claim with receipt
+  else if (path.startsWith("/new-expense/claims/") && init.method === "PATCH") {
+    const expenseId = path.replace("/new-expense/claims/", "");
+    try {
+      if (init.body instanceof FormData) {
+        const file = init.body.get("file") as File | null;
+        const report = init.body.get("report") as string | null;
+        const patch: Record<string, any> = {};
+
+        if (report) {
+          patch.report_name = report;
+        }
+
+        if (file && file.size > 0) {
+          patch.receipt_name = file.name;
+          patch.receipt_content_type = file.type || null;
+          patch.receipt_size_bytes = file.size;
+
+          try {
+            patch.receipt_url = await fileToDataUrl(file);
+          } catch (b64Err) {
+            console.warn("Patch receipt base64 error:", b64Err);
+          }
+        }
+
+        if (Object.keys(patch).length > 0) {
+          await supabase.from("expense_claims").update(patch).eq("id", expenseId);
+        }
+
+        responseData = { id: expenseId, status: "Updated" };
+      }
+    } catch (err) {
+      responseData = { id: expenseId, status: "Error", error: String(err) };
     }
   } else {
     responseData = {};

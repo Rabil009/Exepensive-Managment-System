@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import { Search, Download, CreditCard, Wallet, RotateCcw } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import type { ReportsModel } from "../hooks/useReports";
+import type { Expense } from "../../expenses/types";
 import { StatusBadge } from "../../../shared/components/StatusBadge";
 import { ReceiptModal } from "@/components/shared/ReceiptModal";
-import type { Expense } from "../../expenses/types";
 import { displayDate, money } from "../../../shared/utils/format";
 import { formatTotal, isPersonal } from "../utils/reportTotals";
 import { downloadExpenseReceipt } from "../../expenses/data/newExpenseApi";
@@ -306,7 +306,7 @@ export function ReportTransactions({ model }: Props) {
           receiptUrl={activeReceipt.receiptUrl}
           merchant={activeReceipt.merchant}
           amount={activeReceipt.amount}
-          currency={activeReceipt.currency}
+          currency={activeReceipt.currency || "INR"}
           date={activeReceipt.date}
           category={activeReceipt.category}
           employeeName={activeReceipt.employee_name}
