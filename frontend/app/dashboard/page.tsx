@@ -119,10 +119,16 @@ function DashboardContent() {
         />
 
         {/* Scrollable Main Content (optimized mobile padding) */}
-        <main className="flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+        <main
+          className={
+            isLoading
+              ? "flex-1 overflow-y-auto overscroll-contain flex items-center justify-center h-full"
+              : "flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6"
+          }
+        >
           {isLoading ? (
-            <div className="flex-1 min-h-[60vh] flex items-center justify-center py-16">
-              <Spiral className="size-9 text-emerald-500" />
+            <div className="flex items-center justify-center w-full h-full">
+              <Spiral className="size-10 text-emerald-500" />
             </div>
           ) : (
             <>

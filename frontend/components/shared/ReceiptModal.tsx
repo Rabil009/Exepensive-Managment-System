@@ -116,11 +116,30 @@ export function ReceiptModal({
       setLoadedName(file.name);
       setImageError(false);
 
+      let finalUrl = file.size < 200 * 1024 ? dataUrl : null;
+      try {
+        const fileExt = file.name.split('.').pop() || 'png';
+        const filePath = `${claimId || "claim"}_${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from("receipts")
+          .upload(filePath, file, { contentType: file.type || "image/png", upsert: true });
+        if (!uploadError) {
+          const { data: publicData } = supabase.storage.from("receipts").getPublicUrl(filePath);
+          if (publicData?.publicUrl) {
+            finalUrl = publicData.publicUrl;
+          }
+        }
+      } catch (storageErr) {
+        console.warn("Storage upload notice:", storageErr);
+      }
+
+      if (!finalUrl) finalUrl = dataUrl;
+
       if (claimId) {
         await supabase
           .from("expense_claims")
           .update({
-            receipt_url: dataUrl,
+            receipt_url: finalUrl,
             receipt_name: file.name,
             receipt_content_type: file.type || "image/png",
             receipt_size_bytes: file.size,

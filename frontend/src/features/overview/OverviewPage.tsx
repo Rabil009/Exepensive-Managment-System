@@ -14,8 +14,8 @@ export default function OverviewPage() {
   return (
     <AppShell active="Overview">
       {model.loading && !model.summary ? (
-        <div className="w-full min-h-[60vh] flex items-center justify-center py-16">
-          <Spiral className="size-9 text-blue-500" />
+        <div className="w-full h-full min-h-[calc(100vh-160px)] flex items-center justify-center">
+          <Spiral className="size-10 text-blue-500" />
         </div>
       ) : (
         <div className="space-y-4 sm:space-y-6 w-full">

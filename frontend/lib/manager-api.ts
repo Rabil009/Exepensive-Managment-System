@@ -174,8 +174,13 @@ export async function fetchManagerClaims(params?: {
     console.warn("Supabase claims direct query note:", supabaseErr);
   }
 
-  // 2. Fallback: FastAPI backend if reachable
-  if (BACKEND_BASE_URL) {
+  // 2. Fallback: FastAPI backend if reachable (only locally or if custom remote backend)
+  if (
+    BACKEND_BASE_URL &&
+    (typeof window === "undefined" ||
+      window.location.hostname === "localhost" ||
+      !BACKEND_BASE_URL.includes("localhost:8000"))
+  ) {
     try {
       const url = new URL(`${BACKEND_BASE_URL}/approvals`);
       if (params?.status && params.status !== "All") url.searchParams.set("status", params.status);

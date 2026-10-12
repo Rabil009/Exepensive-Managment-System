@@ -1019,9 +1019,25 @@ export async function employeeRequest(
           if (file && file.size > 0) {
             receiptName = file.name;
             try {
-              receiptUrl = await fileToDataUrl(file);
+              const fileExt = file.name.split('.').pop() || 'png';
+              const filePath = `receipt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+              const { error: uploadError } = await supabase.storage
+                .from("receipts")
+                .upload(filePath, file, { contentType: file.type || "image/png", upsert: true });
+              if (!uploadError) {
+                const { data: publicData } = supabase.storage.from("receipts").getPublicUrl(filePath);
+                if (publicData?.publicUrl) {
+                  receiptUrl = publicData.publicUrl;
+                }
+              }
+              if (!receiptUrl && file.size < 200 * 1024) {
+                receiptUrl = await fileToDataUrl(file);
+              }
             } catch (convErr) {
-              console.warn("Receipt conversion error:", convErr);
+              console.warn("Receipt upload notice:", convErr);
+              if (file.size < 200 * 1024) {
+                try { receiptUrl = await fileToDataUrl(file); } catch {}
+              }
             }
           }
 
