@@ -100,12 +100,28 @@ export async function getEmployeeAccount(): Promise<EmployeeAccount | null> {
       }
 
       const user = data.session.user;
+      let profileName = user.user_metadata?.name || user.email?.split("@")[0] || "Employee";
+      let profileRole = "EMPLOYEE";
+
+      try {
+        const { data: dbProfile } = await supabase
+          .from("profiles")
+          .select("name, role")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (dbProfile?.name) profileName = dbProfile.name;
+        if (dbProfile?.role) profileRole = dbProfile.role;
+      } catch {
+        // Fallback to metadata
+      }
+
       return {
         user: { id: user.id, email: user.email ?? null },
         profile: {
           id: user.id,
-          name: user.user_metadata?.name || user.email?.split("@")[0] || "Employee",
-          role: "EMPLOYEE",
+          name: profileName,
+          role: profileRole,
         },
       };
     }
@@ -117,11 +133,32 @@ export async function getEmployeeAccount(): Promise<EmployeeAccount | null> {
   if (typeof window !== "undefined") {
     const role = localStorage.getItem("payout_user_role");
     const email = localStorage.getItem("payout_user_email");
+    const storedName = localStorage.getItem("payout_user_name");
     if (role === "/employee" || role === "/employee/dashboard" || role?.startsWith("/employee")) {
       const userEmail = email || "adityadevlops@gmail.com";
+      let resolvedId = "emp-demo-001";
+      let resolvedName = storedName || userEmail.split("@")[0] || "Employee";
+      let resolvedRole = "EMPLOYEE";
+
+      try {
+        const { data: dbProfile } = await supabase
+          .from("profiles")
+          .select("id, name, role")
+          .eq("email", userEmail.trim().toLowerCase())
+          .maybeSingle();
+
+        if (dbProfile) {
+          resolvedId = dbProfile.id;
+          if (dbProfile.name) resolvedName = dbProfile.name;
+          if (dbProfile.role) resolvedRole = dbProfile.role;
+        }
+      } catch {
+        // Fallback
+      }
+
       return {
-        user: { id: "emp-demo-001", email: userEmail },
-        profile: { id: "emp-demo-001", name: userEmail.split("@")[0] || "Employee", role: "EMPLOYEE" },
+        user: { id: resolvedId, email: userEmail },
+        profile: { id: resolvedId, name: resolvedName, role: resolvedRole },
       };
     }
   }
