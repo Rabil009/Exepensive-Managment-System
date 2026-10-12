@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { X, Download, Printer, CheckCircle2, ShieldCheck, FileText, ExternalLink } from "lucide-react";
 import { downloadExpenseReceipt } from "@/src/features/expenses/data/newExpenseApi";
+import { supabase } from "@/lib/supabase";
 
 export interface ReceiptModalProps {
   isOpen: boolean;
@@ -32,6 +33,26 @@ export function ReceiptModal({
   category,
 }: ReceiptModalProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [loadedUrl, setLoadedUrl] = useState<string | undefined>(receiptUrl);
+  const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+    if (receiptUrl) {
+      setLoadedUrl(receiptUrl);
+    } else if (claimId && isOpen) {
+      supabase
+        .from("expense_claims")
+        .select("receipt_url, receipt_name")
+        .eq("id", claimId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.receipt_url) {
+            setLoadedUrl(data.receipt_url);
+          }
+        });
+    }
+  }, [receiptUrl, claimId, isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -51,22 +72,24 @@ export function ReceiptModal({
   const displayEmployee = employeeName || "Employee";
   const displayCategory = category || "General";
 
-  // Check if we have a valid direct image/data url (excluding broken supabase storage links)
-  const isBrokenStorageUrl = receiptUrl?.includes("/storage/v1/object/public/receipts/");
+  const activeUrl = loadedUrl || receiptUrl;
+  const isBrokenStorageUrl = activeUrl?.includes("/storage/v1/object/public/receipts/");
   const isDirectImage =
-    Boolean(receiptUrl) &&
+    Boolean(activeUrl) &&
     !isBrokenStorageUrl &&
-    (receiptUrl?.startsWith("data:image/") ||
-      receiptUrl?.endsWith(".png") ||
-      receiptUrl?.endsWith(".jpg") ||
-      receiptUrl?.endsWith(".jpeg") ||
-      receiptUrl?.endsWith(".svg") ||
-      receiptUrl?.endsWith(".webp"));
+    !imageError &&
+    (activeUrl?.startsWith("data:image/") ||
+      activeUrl?.startsWith("data:application/octet-stream") ||
+      activeUrl?.endsWith(".png") ||
+      activeUrl?.endsWith(".jpg") ||
+      activeUrl?.endsWith(".jpeg") ||
+      activeUrl?.endsWith(".svg") ||
+      activeUrl?.endsWith(".webp"));
 
   const isPdf =
-    Boolean(receiptUrl) &&
+    Boolean(activeUrl) &&
     !isBrokenStorageUrl &&
-    (receiptUrl?.startsWith("data:application/pdf") || receiptUrl?.endsWith(".pdf"));
+    (activeUrl?.startsWith("data:application/pdf") || activeUrl?.endsWith(".pdf"));
 
   const handleDownload = async () => {
     try {
@@ -141,18 +164,19 @@ export function ReceiptModal({
 
         {/* Content Viewer */}
         <div className="flex-1 overflow-y-auto p-6 bg-zinc-100/50 dark:bg-black/30 flex flex-col items-center justify-center min-h-[380px]">
-          {isDirectImage && receiptUrl ? (
-            <div className="max-w-full rounded-xl overflow-hidden shadow-lg border border-zinc-200 dark:border-white/[0.08] bg-white">
+          {isDirectImage && activeUrl ? (
+            <div className="max-w-full rounded-xl overflow-hidden shadow-lg border border-zinc-200 dark:border-white/[0.08] bg-white p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={receiptUrl}
+                src={activeUrl}
                 alt={displayName}
-                className="max-h-[500px] w-auto object-contain mx-auto"
+                onError={() => setImageError(true)}
+                className="max-h-[520px] w-auto max-w-full object-contain mx-auto rounded-lg shadow-xs"
               />
             </div>
-          ) : isPdf && receiptUrl ? (
+          ) : isPdf && activeUrl ? (
             <iframe
-              src={receiptUrl}
+              src={activeUrl}
               title={displayName}
               className="w-full h-[500px] rounded-xl border border-zinc-200 dark:border-white/[0.08] bg-white shadow-lg"
             />
