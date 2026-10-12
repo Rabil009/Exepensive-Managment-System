@@ -139,7 +139,12 @@ def extract_merchant(text: str, filename: str = "") -> tuple[str, str | None]:
         ):
             return clean, None
 
-    return filename.rsplit(".", 1)[0].replace("_", " ").title() if filename else "Business Vendor", None
+    if filename and not re.search(r"^(media|img|scan|receipt|file|doc|screenshot)[_\d-]", filename, re.I):
+        candidate = filename.rsplit(".", 1)[0].replace("_", " ").replace("-", " ").strip()
+        if len(candidate) > 2 and not candidate.isdigit():
+            return candidate.title(), None
+
+    return None, None
 
 def extract_category(text: str, merchant_cat: str | None = None) -> str:
     if merchant_cat:
@@ -199,26 +204,39 @@ async def scan_receipt(file: UploadFile = File(...)):
 
     # Fallback to string extraction if still empty
     if not raw_text.strip():
-        # Clean latin1/utf-8 strings
         clean_strs = re.findall(rb"[\x20-\x7e\n]{4,}", content)
         raw_text = "\n".join([s.decode("utf-8", errors="ignore") for s in clean_strs])
 
-    merchant, m_cat = extract_merchant(raw_text, filename)
-    amount = extract_amount(raw_text)
-    date = extract_date(raw_text)
-    category = extract_category(raw_text, m_cat)
-    payment_method = extract_payment_method(raw_text)
+    # Normalize common OCR quirks
+    norm_text = (
+        raw_text
+        .replace("\u2018", "'")
+        .replace("\u2019", "'")
+        .replace("\u201c", '"')
+        .replace("\u201d", '"')
+    )
+    norm_text = re.sub(r"\b([0-3]?[0-9])[-/. ]0ct\b", r"\1-Oct", norm_text, flags=re.I)
+    norm_text = re.sub(r"\b([0-3]?[0-9])[-/. ]0ctober\b", r"\1-October", norm_text, flags=re.I)
+
+    merchant, m_cat = extract_merchant(norm_text, filename)
+    amount = extract_amount(norm_text)
+    date = extract_date(norm_text)
+    category = extract_category(norm_text, m_cat) if (merchant or amount or date) else None
+    payment_method = extract_payment_method(norm_text)
     purpose = f"Business expense at {merchant}" if merchant else "Business Expense"
 
+    has_data = bool(amount or date or (merchant and merchant != "Business Vendor"))
+
     return {
-        "success": True,
+        "success": has_data,
         "filename": filename,
         "merchant": merchant,
         "amount": amount,
         "date": date,
-        "category": category,
+        "category": category or "Other",
         "paymentMethod": payment_method,
         "purpose": purpose,
-        "rawText": raw_text[:1000],
+        "rawText": norm_text[:1000],
     }
+
 

@@ -141,11 +141,26 @@ export function useExpenseForm() {
             if (extracted.amount) updated.amount = extracted.amount;
             if (extracted.date) updated.date = extracted.date;
             if (extracted.category) {
-              const upper = extracted.category.toUpperCase();
+              const CATEGORY_MAP: Record<string, string> = {
+                MEALS: "Food",
+                FOOD: "Food",
+                DINING: "Food",
+                TRAVEL: "Travel",
+                HOTEL: "Accommodation",
+                ACCOMMODATION: "Accommodation",
+                STAY: "Accommodation",
+                OFFICE: "Office",
+                SUPPLIES: "Office",
+                SOFTWARE: "Software",
+                SAAS: "Software",
+                HARDWARE: "Office",
+                OTHER: "Other",
+              };
+              const target = CATEGORY_MAP[extracted.category.toUpperCase()] || extracted.category;
               const matched = options.categories.find(
-                (c) => c.toUpperCase() === upper || upper.includes(c.toUpperCase())
+                (c) => c.toLowerCase() === target.toLowerCase() || target.toLowerCase().includes(c.toLowerCase())
               );
-              updated.category = matched || options.categories[0] || extracted.category;
+              updated.category = matched || target || options.categories[0] || "Other";
             }
             if (extracted.paymentMethod) updated.paymentMethod = extracted.paymentMethod;
             if (extracted.purpose && (!prev.purpose || prev.purpose.trim() === "")) {
