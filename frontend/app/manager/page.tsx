@@ -840,7 +840,7 @@ function ManagerDashboardInner() {
           )}
 
           {/* VIEW 5: Reports */}
-          {activeView === "Reports" && <QuarterlyFinancialStatements />}
+          {activeView === "Reports" && <QuarterlyFinancialStatements initialClaims={claims} />}
 
           {/* VIEW 6: Policies */}
           {activeView === "Policies" && (
