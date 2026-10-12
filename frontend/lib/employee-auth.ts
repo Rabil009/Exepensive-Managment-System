@@ -18,154 +18,89 @@ export function safeEmployeeReturnPath(value: string | null) {
 }
 
 export async function employeePasswordAuth(email: string, password: string, signup = false) {
-  // 1. Try FastAPI backend first
-  try {
-    const response = await fetch(`${apiUrl}/api/auth/employee${signup ? "/signup" : "/login"}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
-    });
-    if (response.ok) {
-      return (await response.json()) as Partial<EmployeeAccount> & {
-        confirmation_required?: boolean;
-        access_token?: string;
-        refresh_token?: string;
-      };
-    }
-  } catch {
-    console.warn("Backend auth offline, falling back to direct Supabase Auth...");
-  }
+  const cleanEmail = email.trim().toLowerCase();
 
-  // 2. Direct Supabase Auth fallback
+  // 1. Direct Supabase Auth
   try {
     if (signup) {
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         password,
       });
-      if (!error && data.session) {
+      if (error) throw error;
+      if (data?.session) {
         return {
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
           confirmation_required: false,
-          user: { id: data.user?.id || "emp-1", email },
-          profile: { id: data.user?.id || "emp-1", name: email.split("@")[0], role: "EMPLOYEE" },
+          user: { id: data.user?.id || "", email: cleanEmail },
+          profile: { id: data.user?.id || "", name: cleanEmail.split("@")[0], role: "EMPLOYEE" },
         };
       }
+      return {
+        confirmation_required: true,
+        user: { id: data.user?.id || "", email: cleanEmail },
+      };
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+        email: cleanEmail,
         password,
       });
-      if (!error && data.session) {
+      if (error) throw error;
+      if (data?.session) {
         return {
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token,
-          user: { id: data.user.id, email: data.user.email || email },
-          profile: { id: data.user.id, name: email.split("@")[0], role: "EMPLOYEE" },
+          user: { id: data.user.id, email: data.user.email || cleanEmail },
+          profile: { id: data.user.id, name: cleanEmail.split("@")[0], role: "EMPLOYEE" },
         };
       }
     }
   } catch (supabaseErr) {
-    console.warn("Supabase auth attempt notice:", supabaseErr);
+    throw supabaseErr;
   }
 
-  // 3. Fallback demo session so Employee portal is never blocked
-  if (typeof window !== "undefined") {
-    localStorage.setItem("payout_user_role", "/employee");
-    localStorage.setItem("payout_user_email", email);
-  }
-
-  return {
-    access_token: "demo-employee-access-token",
-    refresh_token: "demo-employee-refresh-token",
-    user: { id: "emp-demo-001", email },
-    profile: { id: "emp-demo-001", name: email.split("@")[0] || "Employee", role: "EMPLOYEE" },
-  };
+  throw new Error("Authentication failed. Please verify your credentials.");
 }
 
 export async function getEmployeeAccount(): Promise<EmployeeAccount | null> {
-  // 1. Check Supabase Auth session
+  // Check active Supabase Auth session JWT
   try {
-    const { data } = await supabase.auth.getSession();
-    if (data?.session?.access_token) {
-      // Try backend /me if remote URL configured
-      if (apiUrl && !apiUrl.includes("localhost:8000")) {
-        try {
-          const response = await fetch(`${apiUrl}/api/auth/employee/me`, {
-            headers: { Authorization: `Bearer ${data.session.access_token}` },
-          });
-          if (response.ok) return (await response.json()) as EmployeeAccount;
-        } catch {
-          // Backend offline, continue below
-        }
-      }
-
-      const user = data.session.user;
-      let profileName = user.user_metadata?.name || user.email?.split("@")[0] || "Employee";
-      let profileRole = "EMPLOYEE";
-
-      try {
-        const { data: dbProfile } = await supabase
-          .from("profiles")
-          .select("name, role")
-          .eq("id", user.id)
-          .maybeSingle();
-
-        if (dbProfile?.name) profileName = dbProfile.name;
-        if (dbProfile?.role) profileRole = dbProfile.role;
-      } catch {
-        // Fallback to metadata
-      }
-
-      return {
-        user: { id: user.id, email: user.email ?? null },
-        profile: {
-          id: user.id,
-          name: profileName,
-          role: profileRole,
-        },
-      };
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data?.session?.access_token || !data.session.user) {
+      return null;
     }
+
+    const user = data.session.user;
+    let profileName = user.user_metadata?.name || user.email?.split("@")[0] || "Employee";
+    let profileRole = "EMPLOYEE";
+
+    try {
+      const { data: dbProfile } = await supabase
+        .from("profiles")
+        .select("id, name, role")
+        .or(`id.eq.${user.id},email.eq.${user.email?.trim().toLowerCase()}`)
+        .maybeSingle();
+
+      if (dbProfile?.name) profileName = dbProfile.name;
+      if (dbProfile?.role) profileRole = dbProfile.role;
+    } catch {
+      if (user.user_metadata?.role) {
+        profileRole = user.user_metadata.role;
+      }
+    }
+
+    return {
+      user: { id: user.id, email: user.email ?? null },
+      profile: {
+        id: user.id,
+        name: profileName,
+        role: profileRole,
+      },
+    };
   } catch {
-    // Continue to localStorage check
+    return null;
   }
-
-  // 2. If no Supabase session, check localStorage
-  if (typeof window !== "undefined") {
-    const role = localStorage.getItem("payout_user_role");
-    const email = localStorage.getItem("payout_user_email");
-    const storedName = localStorage.getItem("payout_user_name");
-    if (role === "/employee" || role === "/employee/dashboard" || role?.startsWith("/employee")) {
-      const userEmail = email || "adityadevlops@gmail.com";
-      let resolvedId = "emp-demo-001";
-      let resolvedName = storedName || userEmail.split("@")[0] || "Employee";
-      let resolvedRole = "EMPLOYEE";
-
-      try {
-        const { data: dbProfile } = await supabase
-          .from("profiles")
-          .select("id, name, role")
-          .eq("email", userEmail.trim().toLowerCase())
-          .maybeSingle();
-
-        if (dbProfile) {
-          resolvedId = dbProfile.id;
-          if (dbProfile.name) resolvedName = dbProfile.name;
-          if (dbProfile.role) resolvedRole = dbProfile.role;
-        }
-      } catch {
-        // Fallback
-      }
-
-      return {
-        user: { id: resolvedId, email: userEmail },
-        profile: { id: resolvedId, name: resolvedName, role: resolvedRole },
-      };
-    }
-  }
-
-  return null;
 }
 
 export function clearEmployeeCache() {

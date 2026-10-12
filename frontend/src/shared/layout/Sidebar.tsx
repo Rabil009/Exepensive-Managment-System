@@ -77,11 +77,16 @@ export function Sidebar({
   }, [isProfileOpen]);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) return;
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     clearEmployeeCache();
-    localStorage.removeItem("payout_user_role");
-    localStorage.removeItem("payout_user_email");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("payout_user_role");
+      localStorage.removeItem("payout_user_email");
+      localStorage.removeItem("payout_user_name");
+      localStorage.removeItem("payout_employee_token");
+    }
     router.replace("/?portal=employee");
   };
 

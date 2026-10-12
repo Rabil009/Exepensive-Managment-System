@@ -72,3 +72,4 @@ export function ExpenseApprovalChart({ data }: { data: AnalyticsData | null }) {
 }
 
 export default ExpenseApprovalChart;
+

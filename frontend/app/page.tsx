@@ -167,88 +167,70 @@ export default function LoginPage() {
     e.preventDefault();
     setErrorMessage(null);
 
-    // 1. REAL SUPABASE AUTHENTICATION FOR ALL PORTALS
+    const userEmail = email.trim().toLowerCase();
+    if (!userEmail || !password) {
+      setErrorMessage("Please enter both email and password.");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      let userEmail = email.trim().toLowerCase();
-      let userName = userEmail.split("@")[0].replace(".", " ").replace(/\b\w/g, (c) => c.toUpperCase());
-      let accessToken = "";
-      let detectedRole = "";
+      // 1. Strict Supabase Auth with JWT session
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password,
+      });
 
-      // 1. Try real Supabase Auth
+      if (authError || !authData?.user || !authData?.session) {
+        setErrorMessage(
+          authError?.message || "Invalid credentials or account not registered. Please register first."
+        );
+        return;
+      }
+
+      const user = authData.user;
+      const accessToken = authData.session.access_token;
+      let userName =
+        user.user_metadata?.name ||
+        userEmail.split("@")[0].replace(".", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      let detectedRole = (user.user_metadata?.role || "").toUpperCase();
+
+      // Query database profile for authoritative role
       try {
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: userEmail,
-          password,
-        });
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id, name, role, department")
+          .or(`id.eq.${user.id},email.eq.${userEmail}`)
+          .maybeSingle();
 
-        if (!authError && authData?.user) {
-          const user = authData.user;
-          userEmail = user.email || userEmail;
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("id, name, role, department")
-            .or(`id.eq.${user.id},email.eq.${userEmail}`)
-            .maybeSingle();
-          if (profile?.name) userName = profile.name;
-          if (profile?.role) detectedRole = profile.role;
+        if (profile) {
+          if (profile.name) userName = profile.name;
+          if (profile.role) detectedRole = profile.role.toUpperCase();
         }
-      } catch (sbErr) {
-        console.warn("Supabase sign in notice:", sbErr);
+      } catch (profErr) {
+        console.warn("Profile fetch warning:", profErr);
       }
 
-      // 2. Resilient fallback via backend API
-      if (!accessToken) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        try {
-          const res = await fetch(`${apiUrl}/api/auth/employee/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: userEmail, password }),
-          });
-          if (res.ok) {
-            const data = await res.json();
-            accessToken = data.access_token || "";
-            if (data.profile?.name) userName = data.profile.name;
-            if (data.profile?.role && !detectedRole) detectedRole = data.profile.role;
-          }
-        } catch {
-          // Backend offline
-        }
-      }
-
-      // 3. Fallback profile lookup if role is still unresolved
       if (!detectedRole) {
-        try {
-          const { data: fallbackProfile } = await supabase
-            .from("profiles")
-            .select("name, role")
-            .eq("email", userEmail)
-            .maybeSingle();
-          if (fallbackProfile?.name) userName = fallbackProfile.name;
-          if (fallbackProfile?.role) detectedRole = fallbackProfile.role;
-        } catch {}
+        detectedRole = "EMPLOYEE";
       }
 
-      // 4. Strict Role-based destination:
+      // Strict Role-based destination:
       // Manager -> /manager, Finance/Admin -> /dashboard, Employee -> /employee
       let destination = "/employee";
-      const upperRole = (detectedRole || "").toUpperCase();
-      if (upperRole === "MANAGER") {
+      if (detectedRole === "MANAGER") {
         destination = "/manager";
-      } else if (upperRole === "FINANCE" || upperRole === "ADMIN") {
+      } else if (detectedRole === "FINANCE" || detectedRole === "ADMIN") {
         destination = "/dashboard";
-      } else if (upperRole === "EMPLOYEE") {
-        destination = "/employee";
       } else {
-        destination = selectedPortal;
+        destination = "/employee";
       }
 
       if (typeof window !== "undefined") {
         localStorage.setItem("payout_user_role", destination);
         localStorage.setItem("payout_user_email", userEmail);
         localStorage.setItem("payout_user_name", userName);
-        if (accessToken) localStorage.setItem("payout_employee_token", accessToken);
+        localStorage.setItem("payout_employee_token", accessToken);
       }
 
       router.push(destination);
@@ -293,71 +275,65 @@ export default function LoginPage() {
     try {
       const cleanEmail = signUpEmail.trim().toLowerCase();
       const cleanName = signUpName.trim();
-      let accessToken = "";
 
-      // 1. Try Supabase Auth
-      try {
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: cleanEmail,
-          password: signUpPassword,
-          options: {
-            data: {
-              name: cleanName,
-              role: signUpRole,
-              department: signUpDepartment,
-            },
+      // 1. Strict Supabase Auth Sign Up
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: signUpPassword,
+        options: {
+          data: {
+            name: cleanName,
+            role: signUpRole,
+            department: signUpDepartment,
           },
-        });
-        if (!authError && authData?.session?.access_token) {
-          accessToken = authData.session.access_token;
-        }
-      } catch (err) {
-        console.warn("Supabase signup notice:", err);
+        },
+      });
+
+      if (authError) {
+        setSignUpError(authError.message || "Failed to create account. Please check your details.");
+        return;
       }
 
-      // 2. Fallback to backend signup
-      if (!accessToken) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      if (!authData?.user) {
+        setSignUpError("Sign up failed. Please try again.");
+        return;
+      }
+
+      // Check if session was returned directly (auto-confirm enabled)
+      if (authData.session?.access_token) {
+        const accessToken = authData.session.access_token;
+
+        // Upsert profile in Supabase
         try {
-          const res = await fetch(`${apiUrl}/api/auth/employee/signup`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: cleanEmail, password: signUpPassword }),
+          await supabase.from("profiles").upsert({
+            id: authData.user.id,
+            email: cleanEmail,
+            name: cleanName,
+            role: signUpRole,
+            department: signUpDepartment,
+            avatar_initials: cleanName.slice(0, 2).toUpperCase(),
           });
-          if (res.ok) {
-            const data = await res.json();
-            accessToken = data.access_token || "";
-          }
-        } catch (backendErr) {
-          console.warn("Backend signup notice:", backendErr);
+        } catch {
+          // Trigger ensures profile exists
         }
-      }
 
-      // 3. Ensure profile in Supabase if possible
-      try {
-        await supabase.from("profiles").upsert({
-          email: cleanEmail,
-          name: cleanName,
-          role: signUpRole,
-          department: signUpDepartment,
-          avatar_initials: cleanName.slice(0, 2).toUpperCase(),
-        });
-      } catch {
-        // Continue
-      }
+        const destination =
+          signUpRole === "EMPLOYEE" ? "/employee" : signUpRole === "MANAGER" ? "/manager" : "/dashboard";
 
-      // 4. Save session & navigate
-      if (typeof window !== "undefined") {
-        const portalPath = signUpRole === "EMPLOYEE" ? "/employee" : signUpRole === "MANAGER" ? "/manager" : "/dashboard";
-        localStorage.setItem("payout_user_role", portalPath);
-        localStorage.setItem("payout_user_email", cleanEmail);
-        localStorage.setItem("payout_user_name", cleanName);
-        if (accessToken) localStorage.setItem("payout_employee_token", accessToken);
-      }
+        if (typeof window !== "undefined") {
+          localStorage.setItem("payout_user_role", destination);
+          localStorage.setItem("payout_user_email", cleanEmail);
+          localStorage.setItem("payout_user_name", cleanName);
+          localStorage.setItem("payout_employee_token", accessToken);
+        }
 
-      setShowSignUpModal(false);
-      const destination = signUpRole === "EMPLOYEE" ? "/employee" : signUpRole === "MANAGER" ? "/manager" : "/dashboard";
-      router.push(destination);
+        setShowSignUpModal(false);
+        router.push(destination);
+      } else {
+        // Confirmation email required
+        setShowSignUpModal(false);
+        setErrorMessage("Account created successfully! Please check your email to verify before signing in.");
+      }
     } catch (err) {
       setSignUpError(err instanceof Error ? err.message : "Failed to create account.");
     } finally {

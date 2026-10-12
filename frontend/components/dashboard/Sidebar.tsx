@@ -22,6 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { useFinanceStore } from "@/lib/finance-store";
+import { supabase } from "@/lib/supabase";
 
 interface SidebarProps {
   isCollapsed?: boolean;
@@ -76,10 +77,15 @@ export function Sidebar({
     };
   }, [isProfileOpen]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     if (typeof window !== "undefined") {
       localStorage.removeItem("payout_user_role");
       localStorage.removeItem("payout_user_email");
+      localStorage.removeItem("payout_user_name");
+      localStorage.removeItem("payout_employee_token");
     }
     router.push("/");
   };

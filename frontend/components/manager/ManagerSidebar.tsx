@@ -91,12 +91,15 @@ export function ManagerSidebar({
   }, [isProfileOpen]);
 
   const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     if (typeof window !== "undefined") {
       localStorage.removeItem("payout_user_role");
       localStorage.removeItem("payout_user_email");
       localStorage.removeItem("payout_user_name");
+      localStorage.removeItem("payout_employee_token");
     }
-    await supabase.auth.signOut().catch(() => {});
     router.push("/");
   };
 
