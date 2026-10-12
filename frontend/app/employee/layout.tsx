@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { assignEmployeeCacheOwner, clearEmployeeCache, getEmployeeAccount } from "@/lib/employee-auth";
 import type { EmployeeAccount } from "@/lib/employee-auth";
 import { EmployeeSessionProvider } from "@/lib/employee-session";
+import { Spiral } from "@/components/ui/spiral";
 
 function EmployeeAccess({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -44,7 +45,15 @@ function EmployeeAccess({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   if (authorizedPath !== pathname || !account) {
-    return <div className="min-h-screen bg-[#08080A] text-zinc-400 grid place-items-center text-sm" role="status">Checking Employee access…</div>;
+    return (
+      <div className="min-h-screen bg-[#08080A] text-zinc-100 flex flex-col items-center justify-center gap-4 py-16" role="status">
+        <Spiral className="size-10 text-blue-500" />
+        <div className="flex flex-col items-center text-center gap-1.5">
+          <h3 className="text-sm font-semibold tracking-tight text-zinc-200">Checking Employee Access</h3>
+          <p className="text-xs text-zinc-500 max-w-sm">Verifying your secure session and permissions...</p>
+        </div>
+      </div>
+    );
   }
   return <EmployeeSessionProvider account={account}><ExpensesProvider>{children}</ExpensesProvider></EmployeeSessionProvider>;
 }
