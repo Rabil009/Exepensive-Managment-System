@@ -212,12 +212,11 @@ export async function downloadExpenseReceipt(id: string, filename?: string) {
     return;
   }
 
-  // 2. If valid HTTP link (excluding broken bucket link)
+  // 2. If valid HTTP link (including Supabase storage public links)
   if (
     claimData?.receipt_url &&
     (claimData.receipt_url.startsWith("http://") ||
-      claimData.receipt_url.startsWith("https://")) &&
-    !claimData.receipt_url.includes("/storage/v1/object/public/receipts/")
+      claimData.receipt_url.startsWith("https://"))
   ) {
     try {
       const response = await fetch(claimData.receipt_url);
@@ -249,26 +248,8 @@ export async function downloadExpenseReceipt(id: string, filename?: string) {
     console.warn("Fallback receipt download note:", err);
   }
 
-  // 4. Guaranteed fallback: Generate official verified Tax Invoice SVG and download
-  const safeFilename =
-    downloadName.endsWith(".png") ||
-    downloadName.endsWith(".jpg") ||
-    downloadName.endsWith(".jpeg")
-      ? downloadName.replace(/\.(png|jpg|jpeg)$/i, ".svg")
-      : downloadName.includes(".")
-        ? downloadName
-        : `${downloadName}.svg`;
-
-  const fallbackBlob = generateReceiptSvgBlob({
-    id: claimData?.id || id,
-    merchant: claimData?.merchant || claimData?.title || undefined,
-    amount: claimData?.amount ?? undefined,
-    date: claimData?.expense_date ?? undefined,
-    employeeName: claimData?.employee_name ?? undefined,
-    category: claimData?.category ?? undefined,
-  });
-
-  triggerBlobDownload(fallbackBlob, safeFilename);
+  // No fake receipt fallback
+  console.warn(`No receipt file attached or available for claim ${id}`);
 }
 
 export async function completeSubmittedExpense(

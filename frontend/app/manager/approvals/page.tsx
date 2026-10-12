@@ -844,14 +844,25 @@ function ApprovalsPageInner() {
                   )}
                   <div className="pt-2 border-t dark:border-white/[0.06] border-zinc-200/60 flex items-center justify-between">
                     <span className="text-zinc-500">Invoice Voucher:</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowReceiptModal(true)}
-                      className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      <span>{inspectClaim.receiptName || "View Tax Invoice & Receipt"}</span>
-                    </button>
+                    {inspectClaim.receiptUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>{inspectClaim.receiptName || "View Receipt"}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="text-amber-600 dark:text-amber-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>Upload Receipt Proof</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

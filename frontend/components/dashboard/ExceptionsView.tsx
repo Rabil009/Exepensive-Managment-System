@@ -35,14 +35,14 @@ export function ExceptionsView() {
         Boolean(c.policyViolation) ||
         Boolean(c.isDuplicateWarning) ||
         Boolean(c.isHold) ||
-        (!c.receiptUrl && !c.receiptName)
+        (!c.receiptUrl || c.receiptUrl.trim() === "")
       );
     });
   }, [claims]);
 
-  // All claims with missing receipts (includes the 30 items)
+  // All claims with missing receipts
   const missingReceiptClaims = useMemo(() => {
-    return claims.filter((c) => !c.receiptName || c.receiptName.trim() === "" || !c.receiptUrl);
+    return claims.filter((c) => !c.receiptUrl || c.receiptUrl.trim() === "");
   }, [claims]);
 
   const duplicateClaims = useMemo(() => {
@@ -361,7 +361,7 @@ export function ExceptionsView() {
                 </tr>
               ) : (
                 displayedClaims.map((claim) => {
-                  const isMissingReceipt = !claim.receiptUrl && !claim.receiptName;
+                  const isMissingReceipt = !claim.receiptUrl || claim.receiptUrl.trim() === "";
                   return (
                     <tr
                       key={claim.id}
