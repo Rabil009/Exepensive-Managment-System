@@ -843,20 +843,18 @@ function ManagerDashboardInner() {
                             <td className="py-2.5 px-4 text-right text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
                               ₹{req.requestedLimit.toLocaleString("en-IN")}
                             </td>
-                            <td className="py-2.5 px-4">
-                              {req.status === "Approved" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
-                                  Approved
-                                </span>
-                              ) : req.status === "Rejected" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25">
-                                  Rejected
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 animate-pulse">
-                                  Pending Review
-                                </span>
-                              )}
+                            <td className="py-2.5 px-4 whitespace-nowrap">
+                              <StatusBadge
+                                tone={
+                                  req.status === "Approved"
+                                    ? "success"
+                                    : req.status === "Pending"
+                                    ? "warning"
+                                    : "danger"
+                                }
+                              >
+                                {req.status === "Pending" ? "Pending Review" : req.status}
+                              </StatusBadge>
                             </td>
                             <td className="py-2.5 px-4 text-right">
                               {req.status === "Pending" ? (
