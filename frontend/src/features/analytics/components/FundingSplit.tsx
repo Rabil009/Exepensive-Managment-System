@@ -6,8 +6,8 @@ import type { AnalyticsData } from "../data/useEmployeeAnalytics";
 
 export function FundingSplit({ data }: { data: AnalyticsData | null }) {
   const funding = [
-    { label: "Corporate Card", amount: Number(data?.funding.corporate || 0), color: "#5A78A6" },
-    { label: "Personal / Out-of-Pocket", amount: Number(data?.funding.personal || 0), color: "#3B9B78" },
+    { label: "Corporate Card", amount: Number(data?.funding?.corporate || 0), color: "#5A78A6" },
+    { label: "Personal / Out-of-Pocket", amount: Number(data?.funding?.personal || 0), color: "#3B9B78" },
   ];
   const total = funding.reduce((sum, item) => sum + item.amount, 0);
   return <section aria-label="Funding split" className="rounded-xl p-5 border bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.07]">

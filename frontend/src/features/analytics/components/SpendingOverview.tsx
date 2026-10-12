@@ -9,10 +9,22 @@ const colors = ["#5A78A6", "#3B9B78", "#C98642", "#8875B8"];
 
 export function SpendingOverview({ data }: { data: AnalyticsData | null }) {
   const [period, setPeriod] = useState<"daily" | "weekly">("daily");
-  const points = (period === "daily" ? data?.daily_spend.map((item) => ({ label: item.date.slice(8), amount: Number(item.amount) }))
-    : data?.weekly_spend.map((item) => ({ label: item.week, amount: Number(item.amount) }))) || [];
-  const total = Number(data?.totals.total_spend || 0);
-  const categories = (data?.categories || []).map((item, index) => ({ name: item.name, value: Number(item.amount), color: colors[index % colors.length] }));
+  const points =
+    (period === "daily"
+      ? (data?.daily_spend || []).map((item) => ({
+          label: (item.date || "").slice(8) || item.date || "Day",
+          amount: Number(item.amount) || 0,
+        }))
+      : (data?.weekly_spend || []).map((item) => ({
+          label: item.week || "W",
+          amount: Number(item.amount) || 0,
+        }))) || [];
+  const total = Number(data?.totals?.total_spend || 0);
+  const categories = (data?.categories || []).map((item, index) => ({
+    name: item.name,
+    value: Number(item.amount) || 0,
+    color: colors[index % colors.length],
+  }));
   return <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
     <section className="lg:col-span-8 rounded-xl p-5 border bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.07]">
       <div className="flex justify-between gap-3 mb-4"><div><h2 className="text-sm font-semibold">Spending Trend</h2><p className="text-xs text-zinc-500">Business expenses for {data?.month || "the selected month"}</p></div>

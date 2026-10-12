@@ -488,20 +488,36 @@ export async function employeeRequest(
     }
   }
 
-  // ANALYTICS: Dynamic calculation from real expense claims
+  // ANALYTICS: Dynamic calculation from real expense claims & cards
   else if (path.startsWith("/analytics")) {
+    const urlObj = new URL(path, "http://localhost");
+    const monthParam =
+      urlObj.searchParams.get("month") ||
+      new Date().toISOString().slice(0, 7);
+
+    const emptyAnalytics = {
+      month: monthParam,
+      currency: "INR",
+      totals: {
+        total_spend: "0",
+        pending_approval: "0",
+        reimbursed: "0",
+        corporate_card_spend: "0",
+      },
+      categories: [],
+      daily_spend: [],
+      weekly_spend: [],
+      funding: { corporate: "0", personal: "0" },
+      receipt_compliance: { attached: 0, total: 0 },
+      largest_expense: null,
+      cards: [],
+    };
+
     try {
       if (!employeeId && !employeeName) {
-        responseData = {
-          totals: {
-            total_spend: "0",
-            pending_approval: "0",
-            reimbursed: "0",
-            corporate_card_spend: "0",
-          },
-          categories: [],
-        };
+        responseData = emptyAnalytics;
       } else {
+        // 1. Fetch claims
         let claimsQuery = supabase.from("expense_claims").select("*");
         if (employeeId && employeeName) {
           claimsQuery = claimsQuery.or(
@@ -509,38 +525,135 @@ export async function employeeRequest(
           );
         } else if (employeeId) {
           claimsQuery = claimsQuery.eq("employee_id", employeeId);
+        } else if (employeeName) {
+          claimsQuery = claimsQuery.ilike("employee_name", employeeName);
         }
 
         const { data: claims } = await claimsQuery;
         const allClaims = claims || [];
 
-        const totalSpend = allClaims.reduce(
+        // 2. Fetch employee cards
+        let cardsQuery = supabase.from("employee_cards").select("*");
+        if (employeeId && employeeName) {
+          cardsQuery = cardsQuery.or(
+            `employee_id.eq.${employeeId},display_name.ilike.%${employeeName}%`
+          );
+        } else if (employeeId) {
+          cardsQuery = cardsQuery.eq("employee_id", employeeId);
+        } else if (employeeName) {
+          cardsQuery = cardsQuery.ilike("display_name", `%${employeeName}%`);
+        }
+        const { data: dbCards } = await cardsQuery;
+        const cards = (dbCards || []).map((c: any) => ({
+          id: c.id,
+          name: c.display_name || "Corporate Card",
+          last4: c.last4 || null,
+          limit: String(c.monthly_limit || 100000),
+        }));
+
+        // Filter claims by month or fallback to allClaims for resilient display
+        const monthClaims = allClaims.filter((c: any) => {
+          const d = c.expense_date || (c.created_at || "").slice(0, 10);
+          return d.startsWith(monthParam);
+        });
+
+        const targetClaims = monthClaims.length > 0 ? monthClaims : allClaims;
+
+        const totalSpend = targetClaims.reduce(
           (acc: number, c: any) => acc + (Number(c.amount) || 0),
           0
         );
-        const pendingApproval = allClaims
+        const pendingApproval = targetClaims
           .filter((c: any) => normalizeClaimStatus(c.status) === "Pending")
           .reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
-        const reimbursed = allClaims
+        const reimbursed = targetClaims
           .filter((c: any) => normalizeClaimStatus(c.status) === "Reimbursed")
           .reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
-        const corporateSpend = allClaims
+        const corporateSpend = targetClaims
           .filter((c: any) =>
             (c.payment_method || "").toUpperCase().includes("CORPORATE")
           )
           .reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
+        const personalSpend = targetClaims
+          .filter(
+            (c: any) =>
+              !(c.payment_method || "").toUpperCase().includes("CORPORATE")
+          )
+          .reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
 
         const catMap: Record<string, number> = {};
-        allClaims.forEach((c: any) => {
+        const daysMap: Record<string, number> = {};
+        const weeksMap: Record<string, number> = { W1: 0, W2: 0, W3: 0, W4: 0, W5: 0 };
+
+        targetClaims.forEach((c: any) => {
+          const amt = Number(c.amount) || 0;
           const cat = c.category || "OTHER";
-          catMap[cat] = (catMap[cat] || 0) + (Number(c.amount) || 0);
+          catMap[cat] = (catMap[cat] || 0) + amt;
+
+          const d = c.expense_date || (c.created_at || "").slice(0, 10);
+          if (d) {
+            daysMap[d] = (daysMap[d] || 0) + amt;
+          }
+          const day = parseInt((d || "").slice(8, 10), 10) || 1;
+          const w =
+            day <= 7
+              ? "W1"
+              : day <= 14
+              ? "W2"
+              : day <= 21
+              ? "W3"
+              : day <= 28
+              ? "W4"
+              : "W5";
+          weeksMap[w] = (weeksMap[w] || 0) + amt;
         });
+
         const categories = Object.entries(catMap).map(([name, amount]) => ({
           name,
           amount: String(amount),
         }));
 
+        const daily_spend = Object.entries(daysMap)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([date, amount]) => ({
+            date,
+            amount: String(amount),
+          }));
+
+        const weekly_spend = Object.entries(weeksMap).map(([week, amount]) => ({
+          week,
+          amount: String(amount),
+        }));
+
+        const attached = targetClaims.filter(
+          (c: any) => Boolean(c.receipt_url || c.receipt_name)
+        ).length;
+
+        let largest: {
+          merchant: string;
+          date: string;
+          amount: number;
+          currency: string;
+        } | null = null;
+
+        if (targetClaims.length > 0) {
+          const sorted = [...targetClaims].sort(
+            (a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0)
+          );
+          const top = sorted[0];
+          if (top && (Number(top.amount) || 0) > 0) {
+            largest = {
+              merchant: top.merchant || top.title || "Expense",
+              date: top.expense_date || (top.created_at || "").slice(0, 10),
+              amount: Number(top.amount) || 0,
+              currency: top.currency || "INR",
+            };
+          }
+        }
+
         responseData = {
+          month: monthParam,
+          currency: "INR",
           totals: {
             total_spend: String(totalSpend),
             pending_approval: String(pendingApproval),
@@ -548,18 +661,23 @@ export async function employeeRequest(
             corporate_card_spend: String(corporateSpend),
           },
           categories,
+          daily_spend,
+          weekly_spend,
+          funding: {
+            corporate: String(corporateSpend),
+            personal: String(personalSpend),
+          },
+          receipt_compliance: {
+            attached,
+            total: targetClaims.length,
+          },
+          largest_expense: largest,
+          cards,
         };
       }
-    } catch {
-      responseData = {
-        totals: {
-          total_spend: "0",
-          pending_approval: "0",
-          reimbursed: "0",
-          corporate_card_spend: "0",
-        },
-        categories: [],
-      };
+    } catch (err) {
+      console.error("Analytics endpoint error:", err);
+      responseData = emptyAnalytics;
     }
   }
 

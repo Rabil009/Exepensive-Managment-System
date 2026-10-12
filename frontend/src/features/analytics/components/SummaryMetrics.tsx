@@ -13,22 +13,22 @@ export function SummaryMetrics({ data }: { data: AnalyticsData | null }) {
   const cards = [
     {
       label: "Total Spend",
-      value: money(Number(data?.totals.total_spend || 0)),
+      value: money(Number(data?.totals?.total_spend || 0)),
       icon: Receipt,
     },
     {
       label: "Pending Approval",
-      value: money(Number(data?.totals.pending_approval || 0)),
+      value: money(Number(data?.totals?.pending_approval || 0)),
       icon: Clock,
     },
     {
       label: "Reimbursed",
-      value: money(Number(data?.totals.reimbursed || 0)),
+      value: money(Number(data?.totals?.reimbursed || 0)),
       icon: Landmark,
     },
     {
       label: "Corporate Card Spend",
-      value: money(Number(data?.totals.corporate_card_spend || 0)),
+      value: money(Number(data?.totals?.corporate_card_spend || 0)),
       icon: CreditCard,
     },
   ];

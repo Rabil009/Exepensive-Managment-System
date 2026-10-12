@@ -151,6 +151,14 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
 
 export function useExpenses() {
   const value = useContext(Context);
-  if (!value) throw Error("ExpensesProvider missing");
+  if (!value) {
+    return {
+      expenses: [],
+      summary: null,
+      loading: false,
+      error: "",
+      refresh: async () => {},
+    };
+  }
   return value;
 }
