@@ -1,7 +1,16 @@
 "use client";
 
 import React from "react";
-import { Power, CreditCard, Clock, XCircle, CheckCircle2 } from "lucide-react";
+import {
+  Power,
+  CreditCard,
+  Clock,
+  XCircle,
+  CheckCircle2,
+  TrendingUp,
+  ArrowUpRight,
+  ShieldCheck,
+} from "lucide-react";
 import type { CardControlsModel } from "../hooks/useCardControls";
 
 export function CardPreview({
@@ -11,8 +20,13 @@ export function CardPreview({
 }) {
   const { card, requests, state, update } = model;
 
-  // UX Requirement: Remove approved requests from the requests box so space is managed cleanly
-  const activeRequests = requests.filter(
+  // Filter approved limit increase / virtual card requests
+  const approvedRequests = requests.filter((r) =>
+    (r.status || "").toUpperCase().includes("APPROV")
+  );
+
+  // Filter pending or rejected requests
+  const pendingRequests = requests.filter(
     (r) => !(r.status || "").toUpperCase().includes("APPROV")
   );
 
@@ -92,25 +106,97 @@ export function CardPreview({
         </div>
       )}
 
-      {/* Card & Limit Requests (Only Pending / Rejected shown, Approved is removed to save space) */}
-      {activeRequests.length > 0 && (
+      {/* Approved Limit Increase Section (Fills empty space with valuable limit increase info) */}
+      <section className="rounded-xl p-3.5 border bg-white dark:bg-[#111113] border-zinc-200/80 dark:border-white/[0.07] shadow-2xs flex flex-col gap-2.5">
+        <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-white/[0.06]">
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+            <div>
+              <h2 className="text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                Approved Limits &amp; Increases
+              </h2>
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                Authorized by Manager &amp; Finance Treasury
+              </p>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            {approvedRequests.length > 0 ? `${approvedRequests.length} Approved` : "Active Limit"}
+          </span>
+        </div>
+
+        {approvedRequests.length > 0 ? (
+          <div className="flex flex-col divide-y divide-zinc-100 dark:divide-white/[0.04]">
+            {approvedRequests.map((req) => (
+              <div
+                key={req.id}
+                className="py-2.5 flex items-center justify-between gap-2.5 text-xs"
+              >
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <ArrowUpRight className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate text-[11.5px]">
+                      {req.request_type === "VIRTUAL_CARD"
+                        ? req.card_name || "Virtual Card Limit"
+                        : "Limit Increase Authorized"}
+                    </span>
+                  </div>
+                  <span className="text-[10.5px] text-zinc-500 dark:text-zinc-400 mt-0.5 pl-5">
+                    Approved Limit:{" "}
+                    <strong className="text-zinc-800 dark:text-zinc-200 font-semibold tabular-nums">
+                      ₹{Number(req.requested_limit).toLocaleString("en-IN")}
+                    </strong>
+                  </span>
+                </div>
+
+                <div className="shrink-0">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
+                    <CheckCircle2 className="h-3 w-3" />
+                    <span>Applied &amp; Active</span>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-2 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+              <div>
+                <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                  Standard Assigned Limit
+                </span>
+                <p className="text-[10.5px] text-zinc-500">
+                  Current: ₹{Number(card?.monthly_limit || 100000).toLocaleString("en-IN")}
+                </p>
+              </div>
+            </div>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              Active
+            </span>
+          </div>
+        )}
+      </section>
+
+      {/* Pending / In-Review Requests (if any) */}
+      {pendingRequests.length > 0 && (
         <section className="rounded-xl p-3.5 border bg-white dark:bg-[#111113] border-zinc-200/80 dark:border-white/[0.07] shadow-2xs flex flex-col gap-2.5">
           <div className="flex items-center justify-between pb-2 border-b border-zinc-100 dark:border-white/[0.06]">
             <div>
               <h2 className="text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
                 Pending Requests
               </h2>
-              <p className="text-[10.5px] text-zinc-500 dark:text-zinc-400">
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
                 Awaiting authorization from Manager &amp; Finance
               </p>
             </div>
             <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-              {activeRequests.length} pending
+              {pendingRequests.length} pending
             </span>
           </div>
 
           <div className="flex flex-col divide-y divide-zinc-100 dark:divide-white/[0.04]">
-            {activeRequests.map((request) => {
+            {pendingRequests.map((request) => {
               const isRejected = (request.status || "").toUpperCase().includes("REJECT");
 
               return (
