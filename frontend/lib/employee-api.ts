@@ -137,6 +137,26 @@ export async function resolveCurrentEmployee(): Promise<{
   return null;
 }
 
+export function fileToDataUrl(file: File | Blob): Promise<string> {
+  if (typeof FileReader !== "undefined") {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
+  }
+  return file.arrayBuffer().then((buf) => {
+    let binary = "";
+    const bytes = new Uint8Array(buf);
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const mime = (file as any).type || "application/octet-stream";
+    return `data:${mime};base64,${btoa(binary)}`;
+  });
+}
+
 export async function employeeRequest(
   path: string,
   init: RequestInit = {}
@@ -766,10 +786,19 @@ export async function employeeRequest(
                 id: c.id,
                 date: c.expense_date || (c.created_at || "").slice(0, 10),
                 merchant: c.merchant || c.title,
+                description: c.description || "",
                 category: c.category,
                 amount: Number(c.amount) || 0,
                 status: normalizeClaimStatus(c.status),
                 currency: c.currency || "INR",
+                receipt: c.receipt_name || null,
+                receiptUrl: c.receipt_url || null,
+                employee_name: c.employee_name || null,
+                paymentMethod: (c.payment_method || "")
+                  .toUpperCase()
+                  .includes("CORPORATE")
+                  ? "Corporate Card"
+                  : "Personal (Out-of-Pocket)",
               })),
             };
           }
@@ -855,34 +884,10 @@ export async function employeeRequest(
 
           if (file && file.size > 0) {
             receiptName = file.name;
-            const uid = submitEmployeeId || authUser?.id || "7881beaf-b8ab-4600-afd8-4543deb2a24b";
             try {
-              const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-              const filePath = `${uid}/${Date.now()}-${safeName}`;
-              const { error: uploadError } = await supabase.storage
-                .from("receipts")
-                .upload(filePath, file, { upsert: true });
-
-              if (!uploadError) {
-                const { data: urlData } = supabase.storage
-                  .from("receipts")
-                  .getPublicUrl(filePath);
-                if (urlData?.publicUrl) receiptUrl = urlData.publicUrl;
-              }
-            } catch (storageErr) {
-              console.warn("Storage upload note:", storageErr);
-            }
-
-            // Guaranteed Base64 fallback so receipt NEVER 404s
-            if (!receiptUrl) {
-              try {
-                const arrayBuffer = await file.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-                const mime = file.type || "application/octet-stream";
-                receiptUrl = `data:${mime};base64,${buffer.toString("base64")}`;
-              } catch (b64Err) {
-                console.warn("Receipt base64 conversion note:", b64Err);
-              }
+              receiptUrl = await fileToDataUrl(file);
+            } catch (convErr) {
+              console.warn("Receipt conversion error:", convErr);
             }
           }
 
@@ -1020,8 +1025,12 @@ export async function employeeRequest(
         const header = parts[0];
         const base64 = parts[1];
         const mime = header.split(";")[0].replace("data:", "") || "application/octet-stream";
-        const binary = Buffer.from(base64, "base64");
-        return new Response(binary, {
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        return new Response(bytes, {
           status: 200,
           headers: {
             "Content-Type": mime,
@@ -1057,10 +1066,7 @@ export async function employeeRequest(
           patch.receipt_size_bytes = file.size;
 
           try {
-            const arrayBuffer = await file.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-            const mime = file.type || "application/octet-stream";
-            patch.receipt_url = `data:${mime};base64,${buffer.toString("base64")}`;
+            patch.receipt_url = await fileToDataUrl(file);
           } catch (b64Err) {
             console.warn("Patch receipt base64 error:", b64Err);
           }
