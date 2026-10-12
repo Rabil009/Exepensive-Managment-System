@@ -357,11 +357,12 @@ function ManagerDashboardInner() {
                 </div>
                 <div className="mt-3.5 flex items-center">
                   <span
+                    title={`₹${totalSpent.toLocaleString("en-IN")}`}
                     className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    ₹{totalSpent.toLocaleString("en-IN")}
+                    {totalSpent >= 100000 ? `₹${(totalSpent / 100000).toFixed(2)}L` : `₹${totalSpent.toLocaleString("en-IN")}`}
                   </span>
                 </div>
               </div>
@@ -417,11 +418,12 @@ function ManagerDashboardInner() {
                 </div>
                 <div className="mt-3.5 flex items-center">
                   <span
+                    title={`₹${approvedAmount.toLocaleString("en-IN")}`}
                     className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    ₹{approvedAmount.toLocaleString("en-IN")}
+                    {approvedAmount >= 100000 ? `₹${(approvedAmount / 100000).toFixed(2)}L` : `₹${approvedAmount.toLocaleString("en-IN")}`}
                   </span>
                 </div>
               </div>
