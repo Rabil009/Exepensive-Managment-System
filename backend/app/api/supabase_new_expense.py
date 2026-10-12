@@ -97,17 +97,32 @@ def expense_options(gateway: SupabaseExpenseGateway = Depends(get_gateway)):
 def download_receipt(expense_id: UUID, gateway: SupabaseExpenseGateway = Depends(get_gateway)):
     owner = gateway.employee()["id"]
     params = {"id": f"eq.{expense_id}", "employee_id": f"eq.{owner}",
-              "select": "receipt_path,receipt_name,receipt_content_type"}
+              "select": "receipt_path,receipt_name,receipt_content_type,receipt_url"}
     claims = gateway.request("GET", "/rest/v1/expense_claims", params=params).json()
     drafts = [] if claims else gateway.request("GET", "/rest/v1/employee_expense_drafts", params=params).json()
     record = (claims or drafts or [None])[0]
-    if not record or not record.get("receipt_path"):
+    if not record:
+        raise HTTPException(404, "Receipt not found")
+
+    filename = Path(record.get("receipt_name") or "receipt").name
+    data_url = record.get("receipt_url") or ""
+    if data_url.startswith("data:"):
+        import base64
+        header, encoded = data_url.split(",", 1)
+        mime = header.split(";")[0].replace("data:", "")
+        file_bytes = base64.b64decode(encoded)
+        return Response(
+            content=file_bytes,
+            media_type=mime or "application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"},
+        )
+
+    if not record.get("receipt_path"):
         raise HTTPException(404, "Receipt not found")
     path = record["receipt_path"]
     if not path.startswith(f"{owner}/{expense_id}/"):
         raise HTTPException(404, "Receipt not found")
     file = gateway.request("GET", f"/storage/v1/object/authenticated/receipts/{path}")
-    filename = Path(record.get("receipt_name") or "receipt").name
     return Response(
         content=file.content,
         media_type=record.get("receipt_content_type") or "application/octet-stream",

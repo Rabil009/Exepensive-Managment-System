@@ -9,6 +9,7 @@ export type Expense = {
   status: ExpenseStatus;
   description: string;
   receipt?: string;
+  receiptUrl?: string;
   currency?: string;
   report?: string;
   paymentMethod?: string;

@@ -199,6 +199,7 @@ class SupabaseExpenseGateway:
             "linked_transaction_id": draft.get("linked_transaction_id"),
             "card_last4": draft.get("card_last4") if payment_method == "CORPORATE_CARD" else None,
             "receipt_path": draft.get("receipt_path"), "receipt_name": draft.get("receipt_name"),
+            "receipt_url": draft.get("receipt_url"),
             "receipt_content_type": draft.get("receipt_content_type"),
             "receipt_size_bytes": draft.get("receipt_size_bytes"),
             "status": "SUBMITTED",
@@ -268,7 +269,11 @@ class SupabaseExpenseGateway:
             )
         except Exception as e:
             logger.info(f"Receipt upload storage note: {e}")
+        import base64
+        b64 = base64.b64encode(content).decode("ascii")
+        data_url = f"data:{content_type};base64,{b64}"
         return {"receipt_path": path, "receipt_name": safe_name,
+                "receipt_url": data_url,
                 "receipt_content_type": content_type, "receipt_size_bytes": len(content)}
 
     def remove_receipt(self, path: str):

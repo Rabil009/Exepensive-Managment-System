@@ -16,6 +16,8 @@ export interface ManagerClaim {
   status: "Pending" | "Approved" | "Rejected";
   priority: "High" | "Medium" | "Low";
   receiptVerified: boolean;
+  receiptUrl?: string;
+  receiptName?: string;
   policyNotes?: string;
   managerRemark?: string;
 }
@@ -135,6 +137,8 @@ export async function fetchManagerClaims(params?: {
           status: normStatus,
           priority: Number(item.amount) > 5000 ? "High" : "Medium",
           receiptVerified: Boolean(item.receipt_url || item.receipt_name),
+          receiptUrl: item.receipt_url,
+          receiptName: item.receipt_name,
           policyNotes: item.policy_violation,
           managerRemark: item.manager_remark,
         };

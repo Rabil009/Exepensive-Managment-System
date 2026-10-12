@@ -32,7 +32,9 @@ def to_manager_claim_model(c: Dict[str, Any]) -> ManagerClaimModel:
         date=date_str,
         status=norm_status,
         priority=prio,
-        receiptVerified=bool(c.get("receipt_url") or c.get("receipt_verified") or c.get("receipt_path")),
+        receiptVerified=bool(c.get("receipt_url") or c.get("receipt_name") or c.get("receipt_verified") or c.get("receipt_path")),
+        receiptUrl=c.get("receipt_url"),
+        receiptName=c.get("receipt_name"),
         policyNotes=c.get("policy_violation") or c.get("policyNotes"),
         managerRemark=c.get("manager_remark") or c.get("managerRemark"),
     )

@@ -19,5 +19,7 @@ class ManagerClaimModel(BaseModel):
     status: Literal["Pending", "Approved", "Rejected"]
     priority: Literal["High", "Medium", "Low"]
     receiptVerified: bool
+    receiptUrl: Optional[str] = None
+    receiptName: Optional[str] = None
     policyNotes: Optional[str] = None
     managerRemark: Optional[str] = None

@@ -4,8 +4,13 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export async function employeeRequest(path: string, init: RequestInit = {}): Promise<Response> {
   const { data: sessionData } = await supabase.auth.getSession();
-  const token = sessionData?.session?.access_token || "";
-  const authUser = sessionData?.session?.user;
+  let token = sessionData?.session?.access_token || "";
+  let authUser = sessionData?.session?.user;
+
+  if (!token && typeof window !== "undefined") {
+    token = localStorage.getItem("payout_employee_token") || "";
+  }
+
 
   // 1. Try FastAPI backend if online
   if (apiUrl && !apiUrl.includes("localhost:8000")) {
@@ -70,7 +75,8 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           raw_status: c.status || "SUBMITTED",
           source: "claim",
           description: c.description || "",
-          receipt: c.receipt_name || null,
+          receipt: c.receipt_name || (c.receipt_url ? "receipt" : null),
+          receiptUrl: c.receipt_url || null,
           currency: c.currency || "INR",
           report: c.report_name || "General",
           paymentMethod: c.payment_method === "CORPORATE_CARD" ? "Corporate Card" : "Personal (Out-of-Pocket)",
@@ -280,11 +286,15 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           let receiptUrl: string | null = null;
           let receiptName: string | null = null;
 
-          // Real Receipt Upload to Supabase Storage 'receipts' Bucket
-          if (file && file.size > 0 && authUser?.id) {
+          // Real Receipt Handling: Supabase Storage + Guaranteed Base64 Data URL persistence
+          if (file && file.size > 0) {
+            receiptName = file.name;
+            const uid = authUser?.id || "7881beaf-b8ab-4600-afd8-4543deb2a24b";
+            const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+            const filePath = `${uid}/${Date.now()}-${safeName}`;
+
+            // 1. Try Supabase Storage 'receipts' bucket if available
             try {
-              const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-              const filePath = `${authUser.id}/${Date.now()}-${safeName}`;
               const { error: uploadError } = await supabase.storage
                 .from("receipts")
                 .upload(filePath, file, { upsert: true });
@@ -293,11 +303,24 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
                 const { data: urlData } = supabase.storage
                   .from("receipts")
                   .getPublicUrl(filePath);
-                receiptUrl = urlData?.publicUrl || null;
-                receiptName = file.name;
+                if (urlData?.publicUrl) {
+                  receiptUrl = urlData.publicUrl;
+                }
               }
             } catch (storageErr) {
               console.warn("Storage upload note:", storageErr);
+            }
+
+            // 2. Guaranteed fallback: Convert receipt to Base64 Data URL and save directly into Supabase DB!
+            if (!receiptUrl) {
+              try {
+                const arrayBuffer = await file.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                const mime = file.type || "application/octet-stream";
+                receiptUrl = `data:${mime};base64,${buffer.toString("base64")}`;
+              } catch (b64Err) {
+                console.warn("Receipt base64 conversion note:", b64Err);
+              }
             }
           }
 
@@ -337,6 +360,8 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
             report_name: parsed.report || "General",
             receipt_url: receiptUrl,
             receipt_name: receiptName,
+            receipt_content_type: file?.type || null,
+            receipt_size_bytes: file?.size || null,
             expense_date: parsed.date || new Date().toISOString().slice(0, 10),
             submitted_at: new Date().toISOString(),
           });
@@ -346,12 +371,111 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
             throw new Error(insertError.message);
           }
 
+          // Also sync to FastAPI backend if available
+          if (apiUrl) {
+            try {
+              const fd = new FormData();
+              fd.set("action", "Submit");
+              fd.set("data", JSON.stringify({
+                id: claimId,
+                merchant: parsed.merchant,
+                date: parsed.date,
+                amount: String(parsed.amount || "0"),
+                category,
+                report: parsed.report,
+                payment_method: paymentMethod,
+                purpose: parsed.purpose,
+                attendees: parsed.attendees || [],
+                receipt_name: receiptName,
+                receipt_url: receiptUrl,
+              }));
+              if (file) fd.set("file", file);
+              await fetch(`${apiUrl}/api/employee/new-expense`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+                body: fd,
+              });
+            } catch {}
+          }
+
           responseData = { id: claimId, status: "Pending" };
         }
       }
     } catch (err) {
       console.error("New expense submission error:", err);
       responseData = { id: "error", status: "Failed", error: err instanceof Error ? err.message : "Error" };
+    }
+  }
+
+  // RECEIPT DOWNLOAD: Serve receipt directly from Supabase
+  else if (path.startsWith("/new-expense/receipts/")) {
+    const expenseId = path.replace("/new-expense/receipts/", "");
+    try {
+      const { data } = await supabase
+        .from("expense_claims")
+        .select("receipt_url, receipt_name, receipt_content_type")
+        .eq("id", expenseId)
+        .maybeSingle();
+
+      if (data?.receipt_url && data.receipt_url.startsWith("data:")) {
+        const parts = data.receipt_url.split(",");
+        const header = parts[0];
+        const base64 = parts[1];
+        const mime = header.split(";")[0].replace("data:", "") || "application/octet-stream";
+        const binary = Buffer.from(base64, "base64");
+        return new Response(binary, {
+          status: 200,
+          headers: {
+            "Content-Type": mime,
+            "Content-Disposition": `attachment; filename="${data.receipt_name || "receipt"}"`,
+          },
+        });
+      } else if (data?.receipt_url && data.receipt_url.startsWith("http")) {
+        const fetchRes = await fetch(data.receipt_url);
+        if (fetchRes.ok) return fetchRes;
+      }
+    } catch (err) {
+      console.warn("Receipt fetch error:", err);
+    }
+    return new Response(new Uint8Array(0), { status: 404 });
+  }
+
+  // CLAIM UPDATE / ATTACH RECEIPT: Patch existing claim with receipt
+  else if (path.startsWith("/new-expense/claims/") && init.method === "PATCH") {
+    const expenseId = path.replace("/new-expense/claims/", "");
+    try {
+      if (init.body instanceof FormData) {
+        const file = init.body.get("file") as File | null;
+        const report = init.body.get("report") as string | null;
+        const patch: Record<string, any> = {};
+
+        if (report) {
+          patch.report_name = report;
+        }
+
+        if (file && file.size > 0) {
+          patch.receipt_name = file.name;
+          patch.receipt_content_type = file.type || null;
+          patch.receipt_size_bytes = file.size;
+
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const mime = file.type || "application/octet-stream";
+            patch.receipt_url = `data:${mime};base64,${buffer.toString("base64")}`;
+          } catch (b64Err) {
+            console.warn("Patch receipt base64 error:", b64Err);
+          }
+        }
+
+        if (Object.keys(patch).length > 0) {
+          await supabase.from("expense_claims").update(patch).eq("id", expenseId);
+        }
+
+        responseData = { id: expenseId, status: "Updated" };
+      }
+    } catch (err) {
+      responseData = { id: expenseId, status: "Error", error: String(err) };
     }
   } else {
     responseData = {};

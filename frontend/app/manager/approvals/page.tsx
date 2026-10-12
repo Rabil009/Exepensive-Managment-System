@@ -46,51 +46,15 @@ interface ApprovalClaim {
   status: "Pending" | "Approved" | "Rejected";
   priority: "High" | "Medium" | "Low";
   receiptVerified: boolean;
-  merchant: string;
+  receiptUrl?: string;
+  receiptName?: string;
+  merchant?: string;
   gstNumber?: string;
   policyNotes?: string;
 }
 
 const INITIAL_APPROVAL_CLAIMS: ApprovalClaim[] = [];
 
-function useCountUp(endValue: number, duration: number = 350) {
-  const [count, setCount] = useState(endValue);
-  const prevValue = useRef(endValue);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setCount(endValue);
-      prevValue.current = endValue;
-      return;
-    }
-
-    const start = prevValue.current;
-    prevValue.current = endValue;
-    if (start === endValue) return;
-
-    const startTime = performance.now();
-    let frameId: number;
-
-    const step = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(start + (endValue - start) * ease);
-      setCount(current);
-
-      if (progress < 1) {
-        frameId = requestAnimationFrame(step);
-      } else {
-        setCount(endValue);
-      }
-    };
-
-    frameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frameId);
-  }, [endValue, duration]);
-
-  return count;
-}
 
 function ApprovalsPageInner() {
   const router = useRouter();
@@ -180,10 +144,6 @@ function ApprovalsPageInner() {
   const approvedCount = claims.filter((c) => c.status === "Approved").length;
   const rejectedCount = claims.filter((c) => c.status === "Rejected").length;
 
-  const animatedPending = useCountUp(pendingCount);
-  const animatedApproved = useCountUp(approvedCount);
-  const animatedRejected = useCountUp(rejectedCount);
-
   const filteredClaims = claims.filter((c) => {
     const matchStatus = statusFilter === "All" || c.status === statusFilter;
     const matchSearch =
@@ -219,148 +179,144 @@ function ApprovalsPageInner() {
       }`}>
         <ManagerHeader
           title="Manager Approvals"
-          pendingCount={pendingCount}
           rightContent={
             <div className="flex items-center gap-2">
               <Link
                 href="/manager"
-                className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-150 ease-out active:scale-95 flex items-center gap-1.5 font-medium ${
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors flex items-center gap-1.5 font-medium ${
                   isDark
-                    ? "bg-[#18181D] hover:bg-[#202026] hover:border-white/20 text-zinc-300 border-white/[0.08]"
-                    : "bg-zinc-100 hover:bg-zinc-200 hover:border-zinc-300 text-zinc-700 border-zinc-200"
+                    ? "bg-[#18181D] hover:bg-[#202026] text-zinc-300 border-white/[0.08]"
+                    : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
                 }`}
               >
-                <ArrowLeft className="h-3 w-3 transition-transform duration-150 group-hover:-translate-x-0.5" />
+                <ArrowLeft className="h-3 w-3" />
                 <span>Back to Cockpit</span>
               </Link>
             </div>
           }
         />
 
-        <main className={`flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 animate-entrance ${
+        <main className={`flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 ${
           isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
         }`}>
           {/* Toast Notification */}
           {feedbackNotice && (
             <div
-              className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-xs flex items-center gap-2.5 shadow-xl border animate-in fade-in slide-in-from-bottom-2 duration-200 transition-all ${
+              className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-xs flex items-center gap-2.5 shadow-xl border animate-in fade-in slide-in-from-bottom-2 duration-150 ${
                 isDark
                   ? "bg-[#18181D] text-zinc-100 border-white/[0.12]"
                   : "bg-white text-zinc-900 border-zinc-200 shadow-md"
               }`}
             >
-              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 animate-in zoom-in-75 duration-150" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
               <span>{feedbackNotice}</span>
               <button
                 type="button"
                 onClick={() => setFeedbackNotice(null)}
-                className="ml-2 text-zinc-400 hover:text-zinc-200 active:scale-90 transition-transform duration-150 cursor-pointer"
+                className="ml-2 text-zinc-400 hover:text-zinc-200 cursor-pointer"
               >
                 ✕
               </button>
             </div>
           )}
 
-          {/* Staggered KPI Summary Cards */}
+          {/* KPI Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div
               onClick={() => setStatusFilter("Pending")}
-              style={{ animationDelay: "0ms" }}
-              className={`rounded-xl px-5 py-4 border transition-all duration-200 ease-out cursor-pointer flex flex-col justify-between animate-entrance active:scale-[0.99] hover:-translate-y-0.5 ${
+              className={`rounded-xl px-5 py-4 border transition-colors cursor-pointer flex flex-col justify-between ${
                 statusFilter === "Pending"
                   ? isDark
                     ? "bg-[#161619] border-white/20 shadow-sm"
                     : "bg-zinc-50 border-zinc-400 shadow-xs"
                   : isDark
-                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619] hover:border-white/[0.12] hover:shadow-xs"
-                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 hover:border-zinc-300 hover:shadow-xs"
+                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-150 ${
+                <span className={`text-xs font-medium uppercase tracking-wider ${
                   isDark ? "text-zinc-400" : "text-zinc-500"
                 }`}>
                   Awaiting Verification
                 </span>
-                <Clock className={`h-4 w-4 shrink-0 transition-transform duration-200 hover:rotate-12 ${
+                <Clock className={`h-4 w-4 shrink-0 ${
                   isDark ? "text-zinc-500" : "text-zinc-400"
                 }`} />
               </div>
               <div className="mt-3.5 flex items-center">
                 <span
-                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none transition-colors duration-200 ${
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
                     isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
                 >
-                  {animatedPending}
+                  {pendingCount}
                 </span>
               </div>
             </div>
 
             <div
               onClick={() => setStatusFilter("Approved")}
-              style={{ animationDelay: "80ms" }}
-              className={`rounded-xl px-5 py-4 border transition-all duration-200 ease-out cursor-pointer flex flex-col justify-between animate-entrance active:scale-[0.99] hover:-translate-y-0.5 ${
+              className={`rounded-xl px-5 py-4 border transition-colors cursor-pointer flex flex-col justify-between ${
                 statusFilter === "Approved"
                   ? isDark
                     ? "bg-[#161619] border-white/20 shadow-sm"
                     : "bg-zinc-50 border-zinc-400 shadow-xs"
                   : isDark
-                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619] hover:border-white/[0.12] hover:shadow-xs"
-                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 hover:border-zinc-300 hover:shadow-xs"
+                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-150 ${
+                <span className={`text-xs font-medium uppercase tracking-wider ${
                   isDark ? "text-zinc-400" : "text-zinc-500"
                 }`}>
                   Approved Claims
                 </span>
-                <CheckCircle2 className={`h-4 w-4 shrink-0 transition-transform duration-200 hover:scale-110 ${
+                <CheckCircle2 className={`h-4 w-4 shrink-0 ${
                   isDark ? "text-zinc-500" : "text-zinc-400"
                 }`} />
               </div>
               <div className="mt-3.5 flex items-center">
                 <span
-                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none transition-colors duration-200 ${
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
                     isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
                 >
-                  {animatedApproved}
+                  {approvedCount}
                 </span>
               </div>
             </div>
 
             <div
               onClick={() => setStatusFilter("Rejected")}
-              style={{ animationDelay: "160ms" }}
-              className={`rounded-xl px-5 py-4 border transition-all duration-200 ease-out cursor-pointer flex flex-col justify-between animate-entrance active:scale-[0.99] hover:-translate-y-0.5 ${
+              className={`rounded-xl px-5 py-4 border transition-colors cursor-pointer flex flex-col justify-between ${
                 statusFilter === "Rejected"
                   ? isDark
                     ? "bg-[#161619] border-white/20 shadow-sm"
                     : "bg-zinc-50 border-zinc-400 shadow-xs"
                   : isDark
-                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619] hover:border-white/[0.12] hover:shadow-xs"
-                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 hover:border-zinc-300 hover:shadow-xs"
+                  ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                  : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-150 ${
+                <span className={`text-xs font-medium uppercase tracking-wider ${
                   isDark ? "text-zinc-400" : "text-zinc-500"
                 }`}>
                   Returned / Rejected
                 </span>
-                <XCircle className={`h-4 w-4 shrink-0 transition-transform duration-200 hover:rotate-12 ${
+                <XCircle className={`h-4 w-4 shrink-0 ${
                   isDark ? "text-zinc-500" : "text-zinc-400"
                 }`} />
               </div>
               <div className="mt-3.5 flex items-center">
                 <span
-                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none transition-colors duration-200 ${
+                  className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
                     isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
                 >
-                  {animatedRejected}
+                  {rejectedCount}
                 </span>
               </div>
             </div>
@@ -379,45 +335,42 @@ function ApprovalsPageInner() {
               }`}
             >
               <div
-                className={`relative flex items-center gap-1 p-1 rounded-lg border w-fit transition-colors duration-200 ${
+                className={`flex items-center gap-1 p-1 rounded-lg border w-fit ${
                   isDark ? "bg-[#18181D] border-white/[0.06]" : "bg-zinc-100 border-zinc-200/80"
                 }`}
               >
-                {(["All", "Pending", "Approved", "Rejected"] as const).map((tab) => {
-                  const isActive = statusFilter === tab;
-                  return (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setStatusFilter(tab)}
-                      className={`relative z-10 px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ease-out cursor-pointer active:scale-95 ${
-                        isActive
-                          ? isDark
-                            ? "bg-white text-black shadow-xs font-semibold scale-100"
-                            : "bg-black text-white shadow-xs font-semibold scale-100"
-                          : isDark
-                          ? "text-zinc-400 hover:text-white"
-                          : "text-zinc-600 hover:text-black"
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  );
-                })}
+                {(["All", "Pending", "Approved", "Rejected"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    onClick={() => setStatusFilter(tab)}
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                      statusFilter === tab
+                        ? isDark
+                          ? "bg-white text-black shadow-xs font-semibold"
+                          : "bg-black text-white shadow-xs font-semibold"
+                        : isDark
+                        ? "text-zinc-400 hover:text-white"
+                        : "text-zinc-600 hover:text-black"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
               </div>
 
-              {/* Search & Backend Sync with Focus Transition */}
+              {/* Search & Backend Sync */}
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                <div className="group relative w-full sm:w-64 transition-all duration-200 ease-out focus-within:ring-2 focus-within:ring-blue-500/20 rounded-lg">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-blue-500 dark:group-focus-within:text-blue-400 transition-colors duration-200 pointer-events-none" />
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Filter by name, claim ID, or dept..."
-                    className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all duration-200 ease-out focus:outline-none ${
+                    className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all focus:outline-none ${
                       isDark
-                        ? "bg-[#18181D] border-white/[0.08] text-zinc-100 placeholder:text-zinc-500 focus:border-white/30"
+                        ? "bg-[#18181D] border-white/[0.08] text-zinc-100 placeholder:text-zinc-500 focus:border-white/25"
                         : "bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
                     }`}
                   />
@@ -427,13 +380,13 @@ function ApprovalsPageInner() {
                   onClick={refreshData}
                   disabled={isRefreshing}
                   title="Sync with backend database"
-                  className={`p-2 rounded-lg border transition-all duration-150 ease-out cursor-pointer shrink-0 active:scale-90 ${
+                  className={`p-2 rounded-lg border transition-all cursor-pointer shrink-0 ${
                     isDark
                       ? "bg-[#18181D] border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.06]"
                       : "bg-zinc-50 border-zinc-200 text-zinc-700 hover:text-black hover:bg-zinc-100"
                   }`}
                 >
-                  <RefreshCw className={`h-3.5 w-3.5 transition-transform duration-300 ${isRefreshing ? "animate-spin text-blue-500" : "hover:rotate-45"}`} />
+                  <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-blue-500" : ""}`} />
                 </button>
               </div>
             </div>
@@ -469,13 +422,11 @@ function ApprovalsPageInner() {
                       <tr
                         key={claim.id}
                         onClick={() => setInspectClaim(claim)}
-                        className={`group transition-all duration-150 ease-out cursor-pointer ${
-                          isDark
-                            ? "hover:bg-white/[0.04] active:bg-white/[0.07]"
-                            : "hover:bg-zinc-100/70 active:bg-zinc-200/50"
+                        className={`transition-colors cursor-pointer ${
+                          isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"
                         }`}
                       >
-                        <td className="py-2.5 px-4 font-mono text-xs text-zinc-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-150">
+                        <td className="py-2.5 px-4 font-mono text-xs text-zinc-400">
                           {claim.id}
                         </td>
                         <td className="py-2.5 px-4">
@@ -497,19 +448,17 @@ function ApprovalsPageInner() {
                           {claim.date}
                         </td>
                         <td className="py-2.5 px-4 whitespace-nowrap">
-                          <div className="inline-block transition-transform duration-200 ease-out group-hover:scale-105">
-                            <StatusBadge
-                              tone={
-                                claim.status === "Approved"
-                                  ? "success"
-                                  : claim.status === "Pending"
-                                  ? "warning"
-                                  : "danger"
-                              }
-                            >
-                              {claim.status}
-                            </StatusBadge>
-                          </div>
+                          <StatusBadge
+                            tone={
+                              claim.status === "Approved"
+                                ? "success"
+                                : claim.status === "Pending"
+                                ? "warning"
+                                : "danger"
+                            }
+                          >
+                            {claim.status}
+                          </StatusBadge>
                         </td>
                         <td className="py-2.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           {claim.status === "Pending" ? (
@@ -517,14 +466,14 @@ function ApprovalsPageInner() {
                               <button
                                 type="button"
                                 onClick={() => handleApprove(claim)}
-                                className="text-xs font-medium px-2.5 py-1 rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 border border-emerald-500/30 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs"
+                                className="text-xs font-medium px-2.5 py-1 rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/25 transition-colors cursor-pointer"
                               >
                                 Approve
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleReject(claim)}
-                                className="text-xs font-medium px-2.5 py-1 rounded-md text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 border border-rose-500/30 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs"
+                                className="text-xs font-medium px-2.5 py-1 rounded-md text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/25 transition-colors cursor-pointer"
                               >
                                 Reject
                               </button>
@@ -533,13 +482,13 @@ function ApprovalsPageInner() {
                             <button
                               type="button"
                               onClick={() => setInspectClaim(claim)}
-                              className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer border ${
+                              className={`text-xs font-medium px-2.5 py-1 rounded-md transition-colors cursor-pointer border ${
                                 isDark
-                                  ? "text-zinc-300 hover:bg-white/[0.08] hover:border-white/20 border-white/[0.08]"
-                                  : "text-zinc-600 hover:bg-zinc-100 hover:border-zinc-300 border-zinc-200"
+                                  ? "text-zinc-300 hover:bg-white/[0.06] border-white/[0.08]"
+                                  : "text-zinc-600 hover:bg-zinc-100 border-zinc-200"
                               }`}
                             >
-                              View
+                              Inspect
                             </button>
                           )}
                         </td>
@@ -556,11 +505,11 @@ function ApprovalsPageInner() {
       {/* Slide-out Claim Inspector Drawer */}
       {inspectClaim && (
         <div
-          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs transition-opacity duration-200 ease-out animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-in fade-in duration-150 cursor-pointer"
           onClick={() => setInspectClaim(null)}
         >
           <div
-            className={`w-full max-w-md h-full flex flex-col justify-between p-6 shadow-2xl overflow-y-auto transition-transform duration-300 ease-out animate-in slide-in-from-right cursor-default ${
+            className={`w-full max-w-md h-full flex flex-col justify-between p-6 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200 cursor-default ${
               isDark ? "bg-[#111113] text-zinc-100 border-l border-white/[0.08]" : "bg-white text-zinc-900 border-l border-zinc-200"
             }`}
             onClick={(e) => e.stopPropagation()}
@@ -579,8 +528,7 @@ function ApprovalsPageInner() {
                 <button
                   type="button"
                   onClick={() => setInspectClaim(null)}
-                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/[0.08] transition-all duration-200 ease-out hover:rotate-90 active:scale-90 cursor-pointer"
-                  title="Close (Esc)"
+                  className="p-1 rounded-md text-zinc-400 hover:text-zinc-200 cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -652,6 +600,21 @@ function ApprovalsPageInner() {
                       {inspectClaim.receiptVerified ? "Original Tax Invoice Attached" : "Missing Receipt"}
                     </span>
                   </div>
+                  {inspectClaim.receiptUrl && (
+                    <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
+                      <span className="text-zinc-500">Document:</span>
+                      <a
+                        href={inspectClaim.receiptUrl}
+                        download={inspectClaim.receiptName || "receipt"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        {inspectClaim.receiptName || "View Receipt"}
+                      </a>
+                    </div>
+                  )}
                   {inspectClaim.policyNotes && (
                     <div className="pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
                       <span className="text-zinc-500 block mb-0.5">Policy Assessment:</span>
@@ -669,7 +632,7 @@ function ApprovalsPageInner() {
               <button
                 type="button"
                 onClick={() => setInspectClaim(null)}
-                className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                   isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 border-white/[0.08]" : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
                 }`}
               >
@@ -680,14 +643,14 @@ function ApprovalsPageInner() {
                   <button
                     type="button"
                     onClick={() => handleReject(inspectClaim)}
-                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-500 border border-rose-500/25 hover:bg-rose-500/20 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-500 border border-rose-500/25 hover:bg-rose-500/20 transition-colors cursor-pointer"
                   >
                     Reject Claim
                   </button>
                   <button
                     type="button"
                     onClick={() => handleApprove(inspectClaim)}
-                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
                   >
                     Approve Claim
                   </button>

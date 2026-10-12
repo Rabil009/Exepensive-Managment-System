@@ -1,4 +1,5 @@
 import { employeeRequest } from "@/lib/employee-api";
+import { supabase } from "@/lib/supabase";
 import type { Draft } from "./expenseDraft";
 
 type SavedDraft = {
@@ -59,15 +60,52 @@ export async function discardNewExpense(id: string) {
 }
 
 export async function downloadExpenseReceipt(id: string, filename: string) {
-  const response = await employeeRequest(`/new-expense/receipts/${encodeURIComponent(id)}`);
-  const url = URL.createObjectURL(await response.blob());
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  // 1. Check direct Supabase claim record for receipt_url
+  try {
+    const { data } = await supabase
+      .from("expense_claims")
+      .select("receipt_url, receipt_name")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (data?.receipt_url) {
+      const url = data.receipt_url;
+      const downloadName = data.receipt_name || filename || "receipt";
+      if (url.startsWith("data:") || url.startsWith("http")) {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = downloadName;
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Direct receipt download note:", err);
+  }
+
+  // 2. Fallback via employeeRequest
+  try {
+    const response = await employeeRequest(`/new-expense/receipts/${encodeURIComponent(id)}`);
+    if (response.ok) {
+      const blob = await response.blob();
+      if (blob.size > 0) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return;
+      }
+    }
+  } catch (err) {
+    console.warn("Fallback receipt download note:", err);
+  }
 }
 
 export async function completeSubmittedExpense(id: string, update: { report?: string; file?: File }) {

@@ -63,45 +63,6 @@ export type ManagerView =
 const INITIAL_CLAIMS: ManagerClaim[] = [];
 const DEPARTMENT_BUDGETS: DepartmentBudget[] = [];
 
-function useCountUp(endValue: number, duration: number = 350) {
-  const [count, setCount] = useState(endValue);
-  const prevValue = useRef(endValue);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setCount(endValue);
-      prevValue.current = endValue;
-      return;
-    }
-
-    const start = prevValue.current;
-    prevValue.current = endValue;
-    if (start === endValue) return;
-
-    const startTime = performance.now();
-    let frameId: number;
-
-    const step = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(start + (endValue - start) * ease);
-      setCount(current);
-
-      if (progress < 1) {
-        frameId = requestAnimationFrame(step);
-      } else {
-        setCount(endValue);
-      }
-    };
-
-    frameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frameId);
-  }, [endValue, duration]);
-
-  return count;
-}
-
 function ManagerDashboardInner() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -218,11 +179,6 @@ function ManagerDashboardInner() {
   const approvedAmount = approvedClaims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
   const exceptionsCount = claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified).length;
 
-  const animatedTotalSpent = useCountUp(totalSpent);
-  const animatedPendingCount = useCountUp(pendingClaims.length);
-  const animatedApprovedAmount = useCountUp(approvedAmount);
-  const animatedExceptionsCount = useCountUp(exceptionsCount);
-
   const filteredClaims = claims.filter((c) => {
     const matchStatus = statusFilter === "All" || c.status === statusFilter;
     const matchSearch =
@@ -277,11 +233,10 @@ function ManagerDashboardInner() {
         <ManagerHeader
           title={getPageTitle()}
           onToggleSidebar={() => setMobileDrawerOpen(true)}
-          pendingCount={pendingClaims.length}
         />
 
         {/* Scrollable Main Application Space */}
-        <main className={`flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 animate-entrance ${
+        <main className={`flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 ${
           isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
         }`}>
           {/* Toast Notification */}
@@ -311,11 +266,10 @@ function ManagerDashboardInner() {
               {/* Card 1: Total Team Spend */}
               <div
                 onClick={() => setActiveView("Team Spend")}
-                style={{ animationDelay: "0ms" }}
-                className={`animate-entrance rounded-xl px-5 py-4 flex flex-col justify-between transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619] hover:border-white/15"
-                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 hover:border-zinc-300 shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -334,7 +288,7 @@ function ManagerDashboardInner() {
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    ₹{animatedTotalSpent.toLocaleString("en-IN")}
+                    ₹{totalSpent.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
@@ -342,11 +296,10 @@ function ManagerDashboardInner() {
               {/* Card 2: Awaiting Approval */}
               <div
                 onClick={() => setActiveView("Approvals")}
-                style={{ animationDelay: "80ms" }}
-                className={`animate-entrance rounded-xl px-5 py-4 flex flex-col justify-between transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619] hover:border-white/15"
-                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 hover:border-zinc-300 shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -365,7 +318,7 @@ function ManagerDashboardInner() {
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    {animatedPendingCount}
+                    {pendingClaims.length}
                   </span>
                 </div>
               </div>
@@ -373,11 +326,10 @@ function ManagerDashboardInner() {
               {/* Card 3: Approved This Month */}
               <div
                 onClick={() => setActiveView("Approvals")}
-                style={{ animationDelay: "160ms" }}
-                className={`animate-entrance rounded-xl px-5 py-4 flex flex-col justify-between transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619] hover:border-white/15"
-                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 hover:border-zinc-300 shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -396,7 +348,7 @@ function ManagerDashboardInner() {
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    ₹{animatedApprovedAmount.toLocaleString("en-IN")}
+                    ₹{approvedAmount.toLocaleString("en-IN")}
                   </span>
                 </div>
               </div>
@@ -404,11 +356,10 @@ function ManagerDashboardInner() {
               {/* Card 4: Policy Exceptions */}
               <div
                 onClick={() => setActiveView("Exceptions")}
-                style={{ animationDelay: "240ms" }}
-                className={`animate-entrance rounded-xl px-5 py-4 flex flex-col justify-between transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] cursor-pointer border ${
+                className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
                   isDark
-                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619] hover:border-white/15"
-                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 hover:border-zinc-300 shadow-xs"
+                    ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                    : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -427,7 +378,7 @@ function ManagerDashboardInner() {
                       isDark ? "text-zinc-100" : "text-zinc-900"
                     }`}
                   >
-                    {animatedExceptionsCount}
+                    {exceptionsCount}
                   </span>
                 </div>
               </div>
@@ -458,7 +409,7 @@ function ManagerDashboardInner() {
                       key={tab}
                       type="button"
                       onClick={() => setStatusFilter(tab)}
-                      className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ease-out cursor-pointer active:scale-95 ${
+                      className={`px-3 py-1 rounded-md text-xs font-medium transition-all cursor-pointer ${
                         statusFilter === tab
                           ? isDark
                             ? "bg-white text-black shadow-xs font-semibold"
@@ -476,13 +427,13 @@ function ManagerDashboardInner() {
                 {/* Search & Backend Sync */}
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                   <div className="relative w-full sm:w-64">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none transition-colors group-focus-within:text-blue-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search claim, employee, ID..."
-                      className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+                      className={`w-full text-xs rounded-lg pl-8 pr-3 py-1.5 border transition-all focus:outline-none ${
                         isDark
                           ? "bg-[#18181D] border-white/[0.08] text-zinc-100 placeholder:text-zinc-500 focus:border-white/25"
                           : "bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400"
@@ -494,13 +445,13 @@ function ManagerDashboardInner() {
                     onClick={refreshData}
                     disabled={isRefreshing}
                     title="Sync with backend database"
-                    className={`group/btn p-2 rounded-lg border transition-all duration-150 active:scale-95 cursor-pointer shrink-0 ${
+                    className={`p-2 rounded-lg border transition-all cursor-pointer shrink-0 ${
                       isDark
                         ? "bg-[#18181D] border-white/[0.08] text-zinc-300 hover:text-white hover:bg-white/[0.06]"
                         : "bg-zinc-50 border-zinc-200 text-zinc-700 hover:text-black hover:bg-zinc-100"
                     }`}
                   >
-                    <RefreshCw className={`h-3.5 w-3.5 transition-transform duration-300 ${isRefreshing ? "animate-spin text-blue-500" : "group-hover/btn:rotate-180"}`} />
+                    <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-blue-500" : ""}`} />
                   </button>
                 </div>
               </div>
@@ -535,14 +486,12 @@ function ManagerDashboardInner() {
                       filteredClaims.map((claim) => (
                         <tr
                           key={claim.id}
-                          className={`group transition-all duration-150 ease-out cursor-pointer ${
-                            isDark
-                              ? "hover:bg-white/[0.04] active:bg-white/[0.07]"
-                              : "hover:bg-zinc-100/70 active:bg-zinc-200/50"
+                          className={`transition-colors cursor-pointer ${
+                            isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"
                           }`}
                           onClick={() => setInspectClaim(claim)}
                         >
-                          <td className="py-2.5 px-4 font-mono text-xs text-zinc-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors duration-150">
+                          <td className="py-2.5 px-4 font-mono text-xs text-zinc-400">
                             {claim.id}
                           </td>
                           <td className="py-2.5 px-4">
@@ -564,23 +513,21 @@ function ManagerDashboardInner() {
                             {claim.date}
                           </td>
                           <td className="py-2.5 px-4 whitespace-nowrap">
-                            <div className="inline-block transition-transform duration-200 ease-out group-hover:scale-105">
-                              <StatusBadge
-                                tone={
-                                  claim.status === "Approved"
-                                    ? "success"
-                                    : claim.status === "Pending"
-                                    ? "warning"
-                                    : "danger"
-                                }
-                              >
-                                {claim.status === "Pending"
-                                  ? "Pending Approval"
-                                  : claim.status === "Approved"
-                                  ? "Approved"
-                                  : "Rejected"}
-                              </StatusBadge>
-                            </div>
+                            <StatusBadge
+                              tone={
+                                claim.status === "Approved"
+                                  ? "success"
+                                  : claim.status === "Pending"
+                                  ? "warning"
+                                  : "danger"
+                              }
+                            >
+                              {claim.status === "Pending"
+                                ? "Pending Approval"
+                                : claim.status === "Approved"
+                                ? "Approved"
+                                : "Rejected"}
+                            </StatusBadge>
                           </td>
                           <td className="py-2.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                             {claim.status === "Pending" ? (
@@ -589,7 +536,7 @@ function ManagerDashboardInner() {
                                   type="button"
                                   onClick={() => handleApprove(claim)}
                                   title="Approve immediately"
-                                  className="text-xs font-medium px-2.5 py-1 rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 border border-emerald-500/30 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs"
+                                  className="text-xs font-medium px-2.5 py-1 rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/25 transition-colors cursor-pointer"
                                 >
                                   Approve
                                 </button>
@@ -597,7 +544,7 @@ function ManagerDashboardInner() {
                                   type="button"
                                   onClick={() => handleReject(claim)}
                                   title="Reject request"
-                                  className="text-xs font-medium px-2.5 py-1 rounded-md text-rose-600 dark:text-rose-400 hover:bg-rose-500/15 border border-rose-500/30 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs"
+                                  className="text-xs font-medium px-2.5 py-1 rounded-md text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/25 transition-colors cursor-pointer"
                                 >
                                   Reject
                                 </button>
@@ -606,10 +553,10 @@ function ManagerDashboardInner() {
                               <button
                                 type="button"
                                 onClick={() => setInspectClaim(claim)}
-                                className={`text-xs font-medium px-2.5 py-1 rounded-md transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer border ${
+                                className={`text-xs font-medium px-2.5 py-1 rounded-md transition-colors cursor-pointer border ${
                                   isDark
-                                    ? "text-zinc-300 hover:bg-white/[0.08] hover:border-white/20 border-white/[0.08]"
-                                    : "text-zinc-600 hover:bg-zinc-100 hover:border-zinc-300 border-zinc-200"
+                                    ? "text-zinc-300 hover:bg-white/[0.06] border-white/[0.08]"
+                                    : "text-zinc-600 hover:bg-zinc-100 border-zinc-200"
                                 }`}
                               >
                                 View
@@ -1004,11 +951,11 @@ function ManagerDashboardInner() {
       {/* Slide-out Claim Inspector Drawer */}
       {inspectClaim && (
         <div
-          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs transition-opacity duration-200 ease-out animate-in fade-in cursor-pointer"
+          className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-xs animate-in fade-in duration-150 cursor-pointer"
           onClick={() => setInspectClaim(null)}
         >
           <div
-            className={`w-full max-w-md h-full flex flex-col justify-between p-6 shadow-2xl overflow-y-auto transition-transform duration-300 ease-out animate-in slide-in-from-right cursor-default ${
+            className={`w-full max-w-md h-full flex flex-col justify-between p-6 shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-200 cursor-default ${
               isDark ? "bg-[#111113] text-zinc-100 border-l border-white/[0.08]" : "bg-white text-zinc-900 border-l border-zinc-200"
             }`}
             onClick={(e) => e.stopPropagation()}
@@ -1027,8 +974,7 @@ function ManagerDashboardInner() {
                 <button
                   type="button"
                   onClick={() => setInspectClaim(null)}
-                  className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/[0.08] transition-all duration-200 ease-out hover:rotate-90 active:scale-90 cursor-pointer"
-                  title="Close (Esc)"
+                  className="p-1 rounded-md text-zinc-400 hover:text-zinc-200 cursor-pointer"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1090,6 +1036,21 @@ function ManagerDashboardInner() {
                       {inspectClaim.receiptVerified ? "Verified (GST Compliant)" : "Missing / Non-Compliant"}
                     </span>
                   </div>
+                  {inspectClaim.receiptUrl && (
+                    <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
+                      <span className="text-zinc-500">Document:</span>
+                      <a
+                        href={inspectClaim.receiptUrl}
+                        download={inspectClaim.receiptName || "receipt"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        {inspectClaim.receiptName || "View Receipt"}
+                      </a>
+                    </div>
+                  )}
                   {inspectClaim.policyNotes && (
                     <div className="flex items-start justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
                       <span className="text-zinc-500">Audit Heuristic:</span>
@@ -1107,7 +1068,7 @@ function ManagerDashboardInner() {
               <button
                 type="button"
                 onClick={() => setInspectClaim(null)}
-                className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
                   isDark ? "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 border-white/[0.08]" : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
                 }`}
               >
@@ -1118,14 +1079,14 @@ function ManagerDashboardInner() {
                   <button
                     type="button"
                     onClick={() => handleReject(inspectClaim)}
-                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-500 border border-rose-500/25 hover:bg-rose-500/20 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-rose-500/10 text-rose-500 border border-rose-500/25 hover:bg-rose-500/20 transition-colors cursor-pointer"
                   >
                     Reject Claim
                   </button>
                   <button
                     type="button"
                     onClick={() => handleApprove(inspectClaim)}
-                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-all duration-150 ease-out hover:scale-[1.02] active:scale-95 cursor-pointer shadow-xs"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
                   >
                     Approve Claim
                   </button>
