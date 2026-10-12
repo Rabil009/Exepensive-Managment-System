@@ -58,6 +58,7 @@ import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { ReceiptModal } from "@/components/shared/ReceiptModal";
 import { QuarterlyFinancialStatements } from "@/components/manager/QuarterlyFinancialStatements";
+import { Spiral } from "@/components/ui/spiral";
 
 export type ManagerView =
   | "Approvals"
@@ -103,15 +104,17 @@ function ManagerDashboardInner() {
   const [claims, setClaims] = useState<ManagerClaim[]>([]);
   const [cardRequests, setCardRequests] = useState<CardApprovalRequest[]>([]);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [inspectClaim, setInspectClaim] = useState<ManagerClaim | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
-  const refreshData = async () => {
+  const refreshData = async (isInitial: boolean | unknown = false) => {
     try {
-      setIsRefreshing(true);
+      if (isInitial === true) setIsInitialLoading(true);
+      else setIsRefreshing(true);
       const [fetchedClaims, fetchedBudgets, fetchedCards] = await Promise.all([
         fetchManagerClaims(),
         fetchManagerBudgets(),
@@ -130,11 +133,12 @@ function ManagerDashboardInner() {
       console.warn("Backend sync notice:", e);
     } finally {
       setIsRefreshing(false);
+      setIsInitialLoading(false);
     }
   };
 
   useEffect(() => {
-    refreshData();
+    refreshData(true);
 
     // 1. Polling fallback for guaranteed responsiveness
     const interval = setInterval(() => {
@@ -323,8 +327,22 @@ function ManagerDashboardInner() {
             </div>
           )}
 
-          {/* Standardized Flat KPI Cards Matching Finance Dashboard */}
-          <section aria-label="Manager Key Metrics">
+          {isInitialLoading ? (
+            <div className="flex-1 min-h-[60vh] flex flex-col items-center justify-center gap-4 py-16">
+              <Spiral className="size-10 text-blue-500" />
+              <div className="flex flex-col items-center text-center gap-1.5">
+                <h3 className={`text-sm font-semibold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
+                  Loading Manager Portal
+                </h3>
+                <p className={`text-xs max-w-sm ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
+                  Syncing team approvals, department budgets &amp; card requests...
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Standardized Flat KPI Cards Matching Finance Dashboard */}
+              <section aria-label="Manager Key Metrics">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Card 1: Total Team Spend */}
               <div
@@ -1086,6 +1104,8 @@ function ManagerDashboardInner() {
                 </div>
               ))}
             </div>
+          )}
+            </>
           )}
         </main>
 

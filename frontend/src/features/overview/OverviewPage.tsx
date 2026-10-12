@@ -7,17 +7,33 @@ import { OverviewSummary } from "./components/OverviewSummary";
 import { QuickReceiptCapture } from "./components/QuickReceiptCapture";
 import { OverviewExpenseTable } from "./components/OverviewExpenseTable";
 import { ComplianceBanner } from "./components/ComplianceBanner";
+import { Spiral } from "@/components/ui/spiral";
+
 export default function OverviewPage() {
   const model = useOverview();
   return (
     <AppShell active="Overview">
-      <div className="space-y-4 sm:space-y-6 w-full">
-        <OverviewSummary summary={model.summary} />
-        {model.error && <p role="alert" className="text-sm text-rose-500">{model.error}</p>}
-        <QuickReceiptCapture />
-        <OverviewExpenseTable model={model} />
-        <ComplianceBanner />
-      </div>
+      {model.loading && !model.summary ? (
+        <div className="w-full min-h-[60vh] flex flex-col items-center justify-center gap-4 py-16">
+          <Spiral className="size-10 text-blue-500" />
+          <div className="flex flex-col items-center text-center gap-1.5">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Loading Employee Dashboard
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm">
+              Fetching expense summaries, corporate cards &amp; submissions...
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4 sm:space-y-6 w-full">
+          <OverviewSummary summary={model.summary} />
+          {model.error && <p role="alert" className="text-sm text-rose-500">{model.error}</p>}
+          <QuickReceiptCapture />
+          <OverviewExpenseTable model={model} />
+          <ComplianceBanner />
+        </div>
+      )}
       <Toast message={model.notice} onDismiss={() => model.setNotice("")} />
     </AppShell>
   );

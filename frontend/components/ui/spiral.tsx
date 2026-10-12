@@ -53,3 +53,4 @@ function Spiral({
 
 export { Spiral };
 export default Spiral;
+
