@@ -304,7 +304,7 @@ export function OverviewExpenseTable({ model }: Props) {
                     {/* Status with Dot */}
                     <td className="py-2.5 px-4 whitespace-nowrap text-left">
                       <StatusBadge tone={tone}>
-                        {item.status}
+                        {item.raw_status === "MANAGER_APPROVED" ? "Manager Approved" : item.status}
                       </StatusBadge>
                     </td>
                   </tr>

@@ -13,10 +13,10 @@ export function normalizeClaimStatus(rawStatus?: string): "Pending" | "Approved"
   if (s === "DRAFT") {
     return "Draft";
   }
-  if (s === "FINANCE_APPROVED" || s === "PAYMENT_PENDING" || s === "APPROVED") {
+  if (s === "FINANCE_APPROVED" || s === "PAYMENT_PENDING" || s === "APPROVED" || s === "MANAGER_APPROVED" || s.includes("APPROV")) {
     return "Approved";
   }
-  if (s === "MANAGER_APPROVED" || s === "SUBMITTED" || s === "PENDING" || s.includes("PEND") || s.includes("SUBMIT")) {
+  if (s === "SUBMITTED" || s === "PENDING" || s.includes("PEND") || s.includes("SUBMIT")) {
     return "Pending";
   }
   return "Pending";

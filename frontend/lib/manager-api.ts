@@ -430,11 +430,21 @@ export async function approveCardRequest(req: CardApprovalRequest): Promise<bool
         updated_at: new Date().toISOString(),
       });
       if (req.cardId) {
-        query = query.eq("id", req.cardId);
+        query = query.eq("id", req.cardId).eq("employee_id", req.employeeId);
       } else {
         query = query.eq("employee_id", req.employeeId);
       }
-      const { error: limitErr } = await query;
+      const { data: updatedCards, error: limitErr } = await query.select();
+      if (!updatedCards || updatedCards.length === 0) {
+        // Fallback: update employee card by employee_id
+        await supabase
+          .from("employee_cards")
+          .update({
+            monthly_limit: req.requestedLimit,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("employee_id", req.employeeId);
+      }
       if (limitErr) console.error("Error updating approved limit:", limitErr);
     }
 

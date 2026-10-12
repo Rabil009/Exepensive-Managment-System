@@ -39,7 +39,7 @@ export function CardPreview({ model }: { model: Pick<CardControlsModel, "card" |
 
         <div className="flex flex-col divide-y divide-zinc-200/50 dark:divide-white/[0.04]">
           {requests.map((request) => {
-            const isApproved = (request.status || "").toUpperCase() === "APPROVED";
+            const isApproved = (request.status || "").toUpperCase().includes("APPROV");
             const isRejected = (request.status || "").toUpperCase().includes("REJECT");
 
             return (
