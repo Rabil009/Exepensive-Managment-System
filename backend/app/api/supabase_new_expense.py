@@ -17,7 +17,7 @@ from app.services.supabase_expenses import CATEGORIES, MAX_RECEIPT_BYTES, Supaba
 logger = logging.getLogger(__name__)
 
 class NewExpenseInput(BaseModel):
-    id: UUID
+    id: str | UUID
     merchant: str = Field(default="", max_length=200)
     date: str = ""
     amount: Decimal = Field(default=Decimal("0"), ge=0, max_digits=15, decimal_places=2)
@@ -26,7 +26,7 @@ class NewExpenseInput(BaseModel):
     payment_method: str = Field(default="", max_length=100)
     purpose: str = Field(default="", max_length=5000)
     attendees: list[str] = Field(default_factory=list, max_length=50)
-    linked_transaction_id: UUID | None = None
+    linked_transaction_id: str | UUID | None = None
 
     def draft_row(self):
         if self.category and self.category not in CATEGORIES:

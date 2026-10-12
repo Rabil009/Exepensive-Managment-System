@@ -469,7 +469,7 @@ class SharedDataStore:
                 claims = [
                     c for c in claims
                     if "APPROVED" in str(c.get("status", "")).upper()
-                    or str(c.get("status", "")).upper() in ("DISBURSED", "PAID", "PAYMENT_PENDING")
+                    or str(c.get("status", "")).upper() in ("DISBURSED", "PAID", "PAYMENT_PENDING", "CLOSED")
                 ]
             elif s_lower == "rejected":
                 claims = [c for c in claims if "REJECTED" in str(c.get("status", "")).upper()]
@@ -493,7 +493,7 @@ class SharedDataStore:
             ]
 
         # Sort latest first
-        return sorted(claims, key=lambda x: str(x.get("created_at") or ""), reverse=True)
+        return sorted(claims, key=lambda x: str(x.get("created_at") or x.get("submitted_at") or x.get("expense_date") or ""), reverse=True)
 
     def get_claim(self, claim_id: str) -> Optional[Dict[str, Any]]:
         return self._claims.get(claim_id)

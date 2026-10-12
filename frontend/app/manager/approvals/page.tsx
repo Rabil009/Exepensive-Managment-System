@@ -29,6 +29,7 @@ import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { ReceiptModal } from "@/components/shared/ReceiptModal";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 import {
   fetchManagerClaims,
   approveManagerClaim,
@@ -94,6 +95,28 @@ function ApprovalsPageInner() {
 
   useEffect(() => {
     refreshData();
+
+    // 1. Polling fallback for guaranteed responsiveness
+    const interval = setInterval(() => {
+      refreshData();
+    }, 3500);
+
+    // 2. Real-time Supabase postgres_changes listener for instant live update
+    const channel = supabase
+      .channel("manager-approvals-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "expense_claims" },
+        () => {
+          refreshData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {

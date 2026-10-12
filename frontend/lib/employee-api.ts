@@ -45,12 +45,14 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
       const { data: rawClaims, error } = await query;
       const claims = (!error && rawClaims) ? rawClaims : [];
 
-      const pendingClaims = claims.filter(
-        (c: any) => (c.status || "").toUpperCase().includes("SUBMIT") || (c.status || "").toUpperCase().includes("PEND")
-      );
-      const approvedClaims = claims.filter(
-        (c: any) => (c.status || "").toUpperCase().includes("APPROV") || (c.status || "").toUpperCase().includes("DISBURS")
-      );
+      const isClaimApproved = (status: string) => {
+        const s = (status || "").toUpperCase();
+        return s.includes("APPROV") || ["PAID", "CLOSED", "DISBURSED", "PAYMENT_PENDING"].includes(s);
+      };
+      const isClaimRejected = (status: string) => (status || "").toUpperCase().includes("REJECT");
+
+      const pendingClaims = claims.filter((c: any) => !isClaimApproved(c.status) && !isClaimRejected(c.status));
+      const approvedClaims = claims.filter((c: any) => isClaimApproved(c.status));
       const cardClaims = claims.filter(
         (c: any) => c.payment_method === "CORPORATE_CARD"
       );
@@ -67,9 +69,9 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           merchant: c.merchant || c.title || "Expense",
           category: c.category || "OTHER",
           amount: Number(c.amount) || 0,
-          status: (c.status || "").toUpperCase().includes("APPROV")
+          status: isClaimApproved(c.status)
             ? "Approved"
-            : (c.status || "").toUpperCase().includes("REJECT")
+            : isClaimRejected(c.status)
             ? "Rejected"
             : "Pending",
           raw_status: c.status || "SUBMITTED",
@@ -225,7 +227,14 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           merchant: c.merchant || c.title,
           category: c.category,
           amount: Number(c.amount) || 0,
-          status: c.status?.includes("APPROV") ? "Approved" : "Pending",
+          status: (
+            (c.status || "").toUpperCase().includes("APPROV") ||
+            ["PAID", "CLOSED", "DISBURSED", "PAYMENT_PENDING"].includes((c.status || "").toUpperCase())
+          )
+            ? "Approved"
+            : (c.status || "").toUpperCase().includes("REJECT")
+            ? "Rejected"
+            : "Pending",
           currency: c.currency || "INR",
           receipt: c.receipt_name || (c.receipt_url ? "receipt.png" : null),
           receiptUrl: c.receipt_url,
@@ -324,8 +333,21 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
 
           const claimId = `CLM-${Date.now().toString().slice(-6)}`;
           const employeeId = authUser?.id || "7881beaf-b8ab-4600-afd8-4543deb2a24b"; // Fallback to verified user id
-          const employeeName = userProfile?.name || authUser?.user_metadata?.name || "Aditya";
+
+          let employeeName = "Employee";
+          if (userProfile?.name) {
+            employeeName = userProfile.name;
+          } else if (authUser?.user_metadata?.name) {
+            employeeName = authUser.user_metadata.name;
+          } else if (typeof window !== "undefined") {
+            employeeName =
+              localStorage.getItem("payout_user_name") ||
+              localStorage.getItem("payout_user_email")?.split("@")[0] ||
+              "Employee";
+          }
+
           const employeeDept = userProfile?.department || authUser?.user_metadata?.department || "Engineering";
+          const nowIso = new Date().toISOString();
 
           const { error: insertError } = await supabase.from("expense_claims").insert({
             id: claimId,
@@ -345,8 +367,9 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
             receipt_name: receiptName,
             receipt_content_type: file?.type || null,
             receipt_size_bytes: file?.size || null,
-            expense_date: parsed.date || new Date().toISOString().slice(0, 10),
-            submitted_at: new Date().toISOString(),
+            expense_date: parsed.date || nowIso.slice(0, 10),
+            submitted_at: nowIso,
+            created_at: nowIso,
           });
 
           if (insertError) {

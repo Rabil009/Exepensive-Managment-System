@@ -57,14 +57,111 @@ export interface QuarterlyReport {
   topDepartment: string;
 }
 
+const isClaimPending = (status: string) => {
+  const s = (status || "").toUpperCase();
+  return s === "SUBMITTED" || s === "PENDING" || s === "DRAFT";
+};
+
+const isClaimApproved = (status: string) => {
+  const s = (status || "").toUpperCase();
+  return (
+    s.includes("APPROV") ||
+    s === "PAID" ||
+    s === "CLOSED" ||
+    s === "DISBURSED" ||
+    s === "PAYMENT_PENDING"
+  );
+};
+
+const isClaimRejected = (status: string) => {
+  const s = (status || "").toUpperCase();
+  return s.includes("REJECT");
+};
+
 /**
- * Fetch Manager Claims from FastAPI backend if reachable, otherwise direct Supabase Cloud query
+ * Fetch Manager Claims directly from Supabase Cloud first (source of truth for employee submissions),
+ * falling back to FastAPI backend if Supabase is offline.
  */
 export async function fetchManagerClaims(params?: {
   status?: string;
   department?: string;
   search?: string;
 }): Promise<ManagerClaim[]> {
+  // 1. Direct Supabase Query (Real-time live claims submitted by employees)
+  try {
+    const { data, error } = await supabase
+      .from("expense_claims")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data && data.length > 0) {
+      let filtered = data;
+
+      if (params?.status && params.status !== "All") {
+        if (params.status === "Pending") {
+          filtered = filtered.filter((item: any) => isClaimPending(item.status));
+        } else if (params.status === "Approved") {
+          filtered = filtered.filter((item: any) => isClaimApproved(item.status));
+        } else if (params.status === "Rejected") {
+          filtered = filtered.filter((item: any) => isClaimRejected(item.status));
+        }
+      }
+
+      if (params?.department && params.department !== "All") {
+        const targetDept = params.department.toLowerCase();
+        filtered = filtered.filter(
+          (item: any) => (item.employee_department || "").toLowerCase() === targetDept
+        );
+      }
+
+      if (params?.search) {
+        const q = params.search.toLowerCase();
+        filtered = filtered.filter(
+          (item: any) =>
+            (item.employee_name || "").toLowerCase().includes(q) ||
+            (item.title || "").toLowerCase().includes(q) ||
+            (item.merchant || "").toLowerCase().includes(q) ||
+            (item.description || "").toLowerCase().includes(q) ||
+            (item.id || "").toLowerCase().includes(q)
+        );
+      }
+
+      return filtered.map((item: any) => {
+        const rawStatus = (item.status || "Pending").toUpperCase();
+        const normStatus: "Pending" | "Approved" | "Rejected" = isClaimApproved(rawStatus)
+          ? "Approved"
+          : isClaimRejected(rawStatus)
+          ? "Rejected"
+          : "Pending";
+
+        return {
+          id: item.id,
+          employeeName: item.employee_name || "Employee",
+          department: item.employee_department || "Engineering",
+          costCenter: item.cost_center || "CC-ENG-104",
+          category: (item.category || "Travel") as any,
+          description: item.description || item.title || item.merchant || "Expense claim",
+          amount: Number(item.amount) || 0,
+          date: item.expense_date
+            ? item.expense_date
+            : item.created_at
+            ? item.created_at.slice(0, 10)
+            : "Today",
+          status: normStatus,
+          priority: Number(item.amount) > 5000 ? "High" : "Medium",
+          receiptVerified: Boolean(item.receipt_url || item.receipt_name),
+          receiptUrl: item.receipt_url,
+          receiptName: item.receipt_name,
+          policyNotes: item.policy_violation,
+          managerRemark: item.manager_remark,
+        };
+      });
+    }
+  } catch (supabaseErr) {
+    console.warn("Supabase claims direct query note:", supabaseErr);
+  }
+
+  // 2. Fallback: FastAPI backend if reachable
   if (BACKEND_BASE_URL) {
     try {
       const url = new URL(`${BACKEND_BASE_URL}/approvals`);
@@ -85,67 +182,8 @@ export async function fetchManagerClaims(params?: {
         }
       }
     } catch {
-      // Backend offline, fallback to Supabase Cloud
+      // Backend offline
     }
-  }
-
-  // Direct Supabase Query
-  try {
-    const { data, error } = await supabase
-      .from("expense_claims")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (!error && data) {
-      let filtered = data;
-      if (params?.status && params.status !== "All") {
-        const s = params.status.toUpperCase();
-        filtered = filtered.filter((item: any) => (item.status || "").toUpperCase().includes(s));
-      }
-      if (params?.department && params.department !== "All") {
-        filtered = filtered.filter((item: any) => item.employee_department === params.department);
-      }
-      if (params?.search) {
-        const q = params.search.toLowerCase();
-        filtered = filtered.filter(
-          (item: any) =>
-            (item.employee_name || "").toLowerCase().includes(q) ||
-            (item.title || "").toLowerCase().includes(q) ||
-            (item.id || "").toLowerCase().includes(q)
-        );
-      }
-
-      return filtered.map((item: any) => {
-        const rawStatus = (item.status || "Pending").toUpperCase();
-        const normStatus = rawStatus.includes("APPROV")
-          ? "Approved"
-          : rawStatus.includes("REJECT")
-          ? "Rejected"
-          : "Pending";
-
-        return {
-          id: item.id,
-          employeeName: item.employee_name || "Employee",
-          department: item.employee_department || "Engineering",
-          costCenter: item.cost_center || "CC-ENG-104",
-          category: (item.category || "Travel") as any,
-          description: item.description || item.title || "",
-          amount: Number(item.amount) || 0,
-          date: item.created_at
-            ? new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
-            : "Today",
-          status: normStatus,
-          priority: Number(item.amount) > 5000 ? "High" : "Medium",
-          receiptVerified: Boolean(item.receipt_url || item.receipt_name),
-          receiptUrl: item.receipt_url,
-          receiptName: item.receipt_name,
-          policyNotes: item.policy_violation,
-          managerRemark: item.manager_remark,
-        };
-      });
-    }
-  } catch (supabaseErr) {
-    console.error("Supabase query failed:", supabaseErr);
   }
 
   return [];

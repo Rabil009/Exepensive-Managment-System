@@ -4,7 +4,7 @@ from app.services.shared_store import shared_data_store
 
 def to_manager_claim_model(c: Dict[str, Any]) -> ManagerClaimModel:
     raw_status = str(c.get("status", "Pending")).upper()
-    if "APPROV" in raw_status or raw_status in ("DISBURSED", "PAID"):
+    if "APPROV" in raw_status or raw_status in ("DISBURSED", "PAID", "CLOSED", "PAYMENT_PENDING"):
         norm_status = "Approved"
     elif "REJECT" in raw_status:
         norm_status = "Rejected"
@@ -16,7 +16,7 @@ def to_manager_claim_model(c: Dict[str, Any]) -> ManagerClaimModel:
     if not prio or prio not in ("High", "Medium", "Low"):
         prio = "High" if amt > 5000 else "Medium"
 
-    date_str = c.get("date")
+    date_str = c.get("expense_date") or c.get("date")
     if not date_str:
         created = str(c.get("created_at") or "")
         date_str = created[:10] if created else "Today"
@@ -27,7 +27,7 @@ def to_manager_claim_model(c: Dict[str, Any]) -> ManagerClaimModel:
         department=c.get("employee_department") or c.get("department") or "Engineering",
         costCenter=c.get("cost_center") or c.get("costCenter") or "CC-ENG-104",
         category=c.get("category", "Travel").capitalize(),
-        description=c.get("description") or c.get("title") or "Expense claim",
+        description=c.get("description") or c.get("title") or c.get("merchant") or "Expense claim",
         amount=amt,
         date=date_str,
         status=norm_status,

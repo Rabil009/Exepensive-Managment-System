@@ -37,6 +37,7 @@ import { ManagerHeader } from "@/components/manager/ManagerHeader";
 import { StatusBadge, PriorityBadge } from "@/components/shared/StatusBadge";
 import { EmployeeAvatar, EmployeeCell } from "@/components/manager/EmployeeAvatar";
 import { ThemeProvider, useTheme } from "@/lib/theme-store";
+import { supabase } from "@/lib/supabase";
 import {
   fetchManagerClaims,
   approveManagerClaim,
@@ -124,6 +125,28 @@ function ManagerDashboardInner() {
 
   useEffect(() => {
     refreshData();
+
+    // 1. Polling fallback for guaranteed responsiveness
+    const interval = setInterval(() => {
+      refreshData();
+    }, 4000);
+
+    // 2. Real-time Supabase postgres_changes listener for instant live update
+    const channel = supabase
+      .channel("manager-dashboard-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "expense_claims" },
+        () => {
+          refreshData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {
