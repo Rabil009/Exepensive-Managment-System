@@ -227,6 +227,9 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           amount: Number(c.amount) || 0,
           status: c.status?.includes("APPROV") ? "Approved" : "Pending",
           currency: c.currency || "INR",
+          receipt: c.receipt_name || (c.receipt_url ? "receipt.png" : null),
+          receiptUrl: c.receipt_url,
+          employee: c.employee_name,
         });
       });
 
@@ -293,34 +296,14 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
             const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
             const filePath = `${uid}/${Date.now()}-${safeName}`;
 
-            // 1. Try Supabase Storage 'receipts' bucket if available
+            // Convert receipt directly to Base64 Data URL and save directly into Supabase DB
             try {
-              const { error: uploadError } = await supabase.storage
-                .from("receipts")
-                .upload(filePath, file, { upsert: true });
-
-              if (!uploadError) {
-                const { data: urlData } = supabase.storage
-                  .from("receipts")
-                  .getPublicUrl(filePath);
-                if (urlData?.publicUrl) {
-                  receiptUrl = urlData.publicUrl;
-                }
-              }
-            } catch (storageErr) {
-              console.warn("Storage upload note:", storageErr);
-            }
-
-            // 2. Guaranteed fallback: Convert receipt to Base64 Data URL and save directly into Supabase DB!
-            if (!receiptUrl) {
-              try {
-                const arrayBuffer = await file.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-                const mime = file.type || "application/octet-stream";
-                receiptUrl = `data:${mime};base64,${buffer.toString("base64")}`;
-              } catch (b64Err) {
-                console.warn("Receipt base64 conversion note:", b64Err);
-              }
+              const arrayBuffer = await file.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+              const mime = file.type || "application/octet-stream";
+              receiptUrl = `data:${mime};base64,${buffer.toString("base64")}`;
+            } catch (b64Err) {
+              console.warn("Receipt base64 conversion note:", b64Err);
             }
           }
 

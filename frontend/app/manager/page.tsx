@@ -51,6 +51,7 @@ import { SettingsModal } from "@/components/dashboard/SettingsModal";
 import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { QuarterlyFinancialStatements } from "@/components/manager/QuarterlyFinancialStatements";
+import { ReceiptModal } from "@/components/shared/ReceiptModal";
 
 export type ManagerView =
   | "Approvals"
@@ -90,6 +91,7 @@ function ManagerDashboardInner() {
   const [showSettings, setShowSettings] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
 
   // Approvals & Claim State
   const [claims, setClaims] = useState<ManagerClaim[]>([]);
@@ -1036,19 +1038,17 @@ function ManagerDashboardInner() {
                       {inspectClaim.receiptVerified ? "Verified (GST Compliant)" : "Missing / Non-Compliant"}
                     </span>
                   </div>
-                  {inspectClaim.receiptUrl && (
+                  {inspectClaim.receiptVerified && (
                     <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
                       <span className="text-zinc-500">Document:</span>
-                      <a
-                        href={inspectClaim.receiptUrl}
-                        download={inspectClaim.receiptName || "receipt"}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 hover:underline"
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
                       >
-                        <Download className="h-3.5 w-3.5" />
-                        {inspectClaim.receiptName || "View Receipt"}
-                      </a>
+                        <FileText className="h-3.5 w-3.5" />
+                        {inspectClaim.receiptName || "View Receipt & Tax Invoice"}
+                      </button>
                     </div>
                   )}
                   {inspectClaim.policyNotes && (
@@ -1101,6 +1101,21 @@ function ManagerDashboardInner() {
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showSearch && <SearchModal onClose={() => setShowSearch(false)} />}
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+      {showReceiptModal && inspectClaim && (
+        <ReceiptModal
+          isOpen={showReceiptModal}
+          onClose={() => setShowReceiptModal(false)}
+          claimId={inspectClaim.id}
+          receiptName={inspectClaim.receiptName}
+          receiptUrl={inspectClaim.receiptUrl}
+          merchant={inspectClaim.description || inspectClaim.category}
+          amount={inspectClaim.amount}
+          currency="INR"
+          date={inspectClaim.date}
+          employeeName={inspectClaim.employeeName}
+          category={inspectClaim.category}
+        />
+      )}
     </div>
   );
 }

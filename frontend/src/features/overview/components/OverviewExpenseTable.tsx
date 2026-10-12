@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   RotateCw,
   Columns,
@@ -16,9 +16,11 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { ReceiptModal } from "@/components/shared/ReceiptModal";
 import { displayDate, money } from "../../../shared/utils/format";
 import { tabs } from "../data/overview";
 import type { OverviewModel } from "../hooks/useOverview";
+import type { Expense } from "../../expenses/types";
 import { useTheme } from "@/lib/theme-store";
 import { downloadExpenseReceipt } from "../../expenses/data/newExpenseApi";
 
@@ -61,6 +63,8 @@ export function OverviewExpenseTable({ model }: Props) {
     hideReceipt,
     setHideReceipt,
   } = model;
+
+  const [activeReceipt, setActiveReceipt] = useState<Expense | null>(null);
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -285,13 +289,22 @@ export function OverviewExpenseTable({ model }: Props) {
                                 : "text-zinc-400"
                             }`}
                           />
-                          {item.receipt ? <button type="button" className="hover:underline" onClick={() => void downloadExpenseReceipt(item.id, item.receipt || "receipt").catch((cause: unknown) => setNotice(cause instanceof Error ? cause.message : "Could not download receipt."))}>
-                            {item.receipt === "Auto-Matched Invoice"
-                              ? "Invoice Attached"
-                              : item.receipt === "Verified Receipt"
-                              ? "Receipt Attached"
-                              : item.receipt || "No receipt"}
-                          </button> : <span>No receipt</span>}
+                          {item.receipt ? (
+                            <button
+                              type="button"
+                              className="hover:underline font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 cursor-pointer"
+                              onClick={() => setActiveReceipt(item)}
+                              title="Click to view and download receipt"
+                            >
+                              {item.receipt === "Auto-Matched Invoice"
+                                ? "Invoice Attached"
+                                : item.receipt === "Verified Receipt"
+                                ? "Receipt Attached"
+                                : item.receipt || "No receipt"}
+                            </button>
+                          ) : (
+                            <span>No receipt</span>
+                          )}
                         </div>
                       </td>
                     )}
@@ -347,6 +360,21 @@ export function OverviewExpenseTable({ model }: Props) {
           </button>
         </div>
       </div>
+
+      {activeReceipt && (
+        <ReceiptModal
+          isOpen={Boolean(activeReceipt)}
+          onClose={() => setActiveReceipt(null)}
+          claimId={activeReceipt.id}
+          receiptName={activeReceipt.receipt}
+          receiptUrl={activeReceipt.receiptUrl}
+          merchant={activeReceipt.merchant}
+          amount={activeReceipt.amount}
+          currency={activeReceipt.currency}
+          date={activeReceipt.date}
+          category={activeReceipt.category}
+        />
+      )}
     </div>
   );
 }
