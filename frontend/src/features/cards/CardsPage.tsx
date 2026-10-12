@@ -16,12 +16,12 @@ export default function CardsPage() {
 
   return (
     <AppShell active="Cards & Limits">
-      <div className="flex flex-col w-full gap-6">
+      <div className="flex flex-col w-full gap-4 sm:gap-5">
         <CardsHeader model={model} />
 
         {model.message && (
           <div
-            className="rounded-xl px-4 py-3 border bg-blue-50/70 border-blue-200/80 text-blue-900 dark:bg-blue-950/40 dark:border-blue-800/60 dark:text-blue-200 text-xs flex items-center justify-between gap-3 animate-in fade-in"
+            className="rounded-xl px-4 py-2.5 border bg-blue-50/70 border-blue-200/80 text-blue-900 dark:bg-blue-950/40 dark:border-blue-800/60 dark:text-blue-200 text-xs flex items-center justify-between gap-3 animate-in fade-in"
             role="status"
           >
             <span>{model.message}</span>
@@ -36,14 +36,14 @@ export default function CardsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 items-start gap-6">
-          <div className="lg:col-span-5 min-w-0 flex flex-col gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-start gap-4 sm:gap-5">
+          <div className="lg:col-span-5 min-w-0 flex flex-col gap-4">
             <CardPreview model={model} />
-            <CardSecurity model={model} />
           </div>
           <SpendingLimits model={model} />
         </div>
 
+        <CardSecurity model={model} />
         <CardTransactions model={model} />
         <CardDialog model={model} />
       </div>

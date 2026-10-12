@@ -90,7 +90,7 @@ export function ReportHeader({ model }: Props) {
             Expense Report
           </h1>
           <StatusBadge
-            tone={completed ? "success" : recalled ? "neutral" : "warning"}
+            tone={completed ? "success" : recalled ? "neutral" : workflowStage === "REJECTED" ? "danger" : "warning"}
           >
             {recalled
               ? "Draft"

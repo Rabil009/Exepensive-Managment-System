@@ -44,6 +44,8 @@ export function ApprovalWorkflow({ model }: Props) {
               ? "bg-[#3B9B78]/10 text-[#3B9B78] border-[#3B9B78]/20"
               : recalled
               ? "bg-zinc-100 dark:bg-white/[0.04] text-zinc-500 border-zinc-200/80 dark:border-white/[0.08]"
+              : workflowStage === "REJECTED"
+              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
               : "bg-amber-500/10 text-amber-500 border-amber-500/20"
           }`}
         >

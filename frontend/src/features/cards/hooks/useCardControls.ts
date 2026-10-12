@@ -35,7 +35,17 @@ export function useCardControls() {
     let active = true;
     employeeJson<CardsResponse>("/cards").then((result) => { if (active) setData(result); })
       .catch((cause: unknown) => { if (active) setMessage(cause instanceof Error ? cause.message : "Could not load cards."); });
-    return () => { active = false; };
+
+    const interval = setInterval(() => {
+      employeeJson<CardsResponse>("/cards")
+        .then((result) => { if (active) setData(result); })
+        .catch(() => {});
+    }, 4000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const card = data?.cards[0] || null;

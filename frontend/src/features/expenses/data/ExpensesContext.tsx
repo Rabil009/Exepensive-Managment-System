@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { employeeJson } from "@/lib/employee-api";
+import { supabase } from "@/lib/supabase";
 import type { Expense } from "../types";
 
 export type ExpenseSummary = {
@@ -98,6 +99,8 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+
+    // Initial fetch
     employeeJson<OverviewResponse>("/overview").then((response) => {
       if (active) {
         applyResponse(response);
@@ -110,7 +113,37 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     });
-    return () => { active = false; };
+
+    // Realtime Supabase Channel Listener
+    const channel = supabase
+      .channel("employee_claims_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "expense_claims" },
+        () => {
+          employeeJson<OverviewResponse>("/overview")
+            .then((res) => {
+              if (active) applyResponse(res);
+            })
+            .catch(() => {});
+        }
+      )
+      .subscribe();
+
+    // 4-second Polling Fallback
+    const interval = setInterval(() => {
+      employeeJson<OverviewResponse>("/overview")
+        .then((res) => {
+          if (active) applyResponse(res);
+        })
+        .catch(() => {});
+    }, 4000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, [applyResponse]);
 
   return <Context.Provider value={{ expenses, summary, loading, error, refresh }}>{children}</Context.Provider>;
