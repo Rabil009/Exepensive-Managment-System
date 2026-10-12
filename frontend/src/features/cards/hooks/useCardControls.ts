@@ -160,8 +160,8 @@ export function useCardControls() {
       setDialogType(null);
       setMessage(
         dialogType === "limit"
-          ? `Monthly spending limit increased to ₹${amount.toLocaleString("en-IN")}.`
-          : `Virtual card "${virtualName.trim()}" issued and active!`,
+          ? `Limit increase request for ₹${amount.toLocaleString("en-IN")} submitted! Awaiting Manager & Finance authorization.`
+          : `Virtual card request for "${virtualName.trim()}" submitted! Awaiting Manager & Finance authorization.`,
       );
     } catch (cause) {
       setDialogError(cause instanceof Error ? cause.message : "Could not submit request.");

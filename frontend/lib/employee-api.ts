@@ -222,62 +222,51 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           if (bodyData.request_type === "VIRTUAL_CARD") {
             const cardName = bodyData.card_name || `${employeeName} - Virtual Card`;
             const requestedLimit = Number(bodyData.requested_limit) || 50000;
-            const last4 = Math.floor(1000 + Math.random() * 9000).toString();
 
-            const { data: newCard } = await supabase
-              .from("employee_cards")
+            // Submit as PENDING so Manager & Finance can review and authorize it (NO AUTO-APPROVAL)
+            const { data: newReq, error: reqErr } = await supabase
+              .from("employee_card_requests")
               .insert({
                 employee_id: employeeId,
-                display_name: cardName,
-                kind: "VIRTUAL",
-                network: "Mastercard Virtual",
-                last4,
-                currency: "INR",
-                monthly_limit: requestedLimit,
-                active: true,
-                frozen: false,
-                wallet_enabled: true,
-                travel_limits_enabled: false,
-                online_verification_enabled: true,
-                atm_lock_enabled: false,
+                card_id: null,
+                request_type: "VIRTUAL_CARD",
+                card_name: cardName,
+                requested_limit: requestedLimit,
+                status: "PENDING",
               })
               .select()
               .single();
 
-            await supabase.from("employee_card_requests").insert({
-              employee_id: employeeId,
-              card_id: newCard?.id || null,
-              request_type: "VIRTUAL_CARD",
-              card_name: cardName,
-              requested_limit: requestedLimit,
-              status: "APPROVED",
-            });
+            if (reqErr) {
+              console.error("Card request insert error:", reqErr);
+              throw new Error(reqErr.message);
+            }
 
-            responseData = { success: true, card: newCard };
+            responseData = { success: true, pending: true, request: newReq };
           } else if (bodyData.request_type === "LIMIT_INCREASE") {
             const requestedLimit = Number(bodyData.requested_limit) || 150000;
             const cardId = bodyData.card_id;
 
-            if (cardId) {
-              await supabase
-                .from("employee_cards")
-                .update({
-                  monthly_limit: requestedLimit,
-                  updated_at: new Date().toISOString(),
-                })
-                .eq("id", cardId)
-                .eq("employee_id", employeeId);
+            // Submit as PENDING so Manager & Finance can review and authorize it (NO AUTO-APPROVAL)
+            const { data: newReq, error: reqErr } = await supabase
+              .from("employee_card_requests")
+              .insert({
+                employee_id: employeeId,
+                card_id: cardId || null,
+                request_type: "LIMIT_INCREASE",
+                card_name: `${employeeName} - Limit Increase`,
+                requested_limit: requestedLimit,
+                status: "PENDING",
+              })
+              .select()
+              .single();
+
+            if (reqErr) {
+              console.error("Limit request insert error:", reqErr);
+              throw new Error(reqErr.message);
             }
 
-            await supabase.from("employee_card_requests").insert({
-              employee_id: employeeId,
-              card_id: cardId || null,
-              request_type: "LIMIT_INCREASE",
-              requested_limit: requestedLimit,
-              status: "APPROVED",
-            });
-
-            responseData = { success: true, limit: requestedLimit };
+            responseData = { success: true, pending: true, request: newReq };
           }
         }
 

@@ -171,9 +171,15 @@ function ApprovalsPageInner() {
     }
   };
 
-  const pendingCount = claims.filter((c) => c.status === "Pending").length;
-  const approvedCount = claims.filter((c) => c.status === "Approved").length;
-  const rejectedCount = claims.filter((c) => c.status === "Rejected").length;
+  const pendingCount = activeTab === "CLAIMS"
+    ? claims.filter((c) => c.status === "Pending").length
+    : cardRequests.filter((r) => r.status === "Pending").length;
+  const approvedCount = activeTab === "CLAIMS"
+    ? claims.filter((c) => c.status === "Approved").length
+    : cardRequests.filter((r) => r.status === "Approved").length;
+  const rejectedCount = activeTab === "CLAIMS"
+    ? claims.filter((c) => c.status === "Rejected").length
+    : cardRequests.filter((r) => r.status === "Rejected").length;
 
   const filteredClaims = claims.filter((c) => {
     const matchStatus = statusFilter === "All" || c.status === statusFilter;
@@ -182,6 +188,16 @@ function ApprovalsPageInner() {
       c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.id.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchStatus && matchSearch;
+  });
+
+  const displayedCardRequests = cardRequests.filter((r) => {
+    const matchStatus = statusFilter === "All" || r.status === statusFilter;
+    const matchSearch =
+      !searchQuery.trim() ||
+      r.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.cardName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.department.toLowerCase().includes(searchQuery.toLowerCase());
     return matchStatus && matchSearch;
   });
 
@@ -490,14 +506,14 @@ function ApprovalsPageInner() {
                     </tr>
                   </thead>
                   <tbody className={`divide-y text-[13px] ${isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"}`}>
-                    {cardRequests.length === 0 ? (
+                    {displayedCardRequests.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="py-12 text-center text-xs text-zinc-500">
-                          No corporate card or limit requests submitted yet.
+                          No corporate card or limit requests match the current filter.
                         </td>
                       </tr>
                     ) : (
-                      cardRequests.map((req) => (
+                      displayedCardRequests.map((req) => (
                         <tr
                           key={req.id}
                           className={`transition-colors ${

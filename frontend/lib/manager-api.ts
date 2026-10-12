@@ -356,25 +356,50 @@ export async function fetchCardRequests(): Promise<CardApprovalRequest[]> {
 
     if (error || !requests) return [];
 
-    const { data: profiles } = await supabase.from("profiles").select("id, name, department");
+    // Query profiles, expense claims, and employee cards to reliably resolve employee identity
+    const [{ data: profiles }, { data: claims }, { data: cards }] = await Promise.all([
+      supabase.from("profiles").select("id, name, department"),
+      supabase.from("expense_claims").select("employee_id, employee_name, employee_department"),
+      supabase.from("employee_cards").select("employee_id, display_name"),
+    ]);
+
     const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
+    const claimMap = new Map((claims || []).map((c: any) => [c.employee_id, c]));
+    const cardMap = new Map((cards || []).map((c: any) => [c.employee_id, c]));
 
     return requests.map((r: any) => {
       const p = profileMap.get(r.employee_id);
+      const claim = claimMap.get(r.employee_id);
+      const card = cardMap.get(r.employee_id);
+
+      let employeeName = p?.name || claim?.employee_name;
+      if (!employeeName && card?.display_name) {
+        employeeName = card.display_name.split(" - ")[0];
+      }
+      if (!employeeName) {
+        employeeName = "Employee";
+      }
+
+      const department = p?.department || claim?.employee_department || "Engineering";
+      const rawStatus = (r.status || "PENDING").toUpperCase();
+      const status: "Pending" | "Approved" | "Rejected" =
+        rawStatus === "APPROVED" ? "Approved" : rawStatus === "REJECTED" ? "Rejected" : "Pending";
+
       return {
         id: r.id,
         employeeId: r.employee_id,
-        employeeName: p?.name || "Aditya",
-        department: p?.department || "Engineering",
+        employeeName,
+        department,
         cardId: r.card_id,
         requestType: r.request_type,
         cardName: r.card_name || (r.request_type === "VIRTUAL_CARD" ? "Virtual Corporate Card" : "Card Limit Increase"),
         requestedLimit: Number(r.requested_limit) || 50000,
-        status: r.status === "APPROVED" ? "Approved" : r.status === "REJECTED" ? "Rejected" : "Pending",
+        status,
         createdAt: r.created_at ? new Date(r.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Today",
       };
     });
-  } catch {
+  } catch (err) {
+    console.error("fetchCardRequests error:", err);
     return [];
   }
 }
@@ -383,9 +408,9 @@ export async function approveCardRequest(req: CardApprovalRequest): Promise<bool
   try {
     if (req.requestType === "VIRTUAL_CARD") {
       const last4 = Math.floor(1000 + Math.random() * 9000).toString();
-      await supabase.from("employee_cards").insert({
+      const { error: cardErr } = await supabase.from("employee_cards").insert({
         employee_id: req.employeeId,
-        display_name: req.cardName || "Virtual Corporate Card",
+        display_name: req.cardName || `${req.employeeName} - Virtual Card`,
         kind: "VIRTUAL",
         network: "Mastercard Virtual",
         last4,
@@ -398,22 +423,30 @@ export async function approveCardRequest(req: CardApprovalRequest): Promise<bool
         online_verification_enabled: true,
         atm_lock_enabled: false,
       });
+      if (cardErr) console.error("Error creating approved card:", cardErr);
     } else if (req.requestType === "LIMIT_INCREASE") {
-      let cardQuery = supabase.from("employee_cards").update({
+      let query = supabase.from("employee_cards").update({
         monthly_limit: req.requestedLimit,
         updated_at: new Date().toISOString(),
       });
       if (req.cardId) {
-        await cardQuery.eq("id", req.cardId);
+        query = query.eq("id", req.cardId);
       } else {
-        await cardQuery.eq("employee_id", req.employeeId);
+        query = query.eq("employee_id", req.employeeId);
       }
+      const { error: limitErr } = await query;
+      if (limitErr) console.error("Error updating approved limit:", limitErr);
     }
 
-    await supabase
+    const { error: reqErr } = await supabase
       .from("employee_card_requests")
       .update({ status: "APPROVED" })
       .eq("id", req.id);
+
+    if (reqErr) {
+      console.error("Error updating card request status:", reqErr);
+      return false;
+    }
 
     return true;
   } catch (err) {

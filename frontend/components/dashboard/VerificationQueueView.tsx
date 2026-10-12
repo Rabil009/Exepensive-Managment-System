@@ -76,6 +76,14 @@ export function VerificationQueueView() {
       (c.merchant && c.merchant.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const displayedCardRequests = cardRequests.filter(
+    (r) =>
+      !search.trim() ||
+      r.employeeName.toLowerCase().includes(search.toLowerCase()) ||
+      r.cardName.toLowerCase().includes(search.toLowerCase()) ||
+      r.department.toLowerCase().includes(search.toLowerCase())
+  );
+
   const handleConfirmAction = () => {
     if (!actionModal || !actionReason.trim()) return;
     if (actionModal.type === "REJECT") {
@@ -220,7 +228,7 @@ export function VerificationQueueView() {
                   isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
                 }`}
               >
-                {cardRequests.length === 0 ? (
+                {displayedCardRequests.length === 0 ? (
                   <tr>
                     <td
                       colSpan={7}
@@ -228,11 +236,11 @@ export function VerificationQueueView() {
                         isDark ? "text-zinc-500" : "text-zinc-400"
                       }`}
                     >
-                      No corporate card or limit requests awaiting authorization.
+                      No corporate card or limit requests match the current search.
                     </td>
                   </tr>
                 ) : (
-                  cardRequests.map((req) => (
+                  displayedCardRequests.map((req) => (
                     <tr
                       key={req.id}
                       className={`transition-colors ${
