@@ -2,6 +2,26 @@ import { supabase } from "./supabase";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+export function normalizeClaimStatus(rawStatus?: string): "Pending" | "Approved" | "Reimbursed" | "Rejected" | "Draft" {
+  const s = (rawStatus || "").toUpperCase().trim();
+  if (s === "PAID" || s === "DISBURSED" || s === "CLOSED" || s === "SETTLED" || s.includes("REIMBURS")) {
+    return "Reimbursed";
+  }
+  if (s.includes("REJECT")) {
+    return "Rejected";
+  }
+  if (s === "DRAFT") {
+    return "Draft";
+  }
+  if (s === "FINANCE_APPROVED" || s === "PAYMENT_PENDING" || s === "APPROVED") {
+    return "Approved";
+  }
+  if (s === "MANAGER_APPROVED" || s === "SUBMITTED" || s === "PENDING" || s.includes("PEND") || s.includes("SUBMIT")) {
+    return "Pending";
+  }
+  return "Pending";
+}
+
 export async function employeeRequest(path: string, init: RequestInit = {}): Promise<Response> {
   const { data: sessionData } = await supabase.auth.getSession();
   const token = sessionData?.session?.access_token || "";
@@ -41,13 +61,16 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
       const claims = (!error && rawClaims) ? rawClaims : [];
 
       const pendingClaims = claims.filter(
-        (c: any) => (c.status || "").toUpperCase().includes("SUBMIT") || (c.status || "").toUpperCase().includes("PEND")
+        (c: any) => normalizeClaimStatus(c.status) === "Pending"
       );
       const approvedClaims = claims.filter(
-        (c: any) => (c.status || "").toUpperCase().includes("APPROV") || (c.status || "").toUpperCase().includes("DISBURS")
+        (c: any) => normalizeClaimStatus(c.status) === "Approved"
+      );
+      const reimbursedClaims = claims.filter(
+        (c: any) => normalizeClaimStatus(c.status) === "Reimbursed"
       );
       const cardClaims = claims.filter(
-        (c: any) => c.payment_method === "CORPORATE_CARD"
+        (c: any) => (c.payment_method || "").toUpperCase().includes("CORPORATE")
       );
 
       const pendingAmount = pendingClaims.reduce((s: number, c: any) => s + (Number(c.amount) || 0), 0);
@@ -62,18 +85,14 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           merchant: c.merchant || c.title || "Expense",
           category: c.category || "OTHER",
           amount: Number(c.amount) || 0,
-          status: (c.status || "").toUpperCase().includes("APPROV")
-            ? "Approved"
-            : (c.status || "").toUpperCase().includes("REJECT")
-            ? "Rejected"
-            : "Pending",
+          status: normalizeClaimStatus(c.status),
           raw_status: c.status || "SUBMITTED",
           source: "claim",
           description: c.description || "",
           receipt: c.receipt_name || null,
           currency: c.currency || "INR",
           report: c.report_name || "General",
-          paymentMethod: c.payment_method === "CORPORATE_CARD" ? "Corporate Card" : "Personal (Out-of-Pocket)",
+          paymentMethod: (c.payment_method || "").toUpperCase().includes("CORPORATE") ? "Corporate Card" : "Personal (Out-of-Pocket)",
           attendees: c.attendees || [],
         })),
         summary: {
@@ -147,13 +166,13 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
 
       const totalSpend = allClaims.reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
       const pendingApproval = allClaims
-        .filter((c: any) => (c.status || "").toUpperCase().includes("SUBMIT") || (c.status || "").toUpperCase().includes("PEND"))
+        .filter((c: any) => normalizeClaimStatus(c.status) === "Pending")
         .reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
       const reimbursed = allClaims
-        .filter((c: any) => (c.status || "").toUpperCase().includes("APPROV") || (c.status || "").toUpperCase().includes("DISBURS"))
+        .filter((c: any) => normalizeClaimStatus(c.status) === "Reimbursed")
         .reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
       const corporateSpend = allClaims
-        .filter((c: any) => c.payment_method === "CORPORATE_CARD")
+        .filter((c: any) => (c.payment_method || "").toUpperCase().includes("CORPORATE"))
         .reduce((acc: number, c: any) => acc + (Number(c.amount) || 0), 0);
 
       // Group by category
@@ -219,7 +238,7 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
           merchant: c.merchant || c.title,
           category: c.category,
           amount: Number(c.amount) || 0,
-          status: c.status?.includes("APPROV") ? "Approved" : "Pending",
+          status: normalizeClaimStatus(c.status),
           currency: c.currency || "INR",
         });
       });
