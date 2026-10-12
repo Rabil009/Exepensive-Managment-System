@@ -52,9 +52,27 @@ export function Sidebar({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  const [userName, setUserName] = useState("Finance Admin");
+  const [userEmail, setUserEmail] = useState("finance@payout.finance");
+
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      const storedName = localStorage.getItem("payout_user_name");
+      const storedEmail = localStorage.getItem("payout_user_email");
+      if (storedName) setUserName(storedName);
+      if (storedEmail) setUserEmail(storedEmail);
+    }
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        if (user.email) setUserEmail(user.email);
+        const name = user.user_metadata?.name || user.email?.split("@")[0] || "Finance User";
+        setUserName(name);
+      }
+    });
   }, []);
+
+  const initials = (userName || "FI").slice(0, 2).toUpperCase();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -377,22 +395,20 @@ export function Sidebar({
             >
               {/* Profile info header */}
               <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.04]">
-                <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces&auto=format&q=80"
-                  alt="Aditya Kumar"
-                  className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20 shrink-0"
-                />
+                <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold text-xs flex items-center justify-center shrink-0 ring-1 ring-zinc-300 dark:ring-white/20">
+                  {initials}
+                </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-semibold truncate text-zinc-900 dark:text-white leading-tight">
-                      Aditya Kumar
+                      {userName}
                     </span>
                     <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-zinc-200/70 dark:bg-white/[0.1] text-zinc-700 dark:text-zinc-300">
                       Finance
                     </span>
                   </div>
                   <span className="text-[11px] truncate text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    aditya@payout.finance
+                    {userEmail}
                   </span>
                 </div>
               </div>
@@ -432,7 +448,7 @@ export function Sidebar({
           <button
             type="button"
             onClick={() => setIsProfileOpen((prev) => !prev)}
-            title={isCollapsed ? "Aditya Kumar - Profile & Logout" : undefined}
+            title={isCollapsed ? `${userName} - Profile & Logout` : undefined}
             className={`w-full flex items-center h-11 px-1 rounded-xl cursor-pointer text-left group transition-colors duration-150 ${
               isProfileOpen
                 ? "bg-zinc-200/70 dark:bg-white/[0.12] text-zinc-950 dark:text-white"
@@ -440,11 +456,9 @@ export function Sidebar({
             }`}
           >
             <div className="h-8 w-8 shrink-0 flex items-center justify-center">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=faces&auto=format&q=80"
-                alt="Aditya Kumar"
-                className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20"
-              />
+              <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold text-xs flex items-center justify-center ring-1 ring-zinc-300 dark:ring-white/20">
+                {initials}
+              </div>
             </div>
 
             <div
@@ -456,10 +470,10 @@ export function Sidebar({
             >
               <div className="flex flex-col min-w-0">
                 <span className="text-[13px] font-semibold truncate leading-tight text-zinc-900 dark:text-white dark:group-hover:text-black">
-                  Aditya Kumar
+                  {userName}
                 </span>
                 <span className="text-[11px] truncate leading-tight mt-0.5 text-zinc-500 dark:text-zinc-400 dark:group-hover:text-zinc-600">
-                  aditya@payout.finance
+                  {userEmail}
                 </span>
               </div>
               <ChevronsUpDown className="h-4 w-4 shrink-0 text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-black transition-colors" />
@@ -612,7 +626,7 @@ export function Sidebar({
             >
               <div className="flex items-center gap-2">
                 <LogOut className="h-4 w-4" />
-                <span className="text-[13px] font-medium">Log out (Aditya)</span>
+                <span className="text-[13px] font-medium">Log out ({userName})</span>
               </div>
             </button>
           </div>
