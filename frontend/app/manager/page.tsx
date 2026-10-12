@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -11,6 +11,7 @@ import {
   Wallet,
   PieChart,
   AlertTriangle,
+  AlertCircle,
   ClipboardList,
   ShieldCheck,
   Clock,
@@ -67,6 +68,86 @@ export type ManagerView =
   | "Reports"
   | "Policies";
 
+export interface PolicyViolation {
+  claim: ManagerClaim;
+  severity: "high" | "medium" | "low";
+  policyName: string;
+  reason: string;
+}
+
+export function getClaimPolicyViolation(claim: ManagerClaim): {
+  severity: "high" | "medium" | "low";
+  policyName: string;
+  reason: string;
+} | null {
+  // 1. Explicit policy violation from database / backend
+  if (claim.policyNotes && claim.policyNotes.trim()) {
+    const isHigh =
+      claim.priority === "High" ||
+      claim.amount >= 5000 ||
+      /unauthorized|critical|violation|exceed/i.test(claim.policyNotes);
+    return {
+      severity: isHigh ? "high" : "medium",
+      policyName:
+        claim.category === "Hotel"
+          ? "Policy: Accommodation & Hotel 2.1"
+          : claim.category === "Meals"
+          ? "Policy: Meals & Per Diem 3.1"
+          : claim.category === "Travel"
+          ? "Policy: Travel & Conveyance 4.2"
+          : "Policy: Corporate Compliance 1.1",
+      reason: claim.policyNotes,
+    };
+  }
+
+  // 2. Mandatory tax invoice / receipt missing above ₹500
+  if (!claim.receiptVerified && claim.amount > 500) {
+    return {
+      severity: claim.amount >= 5000 ? "high" : "medium",
+      policyName: "Policy: Tax Invoice & Receipts 1.3",
+      reason: `Mandatory itemized tax invoice or receipt missing for expense of ₹${claim.amount.toLocaleString("en-IN")} (exceeds ₹500 threshold).`,
+    };
+  }
+
+  // 3. Nightly hotel accommodation ceiling (₹5,000)
+  if (claim.category === "Hotel" && claim.amount > 5000) {
+    return {
+      severity: "high",
+      policyName: "Policy: Accommodation & Hotel 2.1",
+      reason: `Nightly hotel accommodation of ₹${claim.amount.toLocaleString("en-IN")} exceeds standard corporate ceiling of ₹5,000.`,
+    };
+  }
+
+  // 4. Per diem food & beverage ceiling (₹1,500)
+  if (claim.category === "Meals" && claim.amount > 1500) {
+    return {
+      severity: claim.amount > 3000 ? "high" : "medium",
+      policyName: "Policy: Meals & Per Diem 3.1",
+      reason: `Meal claim of ₹${claim.amount.toLocaleString("en-IN")} exceeds daily per-diem ceiling of ₹1,500.`,
+    };
+  }
+
+  // 5. Domestic travel ceiling (₹9,000)
+  if (claim.category === "Travel" && claim.amount > 9000) {
+    return {
+      severity: "high",
+      policyName: "Policy: Air Travel & Conveyance 4.1",
+      reason: `Travel expenditure of ₹${claim.amount.toLocaleString("en-IN")} exceeds pre-approved domestic travel threshold of ₹9,000.`,
+    };
+  }
+
+  // 6. Unverified receipt for any non-zero claim
+  if (!claim.receiptVerified && claim.amount > 0) {
+    return {
+      severity: "low",
+      policyName: "Policy: Receipt Verification 1.2",
+      reason: `Receipt attachment is pending verification for claim of ₹${claim.amount.toLocaleString("en-IN")}.`,
+    };
+  }
+
+  return null;
+}
+
 const INITIAL_CLAIMS: ManagerClaim[] = [];
 const DEPARTMENT_BUDGETS: DepartmentBudget[] = [];
 
@@ -108,23 +189,25 @@ function ManagerDashboardInner() {
   const [searchQuery, setSearchQuery] = useState("");
   const [inspectClaim, setInspectClaim] = useState<ManagerClaim | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
+  const [exceptionSeverityFilter, setExceptionSeverityFilter] = useState<"All" | "high" | "medium" | "low" | "pending">("All");
+  const [exceptionSearch, setExceptionSearch] = useState("");
 
   const refreshData = async () => {
     try {
       setIsRefreshing(true);
-      const [fetchedClaims, fetchedBudgets, fetchedCards] = await Promise.all([
+      const [claimsResult, budgetsResult, cardsResult] = await Promise.allSettled([
         fetchManagerClaims(),
         fetchManagerBudgets(),
         fetchCardRequests(),
       ]);
-      if (fetchedClaims) {
-        setClaims(fetchedClaims);
+      if (claimsResult.status === "fulfilled" && claimsResult.value) {
+        setClaims(claimsResult.value);
       }
-      if (fetchedBudgets) {
-        setBudgets(fetchedBudgets);
+      if (budgetsResult.status === "fulfilled" && budgetsResult.value) {
+        setBudgets(budgetsResult.value);
       }
-      if (fetchedCards) {
-        setCardRequests(fetchedCards);
+      if (cardsResult.status === "fulfilled" && cardsResult.value) {
+        setCardRequests(cardsResult.value);
       }
     } catch (e) {
       console.warn("Backend sync notice:", e);
@@ -240,7 +323,44 @@ function ManagerDashboardInner() {
   const totalSpent = claims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
   const pendingAmount = pendingClaims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
   const approvedAmount = approvedClaims.reduce((acc, c) => acc + (Number(c.amount) || 0), 0);
-  const exceptionsCount = claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified).length;
+  const allExceptions = useMemo(() => {
+    return claims
+      .map((c) => {
+        const v = getClaimPolicyViolation(c);
+        return v ? { claim: c, ...v } : null;
+      })
+      .filter(Boolean) as {
+        claim: ManagerClaim;
+        severity: "high" | "medium" | "low";
+        policyName: string;
+        reason: string;
+      }[];
+  }, [claims]);
+
+  const exceptionsCount = allExceptions.length;
+
+  const complianceRate = claims.length > 0
+    ? Math.max(0, Math.round(((claims.length - allExceptions.length) / claims.length) * 1000) / 10)
+    : 100;
+
+  const filteredExceptions = useMemo(() => {
+    return allExceptions.filter((item) => {
+      const matchSeverity =
+        exceptionSeverityFilter === "All" ||
+        (exceptionSeverityFilter === "pending"
+          ? item.claim.status === "Pending"
+          : item.severity === exceptionSeverityFilter);
+      const q = exceptionSearch.toLowerCase().trim();
+      const matchSearch =
+        !q ||
+        item.claim.id.toLowerCase().includes(q) ||
+        item.claim.employeeName.toLowerCase().includes(q) ||
+        item.claim.department.toLowerCase().includes(q) ||
+        item.policyName.toLowerCase().includes(q) ||
+        item.reason.toLowerCase().includes(q);
+      return matchSeverity && matchSearch;
+    });
+  }, [allExceptions, exceptionSeverityFilter, exceptionSearch]);
 
   const filteredClaims = claims.filter((c) => {
     const matchStatus = statusFilter === "All" || c.status === statusFilter;
@@ -922,103 +1042,264 @@ function ManagerDashboardInner() {
             </div>
           )}
 
-          {/* VIEW 4: Exceptions */}
+          {/* VIEW 4: Exceptions (100% Data-Driven from Real Claims) */}
           {activeView === "Exceptions" && (
             <div
               className={`rounded-xl overflow-hidden transition-colors border ${
                 isDark ? "bg-[#111113] border-white/[0.07]" : "bg-white border-zinc-200/80 shadow-xs"
               }`}
             >
+              {/* Exceptions Header */}
               <div
-                className={`p-5 flex items-center justify-between border-b ${
+                className={`p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b ${
                   isDark ? "border-white/[0.06]" : "border-zinc-200/60"
                 }`}
               >
                 <div>
-                  <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-                    Policy Violation Exceptions Requiring Review
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+                      Policy Violation Exceptions Requiring Review
+                    </h3>
+                    <span
+                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                        allExceptions.length > 0
+                          ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                          : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                      }`}
+                    >
+                      {allExceptions.length} Flagged
+                    </span>
+                  </div>
                   <p className="text-xs text-zinc-500 mt-0.5">
-                    Flagged by Payout automated compliance heuristics.
+                    Flagged by automated compliance heuristics and policy thresholds across {claims.length} total team claims.
                   </p>
                 </div>
-                <span
-                  className={`text-xs font-medium tabular-nums px-2 py-0.5 rounded-md border ${
-                    isDark ? "bg-[#18181D] text-zinc-300 border-white/[0.08]" : "bg-zinc-100 text-zinc-700 border-zinc-200"
-                  }`}
-                >
-                  Compliance: 98.6%
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs font-semibold tabular-nums px-2.5 py-1 rounded-md border flex items-center gap-1.5 ${
+                      complianceRate >= 90
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                        : complianceRate >= 70
+                        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                        : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                    }`}
+                  >
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    <span>Compliance: {complianceRate}%</span>
+                  </span>
+                </div>
               </div>
 
-              <div className="divide-y text-[13px] dark:divide-white/[0.04] divide-zinc-200/60">
-                <div className={`p-4 flex items-start justify-between gap-4 transition-colors ${
-                  isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
-                }`}>
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px]">
-                        CLM-8827 &bull; Rohan Kapoor
-                      </div>
-                      <div className="text-xs text-zinc-500 mt-0.5">
-                        Claimed ₹7,200 for weekend private car upgrade without manager pre-authorization.
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <PriorityBadge level="high">High Severity</PriorityBadge>
-                        <span className="text-[11px] text-zinc-400">Policy: Local Conveyance 4.2</span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const c = claims.find((i) => i.id === "CLM-8827");
-                      if (c) setInspectClaim(c);
-                    }}
-                    className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer ${
-                      isDark
-                        ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
-                        : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
-                    }`}
-                  >
-                    Inspect Flag
-                  </button>
+              {/* Filter Tabs and Search Bar */}
+              <div
+                className={`px-5 py-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 border-b ${
+                  isDark ? "border-white/[0.04] bg-[#141418]" : "border-zinc-100 bg-zinc-50/70"
+                }`}
+              >
+                {/* Severity Segmented Buttons */}
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0">
+                  {(
+                    [
+                      { key: "All", label: "All", count: allExceptions.length },
+                      {
+                        key: "high",
+                        label: "High Severity",
+                        count: allExceptions.filter((e) => e.severity === "high").length,
+                      },
+                      {
+                        key: "medium",
+                        label: "Medium",
+                        count: allExceptions.filter((e) => e.severity === "medium").length,
+                      },
+                      {
+                        key: "pending",
+                        label: "Pending Action",
+                        count: allExceptions.filter((e) => e.claim.status === "Pending").length,
+                      },
+                    ] as const
+                  ).map((tab) => {
+                    const isSelected = exceptionSeverityFilter === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setExceptionSeverityFilter(tab.key)}
+                        className={`text-xs font-medium px-3 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                          isSelected
+                            ? isDark
+                              ? "bg-white text-zinc-900 shadow-xs"
+                              : "bg-zinc-900 text-white shadow-xs"
+                            : isDark
+                            ? "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
+                            : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200/60"
+                        }`}
+                      >
+                        <span>{tab.label}</span>
+                        <span
+                          className={`text-[10px] px-1.5 py-0.2 rounded-md ${
+                            isSelected
+                              ? isDark
+                                ? "bg-zinc-200 text-zinc-900"
+                                : "bg-zinc-800 text-zinc-100"
+                              : isDark
+                              ? "bg-white/[0.08] text-zinc-400"
+                              : "bg-zinc-200 text-zinc-600"
+                          }`}
+                        >
+                          {tab.count}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className={`p-4 flex items-start justify-between gap-4 transition-colors ${
-                  isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
-                }`}>
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px]">
-                        CLM-8823 &bull; Arjun Reddy
+                {/* Search in Exceptions */}
+                <div className="relative min-w-[220px]">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Search exceptions..."
+                    value={exceptionSearch}
+                    onChange={(e) => setExceptionSearch(e.target.value)}
+                    className={`w-full text-xs pl-8 pr-3 py-1.5 rounded-lg border outline-none transition-colors ${
+                      isDark
+                        ? "bg-[#18181D] border-white/[0.08] text-zinc-200 placeholder-zinc-500 focus:border-zinc-400"
+                        : "bg-white border-zinc-200 text-zinc-900 placeholder-zinc-400 focus:border-zinc-400"
+                    }`}
+                  />
+                  {exceptionSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setExceptionSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-zinc-200"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Exceptions List */}
+              <div className="divide-y text-[13px] dark:divide-white/[0.04] divide-zinc-200/60">
+                {filteredExceptions.length === 0 ? (
+                  <div className="p-10 flex flex-col items-center justify-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-3">
+                      <ShieldCheck className="h-6 w-6" />
+                    </div>
+                    <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                      {allExceptions.length === 0
+                        ? "100% Policy Compliance"
+                        : "No Exceptions Match Your Filter"}
+                    </h4>
+                    <p className="text-xs text-zinc-500 max-w-sm mt-1">
+                      {allExceptions.length === 0
+                        ? "All team expense claims comply with active spending caps, receipt mandates, and corporate thresholds."
+                        : "Try adjusting your severity filter or search query to view other flagged claims."}
+                    </p>
+                  </div>
+                ) : (
+                  filteredExceptions.map(({ claim, severity, policyName, reason }) => (
+                    <div
+                      key={claim.id}
+                      className={`p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors ${
+                        isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        {severity === "high" ? (
+                          <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                        ) : severity === "medium" ? (
+                          <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                        ) : (
+                          <AlertCircle className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-zinc-900 dark:text-zinc-100 text-[13px]">
+                              {claim.id} &bull; {claim.employeeName}
+                            </span>
+                            <span className="text-xs text-zinc-500">({claim.department})</span>
+                            <StatusBadge
+                              tone={
+                                claim.status === "Approved"
+                                  ? "success"
+                                  : claim.status === "Pending"
+                                  ? "warning"
+                                  : "danger"
+                              }
+                            >
+                              {claim.status}
+                            </StatusBadge>
+                            <span className="font-semibold tabular-nums text-zinc-900 dark:text-zinc-100 text-xs sm:ml-auto">
+                              ₹{claim.amount.toLocaleString("en-IN")}
+                            </span>
+                          </div>
+
+                          <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 leading-relaxed">
+                            {reason}
+                          </div>
+
+                          {claim.description && claim.description !== claim.merchant && (
+                            <div className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                              Purpose: {claim.description} &bull; Category: {claim.category}
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-2.5 mt-2 flex-wrap">
+                            <PriorityBadge level={severity}>
+                              {severity.toUpperCase()} SEVERITY
+                            </PriorityBadge>
+                            <span className="text-[11px] text-zinc-400 font-mono">
+                              {policyName}
+                            </span>
+                            <span className="text-[11px] text-zinc-500">
+                              &bull; {claim.date}
+                            </span>
+                            {!claim.receiptVerified && (
+                              <span className="text-[10px] px-2 py-0.5 rounded font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                Missing Receipt
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-xs text-zinc-500 mt-0.5">
-                        Client dinner claim (₹6,800) is close to the per-event executive entertainment cap.
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <PriorityBadge level="medium">Medium Severity</PriorityBadge>
-                        <span className="text-[11px] text-zinc-400">Policy: Meals & Per Diem 3.1</span>
+
+                      <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-100 dark:border-white/[0.04]">
+                        {claim.status === "Pending" && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleApprove(claim)}
+                              className="text-xs px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 font-medium transition-colors border border-emerald-500/20 cursor-pointer"
+                              title="Approve with Policy Exception Waiver"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleReject(claim)}
+                              className="text-xs px-2.5 py-1.5 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 font-medium transition-colors border border-rose-500/20 cursor-pointer"
+                              title="Reject Due to Policy Violation"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setInspectClaim(claim)}
+                          className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer ${
+                            isDark
+                              ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
+                              : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
+                          }`}
+                        >
+                          Inspect Flag
+                        </button>
                       </div>
                     </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const c = claims.find((i) => i.id === "CLM-8823");
-                      if (c) setInspectClaim(c);
-                    }}
-                    className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer ${
-                      isDark
-                        ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
-                        : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
-                    }`}
-                  >
-                    Inspect Flag
-                  </button>
-                </div>
+                  ))
+                )}
               </div>
             </div>
           )}
