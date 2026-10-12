@@ -126,10 +126,13 @@ export function useExpenseForm() {
     update("receipt", next.name);
     if (inputRef.current) inputRef.current.value = "";
 
-    // Automatic Receipt OCR & Form Auto-fill (Runs 100% in browser, 0 API key required!)
-    if (next.type.startsWith("image/")) {
+    // Automatic Receipt OCR & Form Auto-fill (Supports both PDFs and Images!)
+    const isPdf = next.name.toLowerCase().endsWith(".pdf") || next.type === "application/pdf";
+    const isImage = next.type.startsWith("image/") || /\.(png|jpe?g|webp|heic)$/i.test(next.name);
+
+    if (isImage || isPdf) {
       setScanning(true);
-      setScanNotice("Scanning receipt text & extracting details...");
+      setScanNotice(isPdf ? "Reading PDF receipt & extracting details..." : "Scanning receipt text & extracting details...");
       scanReceiptFile(next)
         .then((extracted) => {
           setDraft((prev) => {

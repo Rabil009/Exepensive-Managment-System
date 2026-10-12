@@ -1,6 +1,7 @@
 /**
  * Intelligent Receipt Scanner & OCR Extractor
- * Uses Client-Side Tesseract.js (Zero API key required!)
+ * Supports PDF receipts & Image receipts (PNG, JPG, HEIC, WEBP)
+ * Uses FastAPI backend + Client-Side Tesseract.js (Zero API key required!)
  * Optionally upgrades to Gemini Vision AI if NEXT_PUBLIC_GEMINI_API_KEY is provided.
  */
 
@@ -70,19 +71,13 @@ function getLines(text: string): string[] {
  * Extract date in ISO format YYYY-MM-DD
  */
 function extractDate(text: string): string | undefined {
-  // 1. ISO format: 2026-10-12 or 2026/10/12 or 2026.10.12
+  // 1. ISO format: 2026-10-12
   const isoMatch = text.match(/\b(20\d{2})[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])\b/);
   if (isoMatch) {
     return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
   }
 
-  // 2. Day-Month-Year: 12-10-2026 or 12/10/2026 or 12.10.2026
-  const dmyMatch = text.match(/\b(0[1-9]|[12]\d|3[01])[-/.](0[1-9]|1[0-2])[-/.](20\d{2})\b/);
-  if (dmyMatch) {
-    return `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
-  }
-
-  // 3. Textual Month: 24 Jul 2004 or 12 October 2026 or Oct 12, 2026
+  // 2. Textual Month: 12-Oct-2026 or 12 October 2026
   const months: Record<string, string> = {
     jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
     jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
@@ -98,6 +93,12 @@ function extractDate(text: string): string | undefined {
     return `${year}-${month}-${day}`;
   }
 
+  // 3. Day-Month-Year: 12-10-2026 or 12/10/2026
+  const dmyMatch = text.match(/\b(0[1-9]|[12]\d|3[01])[-/.](0[1-9]|1[0-2])[-/.](20\d{2})\b/);
+  if (dmyMatch) {
+    return `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
+  }
+
   return undefined;
 }
 
@@ -105,51 +106,32 @@ function extractDate(text: string): string | undefined {
  * Extract total charge amount
  */
 function extractAmount(text: string): string | undefined {
-  const lines = getLines(text);
-  const candidates: number[] = [];
+  const cleaned = text.replace(/[\u25a0\u20b9]/g, " ");
 
-  // Keywords that signal the grand total
-  const totalKeywords = [
-    "total charged",
-    "grand total",
-    "net total",
-    "net amount",
-    "total amount",
-    "balance due",
-    "final total",
-    "total",
-    "amount paid",
-    "amount",
-  ];
-
-  for (const line of lines) {
-    const lower = line.toLowerCase();
-    for (const kw of totalKeywords) {
-      if (lower.includes(kw)) {
-        // Extract numbers with optional decimals: ₹ 500.00 or Rs. 1,250.50 or 500
-        const matches = line.match(/(?:(?:rs\.?|inr|₹|\$)\s*)?([\d,]+\.?\d{0,2})/gi);
-        if (matches) {
-          for (const m of matches) {
-            const clean = m.replace(/[^0-9.]/g, "");
-            const val = parseFloat(clean);
-            // Plausible business expense range: ₹1 to ₹10,00,000 (exclude years like 2026, 2024)
-            if (val > 0 && val < 1000000 && val !== 2026 && val !== 2025 && val !== 2024) {
-              candidates.push(val);
-            }
-          }
-        }
-      }
+  // Priority 1: TOTAL CHARGED, GRAND TOTAL, NET TOTAL
+  const p1 = cleaned.match(
+    /(?:total\s*charged|grand\s*total|net\s*(?:total|amount|paid)|final\s*total)[\s:=-]*[\r\n\s]*(?:rs\.?|inr|₹|\$)?[\s]*([\d,]+(?:\.\d{1,2})?)/i
+  );
+  if (p1 && p1[1]) {
+    const val = parseFloat(p1[1].replace(/,/g, ""));
+    if (val > 0 && val < 1000000 && val !== 2026 && val !== 2025 && val !== 2024) {
+      return val.toFixed(2);
     }
   }
 
-  if (candidates.length > 0) {
-    // Return max candidate among total lines (totals are typically highest)
-    const best = Math.max(...candidates);
-    return best.toFixed(2);
+  // Priority 2: \bTOTAL\b (excluding subtotal)
+  const p2 = cleaned.match(
+    /(?<!sub)\btotal\b[\s:=-]*[\r\n\s]*(?:rs\.?|inr|₹|\$)?[\s]*([\d,]+(?:\.\d{1,2})?)/i
+  );
+  if (p2 && p2[1]) {
+    const val = parseFloat(p2[1].replace(/,/g, ""));
+    if (val > 0 && val < 1000000 && val !== 2026 && val !== 2025 && val !== 2024) {
+      return val.toFixed(2);
+    }
   }
 
   // Fallback: search anywhere for currency symbols
-  const currencyMatch = text.match(/(?:rs\.?|inr|₹|\$)\s*([\d,]+\.?\d{0,2})/gi);
+  const currencyMatch = cleaned.match(/(?:rs\.?|inr|₹|\$)\s*([\d,]+\.?\d{0,2})/gi);
   if (currencyMatch) {
     const vals = currencyMatch
       .map((m) => parseFloat(m.replace(/[^0-9.]/g, "")))
@@ -178,7 +160,7 @@ function extractMerchant(text: string, filename?: string): { merchant: string; c
     }
   }
 
-  // 2. Check filename hint (e.g. "Starbucks_Receipt.jpg", "Uber_Invoice.png")
+  // 2. Check filename hint
   if (filename) {
     const fLower = filename.toLowerCase();
     for (const km of KNOWN_MERCHANTS) {
@@ -195,7 +177,6 @@ function extractMerchant(text: string, filename?: string): { merchant: string; c
   for (let i = 0; i < Math.min(4, lines.length); i++) {
     const line = lines[i];
     const cleaned = line.replace(/[^a-zA-Z0-9\s&'-]/g, "").trim();
-    // Exclude header boilerplate like "TAX INVOICE", "RECEIPT", "BILL", "CASH MEMO"
     if (
       cleaned.length >= 3 &&
       cleaned.length <= 40 &&
@@ -219,10 +200,10 @@ function extractCategory(text: string, merchantCat?: string): string {
   if (/(coffee|pastry|bakery|restaurant|food|dining|meal|lunch|dinner|breakfast|burger|pizza|swiggy|zomato|cafe|beverage|snack)/i.test(lower)) {
     return "MEALS";
   }
-  if (/(uber|ola|flight|airline|cab|taxi|fuel|petrol|diesel|toll|train|railway|airport|travel|trip)/i.test(lower)) {
+  if (/(uber|ola|flight|airline|airport|cab|taxi|fuel|petrol|diesel|toll|train|railway|travel|trip|delta|indigo)/i.test(lower)) {
     return "TRAVEL";
   }
-  if (/(hotel|room|stay|lodge|resort|suites|guest|inn|hospitality)/i.test(lower)) {
+  if (/(hotel|room|stay|lodge|resort|suites|guest|inn|hospitality|marriott|hyatt|taj)/i.test(lower)) {
     return "HOTEL";
   }
   if (/(software|cloud|aws|saas|subscription|license|github|domain|zoom|slack)/i.test(lower)) {
@@ -251,10 +232,46 @@ function extractPaymentMethod(text: string): string {
 
 /**
  * Main OCR & Scanning function
- * Runs directly in browser via Tesseract.js (NO API KEY REQUIRED)
+ * 1. Checks FastAPI /api/employee/scan-receipt (PDFs & images)
+ * 2. Runs Client-Side Tesseract OCR in browser
+ * 3. Optional Gemini AI Vision
  */
 export async function scanReceiptFile(file: File): Promise<ExtractedReceiptData> {
-  // Check if Gemini API Key is available for optional AI Vision enhancement
+  // 1. Try FastAPI backend scan endpoint (Ultra-fast for PDFs and images!)
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const formData = new FormData();
+    formData.set("file", file);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    const res = await fetch(`${apiUrl}/api/employee/scan-receipt`, {
+      method: "POST",
+      body: formData,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && (data.merchant || data.amount)) {
+        return {
+          merchant: data.merchant,
+          amount: data.amount ? String(data.amount) : undefined,
+          date: data.date,
+          category: data.category,
+          paymentMethod: data.paymentMethod,
+          purpose: data.purpose,
+          rawText: data.rawText,
+        };
+      }
+    }
+  } catch (backendErr) {
+    console.warn("Backend receipt scanner note, trying fallback:", backendErr);
+  }
+
+  // 2. Optional Gemini Vision AI
   const geminiApiKey =
     typeof process !== "undefined"
       ? process.env.NEXT_PUBLIC_GEMINI_API_KEY
@@ -267,46 +284,49 @@ export async function scanReceiptFile(file: File): Promise<ExtractedReceiptData>
         return aiResult;
       }
     } catch (e) {
-      console.warn("Gemini vision fallback to Tesseract.js:", e);
+      console.warn("Gemini vision fallback:", e);
     }
   }
 
-  // Default: Native Client-Side Tesseract OCR (Zero API Key!)
-  try {
-    const { createWorker } = await import("tesseract.js");
-    const worker = await createWorker("eng");
-    const ret = await worker.recognize(file);
-    await worker.terminate();
+  // 3. Client-Side Tesseract OCR (for image files)
+  if (file.type.startsWith("image/")) {
+    try {
+      const { createWorker } = await import("tesseract.js");
+      const worker = await createWorker("eng");
+      const ret = await worker.recognize(file);
+      await worker.terminate();
 
-    const rawText = ret.data.text || "";
-    const merchantInfo = extractMerchant(rawText, file.name);
-    const amount = extractAmount(rawText);
-    const date = extractDate(rawText);
-    const category = extractCategory(rawText, merchantInfo?.category);
-    const paymentMethod = extractPaymentMethod(rawText);
+      const rawText = ret.data.text || "";
+      const merchantInfo = extractMerchant(rawText, file.name);
+      const amount = extractAmount(rawText);
+      const date = extractDate(rawText);
+      const category = extractCategory(rawText, merchantInfo?.category);
+      const paymentMethod = extractPaymentMethod(rawText);
 
-    const merchant = merchantInfo?.merchant || file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+      const merchant = merchantInfo?.merchant || file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
 
-    return {
-      merchant,
-      amount,
-      date,
-      category,
-      paymentMethod,
-      purpose: merchant ? `Business expense at ${merchant}` : "Business Expense",
-      confidence: ret.data.confidence,
-      rawText,
-    };
-  } catch (err) {
-    console.error("Tesseract.js OCR scan error:", err);
-    // Graceful fallback from filename
-    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
-    return {
-      merchant: nameWithoutExt,
-      category: "OTHER",
-      purpose: `Expense receipt: ${file.name}`,
-    };
+      return {
+        merchant,
+        amount,
+        date,
+        category,
+        paymentMethod,
+        purpose: merchant ? `Business expense at ${merchant}` : "Business Expense",
+        confidence: ret.data.confidence,
+        rawText,
+      };
+    } catch (err) {
+      console.error("Tesseract.js OCR scan error:", err);
+    }
   }
+
+  // 4. Default fallback from filename
+  const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+  return {
+    merchant: nameWithoutExt,
+    category: "OTHER",
+    purpose: `Expense receipt: ${file.name}`,
+  };
 }
 
 /**
@@ -371,4 +391,3 @@ Return only valid JSON.`;
     purpose: parsed.purpose,
   };
 }
-

@@ -99,7 +99,9 @@ export function ReceiptCapture({ model }: Props) {
           </div>
         ) : (
           <div className="w-10 h-10 rounded-xl bg-zinc-200/70 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-2 shadow-2xs">
-            {hasReceipt ? (
+            {scanning ? (
+              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+            ) : hasReceipt ? (
               <FileCheck className="h-5 w-5 text-emerald-600" />
             ) : (
               <UploadCloud className="h-5 w-5" />
@@ -112,9 +114,11 @@ export function ReceiptCapture({ model }: Props) {
             {draft.receipt || "Drag and drop your receipt"}
           </h3>
           <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-            {hasReceipt
+            {scanning
+              ? "Scanning document & auto-filling form..."
+              : hasReceipt
               ? "Click to change or replace file"
-              : "Drop receipt to auto-fill Merchant, Amount, Date & Category"}
+              : "Drop receipt (PDF, PNG, JPG) to auto-fill details"}
           </p>
         </div>
 
