@@ -1116,39 +1116,40 @@ export async function employeeRequest(
               "b8ce7a2d-e91a-47f4-92ba-adb7d0bf5c4d";
           }
 
+          const action = init.body.get("action");
+          const effectiveEmpId =
+            submitEmployeeId ||
+            authUser?.id ||
+            "7881beaf-b8ab-4600-afd8-4543deb2a24b";
+
           let receiptUrl: string | null = null;
           let receiptName: string | null = null;
 
           if (file && file.size > 0) {
             receiptName = file.name;
             try {
+              // Guaranteed data URL fallback
+              const dataUrl = await fileToDataUrl(file);
+              receiptUrl = dataUrl;
+
+              // Upload to storage bucket under employee folder to satisfy RLS
               const fileExt = file.name.split('.').pop() || 'png';
-              const filePath = `receipt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+              const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+              const filePath = `${effectiveEmpId}/${Date.now()}_${cleanName}`;
               const { error: uploadError } = await supabase.storage
                 .from("receipts")
                 .upload(filePath, file, { contentType: file.type || "image/png", upsert: true });
+
               if (!uploadError) {
                 const { data: publicData } = supabase.storage.from("receipts").getPublicUrl(filePath);
                 if (publicData?.publicUrl) {
                   receiptUrl = publicData.publicUrl;
                 }
               }
-              if (!receiptUrl && file.size < 200 * 1024) {
-                receiptUrl = await fileToDataUrl(file);
-              }
             } catch (convErr) {
               console.warn("Receipt upload notice:", convErr);
-              if (file.size < 200 * 1024) {
-                try { receiptUrl = await fileToDataUrl(file); } catch {}
-              }
             }
           }
-
-          const action = init.body.get("action");
-          const effectiveEmpId =
-            submitEmployeeId ||
-            authUser?.id ||
-            "7881beaf-b8ab-4600-afd8-4543deb2a24b";
 
           if (action === "Draft") {
             const { data: existingDraft } = await supabase
