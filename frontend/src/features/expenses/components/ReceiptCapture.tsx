@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { UploadCloud, FileCheck, FileText, Loader2, Sparkles } from "lucide-react";
+import { UploadCloud, FileCheck, FileText, Sparkles } from "lucide-react";
+import { Spiral } from "@/components/ui/spiral";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
 
 type Props = {
@@ -43,8 +44,8 @@ export function ReceiptCapture({ model }: Props) {
           </h2>
         </div>
         {scanning ? (
-          <span className="text-[11px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-md border bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 flex items-center gap-1.5 animate-pulse">
-            <Loader2 className="h-3 w-3 animate-spin" />
+          <span className="text-[11px] font-medium tracking-wider uppercase px-2.5 py-0.5 rounded-md border bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 flex items-center gap-1.5">
+            <Spiral className="size-3 text-blue-600 dark:text-blue-400" />
             <span>Scanning...</span>
           </span>
         ) : hasReceipt ? (
@@ -91,8 +92,8 @@ export function ReceiptCapture({ model }: Props) {
               alt="Receipt preview"
             />
             {scanning && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 rounded-lg backdrop-blur-2xs text-white">
-                <Loader2 className="h-6 w-6 animate-spin text-emerald-400" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 rounded-lg backdrop-blur-2xs text-white">
+                <Spiral className="size-6 text-emerald-400" />
                 <span className="text-xs font-semibold">Reading receipt...</span>
               </div>
             )}
@@ -100,7 +101,7 @@ export function ReceiptCapture({ model }: Props) {
         ) : (
           <div className="w-10 h-10 rounded-xl bg-zinc-200/70 dark:bg-white/[0.04] border border-zinc-200/80 dark:border-white/[0.08] flex items-center justify-center text-zinc-500 dark:text-zinc-400 mb-2 shadow-2xs">
             {scanning ? (
-              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+              <Spiral className="size-5 text-blue-500" />
             ) : hasReceipt ? (
               <FileCheck className="h-5 w-5 text-emerald-600" />
             ) : (
