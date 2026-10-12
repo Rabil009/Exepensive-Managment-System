@@ -185,40 +185,6 @@ export function Sidebar({
 
         {/* Primary Navigation List */}
         <nav className="space-y-1 w-full">
-          {/* Quick Create */}
-          {onQuickCreate && (
-            <button
-              type="button"
-              onClick={onQuickCreate}
-              title={isCollapsed ? "Quick Create" : undefined}
-              className="group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 text-zinc-900 hover:bg-black hover:text-white dark:text-zinc-200 dark:hover:bg-white dark:hover:text-black"
-            >
-              <div className="h-7 w-7 shrink-0 flex items-center justify-center">
-                <PlusCircle className="h-4 w-4 stroke-[2] text-zinc-800 group-hover:text-white dark:text-zinc-300 dark:group-hover:text-black transition-colors" />
-              </div>
-
-              <div
-                className={`flex items-center justify-between whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
-                  isCollapsed
-                    ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                    : "w-[160px] opacity-100 translate-x-0 ml-2.5"
-                }`}
-              >
-                <span className="text-[13.5px] font-medium truncate">Quick Create</span>
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveView("Verification");
-                  }}
-                  title="Inbox / Pending"
-                  className="p-1 rounded hover:bg-zinc-200/80 text-zinc-500 group-hover:text-zinc-300 dark:text-zinc-400 dark:hover:bg-white/20 dark:group-hover:text-black transition-colors"
-                >
-                  <Mail className="h-3.5 w-3.5 stroke-[1.8]" />
-                </div>
-              </div>
-            </button>
-          )}
-
           {/* Main Nav Items */}
           {mainNav.map((item) => {
             const isActive = activeView === item.label;
@@ -536,23 +502,6 @@ export function Sidebar({
               </button>
             )}
           </div>
-
-          {/* Quick Create */}
-          {onQuickCreate && (
-            <button
-              type="button"
-              onClick={() => {
-                onQuickCreate();
-                onCloseMobile?.();
-              }}
-              className="group w-full flex items-center h-10 px-2 rounded-xl cursor-pointer transition-colors duration-150 text-zinc-900 hover:bg-black hover:text-white dark:text-zinc-200 dark:hover:bg-white dark:hover:text-black mb-1"
-            >
-              <div className="h-7 w-7 shrink-0 flex items-center justify-center">
-                <PlusCircle className="h-4 w-4 stroke-[2]" />
-              </div>
-              <span className="text-[13.5px] font-medium ml-2.5">Quick Create</span>
-            </button>
-          )}
 
           {/* Main Nav Items */}
           <nav className="space-y-1 w-full">
