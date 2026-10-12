@@ -70,36 +70,68 @@ function getLines(text: string): string[] {
 /**
  * Extract date in ISO format YYYY-MM-DD
  */
-function extractDate(text: string): string | undefined {
-  // 1. ISO format: 2026-10-12
-  const isoMatch = text.match(/\b(20\d{2})[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])\b/);
-  if (isoMatch) {
-    return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
-  }
-
-  // 2. Textual Month: 12-Oct-2026 or 12 October 2026
+function extractDate(text: string, filename?: string): string {
   const months: Record<string, string> = {
     jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
     jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
   };
 
-  const textMonthRegex = /\b(0?[1-9]|[12]\d|3[01])[\s-](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,-]+(20\d{2}|19\d{2})\b/i;
+  const normYear = (y: string) => (y.length === 2 ? `20${y}` : y);
+
+  // 1. Textual Month First: "October 11, 2026", "Oct 11 2026", "Oct 11, 26"
+  const monthFirstRegex = /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,-]+(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?[\s,-]+(20\d{2}|19\d{2}|\d{2})\b/i;
+  const mfMatch = text.match(monthFirstRegex);
+  if (mfMatch) {
+    const mKey = mfMatch[1].slice(0, 3).toLowerCase();
+    const month = months[mKey] || "01";
+    const day = mfMatch[2].padStart(2, "0");
+    const year = normYear(mfMatch[3]);
+    return `${year}-${month}-${day}`;
+  }
+
+  // 2. Textual Month Second: "11-Oct-2026", "11th October 2026", "11 Oct 26"
+  const textMonthRegex = /\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?[\s,-]+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,-]+(20\d{2}|19\d{2}|\d{2})\b/i;
   const tmMatch = text.match(textMonthRegex);
   if (tmMatch) {
     const day = tmMatch[1].padStart(2, "0");
     const mKey = tmMatch[2].slice(0, 3).toLowerCase();
     const month = months[mKey] || "01";
-    const year = tmMatch[3];
+    const year = normYear(tmMatch[3]);
     return `${year}-${month}-${day}`;
   }
 
-  // 3. Day-Month-Year: 12-10-2026 or 12/10/2026
-  const dmyMatch = text.match(/\b(0[1-9]|[12]\d|3[01])[-/.](0[1-9]|1[0-2])[-/.](20\d{2})\b/);
-  if (dmyMatch) {
-    return `${dmyMatch[3]}-${dmyMatch[2]}-${dmyMatch[1]}`;
+  // 3. Label-based search: "Date: 11/10/2026" or "Invoice Date: 2026-10-11"
+  const labelMatch = text.match(/(?:date|dated|dt)[\s:.-]*([0-9]{1,4}[\s/.-][0-9]{1,2}[\s/.-][0-9]{2,4})/i);
+  if (labelMatch) {
+    const candidate = labelMatch[1].replace(/\s+/g, "");
+    const iso = candidate.match(/^(20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])$/);
+    if (iso) return `${iso[1]}-${iso[2].padStart(2, "0")}-${iso[3].padStart(2, "0")}`;
+    const dmy = candidate.match(/^(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](20\d{2}|\d{2})$/);
+    if (dmy) return `${normYear(dmy[3])}-${dmy[2].padStart(2, "0")}-${dmy[1].padStart(2, "0")}`;
   }
 
-  return undefined;
+  // 4. ISO format anywhere: 2026-10-12 or 2026/10/7
+  const isoMatch = text.match(/\b(20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/);
+  if (isoMatch) {
+    return `${isoMatch[1]}-${isoMatch[2].padStart(2, "0")}-${isoMatch[3].padStart(2, "0")}`;
+  }
+
+  // 5. Day-Month-Year anywhere: 12-10-2026 or 7/10/2026 or 12/10/26
+  const dmyMatch = text.match(/\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](20\d{2}|\d{2})\b/);
+  if (dmyMatch) {
+    return `${normYear(dmyMatch[3])}-${dmyMatch[2].padStart(2, "0")}-${dmyMatch[1].padStart(2, "0")}`;
+  }
+
+  // 6. Check filename for date if present
+  if (filename) {
+    const fIso = filename.match(/\b(20\d{2})[-_.](0?[1-9]|1[0-2])[-_.](0?[1-9]|[12]\d|3[01])\b/);
+    if (fIso) return `${fIso[1]}-${fIso[2].padStart(2, "0")}-${fIso[3].padStart(2, "0")}`;
+    const fDmy = filename.match(/\b(0?[1-9]|[12]\d|3[01])[-_.](0?[1-9]|1[0-2])[-_.](20\d{2})\b/);
+    if (fDmy) return `${fDmy[3]}-${fDmy[2].padStart(2, "0")}-${fDmy[1].padStart(2, "0")}`;
+  }
+
+  // Fallback to today's date so date is always extracted and filled
+  return new Date().toISOString().slice(0, 10);
 }
 
 /**
@@ -299,7 +331,7 @@ export async function scanReceiptFile(file: File): Promise<ExtractedReceiptData>
       const rawText = ret.data.text || "";
       const merchantInfo = extractMerchant(rawText, file.name);
       const amount = extractAmount(rawText);
-      const date = extractDate(rawText);
+      const date = extractDate(rawText, file.name);
       const category = extractCategory(rawText, merchantInfo?.category);
       const paymentMethod = extractPaymentMethod(rawText);
 
@@ -324,6 +356,7 @@ export async function scanReceiptFile(file: File): Promise<ExtractedReceiptData>
   const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
   return {
     merchant: nameWithoutExt,
+    date: extractDate(file.name, file.name),
     category: "OTHER",
     purpose: `Expense receipt: ${file.name}`,
   };

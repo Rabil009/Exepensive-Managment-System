@@ -141,6 +141,7 @@ export function useExpenseForm() {
             if (extracted.merchant) updated.merchant = extracted.merchant;
             if (extracted.amount) updated.amount = extracted.amount;
             if (extracted.date) updated.date = extracted.date;
+            else if (!updated.date) updated.date = new Date().toISOString().slice(0, 10);
             if (extracted.category) {
               const upper = extracted.category.toUpperCase();
               const matched = options.categories.find(

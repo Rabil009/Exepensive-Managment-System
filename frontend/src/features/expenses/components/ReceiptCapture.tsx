@@ -149,19 +149,6 @@ export function ReceiptCapture({ model }: Props) {
           }}
         />
       </div>
-
-      {/* OCR Auto-fill Notification Badge */}
-      {scanNotice && (
-        <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-300 flex items-start gap-2 animate-in fade-in duration-200">
-          <Sparkles className="h-4 w-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
-          <div className="flex-1">
-            <span className="font-semibold block">OCR Auto-Fill Complete</span>
-            <span className="text-[11px] leading-relaxed opacity-90 block mt-0.5">
-              {scanNotice}
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

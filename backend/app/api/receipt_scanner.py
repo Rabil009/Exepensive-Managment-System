@@ -59,26 +59,61 @@ MONTHS = {
     "jul": "07", "aug": "08", "sep": "09", "oct": "10", "nov": "11", "dec": "12",
 }
 
-def extract_date(text: str) -> str | None:
-    # 1. ISO format: 2026-10-12
-    iso_match = re.search(r"\b(20\d{2})[-/.](0[1-9]|1[0-2])[-/.](0[1-9]|[12]\d|3[01])\b", text)
-    if iso_match:
-        return f"{iso_match.group(1)}-{iso_match.group(2)}-{iso_match.group(3)}"
+def extract_date(text: str, filename: str | None = None) -> str:
+    from datetime import date as d_cls
+    # 1. Textual month first: October 11, 2026 or Oct 11 2026 or Oct 11 26
+    mf_match = re.search(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,-]+(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?[\s,-]+(20\d{2}|19\d{2}|\d{2})\b", text, re.I)
+    if mf_match:
+        m = MONTHS.get(mf_match.group(1).lower()[:3], "01")
+        d = mf_match.group(2).zfill(2)
+        y = mf_match.group(3)
+        if len(y) == 2:
+            y = f"20{y}"
+        return f"{y}-{m}-{d}"
 
-    # 2. Textual month: 12-Oct-2026 or 12 October 2026
-    tm_match = re.search(r"\b(0?[1-9]|[12]\d|3[01])[\s-](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,-]+(20\d{2}|19\d{2})\b", text, re.I)
+    # 2. Textual month second: 12-Oct-2026 or 12 October 2026 or 12-Oct-26
+    tm_match = re.search(r"\b(0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?[\s,-]+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\s,-]+(20\d{2}|19\d{2}|\d{2})\b", text, re.I)
     if tm_match:
         d = tm_match.group(1).zfill(2)
         m = MONTHS.get(tm_match.group(2).lower()[:3], "01")
         y = tm_match.group(3)
+        if len(y) == 2:
+            y = f"20{y}"
         return f"{y}-{m}-{d}"
 
-    # 3. Day-Month-Year: 12-10-2026
-    dmy_match = re.search(r"\b(0[1-9]|[12]\d|3[01])[-/.](0[1-9]|1[0-2])[-/.](20\d{2})\b", text)
-    if dmy_match:
-        return f"{dmy_match.group(3)}-{dmy_match.group(2)}-{dmy_match.group(1)}"
+    # 3. Label-based search: Date: 11/10/2026 or Invoice Date: 2026-10-11
+    label_match = re.search(r"(?:date|dated|dt)[\s:.-]*([0-9]{1,4}[\s/.-][0-9]{1,2}[\s/.-][0-9]{2,4})", text, re.I)
+    if label_match:
+        cand = re.sub(r"\s+", "", label_match.group(1))
+        iso_m = re.match(r"^(20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])$", cand)
+        if iso_m:
+            return f"{iso_m.group(1)}-{iso_m.group(2).zfill(2)}-{iso_m.group(3).zfill(2)}"
+        dmy_m = re.match(r"^(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](20\d{2}|\d{2})$", cand)
+        if dmy_m:
+            y = dmy_m.group(3)
+            if len(y) == 2:
+                y = f"20{y}"
+            return f"{y}-{dmy_m.group(2).zfill(2)}-{dmy_m.group(1).zfill(2)}"
 
-    return None
+    # 4. ISO format: 2026-10-12
+    iso_match = re.search(r"\b(20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b", text)
+    if iso_match:
+        return f"{iso_match.group(1)}-{iso_match.group(2).zfill(2)}-{iso_match.group(3).zfill(2)}"
+
+    # 5. Day-Month-Year: 12-10-2026 or 7/10/2026 or 12/10/26
+    dmy_match = re.search(r"\b(0?[1-9]|[12]\d|3[01])[-/.](0?[1-9]|1[0-2])[-/.](20\d{2}|\d{2})\b", text)
+    if dmy_match:
+        y = dmy_match.group(3)
+        if len(y) == 2:
+            y = f"20{y}"
+        return f"{y}-{dmy_match.group(2).zfill(2)}-{dmy_match.group(1).zfill(2)}"
+
+    if filename:
+        fn_iso = re.search(r"\b(20\d{2})[-_.](0?[1-9]|1[0-2])[-_.](0?[1-9]|[12]\d|3[01])\b", filename)
+        if fn_iso:
+            return f"{fn_iso.group(1)}-{fn_iso.group(2).zfill(2)}-{fn_iso.group(3).zfill(2)}"
+
+    return d_cls.today().isoformat()
 
 def extract_amount(text: str) -> str | None:
     cleaned = re.sub(r"[\u25a0\u20b9]", " ", text)
