@@ -67,6 +67,20 @@ export function ManagerSidebar({
     });
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isMobileOpen) {
+      const originalOverflow = document.body.style.overflow;
+      const originalTouchAction = document.body.style.touchAction;
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.touchAction = originalTouchAction;
+      };
+    }
+  }, [isMobileOpen]);
+
   const initials = managerName.slice(0, 2).toUpperCase();
 
   useEffect(() => {
@@ -403,8 +417,9 @@ export function ManagerSidebar({
       {isMobileOpen && (
         <div
           onClick={onCloseMobile}
+          onTouchMove={(e) => e.preventDefault()}
           aria-hidden="true"
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden animate-in fade-in duration-200"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden animate-in fade-in duration-200 touch-none"
         />
       )}
 
@@ -413,7 +428,8 @@ export function ManagerSidebar({
         role="dialog"
         aria-modal="true"
         aria-label="Mobile Manager Navigation"
-        className={`fixed inset-y-0 left-0 z-50 w-[270px] max-w-[85vw] flex flex-col justify-between overflow-y-auto select-none font-sans px-3 py-3.5 bg-[#F7F7F8] dark:bg-[#131316] border-r border-zinc-200/90 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5] shadow-2xl md:hidden transition-transform duration-300 ease-in-out ${
+        onTouchMove={(e) => e.stopPropagation()}
+        className={`fixed inset-y-0 left-0 z-50 w-[270px] max-w-[85vw] flex flex-col justify-between overflow-y-auto overscroll-contain select-none font-sans px-3 py-3.5 bg-[#F7F7F8] dark:bg-[#131316] border-r border-zinc-200/90 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5] shadow-2xl md:hidden transition-transform duration-300 ease-in-out ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full pointer-events-none"
         }`}
       >

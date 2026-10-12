@@ -103,7 +103,7 @@ export function AppShell({
           rightContent={active === "New Expense" ? null : undefined}
         />
 
-        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+        <main className="flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 w-full min-w-0 max-w-full overflow-x-hidden">
           {children}
         </main>
 

@@ -122,8 +122,8 @@ function DashboardContent() {
         <main
           className={
             isLoading
-              ? "flex-1 overflow-y-auto overscroll-contain flex items-center justify-center h-full"
-              : "flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6"
+              ? "flex-1 overflow-y-auto overscroll-contain flex items-center justify-center h-full w-full min-w-0 max-w-full overflow-x-hidden"
+              : "flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 w-full min-w-0 max-w-full overflow-x-hidden"
           }
         >
           {isLoading ? (
@@ -163,21 +163,21 @@ function DashboardContent() {
                   <ChartAreaInteractive />
 
                   {/* 3. Visual Bento Grid: Budget vs Actual Bar Chart (7 cols) + Category Donut Chart (5 cols) */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-7">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
+                    <div className="lg:col-span-7 min-w-0">
                       <BudgetVsActualChart />
                     </div>
-                    <div className="lg:col-span-5">
+                    <div className="lg:col-span-5 min-w-0">
                       <CategoryDonutChart />
                     </div>
                   </div>
 
                   {/* 4. Secondary Visual Grid: Department Utilization (6 cols) + Exceptions Queue (6 cols) */}
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
+                    <div className="lg:col-span-6 min-w-0">
                       <DepartmentSpendChart />
                     </div>
-                    <div className="lg:col-span-6">
+                    <div className="lg:col-span-6 min-w-0">
                       <ExceptionsQueue
                         onViewAll={() => setActiveView("Exceptions")}
                         onReviewException={() => setActiveView("Exceptions")}

@@ -328,7 +328,7 @@ function ManagerDashboardInner() {
 
         {/* Scrollable Main Application Space */}
         <main
-          className={`flex-1 overflow-y-auto overscroll-contain ${
+          className={`flex-1 overflow-y-auto overscroll-contain w-full min-w-0 max-w-full overflow-x-hidden ${
             isInitialLoading
               ? "flex items-center justify-center h-full"
               : "p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6"

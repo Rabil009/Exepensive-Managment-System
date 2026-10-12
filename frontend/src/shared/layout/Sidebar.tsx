@@ -76,6 +76,20 @@ export function Sidebar({
     };
   }, [isProfileOpen]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isMobileOpen) {
+      const originalOverflow = document.body.style.overflow;
+      const originalTouchAction = document.body.style.touchAction;
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        document.body.style.touchAction = originalTouchAction;
+      };
+    }
+  }, [isMobileOpen]);
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -489,12 +503,14 @@ export function Sidebar({
         <div className="fixed inset-0 z-50 md:hidden flex animate-in fade-in duration-200">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs touch-none"
             onClick={onCloseMobile}
+            onTouchMove={(e) => e.preventDefault()}
           />
           {/* Drawer Panel */}
           <div
-            className={`relative w-[280px] max-w-[85vw] h-full flex flex-col justify-between p-3.5 shadow-2xl z-10 animate-in slide-in-from-left duration-200 ${
+            onTouchMove={(e) => e.stopPropagation()}
+            className={`relative w-[280px] max-w-[85vw] h-full flex flex-col justify-between p-3.5 shadow-2xl z-10 overflow-y-auto overscroll-contain animate-in slide-in-from-left duration-200 ${
               isDark
                 ? "bg-[#131316] text-[#F4F4F5] border-r border-white/[0.08]"
                 : "bg-[#F7F7F8] text-zinc-900 border-r border-zinc-200"

@@ -144,7 +144,7 @@ export function ReimbursementsView() {
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[620px] text-left border-collapse">
             <thead>
               <tr
                 className={`text-xs font-medium border-b ${
@@ -343,7 +343,7 @@ export function ReimbursementsView() {
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[700px] text-left border-collapse">
             <thead>
               <tr
                 className={`text-xs font-medium border-b ${
