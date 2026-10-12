@@ -11,13 +11,24 @@ export function ExceptionsView() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const flaggedClaims = claims.filter(
-    (c) =>
+  const flaggedClaims = claims.filter((c) => {
+    const isResolved =
+      c.status === "PAID" ||
+      c.status === "CLOSED" ||
+      c.status === "PAYMENT_PENDING" ||
+      c.status === "DISBURSED" ||
+      c.status === "FINANCE_APPROVED" ||
+      c.status === "FINANCE_REJECTED" ||
+      c.status === "MANAGER_REJECTED";
+    if (isResolved) return false;
+
+    return (
       Boolean(c.policyViolation) ||
       Boolean(c.isDuplicateWarning) ||
       Boolean(c.isHold) ||
       (!c.receiptUrl && !c.receiptName)
-  );
+    );
+  });
 
   return (
     <div className="space-y-4">

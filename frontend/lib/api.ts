@@ -80,6 +80,7 @@ export async function updateClaimInDb(
     if (updates.paymentReference !== undefined) dbUpdates.payment_reference = updates.paymentReference;
     if (updates.paymentChannel !== undefined) dbUpdates.payment_channel = updates.paymentChannel;
     if (updates.disbursedAt !== undefined) dbUpdates.disbursed_at = updates.disbursedAt;
+    if (updates.policyViolation !== undefined) dbUpdates.policy_violation = updates.policyViolation;
 
     const { error } = await supabase
       .from("expense_claims")

@@ -18,6 +18,7 @@ import {
   Building2,
   Download,
   RefreshCw,
+  CreditCard,
 } from "lucide-react";
 import { ManagerSidebar } from "@/components/manager/ManagerSidebar";
 import { ManagerHeader } from "@/components/manager/ManagerHeader";
@@ -32,6 +33,10 @@ import {
   fetchManagerClaims,
   approveManagerClaim,
   rejectManagerClaim,
+  fetchCardRequests,
+  approveCardRequest,
+  rejectCardRequest,
+  type CardApprovalRequest,
 } from "@/lib/manager-api";
 
 interface ApprovalClaim {
@@ -69,7 +74,9 @@ function ApprovalsPageInner() {
   const [showHelp, setShowHelp] = useState(false);
 
   // Claims & Inspection
+  const [activeTab, setActiveTab] = useState<"CLAIMS" | "CARDS">("CLAIMS");
   const [claims, setClaims] = useState<ApprovalClaim[]>([]);
+  const [cardRequests, setCardRequests] = useState<CardApprovalRequest[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("Pending");
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,15 +86,39 @@ function ApprovalsPageInner() {
   const refreshData = async () => {
     try {
       setIsRefreshing(true);
-      const fetched = await fetchManagerClaims();
+      const [fetched, fetchedCards] = await Promise.all([
+        fetchManagerClaims(),
+        fetchCardRequests(),
+      ]);
       if (fetched) {
         setClaims(fetched as any);
+      }
+      if (fetchedCards) {
+        setCardRequests(fetchedCards);
       }
     } catch (e) {
       console.warn("Backend claims fetch notice:", e);
     } finally {
       setIsRefreshing(false);
     }
+  };
+
+  const handleApproveCard = async (req: CardApprovalRequest) => {
+    setCardRequests((prev) =>
+      prev.map((r) => (r.id === req.id ? { ...r, status: "Approved" as const } : r))
+    );
+    notify(`Approved ${req.requestType === "VIRTUAL_CARD" ? "Virtual Card" : "Limit Increase"} for ${req.employeeName} (₹${req.requestedLimit.toLocaleString("en-IN")})`);
+    await approveCardRequest(req);
+    await refreshData();
+  };
+
+  const handleRejectCard = async (req: CardApprovalRequest) => {
+    setCardRequests((prev) =>
+      prev.map((r) => (r.id === req.id ? { ...r, status: "Rejected" as const } : r))
+    );
+    notify(`Rejected card request for ${req.employeeName}`);
+    await rejectCardRequest(req.id);
+    await refreshData();
   };
 
   useEffect(() => {
@@ -322,6 +353,54 @@ function ApprovalsPageInner() {
             </div>
           </div>
 
+          {/* Section Mode Toggle: Expense Claims vs Corporate Card Requests */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab("CLAIMS")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 border ${
+                activeTab === "CLAIMS"
+                  ? isDark
+                    ? "bg-white text-black border-white shadow-xs font-bold"
+                    : "bg-black text-white border-black shadow-xs font-bold"
+                  : isDark
+                  ? "bg-[#111113] text-zinc-400 border-white/[0.08] hover:text-white"
+                  : "bg-white text-zinc-600 border-zinc-200 hover:text-black"
+              }`}
+            >
+              <span>Expense Claims</span>
+              <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
+                activeTab === "CLAIMS"
+                  ? isDark ? "bg-black/10 text-black font-bold" : "bg-white/20 text-white font-bold"
+                  : "bg-zinc-200 dark:bg-white/10 text-zinc-600 dark:text-zinc-300"
+              }`}>
+                {claims.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("CARDS")}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 border ${
+                activeTab === "CARDS"
+                  ? isDark
+                    ? "bg-white text-black border-white shadow-xs font-bold"
+                    : "bg-black text-white border-black shadow-xs font-bold"
+                  : isDark
+                  ? "bg-[#111113] text-zinc-400 border-white/[0.08] hover:text-white"
+                  : "bg-white text-zinc-600 border-zinc-200 hover:text-black"
+              }`}
+            >
+              <CreditCard className="h-3.5 w-3.5" />
+              <span>Corporate Card &amp; Limit Requests</span>
+              {cardRequests.filter(r => r.status === "Pending").length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500 text-white font-bold animate-pulse">
+                  {cardRequests.filter(r => r.status === "Pending").length}
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* Main Table Container */}
           <div
             className={`rounded-xl overflow-hidden transition-colors border ${
@@ -391,9 +470,109 @@ function ApprovalsPageInner() {
               </div>
             </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto px-2 pb-2">
-              <table className="w-full text-left border-collapse">
+            {/* If CARDS tab is selected */}
+            {activeTab === "CARDS" ? (
+              <div className="overflow-x-auto px-2 pb-2">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr
+                      className={`text-xs font-medium border-b ${
+                        isDark ? "text-zinc-400 border-white/[0.06]" : "text-zinc-500 border-zinc-200/60"
+                      }`}
+                    >
+                      <th className="py-2.5 px-4 font-medium">Request Type</th>
+                      <th className="py-2.5 px-4 font-medium">Employee</th>
+                      <th className="py-2.5 px-4 font-medium">Card Name / Purpose</th>
+                      <th className="py-2.5 px-4 font-medium text-right">Requested Limit</th>
+                      <th className="py-2.5 px-4 font-medium">Requested On</th>
+                      <th className="py-2.5 px-4 font-medium">Status</th>
+                      <th className="py-2.5 px-4 font-medium text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y text-[13px] ${isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"}`}>
+                    {cardRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-12 text-center text-xs text-zinc-500">
+                          No corporate card or limit requests submitted yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      cardRequests.map((req) => (
+                        <tr
+                          key={req.id}
+                          className={`transition-colors ${
+                            isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"
+                          }`}
+                        >
+                          <td className="py-2.5 px-4">
+                            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
+                              req.requestType === "VIRTUAL_CARD" ? "text-blue-500" : "text-purple-500"
+                            }`}>
+                              <CreditCard className="h-3.5 w-3.5" />
+                              {req.requestType === "VIRTUAL_CARD" ? "Virtual Card" : "Limit Increase"}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4">
+                            <EmployeeCell
+                              name={req.employeeName}
+                              department={req.department}
+                            />
+                          </td>
+                          <td className="py-2.5 px-4 max-w-xs truncate text-zinc-700 dark:text-zinc-300 font-medium">
+                            {req.cardName}
+                          </td>
+                          <td className="py-2.5 px-4 text-right text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                            ₹{req.requestedLimit.toLocaleString("en-IN")}
+                          </td>
+                          <td className="py-2.5 px-4 text-[13px] text-zinc-500 whitespace-nowrap">
+                            {req.createdAt}
+                          </td>
+                          <td className="py-2.5 px-4 whitespace-nowrap">
+                            <StatusBadge
+                              tone={
+                                req.status === "Approved"
+                                  ? "success"
+                                  : req.status === "Pending"
+                                  ? "warning"
+                                  : "danger"
+                              }
+                            >
+                              {req.status}
+                            </StatusBadge>
+                          </td>
+                          <td className="py-2.5 px-4 text-right whitespace-nowrap">
+                            {req.status === "Pending" ? (
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveCard(req)}
+                                  className="text-xs font-semibold px-3 py-1 rounded-md bg-emerald-600 text-white hover:bg-emerald-500 transition-colors cursor-pointer shadow-xs"
+                                >
+                                  {req.requestType === "VIRTUAL_CARD" ? "Approve & Issue" : "Approve Limit"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRejectCard(req)}
+                                  className="text-xs font-medium px-2.5 py-1 rounded-md text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 border border-rose-500/25 transition-colors cursor-pointer"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-zinc-400">
+                                {req.status === "Approved" ? "Authorized" : "Declined"}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="overflow-x-auto px-2 pb-2">
+                <table className="w-full text-left border-collapse">
                 <thead>
                   <tr
                     className={`text-xs font-medium border-b ${
@@ -498,6 +677,7 @@ function ApprovalsPageInner() {
                 </tbody>
               </table>
             </div>
+          )}
           </div>
         </main>
       </div>

@@ -137,6 +137,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
             ...c,
             status: newStatus,
             financeRemark: finalRemark,
+            policyViolation: undefined,
             isHold: false,
             updatedAt: new Date().toISOString(),
           };
@@ -148,6 +149,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       status: newStatus,
       financeRemark: finalRemark,
       isHold: false,
+      policyViolation: undefined,
     });
     toast.success(`Claim ${claimId} verified and approved for disbursement.`);
     fetch(`${API_URL}/api/finance/claims/${claimId}/verify`, {
