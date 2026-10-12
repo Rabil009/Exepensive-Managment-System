@@ -20,15 +20,18 @@ function EmployeeAccess({ children }: { children: ReactNode }) {
     const returnPath = window.location.pathname + window.location.search;
     getEmployeeAccount().then((account) => {
       if (!active) return;
-      if (account?.profile?.role === "EMPLOYEE") {
+      if (account?.profile?.role === "EMPLOYEE" || account?.profile?.role === "ADMIN") {
         assignEmployeeCacheOwner(account.user.id);
         setAccount(account);
         setAuthorizedPath(pathname);
+      } else if (account?.profile?.role === "MANAGER") {
+        router.replace("/manager");
+      } else if (account?.profile?.role === "FINANCE") {
+        router.replace("/dashboard");
       } else {
         setAccount(null);
         setAuthorizedPath("");
-        const reason = account ? "&reason=role" : "";
-        router.replace(`/?portal=employee&next=${encodeURIComponent(returnPath)}${reason}`);
+        router.replace(`/?portal=employee&next=${encodeURIComponent(returnPath)}`);
       }
     }).catch(() => {
       if (active) router.replace(`/?portal=employee&next=${encodeURIComponent(returnPath)}&reason=profile`);

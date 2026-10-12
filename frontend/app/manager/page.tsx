@@ -963,78 +963,79 @@ function ManagerDashboardInner() {
                     isDark ? "bg-[#18181D] text-zinc-300 border-white/[0.08]" : "bg-zinc-100 text-zinc-700 border-zinc-200"
                   }`}
                 >
-                  Compliance: 98.6%
+                  Compliance: {claims.length > 0 ? (Math.round(((claims.length - exceptionsCount) / claims.length) * 1000) / 10).toFixed(1) : "100.0"}%
                 </span>
               </div>
 
               <div className="divide-y text-[13px] dark:divide-white/[0.04] divide-zinc-200/60">
-                <div className={`p-4 flex items-start justify-between gap-4 transition-colors ${
-                  isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
-                }`}>
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px]">
-                        CLM-8827 &bull; Rohan Kapoor
-                      </div>
-                      <div className="text-xs text-zinc-500 mt-0.5">
-                        Claimed ₹7,200 for weekend private car upgrade without manager pre-authorization.
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <PriorityBadge level="high">High Severity</PriorityBadge>
-                        <span className="text-[11px] text-zinc-400">Policy: Local Conveyance 4.2</span>
-                      </div>
-                    </div>
+                {claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified).length === 0 ? (
+                  <div className="p-8 text-center text-xs text-zinc-500">
+                    No active policy exceptions flagged. All submitted claims comply with current company thresholds.
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const c = claims.find((i) => i.id === "CLM-8827");
-                      if (c) setInspectClaim(c);
-                    }}
-                    className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer ${
-                      isDark
-                        ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
-                        : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
-                    }`}
-                  >
-                    Inspect Flag
-                  </button>
-                </div>
+                ) : (
+                  claims
+                    .filter((c) => Boolean(c.policyNotes) || !c.receiptVerified)
+                    .map((claim) => {
+                      const isHigh = claim.amount > 10000 || Boolean(claim.policyNotes);
+                      const violationText =
+                        claim.policyNotes ||
+                        (!claim.receiptVerified
+                          ? `Expense of ₹${claim.amount.toLocaleString("en-IN")} submitted without verified receipt attachment.`
+                          : `High value claim of ₹${claim.amount.toLocaleString("en-IN")} requiring manual managerial audit.`);
 
-                <div className={`p-4 flex items-start justify-between gap-4 transition-colors ${
-                  isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
-                }`}>
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px]">
-                        CLM-8823 &bull; Arjun Reddy
-                      </div>
-                      <div className="text-xs text-zinc-500 mt-0.5">
-                        Client dinner claim (₹6,800) is close to the per-event executive entertainment cap.
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <PriorityBadge level="medium">Medium Severity</PriorityBadge>
-                        <span className="text-[11px] text-zinc-400">Policy: Meals & Per Diem 3.1</span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const c = claims.find((i) => i.id === "CLM-8823");
-                      if (c) setInspectClaim(c);
-                    }}
-                    className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer ${
-                      isDark
-                        ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
-                        : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
-                    }`}
-                  >
-                    Inspect Flag
-                  </button>
-                </div>
+                      return (
+                        <div
+                          key={claim.id}
+                          className={`p-4 flex items-start justify-between gap-4 transition-colors ${
+                            isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3 min-w-0">
+                            {isHigh ? (
+                              <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                            ) : (
+                              <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                            )}
+                            <div className="min-w-0">
+                              <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px] flex items-center gap-2 flex-wrap">
+                                <span>{claim.id} &bull; {claim.employeeName}</span>
+                                <span className={`text-[11px] font-normal px-2 py-0.5 rounded ${
+                                  isDark ? "bg-white/[0.05] text-zinc-400" : "bg-zinc-100 text-zinc-600"
+                                }`}>
+                                  {claim.department}
+                                </span>
+                              </div>
+                              <div className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
+                                {violationText}
+                              </div>
+                              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                                <PriorityBadge level={isHigh ? "high" : "medium"}>
+                                  {isHigh ? "High Severity" : "Medium Severity"}
+                                </PriorityBadge>
+                                <span className="text-[11px] text-zinc-400">
+                                  Policy: {claim.category} Limit Audit
+                                </span>
+                                <span className="text-[11px] font-mono text-zinc-500">
+                                  Amount: ₹{claim.amount.toLocaleString("en-IN")}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setInspectClaim(claim)}
+                            className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer shrink-0 ${
+                              isDark
+                                ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
+                                : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
+                            }`}
+                          >
+                            Inspect Flag
+                          </button>
+                        </div>
+                      );
+                    })
+                )}
               </div>
             </div>
           )}

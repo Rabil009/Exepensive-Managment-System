@@ -173,6 +173,7 @@ export default function LoginPage() {
       let userEmail = email.trim().toLowerCase();
       let userName = userEmail.split("@")[0].replace(".", " ").replace(/\b\w/g, (c) => c.toUpperCase());
       let accessToken = "";
+      let detectedRole = "";
 
       // 1. Try real Supabase Auth
       try {
@@ -184,13 +185,13 @@ export default function LoginPage() {
         if (!authError && authData?.user) {
           const user = authData.user;
           userEmail = user.email || userEmail;
-          accessToken = authData.session?.access_token || "";
           const { data: profile } = await supabase
             .from("profiles")
             .select("id, name, role, department")
-            .eq("id", user.id)
+            .or(`id.eq.${user.id},email.eq.${userEmail}`)
             .maybeSingle();
           if (profile?.name) userName = profile.name;
+          if (profile?.role) detectedRole = profile.role;
         }
       } catch (sbErr) {
         console.warn("Supabase sign in notice:", sbErr);
@@ -209,20 +210,48 @@ export default function LoginPage() {
             const data = await res.json();
             accessToken = data.access_token || "";
             if (data.profile?.name) userName = data.profile.name;
+            if (data.profile?.role && !detectedRole) detectedRole = data.profile.role;
           }
         } catch {
           // Backend offline
         }
       }
 
+      // 3. Fallback profile lookup if role is still unresolved
+      if (!detectedRole) {
+        try {
+          const { data: fallbackProfile } = await supabase
+            .from("profiles")
+            .select("name, role")
+            .eq("email", userEmail)
+            .maybeSingle();
+          if (fallbackProfile?.name) userName = fallbackProfile.name;
+          if (fallbackProfile?.role) detectedRole = fallbackProfile.role;
+        } catch {}
+      }
+
+      // 4. Strict Role-based destination:
+      // Manager -> /manager, Finance/Admin -> /dashboard, Employee -> /employee
+      let destination = "/employee";
+      const upperRole = (detectedRole || "").toUpperCase();
+      if (upperRole === "MANAGER") {
+        destination = "/manager";
+      } else if (upperRole === "FINANCE" || upperRole === "ADMIN") {
+        destination = "/dashboard";
+      } else if (upperRole === "EMPLOYEE") {
+        destination = "/employee";
+      } else {
+        destination = selectedPortal;
+      }
+
       if (typeof window !== "undefined") {
-        localStorage.setItem("payout_user_role", selectedPortal);
+        localStorage.setItem("payout_user_role", destination);
         localStorage.setItem("payout_user_email", userEmail);
         localStorage.setItem("payout_user_name", userName);
         if (accessToken) localStorage.setItem("payout_employee_token", accessToken);
       }
 
-      router.push(selectedPortal);
+      router.push(destination);
     } catch (cause) {
       setErrorMessage(cause instanceof Error ? cause.message : "Sign in failed.");
     } finally {
