@@ -137,6 +137,25 @@ export async function resolveCurrentEmployee(): Promise<{
   return null;
 }
 
+async function resolveExpenseOwnerId(
+  employeeId: string | undefined,
+  employeeName: string,
+  authUserId?: string,
+) {
+  if (employeeId && !employeeId.includes("@")) return employeeId;
+  const { data: matchedEmployee } = await supabase
+    .from("expense_claims")
+    .select("employee_id")
+    .ilike("employee_name", employeeName)
+    .limit(1)
+    .maybeSingle();
+  return (
+    authUserId ||
+    matchedEmployee?.employee_id ||
+    "b8ce7a2d-e91a-47f4-92ba-adb7d0bf5c4d"
+  );
+}
+
 export function fileToDataUrl(file: File | Blob): Promise<string> {
   if (typeof FileReader !== "undefined") {
     return new Promise((resolve, reject) => {
@@ -251,31 +270,65 @@ export async function employeeRequest(
         );
         const cardLimit = 100000;
 
+        const draftEmployeeId = await resolveExpenseOwnerId(
+          employeeId,
+          employeeName,
+          authUser?.id,
+        );
+        const { data: rawDrafts } = draftEmployeeId
+          ? await supabase
+              .from("employee_expense_drafts")
+              .select("*")
+              .eq("employee_id", draftEmployeeId)
+              .order("updated_at", { ascending: false })
+          : { data: [] };
+
+        const draftsList = (rawDrafts || []).map((d: any) => ({
+          id: d.id,
+          date: d.expense_date || (d.updated_at || "").slice(0, 10),
+          merchant: d.merchant || "Untitled draft",
+          category: d.category || "OTHER",
+          amount: Number(d.amount) || 0,
+          status: "Draft",
+          raw_status: "DRAFT",
+          source: "draft",
+          description: d.business_purpose || "",
+          receipt: d.receipt_name || null,
+          currency: d.currency || "INR",
+          report: d.report_name || "Unassigned",
+          paymentMethod: d.payment_method || "Personal (Out-of-Pocket)",
+          attendees: d.attendees || [],
+        }));
+
+        const claimsList = claims.map((c: any) => ({
+          id: c.id,
+          date: c.expense_date || (c.created_at || "").slice(0, 10),
+          merchant: c.merchant || c.title || "Expense",
+          category: c.category || "OTHER",
+          amount: Number(c.amount) || 0,
+          status: normalizeClaimStatus(c.status),
+          raw_status: c.status || "SUBMITTED",
+          source: "claim",
+          description: c.description || "",
+          receipt: c.receipt_name || null,
+          receiptUrl: c.receipt_url || null,
+          employee_name: c.employee_name || null,
+          currency: c.currency || "INR",
+          report: c.report_name || "General",
+          paymentMethod: (c.payment_method || "")
+            .toUpperCase()
+            .includes("CORPORATE")
+            ? "Corporate Card"
+            : "Personal (Out-of-Pocket)",
+          attendees: c.attendees || [],
+          manager_remark: c.manager_remark || null,
+          finance_remark: c.finance_remark || null,
+        }));
+
         responseData = {
-          expenses: claims.map((c: any) => ({
-            id: c.id,
-            date: c.expense_date || (c.created_at || "").slice(0, 10),
-            merchant: c.merchant || c.title || "Expense",
-            category: c.category || "OTHER",
-            amount: Number(c.amount) || 0,
-            status: normalizeClaimStatus(c.status),
-            raw_status: c.status || "SUBMITTED",
-            source: "claim",
-            description: c.description || "",
-            receipt: c.receipt_name || null,
-            receiptUrl: c.receipt_url || null,
-            employee_name: c.employee_name || null,
-            currency: c.currency || "INR",
-            report: c.report_name || "General",
-            paymentMethod: (c.payment_method || "")
-              .toUpperCase()
-              .includes("CORPORATE")
-              ? "Corporate Card"
-              : "Personal (Out-of-Pocket)",
-            attendees: c.attendees || [],
-            manager_remark: c.manager_remark || null,
-            finance_remark: c.finance_remark || null,
-          })),
+          expenses: [...claimsList, ...draftsList].sort((a: any, b: any) =>
+            (b.date || "").localeCompare(a.date || "")
+          ),
           summary: {
             ready_for_reimbursement: String(approvedAmount),
             pending_approval: String(pendingAmount),
@@ -810,9 +863,24 @@ export async function employeeRequest(
           }
         }
 
+        const approval_counts = {
+          approved: targetClaims.filter((c: any) =>
+            ["APPROVED", "MANAGER_APPROVED", "FINANCE_APPROVED", "PAID", "DISBURSED"].includes(
+              (c.status || "").toUpperCase()
+            )
+          ).length,
+          rejected: targetClaims.filter((c: any) =>
+            (c.status || "").toUpperCase().includes("REJECT")
+          ).length,
+          pending: targetClaims.filter((c: any) =>
+            ["SUBMITTED", "PENDING", "AWAITING"].includes((c.status || "").toUpperCase())
+          ).length,
+        };
+
         responseData = {
           month: monthParam,
           currency: "INR",
+          approval_counts,
           totals: {
             total_spend: String(totalSpend),
             pending_approval: String(pendingApproval),
@@ -987,6 +1055,41 @@ export async function employeeRequest(
     }
   }
 
+  // LOAD A SAVED DRAFT
+  else if (path.match(/^\/new-expense\/[^/]+$/) && init.method !== "DELETE") {
+    const draftId = decodeURIComponent(path.split("/").pop() || "");
+    const draftOwnerId = await resolveExpenseOwnerId(employeeId, employeeName, authUser?.id);
+    const { data: savedDraft, error } = await supabase
+      .from("employee_expense_drafts")
+      .select("*")
+      .eq("id", draftId)
+      .eq("employee_id", draftOwnerId)
+      .maybeSingle();
+    if (error || !savedDraft) {
+      responseData = { detail: error?.message || "Draft not found" };
+    } else {
+      responseData = savedDraft;
+    }
+  }
+
+  // DELETE A SAVED DRAFT
+  else if (path.match(/^\/new-expense\/[^/]+$/) && init.method === "DELETE") {
+    const draftId = decodeURIComponent(path.split("/").pop() || "");
+    const draftOwnerId = await resolveExpenseOwnerId(employeeId, employeeName, authUser?.id);
+    const { data: deletedDraft, error } = await supabase
+      .from("employee_expense_drafts")
+      .delete()
+      .eq("id", draftId)
+      .eq("employee_id", draftOwnerId)
+      .select("id")
+      .maybeSingle();
+    if (error || !deletedDraft) {
+      responseData = { detail: error?.message || "Draft not found" };
+    } else {
+      responseData = { id: draftId, status: "deleted" };
+    }
+  }
+
   // NEW EXPENSE SUBMIT
   else if (path.startsWith("/new-expense") && init.method === "POST") {
     try {
@@ -1041,6 +1144,45 @@ export async function employeeRequest(
             }
           }
 
+          const action = init.body.get("action");
+          const effectiveEmpId =
+            submitEmployeeId ||
+            authUser?.id ||
+            "7881beaf-b8ab-4600-afd8-4543deb2a24b";
+
+          if (action === "Draft") {
+            const { data: existingDraft } = await supabase
+              .from("employee_expense_drafts")
+              .select("receipt_name,receipt_content_type,receipt_size_bytes")
+              .eq("id", parsed.id)
+              .eq("employee_id", effectiveEmpId)
+              .maybeSingle();
+            const draftRow = {
+              id: parsed.id,
+              employee_id: effectiveEmpId,
+              merchant: parsed.merchant?.trim() || null,
+              expense_date: parsed.date || null,
+              amount: Number(parsed.amount) || 0,
+              currency: "INR",
+              category: parsed.category || null,
+              report_name: parsed.report || null,
+              payment_method: parsed.payment_method || null,
+              business_purpose: parsed.purpose || null,
+              attendees: parsed.attendees || [],
+              linked_transaction_id: parsed.linked_transaction_id || null,
+              receipt_name: receiptName || existingDraft?.receipt_name || null,
+              receipt_content_type: file?.type || existingDraft?.receipt_content_type || null,
+              receipt_size_bytes: file?.size || existingDraft?.receipt_size_bytes || null,
+            };
+            const { data: savedDraft, error: draftError } = await supabase
+              .from("employee_expense_drafts")
+              .upsert(draftRow, { onConflict: "id" })
+              .select()
+              .single();
+            if (draftError) throw new Error(draftError.message);
+            responseData = { id: parsed.id, status: "Draft", draft: savedDraft };
+          } else {
+
           const rawCat = (parsed.category || "OTHER").toUpperCase();
           const validCategories = [
             "TRAVEL",
@@ -1070,11 +1212,7 @@ export async function employeeRequest(
           else if (rawPm.includes("UPI")) paymentMethod = "PERSONAL_UPI";
           else if (rawPm.includes("CASH")) paymentMethod = "PERSONAL_CASH";
 
-          const claimId = `CLM-${Date.now().toString().slice(-6)}`;
-          const effectiveEmpId =
-            submitEmployeeId ||
-            authUser?.id ||
-            "7881beaf-b8ab-4600-afd8-4543deb2a24b";
+          const claimId = parsed.id || `CLM-${Date.now().toString().slice(-6)}`;
 
           let finalEmpName = employeeName;
           if (!finalEmpName || finalEmpName === "Employee") {
@@ -1120,6 +1258,13 @@ export async function employeeRequest(
             throw new Error(insertError.message);
           }
 
+          // Delete from drafts if it was previously saved
+          await supabase
+            .from("employee_expense_drafts")
+            .delete()
+            .eq("id", claimId)
+            .eq("employee_id", effectiveEmpId);
+
           // Also sync to FastAPI backend if available
           if (apiUrl) {
             try {
@@ -1148,6 +1293,7 @@ export async function employeeRequest(
           }
 
           responseData = { id: claimId, status: "Pending" };
+          }
         }
       }
     } catch (err) {
