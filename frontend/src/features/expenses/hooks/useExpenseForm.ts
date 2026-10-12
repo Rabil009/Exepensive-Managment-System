@@ -4,6 +4,7 @@ import { useExpenses } from "../data/ExpensesContext";
 import { draftKey, remoteDraftKey, emptyDraft, type Draft } from "../data/expenseDraft";
 import type { ExpenseStatus } from "../types";
 import { discardNewExpense, loadExpenseOptions, loadNewExpense, saveNewExpense, type ExpenseOptions } from "../data/newExpenseApi";
+import { scanReceiptFile } from "../utils/receiptScanner";
 export function useExpenseForm() {
   const params = useSearchParams();
   const draftParam = params.get("draft");
@@ -38,6 +39,8 @@ export function useExpenseForm() {
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanNotice, setScanNotice] = useState("");
   const [addingAttendee, setAddingAttendee] = useState(false);
   const [attendee, setAttendee] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,6 +125,55 @@ export function useExpenseForm() {
     setPreview(previewUrl.current);
     update("receipt", next.name);
     if (inputRef.current) inputRef.current.value = "";
+
+    // Automatic Receipt OCR & Form Auto-fill (Runs 100% in browser, 0 API key required!)
+    if (next.type.startsWith("image/")) {
+      setScanning(true);
+      setScanNotice("Scanning receipt text & extracting details...");
+      scanReceiptFile(next)
+        .then((extracted) => {
+          setDraft((prev) => {
+            const updated = { ...prev };
+            if (extracted.merchant) updated.merchant = extracted.merchant;
+            if (extracted.amount) updated.amount = extracted.amount;
+            if (extracted.date) updated.date = extracted.date;
+            if (extracted.category) {
+              const upper = extracted.category.toUpperCase();
+              const matched = options.categories.find(
+                (c) => c.toUpperCase() === upper || upper.includes(c.toUpperCase())
+              );
+              updated.category = matched || options.categories[0] || extracted.category;
+            }
+            if (extracted.paymentMethod) updated.paymentMethod = extracted.paymentMethod;
+            if (extracted.purpose && (!prev.purpose || prev.purpose.trim() === "")) {
+              updated.purpose = extracted.purpose;
+            }
+            return updated;
+          });
+
+          const parts = [
+            extracted.merchant ? `Merchant: ${extracted.merchant}` : "",
+            extracted.amount ? `₹${extracted.amount}` : "",
+            extracted.date ? `Date: ${extracted.date}` : "",
+            extracted.category ? `Category: ${extracted.category}` : "",
+          ]
+            .filter(Boolean)
+            .join(" • ");
+
+          setScanNotice(
+            parts
+              ? `✨ Receipt auto-scanned: ${parts}`
+              : "✨ Receipt scanned successfully."
+          );
+        })
+        .catch((err) => {
+          console.warn("Receipt scan note:", err);
+          setScanNotice("");
+        })
+        .finally(() => {
+          setScanning(false);
+        });
+    }
   }
   async function save(status: ExpenseStatus) {
     if (saving) return;
@@ -223,6 +275,9 @@ export function useExpenseForm() {
     attendee,
     setAttendee,
     inputRef,
+    scanning,
+    scanNotice,
+    setScanNotice,
     ready,
     update,
     attach,
