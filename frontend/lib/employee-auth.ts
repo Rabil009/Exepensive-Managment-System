@@ -89,14 +89,16 @@ export async function getEmployeeAccount(): Promise<EmployeeAccount | null> {
   try {
     const { data } = await supabase.auth.getSession();
     if (data?.session?.access_token) {
-      // Try backend /me
-      try {
-        const response = await fetch(`${apiUrl}/api/auth/employee/me`, {
-          headers: { Authorization: `Bearer ${data.session.access_token}` },
-        });
-        if (response.ok) return (await response.json()) as EmployeeAccount;
-      } catch {
-        // Backend offline, continue below
+      // Try backend /me if remote URL configured
+      if (apiUrl && !apiUrl.includes("localhost:8000")) {
+        try {
+          const response = await fetch(`${apiUrl}/api/auth/employee/me`, {
+            headers: { Authorization: `Bearer ${data.session.access_token}` },
+          });
+          if (response.ok) return (await response.json()) as EmployeeAccount;
+        } catch {
+          // Backend offline, continue below
+        }
       }
 
       const user = data.session.user;

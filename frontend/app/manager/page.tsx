@@ -328,16 +328,8 @@ function ManagerDashboardInner() {
           )}
 
           {isInitialLoading ? (
-            <div className="flex-1 min-h-[60vh] flex flex-col items-center justify-center gap-4 py-16">
-              <Spiral className="size-10 text-blue-500" />
-              <div className="flex flex-col items-center text-center gap-1.5">
-                <h3 className={`text-sm font-semibold ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
-                  Loading Manager Portal
-                </h3>
-                <p className={`text-xs max-w-sm ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
-                  Syncing team approvals, department budgets &amp; card requests...
-                </p>
-              </div>
+            <div className="flex-1 min-h-[60vh] flex items-center justify-center py-16">
+              <Spiral className="size-9 text-blue-500" />
             </div>
           ) : (
             <>
@@ -1337,7 +1329,13 @@ function ManagerDashboardInner() {
 export default function ManagerDashboardPage() {
   return (
     <ThemeProvider>
-      <React.Suspense fallback={<div className="h-screen w-full bg-transparent" />}>
+      <React.Suspense
+        fallback={
+          <div className="h-screen w-full flex items-center justify-center bg-[#FAFAFB] dark:bg-[#08080A]">
+            <Spiral className="size-9 text-blue-500" />
+          </div>
+        }
+      >
         <ManagerDashboardInner />
       </React.Suspense>
     </ThemeProvider>

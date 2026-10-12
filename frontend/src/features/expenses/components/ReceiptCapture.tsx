@@ -92,9 +92,8 @@ export function ReceiptCapture({ model }: Props) {
               alt="Receipt preview"
             />
             {scanning && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 rounded-lg backdrop-blur-2xs text-white">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg backdrop-blur-2xs">
                 <Spiral className="size-6 text-emerald-400" />
-                <span className="text-xs font-semibold">Reading receipt...</span>
               </div>
             )}
           </div>

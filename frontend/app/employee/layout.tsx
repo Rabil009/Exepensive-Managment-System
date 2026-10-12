@@ -46,12 +46,8 @@ function EmployeeAccess({ children }: { children: ReactNode }) {
 
   if (authorizedPath !== pathname || !account) {
     return (
-      <div className="min-h-screen bg-[#08080A] text-zinc-100 flex flex-col items-center justify-center gap-4 py-16" role="status">
-        <Spiral className="size-10 text-blue-500" />
-        <div className="flex flex-col items-center text-center gap-1.5">
-          <h3 className="text-sm font-semibold tracking-tight text-zinc-200">Checking Employee Access</h3>
-          <p className="text-xs text-zinc-500 max-w-sm">Verifying your secure session and permissions...</p>
-        </div>
+      <div className="min-h-screen bg-[#08080A] flex items-center justify-center" role="status">
+        <Spiral className="size-9 text-blue-500" />
       </div>
     );
   }

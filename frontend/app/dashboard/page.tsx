@@ -121,16 +121,8 @@ function DashboardContent() {
         {/* Scrollable Main Content (optimized mobile padding) */}
         <main className="flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
           {isLoading ? (
-            <div className="flex-1 min-h-[60vh] flex flex-col items-center justify-center gap-4 py-16">
-              <Spiral className="size-10 text-emerald-500" />
-              <div className="flex flex-col items-center text-center gap-1.5">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                  Loading Financial Dashboard
-                </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm">
-                  Syncing real-time ledger, expense claims and treasury budgets...
-                </p>
-              </div>
+            <div className="flex-1 min-h-[60vh] flex items-center justify-center py-16">
+              <Spiral className="size-9 text-emerald-500" />
             </div>
           ) : (
             <>
