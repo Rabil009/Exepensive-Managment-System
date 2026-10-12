@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "recharts";
 import { useTheme } from "@/lib/theme-store";
+import { useFinanceStore } from "@/lib/finance-store";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 
 export interface BudgetSummary {
@@ -20,40 +21,47 @@ export interface BudgetSummary {
   utilization: string;
 }
 
-const DEFAULT_BUDGET_SUMMARY: BudgetSummary = {
-  allocatedBudget: "₹25,00,000",
-  approvedSpend: "₹18,40,000",
-  remainingBudget: "₹6,60,000",
-  utilization: "73.6%",
-};
-
-// Periodic spend vs budget milestones (clean balanced spacing for bar chart)
-const BUDGET_TIMELINE_DATA = [
-  { period: "Jun 1-4", allocated: 35, spend: 28 },
-  { period: "Jun 5-8", allocated: 40, spend: 36 },
-  { period: "Jun 9-12", allocated: 45, spend: 42 },
-  { period: "Jun 13-16", allocated: 40, spend: 35 },
-  { period: "Jun 17-20", allocated: 50, spend: 48 },
-  { period: "Jun 21-24", allocated: 45, spend: 39 },
-  { period: "Jun 25-28", allocated: 45, spend: 41 },
-  { period: "Jun 29-30", allocated: 30, spend: 25 },
-];
-
 interface BudgetVsActualChartProps {
   summary?: BudgetSummary;
 }
 
-export function BudgetVsActualChart({
-  summary = DEFAULT_BUDGET_SUMMARY,
-}: BudgetVsActualChartProps) {
+export function BudgetVsActualChart({ summary }: BudgetVsActualChartProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { budgets } = useFinanceStore();
   const [filter, setFilter] = useState<"3m" | "30d" | "7d">("30d");
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const activeSummary: BudgetSummary = useMemo(() => {
+    if (summary) return summary;
+
+    const totalAllocated = budgets.reduce((sum, b) => sum + (Number(b.allocatedAmount) || 0), 0);
+    const totalSpent = budgets.reduce((sum, b) => sum + (Number(b.spentAmount) || 0), 0);
+    const remaining = totalAllocated - totalSpent;
+    const util = totalAllocated > 0 ? ((totalSpent / totalAllocated) * 100).toFixed(1) : "0.0";
+
+    return {
+      allocatedBudget: `₹${totalAllocated.toLocaleString("en-IN")}`,
+      approvedSpend: `₹${totalSpent.toLocaleString("en-IN")}`,
+      remainingBudget: `₹${remaining.toLocaleString("en-IN")}`,
+      utilization: `${util}%`,
+    };
+  }, [summary, budgets]);
+
+  const chartData = useMemo(() => {
+    if (budgets && budgets.length > 0) {
+      return budgets.map((b) => ({
+        period: b.name.length > 12 ? b.name.substring(0, 10) + "..." : b.name,
+        allocated: Math.round(Number(b.allocatedAmount || 0) / 1000),
+        spend: Math.round(Number(b.spentAmount || 0) / 1000),
+      }));
+    }
+    return [];
+  }, [budgets]);
 
   return (
     <div className={`rounded-xl p-5 space-y-4 transition-colors h-full flex flex-col justify-between border ${
@@ -108,7 +116,7 @@ export function BudgetVsActualChart({
             </span>
           </div>
           <span className={`text-[16px] font-semibold tracking-tight tabular-nums mt-0.5 block ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
-            {summary.allocatedBudget}
+            {activeSummary.allocatedBudget}
           </span>
         </div>
 
@@ -120,7 +128,7 @@ export function BudgetVsActualChart({
             </span>
           </div>
           <span className={`text-[16px] font-semibold tracking-tight tabular-nums mt-0.5 block ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
-            {summary.approvedSpend}
+            {activeSummary.approvedSpend}
           </span>
         </div>
 
@@ -129,7 +137,7 @@ export function BudgetVsActualChart({
             Remaining
           </span>
           <span className={`text-[16px] font-semibold tracking-tight tabular-nums mt-0.5 block ${isDark ? "text-zinc-100" : "text-zinc-900"}`}>
-            {summary.remainingBudget}
+            {activeSummary.remainingBudget}
           </span>
         </div>
 
@@ -139,7 +147,7 @@ export function BudgetVsActualChart({
           </span>
           <div className="flex items-center gap-2 mt-0.5">
             <span className={`text-[16px] font-semibold tracking-tight tabular-nums ${isDark ? "text-zinc-200" : "text-zinc-800"}`}>
-              {summary.utilization}
+              {activeSummary.utilization}
             </span>
             <StatusBadge tone="success">Healthy</StatusBadge>
           </div>
@@ -151,7 +159,7 @@ export function BudgetVsActualChart({
         {isMounted ? (
           <ResponsiveContainer width="100%" height="100%" debounce={150}>
             <BarChart
-              data={BUDGET_TIMELINE_DATA}
+              data={chartData}
               margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
               barGap={4}
             >

@@ -20,7 +20,7 @@ export function ReimbursementsView() {
   const isDark = theme === "dark";
 
   const [settleModalClaim, setSettleModalClaim] = useState<ExpenseClaim | null>(null);
-  const [utr, setUtr] = useState(`UTR-HDFC-2026-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [utr, setUtr] = useState(`UTR-HDFC-${Date.now().toString().slice(-6)}`);
   const [channel, setChannel] = useState("Corporate NEFT Clearing");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
@@ -173,7 +173,7 @@ export function ReimbursementsView() {
                         type="button"
                         onClick={() => {
                           setSettleModalClaim(c);
-                          setUtr(`UTR-HDFC-2026-${Math.floor(1000 + Math.random() * 9000)}`);
+                          setUtr(`UTR-HDFC-${Date.now().toString().slice(-6)}`);
                         }}
                         className={`h-7 px-3 rounded-lg font-medium text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 border ${
                           isDark
@@ -328,7 +328,7 @@ export function ReimbursementsView() {
                   </label>
                   <button
                     type="button"
-                    onClick={() => setUtr(`UTR-HDFC-2026-${Math.floor(100000 + Math.random() * 900000)}`)}
+                    onClick={() => setUtr(`UTR-HDFC-${Date.now().toString().slice(-6)}`)}
                     className={`text-xs flex items-center gap-1 ${
                       isDark ? "text-zinc-400 hover:text-zinc-200" : "text-zinc-600 hover:text-zinc-900"
                     }`}

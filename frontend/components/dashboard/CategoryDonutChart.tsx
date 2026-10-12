@@ -1,24 +1,41 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useTheme } from "@/lib/theme-store";
+import { useFinanceStore } from "@/lib/finance-store";
 
-const CATEGORY_DATA = [
-  { name: "Cloud & Infra", value: 700000, percentage: "38%", color: "#5A78A6" },
-  { name: "Hardware", value: 500000, percentage: "27%", color: "#3B9B78" },
-  { name: "Travel & Offsite", value: 370000, percentage: "20%", color: "#C98642" },
-  { name: "Software & SaaS", value: 270000, percentage: "15%", color: "#8875B8" },
-];
+const PALETTE = ["#5A78A6", "#3B9B78", "#C98642", "#8875B8", "#E05656", "#4F75FF"];
 
 export function CategoryDonutChart() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { claims } = useFinanceStore();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const categoryData = useMemo(() => {
+    if (!claims || claims.length === 0) return [];
+    
+    const catMap: Record<string, number> = {};
+    let total = 0;
+    claims.forEach((c) => {
+      const cat = c.category || "OTHER";
+      const amt = Number(c.amount) || 0;
+      catMap[cat] = (catMap[cat] || 0) + amt;
+      total += amt;
+    });
+
+    return Object.entries(catMap).map(([name, value], idx) => ({
+      name,
+      value,
+      percentage: total > 0 ? `${Math.round((value / total) * 100)}%` : "0%",
+      color: PALETTE[idx % PALETTE.length],
+    }));
+  }, [claims]);
 
   return (
     <div className={`rounded-xl p-5 flex flex-col justify-between transition-colors h-full border ${
@@ -38,18 +55,21 @@ export function CategoryDonutChart() {
             ? "bg-[#18181D] text-zinc-300 border-white/[0.08]"
             : "bg-zinc-50 text-zinc-600 border-zinc-200/80"
         }`}>
-          June 2026
+          Live Claims
         </span>
       </div>
 
       {/* Donut Chart Visual */}
       <div className="relative h-[190px] w-full my-2 flex items-center justify-center">
         {isMounted ? (
+          categoryData.length === 0 ? (
+            <div className="text-xs text-zinc-500">No expense claims recorded yet.</div>
+          ) : (
           <>
             <ResponsiveContainer width="100%" height="100%" debounce={150}>
               <PieChart>
                 <Pie
-                  data={CATEGORY_DATA}
+                  data={categoryData}
                   cx="50%"
                   cy="50%"
                   innerRadius={55}
@@ -58,7 +78,7 @@ export function CategoryDonutChart() {
                   dataKey="value"
                   strokeWidth={0}
                 >
-                  {CATEGORY_DATA.map((entry, index) => (
+                  {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -72,7 +92,7 @@ export function CategoryDonutChart() {
                     boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
                     padding: "8px 12px",
                   }}
-                  formatter={(val: any) => [`₹${(Number(val) / 100000).toFixed(1)}L`, "Amount"]}
+                  formatter={(val: any) => [`₹${Number(val).toLocaleString("en-IN")}`, "Amount"]}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -82,11 +102,12 @@ export function CategoryDonutChart() {
               <span className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
                 Total
               </span>
-              <span className={`text-[19px] font-semibold tracking-tight tabular-nums ${isDark ? "text-white" : "text-zinc-900"}`}>
-                ₹18.4L
+              <span className={`text-[16px] font-semibold tracking-tight tabular-nums ${isDark ? "text-white" : "text-zinc-900"}`}>
+                ₹{categoryData.reduce((sum, c) => sum + c.value, 0).toLocaleString("en-IN")}
               </span>
             </div>
           </>
+          )
         ) : (
           <div className={`h-[150px] w-[150px] rounded-full animate-pulse ${isDark ? "bg-white/[0.04]" : "bg-zinc-200/40"}`} />
         )}
@@ -96,7 +117,7 @@ export function CategoryDonutChart() {
       <div className={`grid grid-cols-2 gap-x-4 gap-y-2 pt-2 border-t ${
         isDark ? "border-white/[0.04]" : "border-zinc-200/60"
       }`}>
-        {CATEGORY_DATA.map((cat) => (
+        {categoryData.map((cat) => (
           <div key={cat.name} className="flex items-center justify-between text-[12px]">
             <div className="flex items-center gap-1.5 min-w-0">
               <span

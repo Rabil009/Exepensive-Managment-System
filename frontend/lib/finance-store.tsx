@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import type { ExpenseClaim, DepartmentBudget, ClaimStatus } from "@/types/finance";
-import { MOCK_CLAIMS, MOCK_BUDGETS } from "@/lib/mock-data";
 import { getExpenseClaims, updateClaimInDb, getDepartmentBudgets } from "@/lib/api";
 
 export interface ExceptionItem {
@@ -167,55 +166,81 @@ const mapLiveClaim = (item: any): ExpenseClaim => {
 
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [activeView, setActiveView] = useState("Dashboard");
-  const [claims, setClaims] = useState<ExpenseClaim[]>(MOCK_CLAIMS);
-  const [budgets, setBudgets] = useState<DepartmentBudget[]>(MOCK_BUDGETS);
-  const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>(INITIAL_REIMBURSEMENTS);
+  const [claims, setClaims] = useState<ExpenseClaim[]>([]);
+  const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
+  const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>([]);
 
-  // Sync with live shared backend API (which serves unified data for Manager & Finance)
+  // Sync claims, budgets, and reimbursements from live backend & Supabase Cloud
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Fetch shared claims
+    const processClaims = (claimList: ExpenseClaim[]) => {
+      if (!isMounted) return;
+      setClaims(claimList);
+      const paidReimbursements: ReimbursementItem[] = claimList
+        .filter((c) => c.status === "PAID" || c.disbursedAt || c.paymentReference)
+        .map((c) => ({
+          id: `RMB-${c.id}`,
+          claimId: c.id,
+          employee: c.employeeName,
+          department: c.employeeDepartment,
+          amount: c.amount,
+          currency: c.currency || "INR",
+          completedDate: c.disbursedAt
+            ? new Date(c.disbursedAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
+            : "Recently",
+          paymentMethod: c.paymentChannel || c.paymentMethod || "Bank Transfer",
+          paymentReference: c.paymentReference || "Direct Settlement",
+          status: "Paid" as const,
+        }));
+      if (paidReimbursements.length > 0) {
+        setReimbursements(paidReimbursements);
+      }
+    };
+
+    // 1. Fetch claims (prefer FastAPI shared store if reachable, else Supabase Cloud)
     fetch(`${API_URL}/api/finance/claims`)
-      .then((res) => res.ok ? res.json() : [])
+      .then((res) => (res.ok ? res.json() : []))
       .then((rows) => {
         if (isMounted && Array.isArray(rows) && rows.length > 0) {
-          setClaims(rows.map(mapLiveClaim));
+          processClaims(rows.map(mapLiveClaim));
         } else {
           getExpenseClaims().then((fetched) => {
-            if (isMounted && fetched && fetched.length > 0) setClaims(fetched);
+            if (isMounted && fetched) processClaims(fetched);
           });
         }
       })
       .catch(() => {
         getExpenseClaims().then((fetched) => {
-          if (isMounted && fetched && fetched.length > 0) setClaims(fetched);
+          if (isMounted && fetched) processClaims(fetched);
         });
       });
 
     // 2. Fetch shared department budgets
     fetch(`${API_URL}/api/finance/budgets`)
-      .then((res) => res.ok ? res.json() : [])
+      .then((res) => (res.ok ? res.json() : []))
       .then((rows) => {
         if (isMounted && Array.isArray(rows) && rows.length > 0) {
-          setBudgets(rows.map((b: any) => ({
-            id: String(b.id || b.department),
-            name: b.name || b.department,
-            allocatedAmount: Number(b.allocated_amount || b.cap || 100000),
-            spentAmount: Number(b.spent_amount || b.spent || 0),
-            currency: b.currency || "INR",
-            fiscalPeriod: b.fiscal_period || "Q4-2026",
-            thresholdPercent: Number(b.threshold_percent || 80),
-          })));
+          setBudgets(
+            rows.map((b: any) => ({
+              id: String(b.id || b.department),
+              name: b.name || b.department,
+              allocatedAmount: Number(b.allocated_amount || b.cap || 100000),
+              spentAmount: Number(b.spent_amount || b.spent || 0),
+              currency: b.currency || "INR",
+              fiscalPeriod: b.fiscal_period || "Q4-2026",
+              thresholdPercent: Number(b.threshold_percent || 80),
+            }))
+          );
         } else {
           getDepartmentBudgets().then((fetchedBudgets) => {
-            if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) setBudgets(fetchedBudgets);
+            if (isMounted && fetchedBudgets) setBudgets(fetchedBudgets);
           });
         }
       })
       .catch(() => {
         getDepartmentBudgets().then((fetchedBudgets) => {
-          if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) setBudgets(fetchedBudgets);
+          if (isMounted && fetchedBudgets) setBudgets(fetchedBudgets);
         });
       });
 
@@ -413,7 +438,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
     // Add to completed reimbursements ledger
     const newReimb: ReimbursementItem = {
-      id: `RMB-${Math.floor(100 + Math.random() * 900)}`,
+      id: `RMB-${claimId}`,
       claimId,
       employee: claim.employeeName,
       department: claim.employeeDepartment,
@@ -558,50 +583,50 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
 
   const exceptions: ExceptionItem[] = useMemo(() => {
     const list: ExceptionItem[] = [];
-    const missingReceipt = claims.filter((c) => !c.receiptName);
+    const missingReceipt = claims.filter((c) => !c.receiptName || c.receiptName.trim() === "");
     const duplicates = claims.filter((c) => c.isDuplicateWarning);
-    const policyViolations = claims.filter((c) => c.policyViolation);
+    const policyViolations = claims.filter((c) => Boolean(c.policyViolation));
     const onHold = claims.filter((c) => c.isHold);
 
-    list.push({
-      id: "exc-1",
-      type: "Missing receipt",
-      description: "Expense claimed without compliant physical/digital tax proof",
-      count: missingReceipt.length || 2,
-      priority: "High",
-    });
+    if (missingReceipt.length > 0) {
+      list.push({
+        id: "exc-1",
+        type: "Missing receipt",
+        description: "Expense claimed without compliant physical/digital tax proof",
+        count: missingReceipt.length,
+        priority: "High",
+      });
+    }
 
-    list.push({
-      id: "exc-2",
-      type: "Duplicate expense",
-      description: "Identical amount and merchant matched within 48h window",
-      count: duplicates.length || 3,
-      priority: "High",
-    });
+    if (duplicates.length > 0) {
+      list.push({
+        id: "exc-2",
+        type: "Duplicate expense",
+        description: "Identical amount and merchant matched within 48h window",
+        count: duplicates.length,
+        priority: "High",
+      });
+    }
 
-    list.push({
-      id: "exc-3",
-      type: "Policy limit cap exceeded",
-      description: "Nightly accommodation cap or meals allowance exceeded",
-      count: policyViolations.length || 4,
-      priority: "Medium",
-    });
+    if (policyViolations.length > 0) {
+      list.push({
+        id: "exc-3",
+        type: "Policy limit cap exceeded",
+        description: "Nightly accommodation cap or meals allowance exceeded",
+        count: policyViolations.length,
+        priority: "Medium",
+      });
+    }
 
-    list.push({
-      id: "exc-4",
-      type: "Audit hold active",
-      description: "Awaiting physical GST invoice copy or clarification",
-      count: onHold.length || 1,
-      priority: "Medium",
-    });
-
-    list.push({
-      id: "exc-5",
-      type: "Payment settlement variance",
-      description: "Disbursement reference verification pending with clearing house",
-      count: 2,
-      priority: "High",
-    });
+    if (onHold.length > 0) {
+      list.push({
+        id: "exc-4",
+        type: "Audit hold active",
+        description: "Awaiting physical GST invoice copy or clarification",
+        count: onHold.length,
+        priority: "Medium",
+      });
+    }
 
     return list;
   }, [claims]);

@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useTheme } from "@/lib/theme-store";
-import { ArrowUpRight } from "lucide-react";
+import { useFinanceStore } from "@/lib/finance-store";
 
 interface DepartmentBudgetProgress {
   name: string;
@@ -13,44 +13,31 @@ interface DepartmentBudgetProgress {
   status: "Normal" | "Near Limit" | "Critical";
 }
 
-const DEPARTMENTS: DepartmentBudgetProgress[] = [
-  {
-    name: "Engineering",
-    spent: "₹8.2L",
-    allocated: "₹10.0L",
-    percentage: 82,
-    color: "#5A78A6",
-    status: "Near Limit",
-  },
-  {
-    name: "Marketing & Growth",
-    spent: "₹4.1L",
-    allocated: "₹6.0L",
-    percentage: 68,
-    color: "#3B9B78",
-    status: "Normal",
-  },
-  {
-    name: "Product & Design",
-    spent: "₹3.6L",
-    allocated: "₹5.0L",
-    percentage: 72,
-    color: "#8875B8",
-    status: "Normal",
-  },
-  {
-    name: "Operations & Legal",
-    spent: "₹2.5L",
-    allocated: "₹4.0L",
-    percentage: 62,
-    color: "#C98642",
-    status: "Normal",
-  },
-];
+const COLORS = ["#5A78A6", "#3B9B78", "#8875B8", "#C98642", "#E05656"];
 
 export function DepartmentSpendChart() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { budgets } = useFinanceStore();
+
+  const departments: DepartmentBudgetProgress[] = useMemo(() => {
+    if (budgets && budgets.length > 0) {
+      return budgets.map((b, idx) => {
+        const allocated = Number(b.allocatedAmount) || 0;
+        const spent = Number(b.spentAmount) || 0;
+        const percentage = allocated > 0 ? Math.min(Math.round((spent / allocated) * 100), 100) : 0;
+        return {
+          name: b.name,
+          spent: `₹${(spent / 100000).toFixed(1)}L`,
+          allocated: `₹${(allocated / 100000).toFixed(1)}L`,
+          percentage,
+          color: COLORS[idx % COLORS.length],
+          status: percentage > 90 ? "Critical" : percentage > 75 ? "Near Limit" : "Normal",
+        };
+      });
+    }
+    return [];
+  }, [budgets]);
 
   return (
     <div className={`rounded-xl p-5 flex flex-col justify-between transition-colors h-full border ${
@@ -70,13 +57,18 @@ export function DepartmentSpendChart() {
             ? "bg-[#18181D] text-zinc-300 border-white/[0.08]"
             : "bg-zinc-50 text-zinc-600 border-zinc-200/80"
         }`}>
-          Q2 2026
+          Live DB
         </span>
       </div>
 
       {/* Progress Bars List */}
       <div className="space-y-4 my-2">
-        {DEPARTMENTS.map((dept) => (
+        {departments.length === 0 ? (
+          <div className="py-8 text-center text-xs text-zinc-500">
+            No department budgets recorded in Supabase.
+          </div>
+        ) : (
+          departments.map((dept) => (
           <div key={dept.name} className="space-y-1.5">
             {/* Dept Label & Metrics */}
             <div className="flex items-center justify-between text-[12.5px]">
@@ -112,7 +104,7 @@ export function DepartmentSpendChart() {
               />
             </div>
           </div>
-        ))}
+        )))}
       </div>
 
       {/* Footer Info */}

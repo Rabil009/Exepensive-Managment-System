@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import React, { useState } from "react";
 import { Compass, CheckSquare, Receipt, Menu } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
