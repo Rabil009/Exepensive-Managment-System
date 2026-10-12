@@ -29,6 +29,8 @@ import {
   Layers,
   ArrowUpRight,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   RefreshCw,
   Menu,
   CreditCard,
@@ -110,6 +112,13 @@ function ManagerDashboardInner() {
   const [searchQuery, setSearchQuery] = useState("");
   const [inspectClaim, setInspectClaim] = useState<ManagerClaim | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [exceptionsPage, setExceptionsPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchQuery]);
 
   const refreshData = async (isInitial: boolean | unknown = false) => {
     try {
@@ -255,6 +264,21 @@ function ManagerDashboardInner() {
       c.id.toLowerCase().includes(searchQuery.toLowerCase());
     return matchStatus && matchSearch;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredClaims.length / ITEMS_PER_PAGE));
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedClaims = filteredClaims.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Exceptions list pagination
+  const allExceptionClaims = claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified);
+  const exceptionsTotalPages = Math.max(1, Math.ceil(allExceptionClaims.length / ITEMS_PER_PAGE));
+  const safeExceptionsPage = Math.min(Math.max(1, exceptionsPage), exceptionsTotalPages);
+  const exceptionsStartIndex = (safeExceptionsPage - 1) * ITEMS_PER_PAGE;
+  const paginatedExceptionClaims = allExceptionClaims.slice(
+    exceptionsStartIndex,
+    exceptionsStartIndex + ITEMS_PER_PAGE
+  );
 
   const getPageTitle = () => {
     switch (activeView) {
@@ -562,7 +586,7 @@ function ManagerDashboardInner() {
                         </td>
                       </tr>
                     ) : (
-                      filteredClaims.map((claim) => (
+                      paginatedClaims.map((claim) => (
                         <tr
                           key={claim.id}
                           className={`transition-colors cursor-pointer ${
@@ -648,6 +672,100 @@ function ManagerDashboardInner() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination Controls */}
+              {filteredClaims.length > 0 && (
+                <div
+                  className={`px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs select-none ${
+                    isDark ? "border-white/[0.06] bg-[#141418]/60" : "border-zinc-200/60 bg-zinc-50/70"
+                  }`}
+                >
+                  <div className={isDark ? "text-zinc-400" : "text-zinc-500"}>
+                    Showing{" "}
+                    <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                      {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, filteredClaims.length)}
+                    </span>{" "}
+                    of{" "}
+                    <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                      {filteredClaims.length}
+                    </span>{" "}
+                    claims
+                  </div>
+
+                  <div className="flex items-center gap-1.5 self-center sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={safeCurrentPage === 1}
+                      className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                        isDark
+                          ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                          : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                      }`}
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <span>Previous</span>
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => {
+                        if (
+                          totalPages > 6 &&
+                          pageNum !== 1 &&
+                          pageNum !== totalPages &&
+                          Math.abs(pageNum - safeCurrentPage) > 1
+                        ) {
+                          if (
+                            (pageNum === 2 && safeCurrentPage > 3) ||
+                            (pageNum === totalPages - 1 && safeCurrentPage < totalPages - 2)
+                          ) {
+                            return (
+                              <span key={pageNum} className="px-1 text-zinc-500 text-xs">
+                                &hellip;
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        const isActive = pageNum === safeCurrentPage;
+                        return (
+                          <button
+                            key={pageNum}
+                            type="button"
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`min-w-7 h-7 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                              isActive
+                                ? isDark
+                                  ? "bg-white text-zinc-950 font-semibold shadow-xs"
+                                  : "bg-zinc-950 text-white font-semibold shadow-xs"
+                                : isDark
+                                ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                                : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={safeCurrentPage === totalPages}
+                      className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                        isDark
+                          ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                          : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                      }`}
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Corporate Card & Limit Requests Queue */}
               <div
@@ -968,75 +1086,145 @@ function ManagerDashboardInner() {
               </div>
 
               <div className="divide-y text-[13px] dark:divide-white/[0.04] divide-zinc-200/60">
-                {claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified).length === 0 ? (
+                {allExceptionClaims.length === 0 ? (
                   <div className="p-8 text-center text-xs text-zinc-500">
                     No active policy exceptions flagged. All submitted claims comply with current company thresholds.
                   </div>
                 ) : (
-                  claims
-                    .filter((c) => Boolean(c.policyNotes) || !c.receiptVerified)
-                    .map((claim) => {
-                      const isHigh = claim.amount > 10000 || Boolean(claim.policyNotes);
-                      const violationText =
-                        claim.policyNotes ||
-                        (!claim.receiptVerified
-                          ? `Expense of ₹${claim.amount.toLocaleString("en-IN")} submitted without verified receipt attachment.`
-                          : `High value claim of ₹${claim.amount.toLocaleString("en-IN")} requiring manual managerial audit.`);
+                  paginatedExceptionClaims.map((claim) => {
+                    const isHigh = claim.amount > 10000 || Boolean(claim.policyNotes);
+                    const violationText =
+                      claim.policyNotes ||
+                      (!claim.receiptVerified
+                        ? `Expense of ₹${claim.amount.toLocaleString("en-IN")} submitted without verified receipt attachment.`
+                        : `High value claim of ₹${claim.amount.toLocaleString("en-IN")} requiring manual managerial audit.`);
 
-                      return (
-                        <div
-                          key={claim.id}
-                          className={`p-4 flex items-start justify-between gap-4 transition-colors ${
-                            isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
-                          }`}
-                        >
-                          <div className="flex items-start gap-3 min-w-0">
-                            {isHigh ? (
-                              <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
-                            ) : (
-                              <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                            )}
-                            <div className="min-w-0">
-                              <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px] flex items-center gap-2 flex-wrap">
-                                <span>{claim.id} &bull; {claim.employeeName}</span>
-                                <span className={`text-[11px] font-normal px-2 py-0.5 rounded ${
-                                  isDark ? "bg-white/[0.05] text-zinc-400" : "bg-zinc-100 text-zinc-600"
-                                }`}>
-                                  {claim.department}
-                                </span>
-                              </div>
-                              <div className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
-                                {violationText}
-                              </div>
-                              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                <PriorityBadge level={isHigh ? "high" : "medium"}>
-                                  {isHigh ? "High Severity" : "Medium Severity"}
-                                </PriorityBadge>
-                                <span className="text-[11px] text-zinc-400">
-                                  Policy: {claim.category} Limit Audit
-                                </span>
-                                <span className="text-[11px] font-mono text-zinc-500">
-                                  Amount: ₹{claim.amount.toLocaleString("en-IN")}
-                                </span>
-                              </div>
+                    return (
+                      <div
+                        key={claim.id}
+                        className={`p-4 flex items-start justify-between gap-4 transition-colors ${
+                          isDark ? "hover:bg-white/[0.02]" : "hover:bg-zinc-50/80"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          {isHigh ? (
+                            <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                          ) : (
+                            <Clock className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                          )}
+                          <div className="min-w-0">
+                            <div className="font-medium text-zinc-900 dark:text-zinc-100 text-[13px] flex items-center gap-2 flex-wrap">
+                              <span>{claim.id} &bull; {claim.employeeName}</span>
+                              <span className={`text-[11px] font-normal px-2 py-0.5 rounded ${
+                                isDark ? "bg-white/[0.05] text-zinc-400" : "bg-zinc-100 text-zinc-600"
+                              }`}>
+                                {claim.department}
+                              </span>
+                            </div>
+                            <div className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
+                              {violationText}
+                            </div>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              <PriorityBadge level={isHigh ? "high" : "medium"}>
+                                {isHigh ? "High Severity" : "Medium Severity"}
+                              </PriorityBadge>
+                              <span className="text-[11px] text-zinc-400">
+                                Policy: {claim.category} Limit Audit
+                              </span>
+                              <span className="text-[11px] font-mono text-zinc-500">
+                                Amount: ₹{claim.amount.toLocaleString("en-IN")}
+                              </span>
                             </div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => setInspectClaim(claim)}
-                            className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer shrink-0 ${
-                              isDark
-                                ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
-                                : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
-                            }`}
-                          >
-                            Inspect Flag
-                          </button>
                         </div>
-                      );
-                    })
+                        <button
+                          type="button"
+                          onClick={() => setInspectClaim(claim)}
+                          className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-colors cursor-pointer shrink-0 ${
+                            isDark
+                              ? "bg-[#18181D] hover:bg-[#202026] text-zinc-200 border-white/[0.08]"
+                              : "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200"
+                          }`}
+                        >
+                          Inspect Flag
+                        </button>
+                      </div>
+                    );
+                  })
                 )}
               </div>
+
+              {/* Exceptions Pagination Controls */}
+              {allExceptionClaims.length > 0 && (
+                <div
+                  className={`px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs select-none ${
+                    isDark ? "border-white/[0.06] bg-[#141418]/60" : "border-zinc-200/60 bg-zinc-50/70"
+                  }`}
+                >
+                  <div className={isDark ? "text-zinc-400" : "text-zinc-500"}>
+                    Showing{" "}
+                    <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                      {exceptionsStartIndex + 1}–{Math.min(exceptionsStartIndex + ITEMS_PER_PAGE, allExceptionClaims.length)}
+                    </span>{" "}
+                    of{" "}
+                    <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                      {allExceptionClaims.length}
+                    </span>{" "}
+                    exceptions
+                  </div>
+
+                  <div className="flex items-center gap-1.5 self-center sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setExceptionsPage((p) => Math.max(1, p - 1))}
+                      disabled={safeExceptionsPage === 1}
+                      className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                        isDark
+                          ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                          : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                      }`}
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <span>Previous</span>
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: exceptionsTotalPages }, (_, idx) => idx + 1).map((pageNum) => (
+                        <button
+                          key={pageNum}
+                          type="button"
+                          onClick={() => setExceptionsPage(pageNum)}
+                          className={`min-w-7 h-7 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                            pageNum === safeExceptionsPage
+                              ? isDark
+                                ? "bg-white text-zinc-950 font-semibold shadow-xs"
+                                : "bg-zinc-950 text-white font-semibold shadow-xs"
+                              : isDark
+                              ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                              : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setExceptionsPage((p) => Math.min(exceptionsTotalPages, p + 1))}
+                      disabled={safeExceptionsPage === exceptionsTotalPages}
+                      className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                        isDark
+                          ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                          : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                      }`}
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

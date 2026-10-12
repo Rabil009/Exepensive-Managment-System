@@ -45,3 +45,4 @@ export default function ManagerLayout({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
+
