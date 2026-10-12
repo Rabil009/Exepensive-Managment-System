@@ -12,7 +12,7 @@ type ClaimStatus =
   | "DISBURSED"
   | "CLOSED";
 
-export type StatusTone = "success" | "warning" | "danger" | "neutral";
+export type StatusTone = "success" | "warning" | "danger" | "neutral" | "info";
 
 export interface StatusBadgeProps {
   tone?: StatusTone;
@@ -38,6 +38,10 @@ const TONE_CONFIG: Record<StatusTone, { text: string; dot: string }> = {
   neutral: {
     text: "text-zinc-600 dark:text-zinc-400",
     dot: "bg-zinc-400",
+  },
+  info: {
+    text: "text-zinc-800 dark:text-zinc-200",
+    dot: "bg-blue-500",
   },
 };
 
