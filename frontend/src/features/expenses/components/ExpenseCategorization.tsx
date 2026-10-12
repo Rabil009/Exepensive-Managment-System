@@ -6,13 +6,51 @@ import type { ExpenseFormModel } from "../hooks/useExpenseForm";
 
 type Props = { model: Pick<ExpenseFormModel, "draft" | "update" | "options"> };
 
+const categoryGroups: {
+  value: string;
+  label: string;
+  aliases: readonly string[];
+}[] = [
+  {
+    value: "TRAVEL",
+    label: "Travel & Lodging",
+    aliases: ["TRAVEL", "HOTEL", "ACCOMMODATION", "TRAVEL & LODGING"],
+  },
+  {
+    value: "SOFTWARE",
+    label: "Software & SaaS",
+    aliases: ["SOFTWARE", "SAAS", "SOFTWARE & SAAS"],
+  },
+  {
+    value: "MEALS",
+    label: "Meals & Other",
+    aliases: ["MEALS", "FOOD", "OTHER", "TRAINING", "MEALS & OTHER"],
+  },
+  {
+    value: "OFFICE",
+    label: "Equipment & Devices",
+    aliases: [
+      "OFFICE",
+      "HARDWARE",
+      "EQUIPMENT",
+      "DEVICES",
+      "EQUIPMENT & DEVICES",
+    ],
+  },
+];
+
+function groupedCategory(value: string) {
+  const normalized = value.trim().toUpperCase();
+  return (
+    categoryGroups.find((group) => group.aliases.includes(normalized))?.value ||
+    ""
+  );
+}
+
 export function ExpenseCategorization({ model }: Props) {
   const { draft, update, options } = model;
 
-  const paymentMethods = [
-    "Corporate Card",
-    "Personal (Out-of-Pocket)",
-  ];
+  const paymentMethods = ["Corporate Card", "Personal (Out-of-Pocket)"];
 
   return (
     <section className="flex flex-col gap-4">
@@ -36,14 +74,14 @@ export function ExpenseCategorization({ model }: Props) {
             <select
               id="expense-category"
               className="w-full h-9 bg-zinc-50/50 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-white/[0.08] rounded-lg pl-9 pr-8 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 appearance-none cursor-pointer"
-              value={draft.category}
+              value={groupedCategory(draft.category)}
               onChange={(event) => update("category", event.target.value)}
               required
             >
               <option value="">Select category...</option>
-              {options.categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              {categoryGroups.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
                 </option>
               ))}
             </select>
@@ -67,7 +105,9 @@ export function ExpenseCategorization({ model }: Props) {
               value={draft.report}
               onChange={(event) => update("report", event.target.value)}
             >
-              {[...new Set(["Unassigned", ...options.reports, draft.report])].map((report) => (
+              {[
+                ...new Set(["Unassigned", ...options.reports, draft.report]),
+              ].map((report) => (
                 <option key={report} value={report}>
                   {report}
                 </option>

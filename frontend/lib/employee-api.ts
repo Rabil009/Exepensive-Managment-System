@@ -137,6 +137,25 @@ export async function resolveCurrentEmployee(): Promise<{
   return null;
 }
 
+async function resolveExpenseOwnerId(
+  employeeId: string | undefined,
+  employeeName: string,
+  authUserId?: string,
+) {
+  if (employeeId && !employeeId.includes("@")) return employeeId;
+  const { data: matchedEmployee } = await supabase
+    .from("expense_claims")
+    .select("employee_id")
+    .ilike("employee_name", employeeName)
+    .limit(1)
+    .maybeSingle();
+  return (
+    authUserId ||
+    matchedEmployee?.employee_id ||
+    "b8ce7a2d-e91a-47f4-92ba-adb7d0bf5c4d"
+  );
+}
+
 export async function employeeRequest(
   path: string,
   init: RequestInit = {}
@@ -165,6 +184,7 @@ export async function employeeRequest(
 
   // 2. Direct Real Supabase Cloud Logic
   let responseData: any = null;
+  let responseStatus = 200;
 
   // OVERVIEW: Real claims & dynamic summary metrics (ISOLATED BY EMPLOYEE)
   if (path.startsWith("/overview")) {
@@ -200,15 +220,25 @@ export async function employeeRequest(
         });
 
         const claims = !error && rawClaims ? rawClaims : [];
+        const draftEmployeeId = await resolveExpenseOwnerId(
+          employeeId,
+          employeeName,
+          authUser?.id,
+        );
+        const { data: rawDrafts } = draftEmployeeId
+          ? await supabase
+              .from("employee_expense_drafts")
+              .select("*")
+              .eq("employee_id", draftEmployeeId)
+              .order("updated_at", { ascending: false })
+          : { data: [] };
+        const drafts = rawDrafts || [];
 
         const pendingClaims = claims.filter(
           (c: any) => normalizeClaimStatus(c.status) === "Pending"
         );
         const approvedClaims = claims.filter(
           (c: any) => normalizeClaimStatus(c.status) === "Approved"
-        );
-        const reimbursedClaims = claims.filter(
-          (c: any) => normalizeClaimStatus(c.status) === "Reimbursed"
         );
         const cardClaims = claims.filter((c: any) =>
           (c.payment_method || "").toUpperCase().includes("CORPORATE")
@@ -229,30 +259,48 @@ export async function employeeRequest(
         const cardLimit = 100000;
 
         responseData = {
-          expenses: claims.map((c: any) => ({
-            id: c.id,
-            date: c.expense_date || (c.created_at || "").slice(0, 10),
-            merchant: c.merchant || c.title || "Expense",
-            category: c.category || "OTHER",
-            amount: Number(c.amount) || 0,
-            status: normalizeClaimStatus(c.status),
-            raw_status: c.status || "SUBMITTED",
-            source: "claim",
-            description: c.description || "",
-            receipt: c.receipt_name || null,
-            receiptUrl: c.receipt_url || null,
-            employee_name: c.employee_name || null,
-            currency: c.currency || "INR",
-            report: c.report_name || "General",
-            paymentMethod: (c.payment_method || "")
-              .toUpperCase()
-              .includes("CORPORATE")
-              ? "Corporate Card"
-              : "Personal (Out-of-Pocket)",
-            attendees: c.attendees || [],
-            manager_remark: c.manager_remark || null,
-            finance_remark: c.finance_remark || null,
-          })),
+          expenses: [
+            ...claims.map((claim: any) => ({
+              id: claim.id,
+              date: claim.expense_date || (claim.created_at || "").slice(0, 10),
+              merchant: claim.merchant || claim.title || "Expense",
+              category: claim.category || "OTHER",
+              amount: Number(claim.amount) || 0,
+              status: normalizeClaimStatus(claim.status),
+              raw_status: claim.status || "SUBMITTED",
+              source: "claim",
+              description: claim.description || "",
+              receipt: claim.receipt_name || null,
+              receiptUrl: claim.receipt_url || null,
+              employee_name: claim.employee_name || null,
+              currency: claim.currency || "INR",
+              report: claim.report_name || "General",
+              paymentMethod: (claim.payment_method || "")
+                .toUpperCase()
+                .includes("CORPORATE")
+                ? "Corporate Card"
+                : "Personal (Out-of-Pocket)",
+              attendees: claim.attendees || [],
+              manager_remark: claim.manager_remark || null,
+              finance_remark: claim.finance_remark || null,
+            })),
+            ...drafts.map((d: any) => ({
+              id: d.id,
+              date: d.expense_date || (d.updated_at || d.created_at || "").slice(0, 10),
+              merchant: d.merchant || "Untitled draft",
+              category: d.category || "OTHER",
+              amount: Number(d.amount) || 0,
+              status: "Draft",
+              raw_status: "DRAFT",
+              source: "draft",
+              description: d.business_purpose || "",
+              receipt: d.receipt_name || null,
+              currency: d.currency || "INR",
+              report: d.report_name || "Unassigned",
+              paymentMethod: d.payment_method || "Personal (Out-of-Pocket)",
+              attendees: d.attendees || [],
+            })),
+          ].sort((a: any, b: any) => (b.date || "").localeCompare(a.date || "")),
           summary: {
             ready_for_reimbursement: String(approvedAmount),
             pending_approval: String(pendingAmount),
@@ -801,7 +849,6 @@ export async function employeeRequest(
                 "OTHER",
               ],
         reports: ["Q4 Operations", "Client Visit", "General", "Conference 2026"],
-        unlinked_transactions: [],
       };
     } catch {
       responseData = {
@@ -816,8 +863,44 @@ export async function employeeRequest(
           "OTHER",
         ],
         reports: ["General"],
-        unlinked_transactions: [],
       };
+    }
+  }
+
+  // LOAD A SAVED DRAFT
+  else if (path.match(/^\/new-expense\/[^/]+$/) && init.method !== "DELETE") {
+    const draftId = decodeURIComponent(path.split("/").pop() || "");
+    const draftOwnerId = await resolveExpenseOwnerId(employeeId, employeeName, authUser?.id);
+    const { data: savedDraft, error } = await supabase
+      .from("employee_expense_drafts")
+      .select("*")
+      .eq("id", draftId)
+      .eq("employee_id", draftOwnerId)
+      .maybeSingle();
+    if (error || !savedDraft) {
+      responseStatus = error ? 500 : 404;
+      responseData = { detail: error?.message || "Draft not found" };
+    } else {
+      responseData = savedDraft;
+    }
+  }
+
+  // DELETE A SAVED DRAFT
+  else if (path.match(/^\/new-expense\/[^/]+$/) && init.method === "DELETE") {
+    const draftId = decodeURIComponent(path.split("/").pop() || "");
+    const draftOwnerId = await resolveExpenseOwnerId(employeeId, employeeName, authUser?.id);
+    const { data: deletedDraft, error } = await supabase
+      .from("employee_expense_drafts")
+      .delete()
+      .eq("id", draftId)
+      .eq("employee_id", draftOwnerId)
+      .select("id")
+      .maybeSingle();
+    if (error || !deletedDraft) {
+      responseStatus = error ? 500 : 404;
+      responseData = { detail: error?.message || "Draft not found" };
+    } else {
+      responseData = { id: draftId, status: "deleted" };
     }
   }
 
@@ -831,34 +914,26 @@ export async function employeeRequest(
           const parsed = JSON.parse(rawData);
 
           // Resolve employee UUID
-          let submitEmployeeId = employeeId;
-          if (!submitEmployeeId || submitEmployeeId.includes("@")) {
-            // Find an existing UUID from profiles or previous claims
-            const { data: matched } = await supabase
-              .from("expense_claims")
-              .select("employee_id")
-              .ilike("employee_name", employeeName)
-              .limit(1)
-              .maybeSingle();
-
-            submitEmployeeId =
-              matched?.employee_id ||
-              (authUser?.id as string) ||
-              "b8ce7a2d-e91a-47f4-92ba-adb7d0bf5c4d";
-          }
+          const submitEmployeeId = await resolveExpenseOwnerId(
+            employeeId,
+            employeeName,
+            authUser?.id,
+          );
 
           let receiptUrl: string | null = null;
           let receiptName: string | null = null;
+          let receiptPath: string | null = null;
 
           if (file && file.size > 0 && submitEmployeeId) {
             try {
               const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-              const filePath = `${submitEmployeeId}/${Date.now()}-${safeName}`;
+              const filePath = `${submitEmployeeId}/${parsed.id}/${Date.now()}-${safeName}`;
               const { error: uploadError } = await supabase.storage
                 .from("receipts")
                 .upload(filePath, file, { upsert: true });
 
               if (!uploadError) {
+                receiptPath = filePath;
                 const { data: urlData } = supabase.storage
                   .from("receipts")
                   .getPublicUrl(filePath);
@@ -869,6 +944,41 @@ export async function employeeRequest(
               console.warn("Storage upload note:", storageErr);
             }
           }
+
+          const action = init.body.get("action");
+          if (action === "Draft") {
+            const { data: existingDraft } = await supabase
+              .from("employee_expense_drafts")
+              .select("receipt_path,receipt_name,receipt_content_type,receipt_size_bytes")
+              .eq("id", parsed.id)
+              .eq("employee_id", submitEmployeeId)
+              .maybeSingle();
+            const draftRow = {
+              id: parsed.id,
+              employee_id: submitEmployeeId,
+              merchant: parsed.merchant?.trim() || null,
+              expense_date: parsed.date || null,
+              amount: Number(parsed.amount) || 0,
+              currency: "INR",
+              category: parsed.category || null,
+              report_name: parsed.report || null,
+              payment_method: parsed.payment_method || null,
+              business_purpose: parsed.purpose || null,
+              attendees: parsed.attendees || [],
+              linked_transaction_id: parsed.linked_transaction_id || null,
+              receipt_path: receiptPath || existingDraft?.receipt_path || null,
+              receipt_name: receiptName || existingDraft?.receipt_name || null,
+              receipt_content_type: file?.type || existingDraft?.receipt_content_type || null,
+              receipt_size_bytes: file?.size || existingDraft?.receipt_size_bytes || null,
+            };
+            const { data: savedDraft, error: draftError } = await supabase
+              .from("employee_expense_drafts")
+              .upsert(draftRow, { onConflict: "id" })
+              .select()
+              .single();
+            if (draftError) throw new Error(draftError.message);
+            responseData = { id: parsed.id, status: "Draft", draft: savedDraft };
+          } else {
 
           const rawCat = (parsed.category || "OTHER").toUpperCase();
           const validCategories = [
@@ -899,7 +1009,7 @@ export async function employeeRequest(
           else if (rawPm.includes("UPI")) paymentMethod = "PERSONAL_UPI";
           else if (rawPm.includes("CASH")) paymentMethod = "PERSONAL_CASH";
 
-          const claimId = `CLM-${Date.now().toString().slice(-6)}`;
+          const claimId = parsed.id || `CLM-${Date.now().toString().slice(-6)}`;
 
           const { error: insertError } = await supabase
             .from("expense_claims")
@@ -919,6 +1029,9 @@ export async function employeeRequest(
               report_name: parsed.report || "General",
               receipt_url: receiptUrl,
               receipt_name: receiptName,
+              receipt_path: receiptPath,
+              receipt_content_type: file?.type || null,
+              receipt_size_bytes: file?.size || null,
               expense_date: parsed.date || new Date().toISOString().slice(0, 10),
               submitted_at: new Date().toISOString(),
             });
@@ -928,7 +1041,13 @@ export async function employeeRequest(
             throw new Error(insertError.message);
           }
 
+          await supabase
+            .from("employee_expense_drafts")
+            .delete()
+            .eq("id", claimId)
+            .eq("employee_id", submitEmployeeId);
           responseData = { id: claimId, status: "Pending" };
+          }
         }
       }
     } catch (err) {
@@ -944,7 +1063,7 @@ export async function employeeRequest(
   }
 
   return new Response(JSON.stringify(responseData), {
-    status: 200,
+    status: responseStatus,
     headers: { "Content-Type": "application/json" },
   });
 }

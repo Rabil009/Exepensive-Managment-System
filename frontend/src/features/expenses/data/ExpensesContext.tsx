@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { employeeJson } from "@/lib/employee-api";
 import { supabase } from "@/lib/supabase";
 import type { Expense } from "../types";
@@ -22,11 +29,16 @@ type ExpenseStore = {
   loading: boolean;
   error: string;
   refresh: () => Promise<void>;
+  upsertDraft: (draft: Expense) => void;
+  removeDraft: (id: string) => void;
 };
 
 const Context = createContext<ExpenseStore | null>(null);
 
-export function computeSummaryFromExpenses(expenses: Expense[], cardLimit = 100000): ExpenseSummary {
+export function computeSummaryFromExpenses(
+  expenses: Expense[],
+  cardLimit = 100000,
+): ExpenseSummary {
   let pendingAmount = 0;
   let pendingCount = 0;
   let approvedAmount = 0;
@@ -35,8 +47,9 @@ export function computeSummaryFromExpenses(expenses: Expense[], cardLimit = 1000
 
   for (const item of expenses) {
     const amt = Number(item.amount) || 0;
-    const isCard =
-      (item.paymentMethod || "").toLowerCase().includes("corporate");
+    const isCard = (item.paymentMethod || "")
+      .toLowerCase()
+      .includes("corporate");
 
     const st = (item.status || "").toLowerCase();
     if (st === "pending") {
@@ -71,16 +84,34 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const upsertDraft = useCallback((draft: Expense) => {
+    setExpenses((current) =>
+      [draft, ...current.filter((item) => item.id !== draft.id)].sort((a, b) =>
+        b.date.localeCompare(a.date),
+      ),
+    );
+  }, []);
+
+  const removeDraft = useCallback((id: string) => {
+    setExpenses((current) => current.filter((item) => item.id !== id));
+  }, []);
+
   const applyResponse = useCallback((response: OverviewResponse) => {
-    const derived = computeSummaryFromExpenses(response.expenses, Number(response.summary?.card_limit) || 100000);
+    const derived = computeSummaryFromExpenses(
+      response.expenses,
+      Number(response.summary?.card_limit) || 100000,
+    );
     setExpenses(response.expenses);
     setSummary({
       ...derived,
       ...(response.summary || {}),
-      approved_count: response.summary?.approved_count ?? derived.approved_count,
+      approved_count:
+        response.summary?.approved_count ?? derived.approved_count,
       pending_count: response.summary?.pending_count ?? derived.pending_count,
-      card_spending_mtd: response.summary?.card_spending_mtd || derived.card_spending_mtd,
-      card_limit_remaining: response.summary?.card_limit_remaining || derived.card_limit_remaining,
+      card_spending_mtd:
+        response.summary?.card_spending_mtd || derived.card_spending_mtd,
+      card_limit_remaining:
+        response.summary?.card_limit_remaining || derived.card_limit_remaining,
     });
   }, []);
 
@@ -91,7 +122,9 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
       applyResponse(response);
       setError("");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not load expenses.");
+      setError(
+        cause instanceof Error ? cause.message : "Could not load expenses.",
+      );
     } finally {
       setLoading(false);
     }
@@ -101,18 +134,22 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     // Initial fetch
-    employeeJson<OverviewResponse>("/overview").then((response) => {
-      if (active) {
-        applyResponse(response);
-        setError("");
-        setLoading(false);
-      }
-    }).catch((cause: unknown) => {
-      if (active) {
-        setError(cause instanceof Error ? cause.message : "Could not load expenses.");
-        setLoading(false);
-      }
-    });
+    employeeJson<OverviewResponse>("/overview")
+      .then((response) => {
+        if (active) {
+          applyResponse(response);
+          setError("");
+          setLoading(false);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (active) {
+          setError(
+            cause instanceof Error ? cause.message : "Could not load expenses.",
+          );
+          setLoading(false);
+        }
+      });
 
     // Realtime Supabase Channel Listener
     const channel = supabase
@@ -126,7 +163,7 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
               if (active) applyResponse(res);
             })
             .catch(() => {});
-        }
+        },
       )
       .subscribe();
 
@@ -146,7 +183,21 @@ export function ExpensesProvider({ children }: { children: ReactNode }) {
     };
   }, [applyResponse]);
 
-  return <Context.Provider value={{ expenses, summary, loading, error, refresh }}>{children}</Context.Provider>;
+  return (
+    <Context.Provider
+      value={{
+        expenses,
+        summary,
+        loading,
+        error,
+        refresh,
+        upsertDraft,
+        removeDraft,
+      }}
+    >
+      {children}
+    </Context.Provider>
+  );
 }
 
 export function useExpenses() {
@@ -158,6 +209,8 @@ export function useExpenses() {
       loading: false,
       error: "",
       refresh: async () => {},
+      upsertDraft: () => {},
+      removeDraft: () => {},
     };
   }
   return value;

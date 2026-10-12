@@ -15,13 +15,22 @@ type SavedDraft = {
   linked_transaction_id: string | null;
 };
 
+type ExpenseReceiptRecord = {
+  id: string;
+  receipt_url: string | null;
+  receipt_name: string | null;
+  title: string | null;
+  merchant: string | null;
+  amount: number | null;
+  currency: string | null;
+  expense_date: string | null;
+  category: string | null;
+  employee_name: string | null;
+};
+
 export type ExpenseOptions = {
   categories: string[];
   reports: string[];
-  unlinked_transactions: {
-    id: string; card_id: string; transaction_date: string; merchant: string;
-    purpose: string | null; amount: string; currency: string; status: string;
-  }[];
 };
 
 export async function loadExpenseOptions() {
@@ -29,33 +38,67 @@ export async function loadExpenseOptions() {
   return response.json() as Promise<ExpenseOptions>;
 }
 
-export async function saveNewExpense(draft: Draft, file: File | null, submit: boolean) {
+export async function saveNewExpense(
+  draft: Draft,
+  file: File | null,
+  submit: boolean,
+) {
   const body = new FormData();
   body.set("action", submit ? "Submit" : "Draft");
-  body.set("data", JSON.stringify({
-    id: draft.id,
-    merchant: draft.merchant,
-    date: draft.date,
-    amount: draft.amount || "0",
-    category: draft.category,
-    report: draft.report,
-    payment_method: draft.paymentMethod,
-    purpose: draft.purpose,
-    attendees: draft.attendees,
-    linked_transaction_id: draft.linkedTransactionId,
-  }));
+  body.set(
+    "data",
+    JSON.stringify({
+      id: draft.id,
+      merchant: draft.merchant,
+      date: draft.date,
+      amount: draft.amount || "0",
+      category: draft.category,
+      report: draft.report,
+      payment_method: draft.paymentMethod,
+      purpose: draft.purpose,
+      attendees: draft.attendees,
+      linked_transaction_id: draft.linkedTransactionId,
+    }),
+  );
   if (file) body.set("file", file);
-  const response = await employeeRequest("/new-expense", { method: "POST", body });
-  return response.json() as Promise<{ id: string; status: "Draft" | "Pending" }>;
+  const response = await employeeRequest("/new-expense", {
+    method: "POST",
+    body,
+  });
+  const result = (await response.json()) as {
+    id: string;
+    status: "Draft" | "Pending" | "Failed";
+    error?: string;
+    detail?: string;
+  };
+  if (!response.ok || result.status === "Failed") {
+    throw new Error(
+      result.error || result.detail || "Could not save the expense.",
+    );
+  }
+  return result;
 }
 
 export async function loadNewExpense(id: string) {
-  const response = await employeeRequest(`/new-expense/${encodeURIComponent(id)}`);
+  const response = await employeeRequest(
+    `/new-expense/${encodeURIComponent(id)}`,
+  );
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+    throw new Error(error?.detail || "Could not load this draft.");
+  }
   return response.json() as Promise<SavedDraft>;
 }
 
 export async function discardNewExpense(id: string) {
-  await employeeRequest(`/new-expense/${encodeURIComponent(id)}`, { method: "DELETE" });
+  const response = await employeeRequest(
+    `/new-expense/${encodeURIComponent(id)}`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+    throw new Error(error?.detail || "Could not discard this draft.");
+  }
 }
 
 import { supabase } from "@/lib/supabase";
@@ -91,7 +134,9 @@ function generateReceiptSvgBlob(claim: {
   category?: string;
 }): Blob {
   const merchant = claim.merchant || "Business Vendor";
-  const amount = Number(claim.amount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 });
+  const amount = Number(claim.amount || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+  });
   const date = claim.date || new Date().toISOString().slice(0, 10);
   const emp = claim.employeeName || "Employee";
   const cat = claim.category || "General";
@@ -138,11 +183,13 @@ function generateReceiptSvgBlob(claim: {
 }
 
 export async function downloadExpenseReceipt(id: string, filename?: string) {
-  let claimData: any = null;
+  let claimData: ExpenseReceiptRecord | null = null;
   try {
     const { data } = await supabase
       .from("expense_claims")
-      .select("id, receipt_url, receipt_name, title, merchant, amount, currency, expense_date, category, employee_name")
+      .select(
+        "id, receipt_url, receipt_name, title, merchant, amount, currency, expense_date, category, employee_name",
+      )
       .eq("id", id)
       .maybeSingle();
 
@@ -151,7 +198,8 @@ export async function downloadExpenseReceipt(id: string, filename?: string) {
     console.warn("Direct receipt lookup note:", err);
   }
 
-  const downloadName = claimData?.receipt_name || filename || `${id}-receipt.png`;
+  const downloadName =
+    claimData?.receipt_name || filename || `${id}-receipt.png`;
 
   // 1. If base64 Data URL, decode directly to binary Blob
   if (claimData?.receipt_url && claimData.receipt_url.startsWith("data:")) {
@@ -163,7 +211,8 @@ export async function downloadExpenseReceipt(id: string, filename?: string) {
   // 2. If valid HTTP link (excluding broken bucket link)
   if (
     claimData?.receipt_url &&
-    (claimData.receipt_url.startsWith("http://") || claimData.receipt_url.startsWith("https://")) &&
+    (claimData.receipt_url.startsWith("http://") ||
+      claimData.receipt_url.startsWith("https://")) &&
     !claimData.receipt_url.includes("/storage/v1/object/public/receipts/")
   ) {
     try {
@@ -180,7 +229,9 @@ export async function downloadExpenseReceipt(id: string, filename?: string) {
 
   // 3. Fallback via employeeRequest
   try {
-    const response = await employeeRequest(`/new-expense/receipts/${encodeURIComponent(id)}`);
+    const response = await employeeRequest(
+      `/new-expense/receipts/${encodeURIComponent(id)}`,
+    );
     if (response.ok) {
       const blob = await response.blob();
       if (blob && blob.size > 0) {
@@ -194,28 +245,36 @@ export async function downloadExpenseReceipt(id: string, filename?: string) {
 
   // 4. Guaranteed fallback: Generate official verified Tax Invoice SVG and download
   const safeFilename =
-    downloadName.endsWith(".png") || downloadName.endsWith(".jpg") || downloadName.endsWith(".jpeg")
+    downloadName.endsWith(".png") ||
+    downloadName.endsWith(".jpg") ||
+    downloadName.endsWith(".jpeg")
       ? downloadName.replace(/\.(png|jpg|jpeg)$/i, ".svg")
       : downloadName.includes(".")
-      ? downloadName
-      : `${downloadName}.svg`;
+        ? downloadName
+        : `${downloadName}.svg`;
 
   const fallbackBlob = generateReceiptSvgBlob({
     id: claimData?.id || id,
-    merchant: claimData?.merchant || claimData?.title,
-    amount: claimData?.amount,
-    date: claimData?.expense_date,
-    employeeName: claimData?.employee_name,
-    category: claimData?.category,
+    merchant: claimData?.merchant || claimData?.title || undefined,
+    amount: claimData?.amount ?? undefined,
+    date: claimData?.expense_date ?? undefined,
+    employeeName: claimData?.employee_name ?? undefined,
+    category: claimData?.category ?? undefined,
   });
 
   triggerBlobDownload(fallbackBlob, safeFilename);
 }
 
-export async function completeSubmittedExpense(id: string, update: { report?: string; file?: File }) {
+export async function completeSubmittedExpense(
+  id: string,
+  update: { report?: string; file?: File },
+) {
   const body = new FormData();
   if (update.report) body.set("report", update.report);
   if (update.file) body.set("file", update.file);
-  const response = await employeeRequest(`/new-expense/claims/${encodeURIComponent(id)}`, { method: "PATCH", body });
+  const response = await employeeRequest(
+    `/new-expense/claims/${encodeURIComponent(id)}`,
+    { method: "PATCH", body },
+  );
   return response.json();
 }

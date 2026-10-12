@@ -136,6 +136,11 @@ def card_usage(cards: list[dict], transactions: list[dict], limits: list[dict], 
 
 def analytics(expenses: list[dict], cards: list[dict], transactions: list[dict], month: str) -> dict:
     month_items = [row for row in expenses if row["status"] != "Draft" and row["date"].startswith(month)]
+    approval_counts = {
+        "approved": sum(row["status"] in {"Approved", "Reimbursed"} for row in month_items),
+        "rejected": sum(row["status"] == "Rejected" for row in month_items),
+        "pending": sum(row["status"] == "Pending" for row in month_items),
+    }
     totals = defaultdict(Decimal, {
         "total_spend": Decimal(0), "pending_approval": Decimal(0),
         "reimbursed": Decimal(0), "corporate_card_spend": Decimal(0),
@@ -161,6 +166,7 @@ def analytics(expenses: list[dict], cards: list[dict], transactions: list[dict],
     attached = sum(bool(row.get("receipt")) for row in month_items)
     return {
         "month": month,
+        "approval_counts": approval_counts,
         "currency": "INR",
         "totals": {key: str(value) for key, value in totals.items()},
         "categories": [{"name": key, "amount": str(value)} for key, value in sorted(categories.items())],
