@@ -61,12 +61,12 @@ export function StatusBadge({ tone, status, children, label, className }: Status
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-xs font-medium whitespace-nowrap bg-transparent",
+        "inline-flex items-center gap-1.5 text-xs font-medium whitespace-nowrap bg-transparent transition-colors duration-200 ease-out",
         config.text,
         className
       )}
     >
-      <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", config.dot)} />
+      <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 transition-all duration-200 ease-out", config.dot)} />
       {content}
     </span>
   );

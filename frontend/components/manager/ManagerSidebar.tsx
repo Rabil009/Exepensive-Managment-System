@@ -166,15 +166,15 @@ export function ManagerSidebar({
                 type="button"
                 onClick={() => setActiveView(item.label)}
                 title={isCollapsed ? item.label : undefined}
-                className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
+                className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-all duration-200 ease-out active:scale-[0.98] ${
                   isActive
                     ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs"
-                    : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                    : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:translate-x-0.5"
                 }`}
               >
                 <div className="h-7 w-7 shrink-0 flex items-center justify-center">
                   <item.icon
-                    className={`h-4 w-4 stroke-[1.85] transition-colors ${
+                    className={`h-4 w-4 stroke-[1.85] transition-all duration-200 ease-out group-hover:scale-105 ${
                       isActive
                         ? "text-white dark:text-black"
                         : "text-zinc-800 group-hover:text-white dark:text-zinc-400 dark:group-hover:text-black"
@@ -194,7 +194,7 @@ export function ManagerSidebar({
                   </span>
                   {item.count !== null && item.count > 0 && (
                     <span
-                      className={`h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-medium leading-none shrink-0 ${
+                      className={`h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-medium leading-none shrink-0 transition-transform duration-200 group-hover:scale-105 ${
                         isActive
                           ? "bg-white/20 text-white dark:bg-black/15 dark:text-black font-semibold"
                           : "bg-[#E5E7EB] text-zinc-800 group-hover:bg-white/20 group-hover:text-white dark:bg-white/[0.12] dark:text-zinc-200 dark:group-hover:bg-black/15 dark:group-hover:text-black"
@@ -235,15 +235,15 @@ export function ManagerSidebar({
                   type="button"
                   onClick={() => setActiveView(item.label)}
                   title={isCollapsed ? item.label : undefined}
-                  className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
+                  className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-all duration-200 ease-out active:scale-[0.98] ${
                     isActive
                       ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs"
-                      : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+                      : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black hover:translate-x-0.5"
                   }`}
                 >
                   <div className="h-7 w-7 shrink-0 flex items-center justify-center">
                     <item.icon
-                      className={`h-4 w-4 stroke-[1.85] transition-colors ${
+                      className={`h-4 w-4 stroke-[1.85] transition-all duration-200 ease-out group-hover:scale-105 ${
                         isActive
                           ? "text-white dark:text-black"
                           : "text-zinc-800 group-hover:text-white dark:text-zinc-400 dark:group-hover:text-black"
