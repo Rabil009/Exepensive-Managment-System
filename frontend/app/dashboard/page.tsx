@@ -166,7 +166,7 @@ function DashboardContent() {
                 <div className="lg:col-span-6">
                   <ExceptionsQueue
                     onViewAll={() => setActiveView("Exceptions")}
-                    onReviewException={() => setActiveView("Verification")}
+                    onReviewException={() => setActiveView("Exceptions")}
                   />
                 </div>
               </div>
