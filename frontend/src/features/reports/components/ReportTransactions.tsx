@@ -1,10 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Search, Download, CreditCard, Wallet, RotateCcw } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import type { ReportsModel } from "../hooks/useReports";
 import { StatusBadge } from "../../../shared/components/StatusBadge";
+import { ReceiptModal } from "@/components/shared/ReceiptModal";
+import type { Expense } from "../../expenses/types";
 import { displayDate, money } from "../../../shared/utils/format";
 import { formatTotal, isPersonal } from "../utils/reportTotals";
 import { downloadExpenseReceipt } from "../../expenses/data/newExpenseApi";
@@ -49,6 +51,8 @@ export function ReportTransactions({ model }: Props) {
     clearFilters,
     setNotice,
   } = model;
+
+  const [activeReceipt, setActiveReceipt] = useState<Expense | null>(null);
 
   return (
     <section
@@ -225,13 +229,24 @@ export function ReportTransactions({ model }: Props) {
                 </td>
 
                 <td className="py-3.5 px-4">
-                  {item.receipt ? <button type="button" onClick={() => void downloadExpenseReceipt(item.id, item.receipt || "receipt").catch((cause: unknown) => setNotice(cause instanceof Error ? cause.message : "Could not download receipt."))} className="hover:underline"><StatusBadge tone="success">
-                    {item.receipt === "Auto-Matched Invoice"
-                      ? "Invoice Attached"
-                      : item.receipt === "Verified Receipt"
-                      ? "Receipt Attached"
-                      : item.receipt}
-                  </StatusBadge></button> : <StatusBadge tone="warning">Receipt Missing</StatusBadge>}
+                  {item.receipt ? (
+                    <button
+                      type="button"
+                      onClick={() => setActiveReceipt(item)}
+                      className="hover:underline cursor-pointer"
+                      title="Click to view and download receipt"
+                    >
+                      <StatusBadge tone="success">
+                        {item.receipt === "Auto-Matched Invoice"
+                          ? "Invoice Attached"
+                          : item.receipt === "Verified Receipt"
+                          ? "Receipt Attached"
+                          : item.receipt}
+                      </StatusBadge>
+                    </button>
+                  ) : (
+                    <StatusBadge tone="warning">Receipt Missing</StatusBadge>
+                  )}
                 </td>
 
                 <td className="py-3.5 px-4 text-right font-semibold tabular-nums text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
@@ -281,6 +296,22 @@ export function ReportTransactions({ model }: Props) {
           </tfoot>
         </table>
       </div>
+
+      {activeReceipt && (
+        <ReceiptModal
+          isOpen={Boolean(activeReceipt)}
+          onClose={() => setActiveReceipt(null)}
+          claimId={activeReceipt.id}
+          receiptName={activeReceipt.receipt}
+          receiptUrl={activeReceipt.receiptUrl}
+          merchant={activeReceipt.merchant}
+          amount={activeReceipt.amount}
+          currency={activeReceipt.currency}
+          date={activeReceipt.date}
+          category={activeReceipt.category}
+          employeeName={activeReceipt.employee_name}
+        />
+      )}
     </section>
   );
 }

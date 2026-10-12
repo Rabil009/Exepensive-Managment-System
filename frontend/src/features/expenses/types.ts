@@ -9,10 +9,12 @@ export type Expense = {
   status: ExpenseStatus;
   description: string;
   receipt?: string;
+  receiptUrl?: string;
   currency?: string;
   report?: string;
   paymentMethod?: string;
   attendees?: string[];
   raw_status?: string;
   source?: "claim" | "draft";
+  employee_name?: string;
 };

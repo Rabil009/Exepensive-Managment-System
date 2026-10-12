@@ -240,6 +240,8 @@ export async function employeeRequest(
             source: "claim",
             description: c.description || "",
             receipt: c.receipt_name || null,
+            receiptUrl: c.receipt_url || null,
+            employee_name: c.employee_name || null,
             currency: c.currency || "INR",
             report: c.report_name || "General",
             paymentMethod: (c.payment_method || "")

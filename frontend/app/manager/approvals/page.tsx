@@ -28,6 +28,7 @@ import { ThemeProvider, useTheme } from "@/lib/theme-store";
 import { SettingsModal } from "@/components/dashboard/SettingsModal";
 import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
+import { ReceiptModal } from "@/components/shared/ReceiptModal";
 import { useRouter } from "next/navigation";
 import {
   fetchManagerClaims,
@@ -72,6 +73,7 @@ function ApprovalsPageInner() {
   const [showSettings, setShowSettings] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
 
   // Claims & Inspection
   const [activeTab, setActiveTab] = useState<"CLAIMS" | "CARDS">("CLAIMS");
@@ -804,20 +806,17 @@ function ApprovalsPageInner() {
                       </span>
                     </div>
                   )}
-                  {inspectClaim.receiptUrl && (
-                    <div className="pt-2 border-t dark:border-white/[0.06] border-zinc-200/60 flex items-center justify-between">
-                      <span className="text-zinc-500">Invoice Voucher:</span>
-                      <a
-                        href={inspectClaim.receiptUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-blue-500 hover:text-blue-400 font-medium flex items-center gap-1.5 underline"
-                      >
-                        <FileText className="h-3.5 w-3.5" />
-                        <span>{inspectClaim.receiptName || "View Tax Invoice"}</span>
-                      </a>
-                    </div>
-                  )}
+                  <div className="pt-2 border-t dark:border-white/[0.06] border-zinc-200/60 flex items-center justify-between">
+                    <span className="text-zinc-500">Invoice Voucher:</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowReceiptModal(true)}
+                      className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      <span>{inspectClaim.receiptName || "View Tax Invoice & Receipt"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -860,6 +859,22 @@ function ApprovalsPageInner() {
       {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
       {showSearch && <SearchModal onClose={() => setShowSearch(false)} />}
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+
+      {showReceiptModal && inspectClaim && (
+        <ReceiptModal
+          isOpen={showReceiptModal}
+          onClose={() => setShowReceiptModal(false)}
+          claimId={inspectClaim.id}
+          receiptName={inspectClaim.receiptName}
+          receiptUrl={inspectClaim.receiptUrl}
+          merchant={inspectClaim.merchant || inspectClaim.description}
+          amount={inspectClaim.amount}
+          currency="INR"
+          date={inspectClaim.date}
+          employeeName={inspectClaim.employeeName}
+          category={inspectClaim.category}
+        />
+      )}
     </div>
   );
 }
