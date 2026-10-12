@@ -1,7 +1,16 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { Search, Paperclip, AlertTriangle, ShieldCheck, Filter, ArrowUpRight } from "lucide-react";
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  Search,
+  Paperclip,
+  AlertTriangle,
+  ShieldCheck,
+  Filter,
+  ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useFinanceStore } from "@/lib/finance-store";
 import type { ExpenseClaim } from "@/types/finance";
 import { useTheme } from "@/lib/theme-store";
@@ -17,6 +26,14 @@ export function ExceptionsView() {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [inspectClaim, setInspectClaim] = useState<ExpenseClaim | null>(null);
+
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  // Reset page when filter or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedFilter, searchQuery]);
 
   // Active flagged claims (unresolved issues)
   const activeFlaggedClaims = useMemo(() => {
@@ -86,6 +103,41 @@ export function ExceptionsView() {
         (c.category || "").toLowerCase().includes(q)
     );
   }, [currentCategoryList, searchQuery]);
+
+  // Pagination calculation
+  const totalItems = displayedClaims.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedClaims = useMemo(() => {
+    const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
+    return displayedClaims.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [displayedClaims, safePage]);
+
+  const getVisiblePages = (current: number, total: number) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | string)[] = [];
+    if (current <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    } else if (current >= total - 3) {
+      pages.push(1);
+      pages.push("...");
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push("...");
+      pages.push(current - 1);
+      pages.push(current);
+      pages.push(current + 1);
+      pages.push("...");
+      pages.push(total);
+    }
+    return pages;
+  };
 
   return (
     <div className="space-y-4">
@@ -348,7 +400,7 @@ export function ExceptionsView() {
                 isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
               }`}
             >
-              {displayedClaims.length === 0 ? (
+              {paginatedClaims.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -360,7 +412,7 @@ export function ExceptionsView() {
                   </td>
                 </tr>
               ) : (
-                displayedClaims.map((claim) => {
+                paginatedClaims.map((claim) => {
                   const isMissingReceipt = !claim.receiptUrl || claim.receiptUrl.trim() === "";
                   return (
                     <tr
@@ -488,6 +540,91 @@ export function ExceptionsView() {
             </tbody>
           </table>
         </div>
+
+        {/* Exceptions Pagination Controls */}
+        {totalItems > 0 && (
+          <div
+            className={`px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs select-none ${
+              isDark ? "border-white/[0.06] bg-[#141418]/60" : "border-zinc-200/60 bg-zinc-50/70"
+            }`}
+          >
+            <div className={isDark ? "text-zinc-400" : "text-zinc-500"}>
+              Showing{" "}
+              <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                {(safePage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safePage * ITEMS_PER_PAGE, totalItems)}
+              </span>{" "}
+              of{" "}
+              <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                {totalItems}
+              </span>{" "}
+              exceptions
+            </div>
+
+            <div className="flex items-center gap-1.5 self-center sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+                className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                    : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                }`}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span>Previous</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {getVisiblePages(safePage, totalPages).map((item, idx) => {
+                  if (item === "...") {
+                    return (
+                      <span
+                        key={`ellipsis-${idx}`}
+                        className={`px-1.5 text-xs ${isDark ? "text-zinc-500" : "text-zinc-400"}`}
+                      >
+                        …
+                      </span>
+                    );
+                  }
+                  const pageNum = Number(item);
+                  return (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`min-w-7 h-7 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                        pageNum === safePage
+                          ? isDark
+                            ? "bg-white text-zinc-950 font-semibold shadow-xs"
+                            : "bg-zinc-950 text-white font-semibold shadow-xs"
+                          : isDark
+                          ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                          : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+                className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                    : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                }`}
+              >
+                <span>Next</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Interactive Receipt Inspection & Upload Modal */}
