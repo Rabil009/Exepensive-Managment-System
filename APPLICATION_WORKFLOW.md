@@ -183,3 +183,4 @@ All accounts are pre-configured in Supabase `profiles` with active RLS permissio
 * **`expense_policies`**: Spending limits per category (`HOTEL`, `MEALS`, `TRAVEL`, etc.) and receipt threshold rules.
 * **`employee_cards`**: Corporate cards issued to employees with monthly limits and active status.
 * **`storage.buckets ('receipts')`**: Storage for uploaded PDF tax invoices and JPG/PNG receipt vouchers.
+

@@ -1044,6 +1044,20 @@ function ManagerDashboardInner() {
                       </span>
                     </div>
                   )}
+                  {inspectClaim.receiptUrl && (
+                    <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
+                      <span className="text-zinc-500">Invoice Voucher:</span>
+                      <a
+                        href={inspectClaim.receiptUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-500 hover:text-blue-400 font-medium flex items-center gap-1.5 underline"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>{inspectClaim.receiptName || "View Tax Invoice"}</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
