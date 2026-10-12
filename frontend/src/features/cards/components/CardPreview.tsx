@@ -15,7 +15,7 @@ export function CardPreview({ model }: { model: Pick<CardControlsModel, "card" |
       <div className="rounded-xl p-4 border bg-white dark:bg-[#111113] border-zinc-200 dark:border-white/[0.07] flex items-center justify-between gap-3">
         <span className="text-xs text-zinc-600 dark:text-zinc-400">Card status: <strong>{!state.active ? "Inactive" : state.frozen ? "Frozen" : "Active"}</strong></span>
         <button type="button" onClick={() => void update({ ...state, active: !state.active, frozen: state.active ? state.frozen : false })}
-          className="h-8 px-3 rounded-lg border text-xs font-medium dark:border-white/[0.08] inline-flex items-center gap-1.5">
+          className="h-8 px-3 rounded-lg border text-xs font-medium dark:border-white/[0.08] inline-flex items-center gap-1.5 cursor-pointer">
           <Power className="h-3.5 w-3.5" />{state.active ? "Deactivate" : "Activate"}
         </button>
       </div>

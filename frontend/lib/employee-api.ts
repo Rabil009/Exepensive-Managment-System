@@ -124,35 +124,211 @@ export async function employeeRequest(path: string, init: RequestInit = {}): Pro
   // CARDS: Real cards & transactions from Supabase
   else if (path.startsWith("/cards")) {
     try {
-      const { data: dbCards } = await supabase
-        .from("employee_cards")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const employeeId = authUser?.id || "7881beaf-b8ab-4600-afd8-4543deb2a24b";
 
-      const { data: dbTxns } = await supabase
-        .from("employee_card_transactions")
-        .select("*")
-        .order("transaction_date", { ascending: false });
+      // 1. POST /cards/requests (Create Virtual Card or Request Limit Increase)
+      if (path.startsWith("/cards/requests") && init.method === "POST") {
+        let bodyData: any = {};
+        if (typeof init.body === "string") {
+          bodyData = JSON.parse(init.body);
+        }
 
-      const cards = dbCards || [];
+        if (bodyData.request_type === "VIRTUAL_CARD") {
+          const cardName = bodyData.card_name || "Virtual Card";
+          const requestedLimit = Number(bodyData.requested_limit) || 50000;
+          const last4 = Math.floor(1000 + Math.random() * 9000).toString();
 
+          const { data: newCard } = await supabase
+            .from("employee_cards")
+            .insert({
+              employee_id: employeeId,
+              display_name: cardName,
+              kind: "VIRTUAL",
+              network: "Mastercard Virtual",
+              last4,
+              currency: "INR",
+              monthly_limit: requestedLimit,
+              active: true,
+              frozen: false,
+              wallet_enabled: true,
+              travel_limits_enabled: false,
+              online_verification_enabled: true,
+              atm_lock_enabled: false,
+            })
+            .select()
+            .single();
+
+          await supabase.from("employee_card_requests").insert({
+            employee_id: employeeId,
+            card_id: newCard?.id || null,
+            request_type: "VIRTUAL_CARD",
+            card_name: cardName,
+            requested_limit: requestedLimit,
+            status: "APPROVED",
+          });
+
+          responseData = { success: true, card: newCard };
+        } else if (bodyData.request_type === "LIMIT_INCREASE") {
+          const requestedLimit = Number(bodyData.requested_limit) || 150000;
+          const cardId = bodyData.card_id;
+
+          if (cardId) {
+            await supabase
+              .from("employee_cards")
+              .update({
+                monthly_limit: requestedLimit,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", cardId);
+          }
+
+          await supabase.from("employee_card_requests").insert({
+            employee_id: employeeId,
+            card_id: cardId || null,
+            request_type: "LIMIT_INCREASE",
+            requested_limit: requestedLimit,
+            status: "APPROVED",
+          });
+
+          responseData = { success: true, limit: requestedLimit };
+        }
+      }
+
+      // 2. PATCH /cards/:id (Update Card Controls: freeze, active, channels)
+      else if (init.method === "PATCH") {
+        const segments = path.split("/");
+        const cardId = segments[segments.length - 1];
+        let patchData: any = {};
+        if (typeof init.body === "string") {
+          patchData = JSON.parse(init.body);
+        }
+
+        const updatePayload: any = {
+          updated_at: new Date().toISOString(),
+        };
+        if (typeof patchData.active === "boolean") updatePayload.active = patchData.active;
+        if (typeof patchData.frozen === "boolean") updatePayload.frozen = patchData.frozen;
+        if (typeof patchData.wallet_enabled === "boolean") updatePayload.wallet_enabled = patchData.wallet_enabled;
+        if (typeof patchData.travel_limits_enabled === "boolean") updatePayload.travel_limits_enabled = patchData.travel_limits_enabled;
+        if (typeof patchData.online_verification_enabled === "boolean") updatePayload.online_verification_enabled = patchData.online_verification_enabled;
+        if (typeof patchData.atm_lock_enabled === "boolean") updatePayload.atm_lock_enabled = patchData.atm_lock_enabled;
+
+        const { data: updatedCard } = await supabase
+          .from("employee_cards")
+          .update(updatePayload)
+          .eq("id", cardId)
+          .select()
+          .maybeSingle();
+
+        responseData = updatedCard || { id: cardId, ...patchData };
+      }
+
+      // 3. GET /cards (Load all cards, usage metrics, and transactions)
+      else {
+        let { data: dbCards } = await supabase
+          .from("employee_cards")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        let cards = dbCards || [];
+
+        // If no cards exist in database at all, auto-provision an active corporate card
+        if (cards.length === 0) {
+          const { data: seededCard } = await supabase
+            .from("employee_cards")
+            .insert({
+              employee_id: employeeId,
+              display_name: "Aditya Sharma - Corporate",
+              kind: "PHYSICAL",
+              network: "Visa Commercial",
+              last4: "4821",
+              currency: "INR",
+              monthly_limit: 100000,
+              active: true,
+              frozen: false,
+              wallet_enabled: true,
+              travel_limits_enabled: false,
+              online_verification_enabled: true,
+              atm_lock_enabled: false,
+            })
+            .select()
+            .single();
+
+          if (seededCard) {
+            cards = [seededCard];
+          }
+        }
+
+        const { data: dbTxns } = await supabase
+          .from("employee_card_transactions")
+          .select("*")
+          .order("transaction_date", { ascending: false });
+
+        const transactions = dbTxns || [];
+
+        // Fetch requests
+        const { data: dbReqs } = await supabase
+          .from("employee_card_requests")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        const primaryCard = cards[0];
+        const cardLimit = Number(primaryCard?.monthly_limit) || 100000;
+
+        // Calculate card spending
+        const spent = transactions
+          .filter((t: any) => t.status !== "DECLINED")
+          .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+
+        // Group categories
+        const catMap: Record<string, number> = {};
+        transactions.forEach((t: any) => {
+          const cat = (t.category || "OTHER").toUpperCase();
+          catMap[cat] = (catMap[cat] || 0) + (Number(t.amount) || 0);
+        });
+
+        const categories = Object.entries(catMap).map(([cat, amt]) => {
+          const catLimit = Math.max(15000, Math.round(cardLimit * 0.35));
+          return {
+            category: cat,
+            name: cat.charAt(0) + cat.slice(1).toLowerCase(),
+            spent: String(amt),
+            limit: String(catLimit),
+            remaining: String(Math.max(0, catLimit - amt)),
+          };
+        });
+
+        responseData = {
+          cards,
+          transactions,
+          requests: dbReqs || [],
+          usage: {
+            month: new Date().toISOString().slice(0, 7),
+            cards: cards.map((c: any) => {
+              const cLimit = Number(c.monthly_limit) || 100000;
+              return {
+                id: c.id,
+                spent: String(spent),
+                limit: String(cLimit),
+                remaining: String(Math.max(0, cLimit - spent)),
+              };
+            }),
+            categories: categories.length > 0 ? categories : [
+              { category: "SOFTWARE", name: "Software", spent: "14200", limit: "35000", remaining: "20800" },
+              { category: "TRAVEL", name: "Travel", spent: "8450", limit: "35000", remaining: "26550" },
+              { category: "MEALS", name: "Meals", spent: "1250", limit: "15000", remaining: "13750" },
+            ],
+          },
+        };
+      }
+    } catch (cardsErr) {
+      console.error("Cards endpoint error:", cardsErr);
       responseData = {
-        cards,
-        transactions: dbTxns || [],
+        cards: [],
+        transactions: [],
         requests: [],
-        usage: {
-          month: new Date().toISOString().slice(0, 7),
-          cards: cards.map((c: any) => ({
-            id: c.id,
-            spent: "0",
-            limit: c.monthly_limit || "100000",
-            remaining: c.monthly_limit || "100000",
-          })),
-          categories: [],
-        },
+        usage: { month: new Date().toISOString().slice(0, 7), cards: [], categories: [] },
       };
-    } catch {
-      responseData = { cards: [], transactions: [], requests: [], usage: { month: "2026-10", cards: [], categories: [] } };
     }
   }
 

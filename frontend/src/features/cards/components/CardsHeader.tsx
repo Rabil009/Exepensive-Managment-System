@@ -30,8 +30,11 @@ export function CardsHeader({ model }: Props) {
         <button
           type="button"
           aria-pressed={state.frozen}
-          disabled={!card}
           onClick={() => {
+            if (!card) {
+              openDialog("virtual");
+              return;
+            }
             void update({ ...state, frozen: !state.frozen });
           }}
           className={`h-8 px-3 rounded-lg border text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs ${
@@ -51,8 +54,13 @@ export function CardsHeader({ model }: Props) {
         {/* Request Limit Increase */}
         <button
           type="button"
-          disabled={!card}
-          onClick={() => openDialog("limit")}
+          onClick={() => {
+            if (!card) {
+              openDialog("virtual");
+              return;
+            }
+            openDialog("limit");
+          }}
           className="h-8 px-3 rounded-lg border text-xs font-medium bg-white dark:bg-[#111113] border-zinc-200/80 dark:border-white/[0.08] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-[#18181D] transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
         >
           <ArrowUpRight className="h-3.5 w-3.5 text-zinc-400" />
