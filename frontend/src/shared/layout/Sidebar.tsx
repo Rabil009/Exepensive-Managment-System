@@ -151,10 +151,10 @@ export function Sidebar({
           className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
             isCollapsed
               ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-              : "w-[160px] opacity-100 translate-x-0 ml-2.5"
+              : "w-[130px] opacity-100 translate-x-0 ml-2"
           }`}
         >
-          <span className="text-[13.5px] font-medium truncate">
+          <span className="text-[13px] font-medium truncate">
             {item.label}
           </span>
         </div>
@@ -168,8 +168,8 @@ export function Sidebar({
       <aside
         style={{ willChange: "width" }}
         aria-label="Employee Navigation"
-        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-300 ease-in-out ${
-          isCollapsed ? "w-[64px]" : "w-[240px]"
+        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2 py-3 transition-[width] duration-300 ease-in-out ${
+          isCollapsed ? "w-[56px]" : "w-[200px]"
         } ${
           isDark
             ? "bg-[#131316] border-white/[0.08] text-[#F4F4F5]"
@@ -185,7 +185,7 @@ export function Sidebar({
             onClick={onToggleSidebar}
             title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
+            className={`group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer transition-colors duration-150 ${
               isDark
                 ? "hover:bg-white/[0.08]"
                 : "hover:bg-zinc-200/60"
@@ -198,20 +198,6 @@ export function Sidebar({
             }`}>
               <PanelLeft className="h-4 w-4 stroke-[1.85]" />
             </div>
-
-            <div
-              className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
-                isCollapsed
-                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
-              }`}
-            >
-              <span className={`text-[15px] font-semibold tracking-tight truncate ${
-                isDark ? "text-white" : "text-zinc-900"
-              }`}>
-                Payout
-              </span>
-            </div>
           </button>
         </div>
 
@@ -221,10 +207,10 @@ export function Sidebar({
         </nav>
 
         {/* Expenses Group */}
-        <div className="mt-3 w-full">
-          <div className="h-6 w-full flex items-center relative mb-1">
+        <div className="mt-2.5 w-full">
+          <div className="h-5 w-full flex items-center relative mb-1">
             <span
-              className={`text-[12px] font-normal px-2 whitespace-nowrap transition-all duration-300 ease-in-out ${
+              className={`text-[11px] font-medium tracking-wide uppercase px-1.5 whitespace-nowrap transition-all duration-300 ease-in-out ${
                 isDark ? "text-zinc-400" : "text-zinc-500"
               } ${
                 isCollapsed
@@ -240,7 +226,7 @@ export function Sidebar({
               }`}
             >
               <div
-                className={`w-6 h-[1px] ${
+                className={`w-5 h-[1px] ${
                   isDark ? "bg-white/[0.08]" : "bg-zinc-200/80"
                 }`}
               />
@@ -253,11 +239,11 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Bottom Section: Settings */}
-      <div className="w-full space-y-1">
-        <div className="h-4 w-full flex items-center justify-center">
+      {/* Bottom Section: Settings, Help, and Payout Brand */}
+      <div className="w-full space-y-0.5">
+        <div className="h-3 w-full flex items-center justify-center mb-0.5">
           <div
-            className={`w-6 h-[1px] transition-opacity duration-300 ${
+            className={`w-5 h-[1px] transition-opacity duration-300 ${
               isDark ? "bg-white/[0.08]" : "bg-zinc-200/80"
             } ${
               isCollapsed ? "opacity-100" : "opacity-0"
@@ -265,44 +251,12 @@ export function Sidebar({
           />
         </div>
 
-        {onOpenHelp && (
-          <button
-            type="button"
-            onClick={onOpenHelp}
-            title={isCollapsed ? "Get Help" : undefined}
-            className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
-              isDark
-                ? "text-zinc-300 hover:bg-white hover:text-black"
-                : "text-zinc-900 hover:bg-black hover:text-white"
-            }`}
-          >
-            <div className="h-7 w-7 shrink-0 flex items-center justify-center">
-              <HelpCircle
-                className={`h-4 w-4 stroke-[1.85] transition-colors ${
-                  isDark
-                    ? "text-zinc-400 group-hover:text-black"
-                    : "text-zinc-800 group-hover:text-white"
-                }`}
-              />
-            </div>
-            <div
-              className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
-                isCollapsed
-                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
-              }`}
-            >
-              <span className="text-[13.5px] font-medium">Get Help</span>
-            </div>
-          </button>
-        )}
-
         {onOpenSettings && (
           <button
             type="button"
             onClick={onOpenSettings}
             title={isCollapsed ? "Settings" : undefined}
-            className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
+            className={`group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer transition-colors duration-150 ${
               isDark
                 ? "text-zinc-300 hover:bg-white hover:text-black"
                 : "text-zinc-900 hover:bg-black hover:text-white"
@@ -321,13 +275,76 @@ export function Sidebar({
               className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                 isCollapsed
                   ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
+                  : "w-[130px] opacity-100 translate-x-0 ml-2"
               }`}
             >
-              <span className="text-[13.5px] font-medium">Settings</span>
+              <span className="text-[13px] font-medium">Settings</span>
             </div>
           </button>
         )}
+
+        {onOpenHelp && (
+          <button
+            type="button"
+            onClick={onOpenHelp}
+            title={isCollapsed ? "Get Help" : undefined}
+            className={`group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer transition-colors duration-150 ${
+              isDark
+                ? "text-zinc-300 hover:bg-white hover:text-black"
+                : "text-zinc-900 hover:bg-black hover:text-white"
+            }`}
+          >
+            <div className="h-7 w-7 shrink-0 flex items-center justify-center">
+              <HelpCircle
+                className={`h-4 w-4 stroke-[1.85] transition-colors ${
+                  isDark
+                    ? "text-zinc-400 group-hover:text-black"
+                    : "text-zinc-800 group-hover:text-white"
+                }`}
+              />
+            </div>
+            <div
+              className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
+                isCollapsed
+                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  : "w-[130px] opacity-100 translate-x-0 ml-2"
+              }`}
+            >
+              <span className="text-[13px] font-medium">Get Help</span>
+            </div>
+          </button>
+        )}
+
+        {/* Payout Brand Footer below Get Help */}
+        <div className={`pt-2 pb-0.5 border-t mt-1.5 w-full overflow-hidden ${
+          isDark ? "border-white/[0.06]" : "border-zinc-200/70"
+        }`}>
+          <div className="flex items-center h-8 px-1 rounded-lg select-none">
+            <div className="h-7 w-7 shrink-0 flex items-center justify-center">
+              <div className={`h-5 w-5 rounded-md flex items-center justify-center text-[10px] font-bold tracking-tight shadow-xs ${
+                isDark ? "bg-white text-black" : "bg-zinc-900 text-white"
+              }`}>
+                P
+              </div>
+            </div>
+            <div
+              className={`flex items-center justify-between whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
+                isCollapsed
+                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  : "w-[125px] opacity-100 translate-x-0 ml-2"
+              }`}
+            >
+              <span className={`text-[12.5px] font-semibold tracking-tight ${
+                isDark ? "text-zinc-200" : "text-zinc-900"
+              }`}>
+                Payout
+              </span>
+              <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                v1.0
+              </span>
+            </div>
+          </div>
+        </div>
 
       </div>
       </aside>

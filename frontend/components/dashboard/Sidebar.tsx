@@ -178,10 +178,10 @@ export function Sidebar({
       <aside
         style={{ willChange: "width" }}
         aria-label="Finance Navigation"
-        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 ${
+        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2 py-3 ${
           mounted ? "transition-[width] duration-300 ease-in-out" : ""
         } ${
-          isCollapsed ? "w-[64px]" : "w-[240px]"
+          isCollapsed ? "w-[56px]" : "w-[200px]"
         } bg-[#F7F7F8] dark:bg-[#131316] border-zinc-200/90 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5]`}
       >
       {/* Top Group: Brand Header & Navigation */}
@@ -194,22 +194,10 @@ export function Sidebar({
               onClick={handleToggle}
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className="group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 hover:bg-zinc-200/60 dark:hover:bg-white/[0.08]"
+              className="group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer transition-colors duration-150 hover:bg-zinc-200/60 dark:hover:bg-white/[0.08]"
             >
               <div className="h-7 w-7 shrink-0 flex items-center justify-center text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-white transition-colors">
                 <PanelLeft className="h-4 w-4 stroke-[1.85]" />
-              </div>
-
-              <div
-                className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-300 ease-in-out ${
-                  isCollapsed
-                    ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                    : "max-w-[170px] opacity-100"
-                }`}
-              >
-                <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
-                  Payout
-                </span>
               </div>
             </button>
           )}
@@ -226,7 +214,7 @@ export function Sidebar({
                 type="button"
                 onClick={() => setActiveView(item.label)}
                 title={isCollapsed ? item.label : undefined}
-                className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
+                className={`group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer transition-colors duration-150 ${
                   isActive
                     ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs"
                     : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
@@ -252,13 +240,13 @@ export function Sidebar({
                   className={`flex items-center justify-between whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                     isCollapsed
                       ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                      : "w-[160px] opacity-100 translate-x-0 ml-2.5"
+                      : "w-[130px] opacity-100 translate-x-0 ml-2"
                   }`}
                 >
-                  <span className="text-[13.5px] font-medium truncate">{item.label}</span>
+                  <span className="text-[13px] font-medium truncate">{item.label}</span>
                   {!isCollapsed && item.count !== undefined && item.count !== null && item.count > 0 && (
                     <span
-                      className={`h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center text-[11px] font-sans font-medium leading-none shrink-0 ${
+                      className={`h-4.5 min-w-[18px] px-1 rounded-full flex items-center justify-center text-[10.5px] font-sans font-medium leading-none shrink-0 ${
                         isActive
                           ? "bg-white/20 text-white dark:bg-black/15 dark:text-black font-semibold"
                           : "bg-[#E5E7EB] text-zinc-800 group-hover:bg-white/20 group-hover:text-white dark:bg-white/[0.12] dark:text-zinc-200 dark:group-hover:bg-black/15 dark:group-hover:text-black"
@@ -274,10 +262,10 @@ export function Sidebar({
         </nav>
 
         {/* Documents Group */}
-        <div className="mt-3 w-full">
-          <div className="h-6 w-full flex items-center relative mb-1">
+        <div className="mt-2.5 w-full">
+          <div className="h-5 w-full flex items-center relative mb-1">
             <span
-              className={`text-[12px] font-normal px-2 text-zinc-500 dark:text-zinc-400 whitespace-nowrap transition-all duration-300 ease-in-out ${
+              className={`text-[11px] font-medium tracking-wide uppercase px-1.5 text-zinc-400 dark:text-zinc-500 whitespace-nowrap transition-all duration-300 ease-in-out ${
                 isCollapsed
                   ? "opacity-0 -translate-x-2 pointer-events-none"
                   : "opacity-100 translate-x-0"
@@ -290,7 +278,7 @@ export function Sidebar({
                 isCollapsed ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
             >
-              <div className="w-6 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08]" />
+              <div className="w-5 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08]" />
             </div>
           </div>
 
@@ -303,7 +291,7 @@ export function Sidebar({
                   type="button"
                   onClick={() => setActiveView(item.label)}
                   title={isCollapsed ? item.label : undefined}
-                  className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
+                  className={`group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer transition-colors duration-150 ${
                     isActive
                       ? "bg-black text-white dark:bg-white dark:text-black font-semibold shadow-xs"
                       : "text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
@@ -323,10 +311,10 @@ export function Sidebar({
                     className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                       isCollapsed
                         ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                        : "w-[160px] opacity-100 translate-x-0 ml-2.5"
+                        : "w-[130px] opacity-100 translate-x-0 ml-2"
                     }`}
                   >
-                    <span className="text-[13.5px] font-medium truncate">{item.label}</span>
+                    <span className="text-[13px] font-medium truncate">{item.label}</span>
                   </div>
                 </button>
               );
@@ -338,10 +326,10 @@ export function Sidebar({
                 type="button"
                 onClick={onOpenSettings}
                 title={isCollapsed ? "More" : undefined}
-                className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer text-left transition-colors duration-150 text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black ${
+                className={`group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer text-left transition-colors duration-150 text-zinc-900 dark:text-zinc-300 font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black ${
                   isCollapsed
                     ? "h-0 opacity-0 pointer-events-none my-0 py-0 overflow-hidden"
-                    : "h-10 opacity-100"
+                    : "h-9 opacity-100"
                 }`}
               >
                 <div className="h-7 w-7 shrink-0 flex items-center justify-center">
@@ -351,10 +339,10 @@ export function Sidebar({
                   className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                     isCollapsed
                       ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                      : "w-[160px] opacity-100 translate-x-0 ml-2.5"
+                      : "w-[130px] opacity-100 translate-x-0 ml-2"
                   }`}
                 >
-                  <span className="text-[13.5px] font-medium truncate">More</span>
+                  <span className="text-[13px] font-medium truncate">More</span>
                 </div>
               </button>
             )}
@@ -362,11 +350,11 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Bottom Section: Settings, Help, Search, User Profile */}
-      <div className="w-full space-y-1">
-        <div className="h-4 w-full flex items-center justify-center">
+      {/* Bottom Section: Settings, Help, Search, Payout Brand */}
+      <div className="w-full space-y-0.5">
+        <div className="h-3 w-full flex items-center justify-center mb-0.5">
           <div
-            className={`w-6 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08] transition-opacity duration-300 ${
+            className={`w-5 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08] transition-opacity duration-300 ${
               isCollapsed ? "opacity-100" : "opacity-0"
             }`}
           />
@@ -378,7 +366,7 @@ export function Sidebar({
             type="button"
             onClick={item.action}
             title={isCollapsed ? item.label : undefined}
-            className="group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 text-zinc-900 hover:bg-black hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-black"
+            className="group w-full flex items-center h-9 px-1 rounded-lg cursor-pointer transition-colors duration-150 text-zinc-900 hover:bg-black hover:text-white dark:text-zinc-300 dark:hover:bg-white dark:hover:text-black"
           >
             <div className="h-7 w-7 shrink-0 flex items-center justify-center">
               <item.icon className="h-4 w-4 stroke-[1.85] text-zinc-800 group-hover:text-white dark:text-zinc-400 dark:group-hover:text-black transition-colors" />
@@ -388,13 +376,38 @@ export function Sidebar({
               className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                 isCollapsed
                   ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
+                  : "w-[130px] opacity-100 translate-x-0 ml-2"
               }`}
             >
-              <span className="text-[13.5px] font-medium">{item.label}</span>
+              <span className="text-[13px] font-medium">{item.label}</span>
             </div>
           </button>
         ))}
+
+        {/* Payout Brand Footer below Get Help */}
+        <div className="pt-2 pb-0.5 border-t border-zinc-200/70 dark:border-white/[0.06] mt-1.5 w-full overflow-hidden">
+          <div className="flex items-center h-8 px-1 rounded-lg select-none">
+            <div className="h-7 w-7 shrink-0 flex items-center justify-center">
+              <div className="h-5 w-5 rounded-md bg-zinc-900 text-white dark:bg-white dark:text-black flex items-center justify-center text-[10px] font-bold tracking-tight shadow-xs">
+                P
+              </div>
+            </div>
+            <div
+              className={`flex items-center justify-between whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
+                isCollapsed
+                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  : "w-[125px] opacity-100 translate-x-0 ml-2"
+              }`}
+            >
+              <span className="text-[12.5px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-200">
+                Payout
+              </span>
+              <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
+                v1.0
+              </span>
+            </div>
+          </div>
+        </div>
 
       </div>
     </aside>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Sun, Moon, PanelLeft, Settings, LogOut, ChevronsUpDown } from "lucide-react";
+import { Sun, Moon, PanelLeft, Settings, LogOut } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import { supabase } from "@/lib/supabase";
 
@@ -125,26 +125,20 @@ export function ManagerHeader({
           )}
         </button>
 
-        {/* User Profile Pill & Dropdown in Right Corner */}
+        {/* User Profile Circular Avatar & Dropdown in Right Corner */}
         <div className="relative" ref={profileRef}>
           <button
             type="button"
             onClick={() => setIsProfileOpen((prev) => !prev)}
             title={`${managerName} (${managerEmail})`}
             aria-label="Manager Profile Menu"
-            className={`h-8 pl-1 pr-2 rounded-xl flex items-center gap-2 border transition-all cursor-pointer ${
+            className={`h-8 w-8 rounded-full flex items-center justify-center font-semibold text-xs transition-all cursor-pointer select-none ${
               isProfileOpen
-                ? "bg-zinc-200/80 dark:bg-white/[0.14] border-zinc-300 dark:border-white/20"
-                : "bg-zinc-100/80 hover:bg-zinc-200/60 dark:bg-[#141418] dark:hover:bg-[#1E1E24] border-zinc-200 dark:border-white/[0.08]"
+                ? "ring-2 ring-zinc-900 dark:ring-white bg-zinc-900 text-white dark:bg-white dark:text-black shadow-sm"
+                : "bg-zinc-900 text-white dark:bg-white dark:text-black hover:ring-2 hover:ring-zinc-400 dark:hover:ring-white/40"
             }`}
           >
-            <div className="h-6 w-6 rounded-lg bg-zinc-900 text-white dark:bg-zinc-700 font-semibold text-[11px] flex items-center justify-center shrink-0">
-              {initials}
-            </div>
-            <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 max-w-[120px] truncate hidden sm:inline">
-              {managerName}
-            </span>
-            <ChevronsUpDown className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
+            {initials}
           </button>
 
           {/* Profile Dropdown Popover */}
