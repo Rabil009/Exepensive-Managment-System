@@ -261,38 +261,6 @@ export function Sidebar({
           />
         )}
 
-        {onOpenSearch && (
-          <button
-            type="button"
-            onClick={onOpenSearch}
-            title={isCollapsed ? "Search" : undefined}
-            className={`group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 ${
-              isDark
-                ? "text-zinc-300 hover:bg-white hover:text-black"
-                : "text-zinc-900 hover:bg-black hover:text-white"
-            }`}
-          >
-            <div className="h-7 w-7 shrink-0 flex items-center justify-center">
-              <Search
-                className={`h-4 w-4 stroke-[1.85] transition-colors ${
-                  isDark
-                    ? "text-zinc-400 group-hover:text-black"
-                    : "text-zinc-800 group-hover:text-white"
-                }`}
-              />
-            </div>
-            <div
-              className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
-                isCollapsed
-                  ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                  : "max-w-[170px] opacity-100"
-              }`}
-            >
-              <span className="text-[13.5px] font-medium">Search</span>
-            </div>
-          </button>
-        )}
-
         {onOpenHelp && (
           <button
             type="button"
@@ -357,132 +325,6 @@ export function Sidebar({
           </button>
         )}
 
-        {/* User Profile Card */}
-        <div
-          className={`pt-2 mt-2 border-t relative ${
-            isDark ? "border-white/[0.08]" : "border-zinc-200/80"
-          }`}
-          ref={profileRef}
-        >
-          {isProfileOpen && (
-            <div
-              className={`z-50 bg-white dark:bg-[#18181B] border border-zinc-200 dark:border-white/[0.1] rounded-2xl shadow-xl shadow-black/10 dark:shadow-black/50 p-1.5 transition-all animate-in fade-in zoom-in-95 duration-150 ${
-                isCollapsed
-                  ? "fixed left-[72px] bottom-3 w-60"
-                  : "absolute bottom-[calc(100%+8px)] left-0 right-0"
-              }`}
-            >
-              {/* Profile info header */}
-              <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.04]">
-                <img
-                  src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80"
-                  alt={profileName}
-                  className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20 shrink-0"
-                />
-                <div className="flex flex-col min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-semibold truncate text-zinc-900 dark:text-white leading-tight">
-                      {profileName}
-                    </span>
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-zinc-200/70 dark:bg-white/[0.1] text-zinc-700 dark:text-zinc-300">
-                      Employee
-                    </span>
-                  </div>
-                  <span className="text-[11px] truncate text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    {email}
-                  </span>
-                </div>
-              </div>
-
-              <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
-
-              {/* Account Settings */}
-              {onOpenSettings && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    onOpenSettings();
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.08] rounded-xl transition-colors cursor-pointer"
-                >
-                  <Settings className="h-4 w-4 shrink-0 text-zinc-500 dark:text-zinc-400" />
-                  <span>Account Settings</span>
-                </button>
-              )}
-
-              {/* Divider */}
-              <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
-
-              {/* Log Out Button */}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
-              >
-                <LogOut className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
-                <span>Log out</span>
-              </button>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setIsProfileOpen((prev) => !prev)}
-            title={isCollapsed ? `${profileName} - Profile & Logout` : undefined}
-            className={`w-full flex items-center h-11 px-1 rounded-xl cursor-pointer text-left group transition-colors duration-150 ${
-              isProfileOpen
-                ? isDark
-                  ? "bg-white/[0.12] text-white"
-                  : "bg-zinc-200/70 text-zinc-950"
-                : isDark
-                ? "hover:bg-white hover:text-black text-white"
-                : "hover:bg-zinc-100 text-zinc-900"
-            }`}
-          >
-            <div className="h-8 w-8 shrink-0 flex items-center justify-center">
-              <img
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=faces&auto=format&q=80"
-                alt={profileName}
-                className="h-8 w-8 rounded-lg object-cover ring-1 ring-zinc-300 dark:ring-white/20"
-              />
-            </div>
-
-            <div
-              className={`flex items-center justify-between flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
-                isCollapsed
-                  ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                  : "max-w-[170px] opacity-100"
-              }`}
-            >
-              <div className="flex flex-col min-w-0">
-                <span
-                  className={`text-[13px] font-semibold truncate leading-tight ${
-                    isDark ? "text-white group-hover:text-black" : "text-zinc-900"
-                  }`}
-                >
-                  {profileName}
-                </span>
-                <span
-                  className={`text-[11px] truncate leading-tight mt-0.5 ${
-                    isDark
-                      ? "text-zinc-400 group-hover:text-zinc-600"
-                      : "text-zinc-500"
-                  }`}
-                >
-                  {email}
-                </span>
-              </div>
-              <ChevronsUpDown
-                className={`h-4 w-4 shrink-0 ${
-                  isDark
-                    ? "text-zinc-500 group-hover:text-black"
-                    : "text-zinc-400 group-hover:text-zinc-700"
-                }`}
-              />
-            </div>
-          </button>
-        </div>
       </div>
       </aside>
 
@@ -606,19 +448,6 @@ export function Sidebar({
 
             {/* Bottom Section */}
             <div className="w-full space-y-2 pt-3 border-t border-zinc-200/80 dark:border-white/[0.08]">
-              {onOpenSearch && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onCloseMobile?.();
-                    onOpenSearch();
-                  }}
-                  className="w-full flex items-center gap-3 px-3 h-10 rounded-xl text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/[0.08] transition-colors"
-                >
-                  <Search className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-                  <span className="text-[13.5px] font-medium">Search</span>
-                </button>
-              )}
               {onOpenSettings && (
                 <button
                   type="button"

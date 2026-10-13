@@ -253,8 +253,8 @@ function ApprovalsPageInner() {
         isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
       }`}>
         <ManagerHeader
-          title="Manager Approvals"
           onToggleSidebar={() => setMobileDrawerOpen(true)}
+          onOpenSettings={() => setShowSettings(true)}
           rightContent={
             <div className="flex items-center gap-2">
               <Link

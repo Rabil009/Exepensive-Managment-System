@@ -322,8 +322,8 @@ function ManagerDashboardInner() {
       }`}>
         {/* Core Manager Header */}
         <ManagerHeader
-          title={getPageTitle()}
           onToggleSidebar={() => setMobileDrawerOpen(true)}
+          onOpenSettings={() => setShowSettings(true)}
         />
 
         {/* Scrollable Main Application Space */}
