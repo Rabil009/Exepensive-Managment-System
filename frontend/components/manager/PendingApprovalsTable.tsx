@@ -232,14 +232,14 @@ export function PendingApprovalsTable({
 
                     {/* Popover Action Menu */}
                     {isMenuOpen && (
-                      <div className="absolute right-6 sm:right-8 top-12 w-40 bg-[#0e0e12]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-[0_12px_32px_rgba(0,0,0,0.7)] py-1.5 z-30 text-xs text-left animate-in fade-in zoom-in-95 duration-150">
+                      <div className="absolute right-6 sm:right-8 top-12 z-30 w-40 rounded-xl border border-zinc-700 bg-[#37373A] py-1.5 text-left text-xs text-zinc-100 shadow-xl shadow-black/25 animate-in fade-in zoom-in-95 duration-150">
                         <button
                           type="button"
                           onClick={() => {
                             onApprove?.(row);
                             setActiveMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 text-emerald-400 hover:bg-white/[0.06] cursor-pointer font-medium transition-colors"
+                          className="w-full flex items-center gap-2 rounded-lg px-3.5 py-2 font-medium text-emerald-400 transition-colors hover:bg-white/[0.1] cursor-pointer"
                         >
                           <Check className="h-3.5 w-3.5" />
                           <span>Approve</span>
@@ -250,18 +250,18 @@ export function PendingApprovalsTable({
                             onReject?.(row);
                             setActiveMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 text-rose-400 hover:bg-white/[0.06] cursor-pointer font-medium transition-colors"
+                          className="w-full flex items-center gap-2 rounded-lg px-3.5 py-2 font-medium text-rose-400 transition-colors hover:bg-white/[0.1] cursor-pointer"
                         >
                           <X className="h-3.5 w-3.5" />
                           <span>Reject</span>
                         </button>
-                        <div className="h-px bg-white/[0.06] my-1" />
+                        <div className="my-1 h-px bg-white/[0.08]" />
                         <button
                           type="button"
                           onClick={() => {
                             setActiveMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-3.5 py-2 text-zinc-300 hover:bg-white/[0.06] hover:text-white cursor-pointer font-medium transition-colors"
+                          className="w-full flex items-center gap-2 rounded-lg px-3.5 py-2 font-medium text-zinc-200 transition-colors hover:bg-white/[0.1] hover:text-white cursor-pointer"
                         >
                           <Eye className="h-3.5 w-3.5 text-zinc-400" />
                           <span>View Details</span>
