@@ -427,24 +427,6 @@ export function Sidebar({
 
               <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
 
-              {/* Account Settings */}
-              {onOpenSettings && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    onOpenSettings();
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.08] rounded-xl transition-colors cursor-pointer"
-                >
-                  <Settings className="h-4 w-4 shrink-0 text-zinc-500 dark:text-zinc-400" />
-                  <span>Account Settings</span>
-                </button>
-              )}
-
-              {/* Divider */}
-              <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
-
               {/* Log Out Button */}
               <button
                 type="button"
