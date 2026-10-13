@@ -544,7 +544,7 @@ function ManagerDashboardInner() {
   const getPageTitle = () => {
     switch (activeView) {
       case "Approvals":
-        return "Manager Approvals";
+        return "";
       case "Team Spend":
         return "Team Spend & Cost Centers";
       case "Budgets":
@@ -556,7 +556,7 @@ function ManagerDashboardInner() {
       case "Policies":
         return "Expense Compliance Policies";
       default:
-        return "Manager Approvals";
+        return "";
     }
   };
 

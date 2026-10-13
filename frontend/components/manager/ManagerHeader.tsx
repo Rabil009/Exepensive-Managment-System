@@ -11,7 +11,7 @@ interface ManagerHeaderProps {
 }
 
 export function ManagerHeader({
-  title = "Manager Cockpit & Approvals",
+  title = "",
   rightContent,
   onToggleSidebar,
 }: ManagerHeaderProps) {
@@ -37,9 +37,11 @@ export function ManagerHeader({
             <PanelLeft className="h-4 w-4 stroke-[1.85]" />
           </button>
         )}
-        <span className="text-[13.5px] sm:text-[14px] font-medium truncate text-zinc-900 dark:text-zinc-100">
-          {title}
-        </span>
+        {title ? (
+          <span className="text-[13.5px] sm:text-[14px] font-medium truncate text-zinc-900 dark:text-zinc-100">
+            {title}
+          </span>
+        ) : null}
       </div>
 
       {/* Right Content: Action controls + Theme Toggle Button */}

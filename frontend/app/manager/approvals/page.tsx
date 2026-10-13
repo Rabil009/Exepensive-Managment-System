@@ -250,7 +250,7 @@ function ApprovalsPageInner() {
         isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
       }`}>
         <ManagerHeader
-          title="Manager Approvals"
+          title=""
           rightContent={
             <div className="flex items-center gap-2">
               <Link
