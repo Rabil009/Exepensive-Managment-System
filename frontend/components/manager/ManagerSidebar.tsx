@@ -134,7 +134,7 @@ export function ManagerSidebar({
       <aside
         style={{ willChange: "width" }}
         aria-label="Manager Navigation"
-        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-200 ease-in-out ${
+        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-300 ease-in-out ${
           isCollapsed ? "w-[64px]" : "w-[240px]"
         } bg-[#F7F7F8] dark:bg-[#131316] border-zinc-200/90 dark:border-white/[0.08] text-zinc-900 dark:text-[#F4F4F5]`}
       >
@@ -154,10 +154,10 @@ export function ManagerSidebar({
             </div>
 
             <div
-              className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+              className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                 isCollapsed
-                  ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                  : "max-w-[170px] opacity-100"
+                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
               }`}
             >
               <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
@@ -194,10 +194,10 @@ export function ManagerSidebar({
                 </div>
 
                 <div
-                  className={`flex items-center justify-between flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+                  className={`flex items-center justify-between whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                     isCollapsed
-                      ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                      : "max-w-[170px] opacity-100"
+                      ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                      : "w-[160px] opacity-100 translate-x-0 ml-2.5"
                   }`}
                 >
                   <span className="text-[13.5px] font-medium truncate">
@@ -221,21 +221,25 @@ export function ManagerSidebar({
         </nav>
 
         {/* Documents Group */}
-        <div className="mt-4 w-full">
-          <div
-            className={`overflow-hidden transition-all duration-200 ${
-              isCollapsed
-                ? "max-h-0 opacity-0 pointer-events-none mb-0"
-                : "max-h-6 opacity-100 mb-1"
-            }`}
-          >
-            <p className="px-2 text-[12px] font-normal text-zinc-500 dark:text-zinc-400">
+        <div className="mt-3 w-full">
+          <div className="h-6 w-full flex items-center relative mb-1">
+            <span
+              className={`text-[12px] font-normal px-2 text-zinc-500 dark:text-zinc-400 whitespace-nowrap transition-all duration-300 ease-in-out ${
+                isCollapsed
+                  ? "opacity-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 translate-x-0"
+              }`}
+            >
               Documents &amp; Policies
-            </p>
+            </span>
+            <div
+              className={`absolute inset-x-0 flex items-center justify-center transition-opacity duration-300 ${
+                isCollapsed ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="w-6 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08]" />
+            </div>
           </div>
-          {isCollapsed && (
-            <div className="w-6 h-[1px] my-2 mx-auto bg-zinc-200/80 dark:bg-white/[0.08]" />
-          )}
 
           <nav className="space-y-1 w-full">
             {documentsNav.map((item) => {
@@ -263,10 +267,10 @@ export function ManagerSidebar({
                   </div>
 
                   <div
-                    className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+                    className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                       isCollapsed
-                        ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                        : "max-w-[170px] opacity-100"
+                        ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                        : "w-[160px] opacity-100 translate-x-0 ml-2.5"
                     }`}
                   >
                     <span className="text-[13.5px] font-medium truncate">
@@ -280,11 +284,15 @@ export function ManagerSidebar({
         </div>
       </div>
 
-      {/* Bottom Section: Settings & Tejaswini User Profile */}
+      {/* Bottom Section: Settings */}
       <div className="w-full space-y-1">
-        {isCollapsed && (
-          <div className="w-6 h-[1px] my-2 mx-auto bg-zinc-200/80 dark:bg-white/[0.08]" />
-        )}
+        <div className="h-4 w-full flex items-center justify-center">
+          <div
+            className={`w-6 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08] transition-opacity duration-300 ${
+              isCollapsed ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        </div>
 
         <button
           type="button"
@@ -297,10 +305,10 @@ export function ManagerSidebar({
           </div>
 
           <div
-            className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+            className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
               isCollapsed
-                ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                : "max-w-[170px] opacity-100"
+                ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                : "w-[160px] opacity-100 translate-x-0 ml-2.5"
             }`}
           >
             <span className="text-[13.5px] font-medium">Settings</span>

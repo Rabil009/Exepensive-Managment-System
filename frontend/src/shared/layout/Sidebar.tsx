@@ -148,10 +148,10 @@ export function Sidebar({
         </div>
 
         <div
-          className={`flex items-center justify-between flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+          className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
             isCollapsed
-              ? "max-w-0 opacity-0 pointer-events-none ml-0"
-              : "max-w-[170px] opacity-100"
+              ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+              : "w-[160px] opacity-100 translate-x-0 ml-2.5"
           }`}
         >
           <span className="text-[13.5px] font-medium truncate">
@@ -168,7 +168,7 @@ export function Sidebar({
       <aside
         style={{ willChange: "width" }}
         aria-label="Employee Navigation"
-        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-200 ease-in-out ${
+        className={`hidden md:flex shrink-0 h-screen border-r flex-col justify-between overflow-hidden select-none font-sans px-2.5 py-3 transition-[width] duration-300 ease-in-out ${
           isCollapsed ? "w-[64px]" : "w-[240px]"
         } ${
           isDark
@@ -200,10 +200,10 @@ export function Sidebar({
             </div>
 
             <div
-              className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+              className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                 isCollapsed
-                  ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                  : "max-w-[170px] opacity-100"
+                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
               }`}
             >
               <span className={`text-[15px] font-semibold tracking-tight truncate ${
@@ -221,29 +221,31 @@ export function Sidebar({
         </nav>
 
         {/* Expenses Group */}
-        <div className="mt-4 w-full">
-          <div
-            className={`overflow-hidden transition-all duration-200 ${
-              isCollapsed
-                ? "max-h-0 opacity-0 pointer-events-none mb-0"
-                : "max-h-6 opacity-100 mb-1"
-            }`}
-          >
-            <p
-              className={`px-2 text-[12px] font-normal ${
+        <div className="mt-3 w-full">
+          <div className="h-6 w-full flex items-center relative mb-1">
+            <span
+              className={`text-[12px] font-normal px-2 whitespace-nowrap transition-all duration-300 ease-in-out ${
                 isDark ? "text-zinc-400" : "text-zinc-500"
+              } ${
+                isCollapsed
+                  ? "opacity-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 translate-x-0"
               }`}
             >
-              Expenses & Claims
-            </p>
-          </div>
-          {isCollapsed && (
+              Expenses &amp; Claims
+            </span>
             <div
-              className={`w-6 h-[1px] my-2 mx-auto ${
-                isDark ? "bg-white/[0.08]" : "bg-zinc-200/80"
+              className={`absolute inset-x-0 flex items-center justify-center transition-opacity duration-300 ${
+                isCollapsed ? "opacity-100" : "opacity-0 pointer-events-none"
               }`}
-            />
-          )}
+            >
+              <div
+                className={`w-6 h-[1px] ${
+                  isDark ? "bg-white/[0.08]" : "bg-zinc-200/80"
+                }`}
+              />
+            </div>
+          </div>
 
           <nav className="space-y-1 w-full">
             {expensesNav.map(renderNavButton)}
@@ -251,15 +253,17 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Bottom Section: Settings & User Profile */}
+      {/* Bottom Section: Settings */}
       <div className="w-full space-y-1">
-        {isCollapsed && (
+        <div className="h-4 w-full flex items-center justify-center">
           <div
-            className={`w-6 h-[1px] my-2 mx-auto ${
+            className={`w-6 h-[1px] transition-opacity duration-300 ${
               isDark ? "bg-white/[0.08]" : "bg-zinc-200/80"
+            } ${
+              isCollapsed ? "opacity-100" : "opacity-0"
             }`}
           />
-        )}
+        </div>
 
         {onOpenHelp && (
           <button
@@ -282,10 +286,10 @@ export function Sidebar({
               />
             </div>
             <div
-              className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+              className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                 isCollapsed
-                  ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                  : "max-w-[170px] opacity-100"
+                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
               }`}
             >
               <span className="text-[13.5px] font-medium">Get Help</span>
@@ -314,10 +318,10 @@ export function Sidebar({
               />
             </div>
             <div
-              className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-200 ${
+              className={`flex items-center whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
                 isCollapsed
-                  ? "max-w-0 opacity-0 pointer-events-none ml-0"
-                  : "max-w-[170px] opacity-100"
+                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
               }`}
             >
               <span className="text-[13.5px] font-medium">Settings</span>

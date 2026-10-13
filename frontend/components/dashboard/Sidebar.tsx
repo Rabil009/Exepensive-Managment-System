@@ -274,22 +274,25 @@ export function Sidebar({
         </nav>
 
         {/* Documents Group */}
-        <div className="mt-4 w-full">
-          <div
-            className={`overflow-hidden transition-all duration-300 ${
-              isCollapsed ? "max-h-0 opacity-0 pointer-events-none mb-0" : "max-h-6 opacity-100 mb-1"
-            }`}
-          >
-            <p className="px-2 text-[12px] font-normal text-zinc-500 dark:text-zinc-400">
+        <div className="mt-3 w-full">
+          <div className="h-6 w-full flex items-center relative mb-1">
+            <span
+              className={`text-[12px] font-normal px-2 text-zinc-500 dark:text-zinc-400 whitespace-nowrap transition-all duration-300 ease-in-out ${
+                isCollapsed
+                  ? "opacity-0 -translate-x-2 pointer-events-none"
+                  : "opacity-100 translate-x-0"
+              }`}
+            >
               Documents
-            </p>
+            </span>
+            <div
+              className={`absolute inset-x-0 flex items-center justify-center transition-opacity duration-300 ${
+                isCollapsed ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <div className="w-6 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08]" />
+            </div>
           </div>
-
-          <div
-            className={`w-6 h-[1px] mx-auto bg-zinc-200/80 dark:bg-white/[0.08] transition-all duration-300 ${
-              isCollapsed ? "my-2 opacity-100 max-h-[1px]" : "my-0 opacity-0 max-h-0 pointer-events-none overflow-hidden"
-            }`}
-          />
 
           <nav className="space-y-1 w-full">
             {documentsNav.map((item) => {
@@ -361,11 +364,13 @@ export function Sidebar({
 
       {/* Bottom Section: Settings, Help, Search, User Profile */}
       <div className="w-full space-y-1">
-        <div
-          className={`w-6 h-[1px] mx-auto bg-zinc-200/80 dark:bg-white/[0.08] transition-all duration-300 ${
-            isCollapsed ? "my-2 opacity-100 max-h-[1px]" : "my-0 opacity-0 max-h-0 pointer-events-none overflow-hidden"
-          }`}
-        />
+        <div className="h-4 w-full flex items-center justify-center">
+          <div
+            className={`w-6 h-[1px] bg-zinc-200/80 dark:bg-white/[0.08] transition-opacity duration-300 ${
+              isCollapsed ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        </div>
 
         {bottomItems.map((item) => (
           <button
