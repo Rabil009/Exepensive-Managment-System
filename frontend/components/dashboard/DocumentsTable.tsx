@@ -5,8 +5,8 @@ import {
   GripVertical,
   MoreVertical,
   CheckCircle2,
-  Loader2,
 } from "lucide-react";
+import { Spiral } from "@/components/ui/spiral";
 
 interface TableRowData {
   id: string;
@@ -174,7 +174,7 @@ export function DocumentsTable() {
                   <td className="py-3 px-4">
                     {row.status === "In Process" ? (
                       <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded border border-white/[0.08] bg-[#141417] text-[12px] font-normal text-[#A1A1AA]">
-                        <Loader2 className="h-3 w-3 animate-spin text-[#A1A1AA]" />
+                        <Spiral className="size-3 text-[#A1A1AA]" />
                         <span>In Process</span>
                       </div>
                     ) : (

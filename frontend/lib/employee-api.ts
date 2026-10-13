@@ -137,6 +137,25 @@ export async function resolveCurrentEmployee(): Promise<{
   return null;
 }
 
+async function resolveExpenseOwnerId(
+  employeeId: string | undefined,
+  employeeName: string,
+  authUserId?: string,
+) {
+  if (employeeId && !employeeId.includes("@")) return employeeId;
+  const { data: matchedEmployee } = await supabase
+    .from("expense_claims")
+    .select("employee_id")
+    .ilike("employee_name", employeeName)
+    .limit(1)
+    .maybeSingle();
+  return (
+    authUserId ||
+    matchedEmployee?.employee_id ||
+    "b8ce7a2d-e91a-47f4-92ba-adb7d0bf5c4d"
+  );
+}
+
 export function fileToDataUrl(file: File | Blob): Promise<string> {
   if (typeof FileReader !== "undefined") {
     return new Promise((resolve, reject) => {
@@ -251,31 +270,65 @@ export async function employeeRequest(
         );
         const cardLimit = 100000;
 
+        const draftEmployeeId = await resolveExpenseOwnerId(
+          employeeId,
+          employeeName,
+          authUser?.id,
+        );
+        const { data: rawDrafts } = draftEmployeeId
+          ? await supabase
+              .from("employee_expense_drafts")
+              .select("*")
+              .eq("employee_id", draftEmployeeId)
+              .order("updated_at", { ascending: false })
+          : { data: [] };
+
+        const draftsList = (rawDrafts || []).map((d: any) => ({
+          id: d.id,
+          date: d.expense_date || (d.updated_at || "").slice(0, 10),
+          merchant: d.merchant || "Untitled draft",
+          category: d.category || "OTHER",
+          amount: Number(d.amount) || 0,
+          status: "Draft",
+          raw_status: "DRAFT",
+          source: "draft",
+          description: d.business_purpose || "",
+          receipt: d.receipt_name || null,
+          currency: d.currency || "INR",
+          report: d.report_name || "Unassigned",
+          paymentMethod: d.payment_method || "Personal (Out-of-Pocket)",
+          attendees: d.attendees || [],
+        }));
+
+        const claimsList = claims.map((c: any) => ({
+          id: c.id,
+          date: c.expense_date || (c.created_at || "").slice(0, 10),
+          merchant: c.merchant || c.title || "Expense",
+          category: c.category || "OTHER",
+          amount: Number(c.amount) || 0,
+          status: normalizeClaimStatus(c.status),
+          raw_status: c.status || "SUBMITTED",
+          source: "claim",
+          description: c.description || "",
+          receipt: c.receipt_name || null,
+          receiptUrl: c.receipt_url || null,
+          employee_name: c.employee_name || null,
+          currency: c.currency || "INR",
+          report: c.report_name || "General",
+          paymentMethod: (c.payment_method || "")
+            .toUpperCase()
+            .includes("CORPORATE")
+            ? "Corporate Card"
+            : "Personal (Out-of-Pocket)",
+          attendees: c.attendees || [],
+          manager_remark: c.manager_remark || null,
+          finance_remark: c.finance_remark || null,
+        }));
+
         responseData = {
-          expenses: claims.map((c: any) => ({
-            id: c.id,
-            date: c.expense_date || (c.created_at || "").slice(0, 10),
-            merchant: c.merchant || c.title || "Expense",
-            category: c.category || "OTHER",
-            amount: Number(c.amount) || 0,
-            status: normalizeClaimStatus(c.status),
-            raw_status: c.status || "SUBMITTED",
-            source: "claim",
-            description: c.description || "",
-            receipt: c.receipt_name || null,
-            receiptUrl: c.receipt_url || null,
-            employee_name: c.employee_name || null,
-            currency: c.currency || "INR",
-            report: c.report_name || "General",
-            paymentMethod: (c.payment_method || "")
-              .toUpperCase()
-              .includes("CORPORATE")
-              ? "Corporate Card"
-              : "Personal (Out-of-Pocket)",
-            attendees: c.attendees || [],
-            manager_remark: c.manager_remark || null,
-            finance_remark: c.finance_remark || null,
-          })),
+          expenses: [...claimsList, ...draftsList].sort((a: any, b: any) =>
+            (b.date || "").localeCompare(a.date || "")
+          ),
           summary: {
             ready_for_reimbursement: String(approvedAmount),
             pending_approval: String(pendingAmount),
@@ -421,6 +474,14 @@ export async function employeeRequest(
             }
           }
 
+          // Sort cards: PHYSICAL card is always primary at index 0
+          cards.sort((a: any, b: any) => {
+            if (a.kind === "PHYSICAL" && b.kind !== "PHYSICAL") return -1;
+            if (b.kind === "PHYSICAL" && a.kind !== "PHYSICAL") return 1;
+            return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+          });
+
+          // Fetch card transactions
           const { data: dbTxns } = await supabase
             .from("employee_card_transactions")
             .select("*")
@@ -437,60 +498,186 @@ export async function employeeRequest(
           const { data: dbReqs } = await reqQuery.order("created_at", {
             ascending: false,
           });
+          const requests = dbReqs || [];
+
+          // Fetch corporate card expense claims for this employee
+          let claimsQuery = supabase.from("expense_claims").select("*");
+          if (employeeId && employeeName) {
+            claimsQuery = claimsQuery.or(
+              `employee_id.eq.${employeeId},employee_name.ilike.${employeeName}`
+            );
+          } else if (employeeId) {
+            claimsQuery = claimsQuery.eq("employee_id", employeeId);
+          } else if (employeeName) {
+            claimsQuery = claimsQuery.ilike("employee_name", employeeName);
+          }
+          const { data: dbClaims } = await claimsQuery;
+          const corporateClaims = (dbClaims || []).filter(
+            (c: any) =>
+              (c.payment_method || "").toUpperCase().includes("CORPORATE") &&
+              !normalizeClaimStatus(c.status).toLowerCase().includes("reject")
+          );
+
+          // Check if there is an approved limit increase request for this employee
+          const approvedLimitReq = requests.find(
+            (r: any) =>
+              (r.status || "").toUpperCase() === "APPROVED" &&
+              r.request_type === "LIMIT_INCREASE"
+          );
 
           const primaryCard = cards[0];
-          const cardLimit = Number(primaryCard?.monthly_limit) || 100000;
+          let cardLimit = Number(primaryCard?.monthly_limit) || 100000;
+          if (
+            approvedLimitReq &&
+            Number(approvedLimitReq.requested_limit) > cardLimit
+          ) {
+            cardLimit = Number(approvedLimitReq.requested_limit);
+            if (primaryCard) {
+              primaryCard.monthly_limit = String(cardLimit);
+            }
+          }
 
-          // Calculate card spending
-          const spent = transactions
+          // Calculate category spending dynamically
+          let softwareSpent = 0;
+          let travelSpent = 0;
+          let mealsSpent = 0;
+          let officeSpent = 0;
+
+          const categorizeAmount = (cat: string, amt: number) => {
+            const c = (cat || "").toUpperCase();
+            if (
+              c.includes("SOFTWARE") ||
+              c.includes("CLOUD") ||
+              c.includes("SAAS") ||
+              c.includes("TECH") ||
+              c.includes("IT")
+            ) {
+              softwareSpent += amt;
+            } else if (
+              c.includes("TRAVEL") ||
+              c.includes("TRANSIT") ||
+              c.includes("FLIGHT") ||
+              c.includes("CAB") ||
+              c.includes("UBER") ||
+              c.includes("HOTEL") ||
+              c.includes("LODGING")
+            ) {
+              travelSpent += amt;
+            } else if (
+              c.includes("MEAL") ||
+              c.includes("FOOD") ||
+              c.includes("DINING") ||
+              c.includes("BEVERAGE")
+            ) {
+              mealsSpent += amt;
+            } else if (
+              c.includes("OFFICE") ||
+              c.includes("EQUIPMENT") ||
+              c.includes("HARDWARE") ||
+              c.includes("SUPPLIES") ||
+              c.includes("FURNITURE")
+            ) {
+              officeSpent += amt;
+            } else {
+              softwareSpent += amt;
+            }
+          };
+
+          // Tally from card transactions
+          transactions
             .filter((t: any) => t.status !== "DECLINED")
-            .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+            .forEach((t: any) => {
+              categorizeAmount(
+                t.category || t.purpose || "",
+                Number(t.amount) || 0
+              );
+            });
+
+          // Tally from corporate card claims (deduplicating if any ID overlaps)
+          const txnIds = new Set(transactions.map((t: any) => t.id));
+          corporateClaims.forEach((c: any) => {
+            if (!txnIds.has(c.id)) {
+              categorizeAmount(c.category || "", Number(c.amount) || 0);
+            }
+          });
+
+          const totalSpent =
+            softwareSpent + travelSpent + mealsSpent + officeSpent;
 
           // Standard 4 category limits matching SpendingLimits component
+          const softwareLimit = Math.round(cardLimit * 0.35);
+          const travelLimit = Math.round(cardLimit * 0.35);
+          const mealsLimit = Math.round(cardLimit * 0.15);
+          const officeLimit = Math.round(cardLimit * 0.15);
+
           const categories = [
             {
               category: "SOFTWARE",
               name: "Software & Cloud",
-              spent: "0",
-              limit: String(Math.round(cardLimit * 0.35)),
-              remaining: String(Math.round(cardLimit * 0.35)),
+              spent: String(softwareSpent),
+              limit: String(softwareLimit),
+              remaining: String(Math.max(0, softwareLimit - softwareSpent)),
             },
             {
               category: "TRAVEL",
               name: "Travel & Transit",
-              spent: "0",
-              limit: String(Math.round(cardLimit * 0.35)),
-              remaining: String(Math.round(cardLimit * 0.35)),
+              spent: String(travelSpent),
+              limit: String(travelLimit),
+              remaining: String(Math.max(0, travelLimit - travelSpent)),
             },
             {
               category: "MEALS",
               name: "Meals & Dining",
-              spent: "0",
-              limit: String(Math.round(cardLimit * 0.15)),
-              remaining: String(Math.round(cardLimit * 0.15)),
+              spent: String(mealsSpent),
+              limit: String(mealsLimit),
+              remaining: String(Math.max(0, mealsLimit - mealsSpent)),
             },
             {
               category: "OFFICE",
               name: "Office & Equipment",
-              spent: "0",
-              limit: String(Math.round(cardLimit * 0.15)),
-              remaining: String(Math.round(cardLimit * 0.15)),
+              spent: String(officeSpent),
+              limit: String(officeLimit),
+              remaining: String(Math.max(0, officeLimit - officeSpent)),
             },
           ];
 
+          // Map corporate claims to transactions list for card transactions display
+          const mappedClaimTransactions = corporateClaims
+            .filter((c: any) => !txnIds.has(c.id))
+            .map((c: any) => ({
+              id: c.id,
+              card_id: primaryCard?.id || "",
+              transaction_date:
+                c.expense_date || (c.created_at || "").slice(0, 10),
+              merchant: c.merchant || c.title || "Corporate Expense",
+              purpose: c.description || c.title || "Business Expense",
+              amount: String(c.amount || 0),
+              currency: c.currency || "INR",
+              status:
+                normalizeClaimStatus(c.status) === "Rejected"
+                  ? "DECLINED"
+                  : "SETTLED",
+              category: c.category || "SOFTWARE",
+            }));
+
+          const allTransactions = [...transactions, ...mappedClaimTransactions];
+          allTransactions.sort((a: any, b: any) =>
+            (b.transaction_date || "").localeCompare(a.transaction_date || "")
+          );
+
           responseData = {
             cards,
-            transactions,
-            requests: dbReqs || [],
+            transactions: allTransactions,
+            requests,
             usage: {
               month: new Date().toISOString().slice(0, 7),
               cards: cards.map((c: any) => {
                 const cLimit = Number(c.monthly_limit) || 100000;
                 return {
                   id: c.id,
-                  spent: String(spent),
+                  spent: String(totalSpent),
                   limit: String(cLimit),
-                  remaining: String(Math.max(0, cLimit - spent)),
+                  remaining: String(Math.max(0, cLimit - totalSpent)),
                 };
               }),
               categories,
@@ -676,9 +863,24 @@ export async function employeeRequest(
           }
         }
 
+        const approval_counts = {
+          approved: targetClaims.filter((c: any) =>
+            ["APPROVED", "MANAGER_APPROVED", "FINANCE_APPROVED", "PAID", "DISBURSED"].includes(
+              (c.status || "").toUpperCase()
+            )
+          ).length,
+          rejected: targetClaims.filter((c: any) =>
+            (c.status || "").toUpperCase().includes("REJECT")
+          ).length,
+          pending: targetClaims.filter((c: any) =>
+            ["SUBMITTED", "PENDING", "AWAITING"].includes((c.status || "").toUpperCase())
+          ).length,
+        };
+
         responseData = {
           month: monthParam,
           currency: "INR",
+          approval_counts,
           totals: {
             total_spend: String(totalSpend),
             pending_approval: String(pendingApproval),
@@ -853,6 +1055,41 @@ export async function employeeRequest(
     }
   }
 
+  // LOAD A SAVED DRAFT
+  else if (path.match(/^\/new-expense\/[^/]+$/) && init.method !== "DELETE") {
+    const draftId = decodeURIComponent(path.split("/").pop() || "");
+    const draftOwnerId = await resolveExpenseOwnerId(employeeId, employeeName, authUser?.id);
+    const { data: savedDraft, error } = await supabase
+      .from("employee_expense_drafts")
+      .select("*")
+      .eq("id", draftId)
+      .eq("employee_id", draftOwnerId)
+      .maybeSingle();
+    if (error || !savedDraft) {
+      responseData = { detail: error?.message || "Draft not found" };
+    } else {
+      responseData = savedDraft;
+    }
+  }
+
+  // DELETE A SAVED DRAFT
+  else if (path.match(/^\/new-expense\/[^/]+$/) && init.method === "DELETE") {
+    const draftId = decodeURIComponent(path.split("/").pop() || "");
+    const draftOwnerId = await resolveExpenseOwnerId(employeeId, employeeName, authUser?.id);
+    const { data: deletedDraft, error } = await supabase
+      .from("employee_expense_drafts")
+      .delete()
+      .eq("id", draftId)
+      .eq("employee_id", draftOwnerId)
+      .select("id")
+      .maybeSingle();
+    if (error || !deletedDraft) {
+      responseData = { detail: error?.message || "Draft not found" };
+    } else {
+      responseData = { id: draftId, status: "deleted" };
+    }
+  }
+
   // NEW EXPENSE SUBMIT
   else if (path.startsWith("/new-expense") && init.method === "POST") {
     try {
@@ -879,17 +1116,81 @@ export async function employeeRequest(
               "b8ce7a2d-e91a-47f4-92ba-adb7d0bf5c4d";
           }
 
+          const action = init.body.get("action");
+          const effectiveEmpId =
+            submitEmployeeId ||
+            authUser?.id ||
+            "7881beaf-b8ab-4600-afd8-4543deb2a24b";
+
           let receiptUrl: string | null = null;
           let receiptName: string | null = null;
 
           if (file && file.size > 0) {
             receiptName = file.name;
             try {
-              receiptUrl = await fileToDataUrl(file);
+              // Guaranteed data URL fallback
+              const dataUrl = await fileToDataUrl(file);
+              receiptUrl = dataUrl;
+
+              // Upload to storage bucket under employee folder to satisfy RLS
+              const fileExt = file.name.split('.').pop() || 'png';
+              const cleanName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+              const storageFolder = authUser?.id || effectiveEmpId || "receipts";
+              const filePath = `${storageFolder}/${Date.now()}_${cleanName}`;
+              const { error: uploadError } = await supabase.storage
+                .from("receipts")
+                .upload(filePath, file, { contentType: file.type || "image/png", upsert: true });
+
+              if (!uploadError) {
+                const { data: publicData } = supabase.storage.from("receipts").getPublicUrl(filePath);
+                if (publicData?.publicUrl) {
+                  receiptUrl = publicData.publicUrl;
+                }
+              }
             } catch (convErr) {
-              console.warn("Receipt conversion error:", convErr);
+              console.warn("Receipt upload notice:", convErr);
             }
           }
+
+          if (!receiptUrl && parsed.receipt_url) {
+            receiptUrl = parsed.receipt_url;
+          }
+          if (!receiptName && (parsed.receipt || parsed.receipt_name)) {
+            receiptName = parsed.receipt || parsed.receipt_name;
+          }
+
+          if (action === "Draft") {
+            const { data: existingDraft } = await supabase
+              .from("employee_expense_drafts")
+              .select("receipt_name,receipt_content_type,receipt_size_bytes")
+              .eq("id", parsed.id)
+              .eq("employee_id", effectiveEmpId)
+              .maybeSingle();
+            const draftRow = {
+              id: parsed.id,
+              employee_id: effectiveEmpId,
+              merchant: parsed.merchant?.trim() || null,
+              expense_date: parsed.date || null,
+              amount: Number(parsed.amount) || 0,
+              currency: "INR",
+              category: parsed.category || null,
+              report_name: parsed.report || null,
+              payment_method: parsed.payment_method || null,
+              business_purpose: parsed.purpose || null,
+              attendees: parsed.attendees || [],
+              linked_transaction_id: parsed.linked_transaction_id || null,
+              receipt_name: receiptName || existingDraft?.receipt_name || null,
+              receipt_content_type: file?.type || existingDraft?.receipt_content_type || null,
+              receipt_size_bytes: file?.size || existingDraft?.receipt_size_bytes || null,
+            };
+            const { data: savedDraft, error: draftError } = await supabase
+              .from("employee_expense_drafts")
+              .upsert(draftRow, { onConflict: "id" })
+              .select()
+              .single();
+            if (draftError) throw new Error(draftError.message);
+            responseData = { id: parsed.id, status: "Draft", draft: savedDraft };
+          } else {
 
           const rawCat = (parsed.category || "OTHER").toUpperCase();
           const validCategories = [
@@ -920,11 +1221,7 @@ export async function employeeRequest(
           else if (rawPm.includes("UPI")) paymentMethod = "PERSONAL_UPI";
           else if (rawPm.includes("CASH")) paymentMethod = "PERSONAL_CASH";
 
-          const claimId = `CLM-${Date.now().toString().slice(-6)}`;
-          const effectiveEmpId =
-            submitEmployeeId ||
-            authUser?.id ||
-            "7881beaf-b8ab-4600-afd8-4543deb2a24b";
+          const claimId = parsed.id || `CLM-${Date.now().toString().slice(-6)}`;
 
           let finalEmpName = employeeName;
           if (!finalEmpName || finalEmpName === "Employee") {
@@ -970,6 +1267,13 @@ export async function employeeRequest(
             throw new Error(insertError.message);
           }
 
+          // Delete from drafts if it was previously saved
+          await supabase
+            .from("employee_expense_drafts")
+            .delete()
+            .eq("id", claimId)
+            .eq("employee_id", effectiveEmpId);
+
           // Also sync to FastAPI backend if available
           if (apiUrl) {
             try {
@@ -998,6 +1302,7 @@ export async function employeeRequest(
           }
 
           responseData = { id: claimId, status: "Pending" };
+          }
         }
       }
     } catch (err) {

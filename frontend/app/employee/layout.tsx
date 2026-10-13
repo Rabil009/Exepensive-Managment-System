@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { assignEmployeeCacheOwner, clearEmployeeCache, getEmployeeAccount } from "@/lib/employee-auth";
 import type { EmployeeAccount } from "@/lib/employee-auth";
 import { EmployeeSessionProvider } from "@/lib/employee-session";
+import { Spiral } from "@/components/ui/spiral";
 
 function EmployeeAccess({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -19,15 +20,18 @@ function EmployeeAccess({ children }: { children: ReactNode }) {
     const returnPath = window.location.pathname + window.location.search;
     getEmployeeAccount().then((account) => {
       if (!active) return;
-      if (account?.profile?.role === "EMPLOYEE") {
+      if (account?.profile?.role === "EMPLOYEE" || account?.profile?.role === "ADMIN") {
         assignEmployeeCacheOwner(account.user.id);
         setAccount(account);
         setAuthorizedPath(pathname);
+      } else if (account?.profile?.role === "MANAGER") {
+        router.replace("/manager");
+      } else if (account?.profile?.role === "FINANCE") {
+        router.replace("/dashboard");
       } else {
         setAccount(null);
         setAuthorizedPath("");
-        const reason = account ? "&reason=role" : "";
-        router.replace(`/?portal=employee&next=${encodeURIComponent(returnPath)}${reason}`);
+        router.replace(`/?portal=employee&next=${encodeURIComponent(returnPath)}`);
       }
     }).catch(() => {
       if (active) router.replace(`/?portal=employee&next=${encodeURIComponent(returnPath)}&reason=profile`);
@@ -44,7 +48,11 @@ function EmployeeAccess({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   if (authorizedPath !== pathname || !account) {
-    return <div className="min-h-screen bg-[#08080A] text-zinc-400 grid place-items-center text-sm" role="status">Checking Employee access…</div>;
+    return (
+      <div className="min-h-screen bg-[#08080A] flex items-center justify-center" role="status">
+        <Spiral className="size-9 text-blue-500" />
+      </div>
+    );
   }
   return <EmployeeSessionProvider account={account}><ExpensesProvider>{children}</ExpensesProvider></EmployeeSessionProvider>;
 }

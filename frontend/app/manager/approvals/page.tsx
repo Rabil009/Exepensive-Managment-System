@@ -69,6 +69,7 @@ function ApprovalsPageInner() {
   const isDark = theme === "dark";
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Modals state
   const [showSettings, setShowSettings] = useState(false);
@@ -242,6 +243,8 @@ function ApprovalsPageInner() {
         }}
         isCollapsed={!sidebarOpen}
         setIsCollapsed={(collapsed) => setSidebarOpen(!collapsed)}
+        isMobileOpen={mobileDrawerOpen}
+        onCloseMobile={() => setMobileDrawerOpen(false)}
         onOpenSettings={() => setShowSettings(true)}
       />
 
@@ -251,6 +254,8 @@ function ApprovalsPageInner() {
       }`}>
         <ManagerHeader
           title=""
+          onToggleSidebar={() => setMobileDrawerOpen(true)}
+          onOpenSettings={() => setShowSettings(true)}
           rightContent={
             <div className="flex items-center gap-2">
               <Link
@@ -268,7 +273,7 @@ function ApprovalsPageInner() {
           }
         />
 
-        <main className={`flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 ${
+        <main className={`flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 w-full min-w-0 max-w-full overflow-x-hidden ${
           isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
         }`}>
           {/* Toast Notification */}
@@ -514,7 +519,7 @@ function ApprovalsPageInner() {
             {/* If CARDS tab is selected */}
             {activeTab === "CARDS" ? (
               <div className="overflow-x-auto px-2 pb-2">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[700px] text-left border-collapse">
                   <thead>
                     <tr
                       className={`text-xs font-medium border-b ${
@@ -613,7 +618,7 @@ function ApprovalsPageInner() {
               </div>
             ) : (
               <div className="overflow-x-auto px-2 pb-2">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full min-w-[700px] text-left border-collapse">
                 <thead>
                   <tr
                     className={`text-xs font-medium border-b ${
@@ -844,14 +849,25 @@ function ApprovalsPageInner() {
                   )}
                   <div className="pt-2 border-t dark:border-white/[0.06] border-zinc-200/60 flex items-center justify-between">
                     <span className="text-zinc-500">Invoice Voucher:</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowReceiptModal(true)}
-                      className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      <span>{inspectClaim.receiptName || "View Tax Invoice & Receipt"}</span>
-                    </button>
+                    {inspectClaim.receiptUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>{inspectClaim.receiptName || "View Receipt"}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="text-amber-600 dark:text-amber-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>Upload Receipt Proof</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

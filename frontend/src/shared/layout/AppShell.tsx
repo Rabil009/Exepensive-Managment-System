@@ -86,24 +86,11 @@ export function AppShell({
       {/* Main Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         <Header
-          title={
-            active === "Overview" || !active
-              ? "Employee Portal"
-              : active === "Cards & Limits"
-              ? "Corporate Cards & Limits"
-              : active === "Analytics"
-              ? "Spending Analytics"
-              : active === "New Expense"
-              ? "Submit New Expense"
-              : active === "Reports"
-              ? "Expense Reports"
-              : active
-          }
           onToggleSidebar={() => setMobileDrawerOpen(true)}
-          rightContent={active === "New Expense" ? null : undefined}
+          onOpenSettings={() => setShowSettings(true)}
         />
 
-        <main className="flex-1 overflow-y-auto p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
+        <main className="flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 w-full min-w-0 max-w-full overflow-x-hidden">
           {children}
         </main>
 

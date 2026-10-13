@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Wallet, Sparkles } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Wallet, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { useFinanceStore } from "@/lib/finance-store";
 import { useTheme } from "@/lib/theme-store";
 import { formatCurrency, getEmployeeAvatar } from "@/lib";
@@ -31,6 +31,53 @@ export function ReimbursementsView() {
       (c.status === "FINANCE_APPROVED" || c.status === "PAYMENT_PENDING" || c.status === "MANAGER_APPROVED") &&
       !c.isHold
   );
+
+  const ITEMS_PER_PAGE = 10;
+  const [pendingPage, setPendingPage] = useState<number>(1);
+  const [settledPage, setSettledPage] = useState<number>(1);
+
+  const totalPending = pendingReimbursements.length;
+  const totalPendingPages = Math.max(1, Math.ceil(totalPending / ITEMS_PER_PAGE));
+  const safePendingPage = Math.min(Math.max(1, pendingPage), totalPendingPages);
+
+  const paginatedPending = useMemo(() => {
+    const startIndex = (safePendingPage - 1) * ITEMS_PER_PAGE;
+    return pendingReimbursements.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [pendingReimbursements, safePendingPage]);
+
+  const totalSettled = reimbursements.length;
+  const totalSettledPages = Math.max(1, Math.ceil(totalSettled / ITEMS_PER_PAGE));
+  const safeSettledPage = Math.min(Math.max(1, settledPage), totalSettledPages);
+
+  const paginatedSettled = useMemo(() => {
+    const startIndex = (safeSettledPage - 1) * ITEMS_PER_PAGE;
+    return reimbursements.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [reimbursements, safeSettledPage]);
+
+  const getVisiblePages = (current: number, total: number) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    const pages: (number | string)[] = [];
+    if (current <= 4) {
+      for (let i = 1; i <= 5; i++) pages.push(i);
+      pages.push("...");
+      pages.push(total);
+    } else if (current >= total - 3) {
+      pages.push(1);
+      pages.push("...");
+      for (let i = total - 4; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      pages.push("...");
+      pages.push(current - 1);
+      pages.push(current);
+      pages.push(current + 1);
+      pages.push("...");
+      pages.push(total);
+    }
+    return pages;
+  };
 
   const handleExecuteSettlement = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +144,7 @@ export function ReimbursementsView() {
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[620px] text-left border-collapse">
             <thead>
               <tr
                 className={`text-xs font-medium border-b ${
@@ -119,7 +166,7 @@ export function ReimbursementsView() {
                 isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
               }`}
             >
-              {pendingReimbursements.length === 0 ? (
+              {paginatedPending.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -131,7 +178,7 @@ export function ReimbursementsView() {
                   </td>
                 </tr>
               ) : (
-                pendingReimbursements.map((c) => (
+                paginatedPending.map((c) => (
                   <tr
                     key={c.id}
                     className={`transition-colors ${
@@ -191,6 +238,91 @@ export function ReimbursementsView() {
             </tbody>
           </table>
         </div>
+
+        {/* Pending Reimbursements Pagination Controls */}
+        {totalPending > 0 && (
+          <div
+            className={`px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs select-none ${
+              isDark ? "border-white/[0.06] bg-[#141418]/60" : "border-zinc-200/60 bg-zinc-50/70"
+            }`}
+          >
+            <div className={isDark ? "text-zinc-400" : "text-zinc-500"}>
+              Showing{" "}
+              <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                {(safePendingPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safePendingPage * ITEMS_PER_PAGE, totalPending)}
+              </span>{" "}
+              of{" "}
+              <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                {totalPending}
+              </span>{" "}
+              claims
+            </div>
+
+            <div className="flex items-center gap-1.5 self-center sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setPendingPage((p) => Math.max(1, p - 1))}
+                disabled={safePendingPage === 1}
+                className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                    : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                }`}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span>Previous</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {getVisiblePages(safePendingPage, totalPendingPages).map((item, idx) => {
+                  if (item === "...") {
+                    return (
+                      <span
+                        key={`pending-ellipsis-${idx}`}
+                        className={`px-1.5 text-xs ${isDark ? "text-zinc-500" : "text-zinc-400"}`}
+                      >
+                        …
+                      </span>
+                    );
+                  }
+                  const pageNum = Number(item);
+                  return (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => setPendingPage(pageNum)}
+                      className={`min-w-7 h-7 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                        pageNum === safePendingPage
+                          ? isDark
+                            ? "bg-white text-zinc-950 font-semibold shadow-xs"
+                            : "bg-zinc-950 text-white font-semibold shadow-xs"
+                          : isDark
+                          ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                          : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setPendingPage((p) => Math.min(totalPendingPages, p + 1))}
+                disabled={safePendingPage === totalPendingPages}
+                className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                    : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                }`}
+              >
+                <span>Next</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Completed Reimbursements History Table */}
@@ -211,7 +343,7 @@ export function ReimbursementsView() {
           </h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[700px] text-left border-collapse">
             <thead>
               <tr
                 className={`text-xs font-medium border-b ${
@@ -234,7 +366,7 @@ export function ReimbursementsView() {
                 isDark ? "divide-white/[0.04]" : "divide-zinc-200/50"
               }`}
             >
-              {reimbursements.length === 0 ? (
+              {paginatedSettled.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
@@ -246,7 +378,7 @@ export function ReimbursementsView() {
                   </td>
                 </tr>
               ) : (
-                reimbursements.map((r) => (
+                paginatedSettled.map((r) => (
                 <tr
                   key={r.id}
                   className={`transition-colors ${
@@ -300,6 +432,91 @@ export function ReimbursementsView() {
           </tbody>
           </table>
         </div>
+
+        {/* Settled Reimbursements Pagination Controls */}
+        {totalSettled > 0 && (
+          <div
+            className={`px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs select-none ${
+              isDark ? "border-white/[0.06] bg-[#141418]/60" : "border-zinc-200/60 bg-zinc-50/70"
+            }`}
+          >
+            <div className={isDark ? "text-zinc-400" : "text-zinc-500"}>
+              Showing{" "}
+              <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                {(safeSettledPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(safeSettledPage * ITEMS_PER_PAGE, totalSettled)}
+              </span>{" "}
+              of{" "}
+              <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                {totalSettled}
+              </span>{" "}
+              records
+            </div>
+
+            <div className="flex items-center gap-1.5 self-center sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setSettledPage((p) => Math.max(1, p - 1))}
+                disabled={safeSettledPage === 1}
+                className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                    : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                }`}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+                <span>Previous</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {getVisiblePages(safeSettledPage, totalSettledPages).map((item, idx) => {
+                  if (item === "...") {
+                    return (
+                      <span
+                        key={`settled-ellipsis-${idx}`}
+                        className={`px-1.5 text-xs ${isDark ? "text-zinc-500" : "text-zinc-400"}`}
+                      >
+                        …
+                      </span>
+                    );
+                  }
+                  const pageNum = Number(item);
+                  return (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => setSettledPage(pageNum)}
+                      className={`min-w-7 h-7 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                        pageNum === safeSettledPage
+                          ? isDark
+                            ? "bg-white text-zinc-950 font-semibold shadow-xs"
+                            : "bg-zinc-950 text-white font-semibold shadow-xs"
+                          : isDark
+                          ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                          : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSettledPage((p) => Math.min(totalSettledPages, p + 1))}
+                disabled={safeSettledPage === totalSettledPages}
+                className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                    : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                }`}
+              >
+                <span>Next</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Settlement UTR Modal */}

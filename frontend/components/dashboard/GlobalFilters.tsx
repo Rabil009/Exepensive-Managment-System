@@ -128,7 +128,7 @@ export function GlobalFilters({
       {/* Floating Filter Popover in Top Right Corner */}
       {isOpen && (
         <div
-          className={`absolute right-0 top-10 z-50 w-80 rounded-xl border p-4 space-y-3.5 animate-in fade-in zoom-in-95 duration-150 font-sans select-none transition-colors ${
+          className={`absolute right-0 top-10 z-50 w-[calc(100vw-2rem)] max-w-xs sm:w-80 rounded-xl border p-4 space-y-3.5 animate-in fade-in zoom-in-95 duration-150 font-sans select-none transition-colors ${
             isDark
               ? "bg-[#111113] border-white/[0.08] text-zinc-100 shadow-2xl"
               : "bg-white border-zinc-200 text-zinc-900 shadow-xl"

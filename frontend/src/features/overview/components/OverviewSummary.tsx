@@ -5,7 +5,15 @@ import { Wallet, Clock, CreditCard, CheckCircle2 } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
 import type { ExpenseSummary } from "../../expenses/data/ExpensesContext";
 
-const rupees = (value?: string | number) => {
+const toLakhs = (value?: string | number) => {
+  if (value === undefined || value === null || value === "") return "—";
+  const cleaned = typeof value === "string" ? value.replace(/,/g, "") : value;
+  const num = Number(cleaned);
+  if (isNaN(num)) return "—";
+  return `₹${(num / 100000).toFixed(2)}L`;
+};
+
+const fullRupees = (value?: string | number) => {
   if (value === undefined || value === null || value === "") return "—";
   const cleaned = typeof value === "string" ? value.replace(/,/g, "") : value;
   const num = Number(cleaned);
@@ -25,32 +33,36 @@ export function OverviewSummary({ summary }: { summary: ExpenseSummary | null })
   const cards = [
     {
       label: "Ready for Reimbursement",
-      value: rupees(summary?.ready_for_reimbursement),
+      value: toLakhs(summary?.ready_for_reimbursement),
+      rawTitle: fullRupees(summary?.ready_for_reimbursement),
       icon: CheckCircle2,
       subBadge: `${summary?.approved_count ?? 0} approved`,
       subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Pending Approval",
-      value: rupees(summary?.pending_approval),
+      value: toLakhs(summary?.pending_approval),
+      rawTitle: fullRupees(summary?.pending_approval),
       icon: Clock,
       subBadge: `${summary?.pending_count ?? 0} pending`,
       subColor: "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Card Spending (MTD)",
-      value: rupees(summary?.card_spending_mtd),
+      value: toLakhs(summary?.card_spending_mtd),
+      rawTitle: fullRupees(summary?.card_spending_mtd),
       icon: CreditCard,
       subBadge: isOverLimit
-        ? `Exceeded limit of ${rupees(cardLimitNum)}`
-        : `Limit: ${rupees(cardLimitNum)}`,
+        ? `Exceeded limit of ${toLakhs(cardLimitNum)}`
+        : `Limit: ${toLakhs(cardLimitNum)}`,
       subColor: isOverLimit
         ? "text-amber-500 dark:text-amber-400 font-medium"
         : "text-zinc-500 dark:text-zinc-400",
     },
     {
       label: "Card Limit Remaining",
-      value: rupees(cardRemainingNum),
+      value: toLakhs(cardRemainingNum),
+      rawTitle: fullRupees(cardRemainingNum),
       icon: Wallet,
       subBadge:
         cardLimitNum > 0
@@ -96,7 +108,7 @@ export function OverviewSummary({ summary }: { summary: ExpenseSummary | null })
                   className={`text-2xl sm:text-[25px] font-bold tracking-tight tabular-nums leading-tight truncate ${
                     isDark ? "text-zinc-100" : "text-zinc-900"
                   }`}
-                  title={card.value}
+                  title={card.rawTitle || card.value}
                 >
                   {card.value}
                 </div>

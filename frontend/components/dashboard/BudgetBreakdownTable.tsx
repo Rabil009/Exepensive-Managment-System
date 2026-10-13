@@ -125,7 +125,7 @@ export function BudgetBreakdownTable() {
 
       {/* Table */}
       <div className="overflow-x-auto px-2 pb-2">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full min-w-[620px] text-left border-collapse">
           <thead>
             <tr className={`text-xs font-medium border-b ${
               isDark ? "text-zinc-400 border-white/[0.06]" : "text-zinc-500 border-zinc-200/60"

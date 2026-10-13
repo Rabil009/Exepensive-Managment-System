@@ -32,6 +32,7 @@ interface FinanceContextType {
   // Navigation & View
   activeView: string;
   setActiveView: (view: string) => void;
+  isLoading: boolean;
 
   // Data
   claims: ExpenseClaim[];
@@ -113,6 +114,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
   const [claims, setClaims] = useState<ExpenseClaim[]>([]);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
   const [reimbursements, setReimbursements] = useState<ReimbursementItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Sync claims, budgets, and reimbursements from live backend & Supabase Cloud
   useEffect(() => {
@@ -142,51 +144,54 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // 1. Fetch claims (prefer FastAPI shared store if reachable, else Supabase Cloud)
-    fetch(`${API_URL}/api/finance/claims`)
-      .then((res) => (res.ok ? res.json() : []))
-      .then((rows) => {
-        if (isMounted && Array.isArray(rows) && rows.length > 0) {
-          processClaims(rows.map(mapLiveClaim));
-        } else {
-          getExpenseClaims().then((fetched) => {
-            if (isMounted && fetched) processClaims(fetched);
-          });
+    // 1. Fetch claims directly from Supabase Cloud first for instant load
+    const fetchClaimsPromise = getExpenseClaims()
+      .then((fetched) => {
+        if (isMounted && fetched && fetched.length > 0) {
+          processClaims(fetched);
+        } else if (API_URL && !API_URL.includes("localhost:8000")) {
+          return fetch(`${API_URL}/api/finance/claims`)
+            .then((res) => (res.ok ? res.json() : []))
+            .then((rows) => {
+              if (isMounted && Array.isArray(rows) && rows.length > 0) {
+                processClaims(rows.map(mapLiveClaim));
+              }
+            });
         }
       })
-      .catch(() => {
-        getExpenseClaims().then((fetched) => {
-          if (isMounted && fetched) processClaims(fetched);
-        });
-      });
+      .catch(() => {});
 
-    // 2. Fetch shared department budgets
-    fetch(`${API_URL}/api/finance/budgets`)
-      .then((res) => (res.ok ? res.json() : []))
-      .then((rows) => {
-        if (isMounted && Array.isArray(rows) && rows.length > 0) {
-          setBudgets(
-            rows.map((b: any) => ({
-              id: String(b.id || b.department),
-              name: b.name || b.department,
-              allocatedAmount: Number(b.allocated_amount || b.cap || 100000),
-              spentAmount: Number(b.spent_amount || b.spent || 0),
-              currency: b.currency || "INR",
-              fiscalPeriod: b.fiscal_period || "Q4-2026",
-              thresholdPercent: Number(b.threshold_percent || 80),
-            }))
-          );
-        } else {
-          getDepartmentBudgets().then((fetchedBudgets) => {
-            if (isMounted && fetchedBudgets) setBudgets(fetchedBudgets);
-          });
+    // 2. Fetch shared department budgets directly from Supabase Cloud first
+    const fetchBudgetsPromise = getDepartmentBudgets()
+      .then((fetchedBudgets) => {
+        if (isMounted && fetchedBudgets && fetchedBudgets.length > 0) {
+          setBudgets(fetchedBudgets);
+        } else if (API_URL && !API_URL.includes("localhost:8000")) {
+          return fetch(`${API_URL}/api/finance/budgets`)
+            .then((res) => (res.ok ? res.json() : []))
+            .then((rows) => {
+              if (isMounted && Array.isArray(rows) && rows.length > 0) {
+                setBudgets(
+                  rows.map((b: any) => ({
+                    id: String(b.id || b.department),
+                    name: b.name || b.department,
+                    allocatedAmount: Number(b.allocated_amount || b.cap || 100000),
+                    spentAmount: Number(b.spent_amount || b.spent || 0),
+                    currency: b.currency || "INR",
+                    fiscalPeriod: b.fiscal_period || "Q4-2026",
+                    thresholdPercent: Number(b.threshold_percent || 80),
+                  }))
+                );
+              }
+            });
         }
       })
-      .catch(() => {
-        getDepartmentBudgets().then((fetchedBudgets) => {
-          if (isMounted && fetchedBudgets) setBudgets(fetchedBudgets);
-        });
-      });
+      .catch(() => {});
+
+    // 3. Complete initial loading once both settled
+    Promise.allSettled([fetchClaimsPromise, fetchBudgetsPromise]).finally(() => {
+      if (isMounted) setIsLoading(false);
+    });
 
     // 3. Fetch reimbursements queue
     fetch(`${API_URL}/api/finance/reimbursements`)
@@ -582,6 +587,7 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
       value={{
         activeView,
         setActiveView,
+        isLoading,
         claims,
         budgets,
         reimbursements,

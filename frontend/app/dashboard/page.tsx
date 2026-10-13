@@ -29,6 +29,7 @@ import { QuickCreateModal } from "@/components/dashboard/QuickCreateModal";
 import { SettingsModal } from "@/components/dashboard/SettingsModal";
 import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
+import { Spiral } from "@/components/ui/spiral";
 
 import { FinanceProvider, useFinanceStore } from "@/lib/finance-store";
 import { ThemeProvider, useTheme } from "@/lib/theme-store";
@@ -40,6 +41,7 @@ function DashboardContent() {
   const {
     activeView,
     setActiveView,
+    isLoading,
     awaitingVerificationCount,
     awaitingHighPriorityCount,
     approvedAmountTotal,
@@ -66,25 +68,6 @@ function DashboardContent() {
   const [showSearch, setShowSearch] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
-  const getPageTitle = () => {
-    switch (activeView) {
-      case "Verification":
-        return "Finance Verification Queue";
-      case "Reimbursements":
-        return "Employee Reimbursements";
-      case "Payments":
-        return "Disbursement & Payments";
-      case "Exceptions":
-        return "Exceptions & Policy Violations";
-      case "Budgets":
-        return "Treasury Budgets & Limits";
-      case "Reports":
-        return "Accounting Reports & CSV Export";
-      default:
-        return "Finance Operations";
-    }
-  };
-
   return (
     <div className="flex h-screen w-full overflow-hidden font-sans antialiased transition-colors bg-[#FAFAFB] dark:bg-[#08080A] text-zinc-900 dark:text-zinc-100">
       {/* Sidebar with Desktop rail and Mobile slide-over drawer */}
@@ -101,103 +84,117 @@ function DashboardContent() {
 
       {/* Main Application Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-        {/* Top Header with Mobile Hamburger and Actions */}
+        {/* Top Header with Mobile Hamburger and Right-Corner User Profile */}
         <Header
-          title={getPageTitle()}
           onToggleSidebar={() => setMobileDrawerOpen(true)}
-          rightContent={
-            activeView === "Dashboard" ? (
-              <GlobalFilters
-                filters={filters}
-                onFilterChange={setFilters}
-                onReset={() => setFilters(DEFAULT_FILTERS)}
-              />
-            ) : null
-          }
+          onOpenSettings={() => setShowSettings(true)}
         />
 
         {/* Scrollable Main Content (optimized mobile padding) */}
-        <main className="flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6">
-          {/* Main Dashboard Overview View */}
-          {activeView === "Dashboard" && (
+        <main
+          className={
+            isLoading
+              ? "flex-1 overflow-y-auto overscroll-contain flex items-center justify-center h-full w-full min-w-0 max-w-full overflow-x-hidden"
+              : "flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 w-full min-w-0 max-w-full overflow-x-hidden"
+          }
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center w-full h-full">
+              <Spiral className="size-10 text-emerald-500" />
+            </div>
+          ) : (
             <>
-              {/* 2. Top KPI Cards */}
-              <div
-                onClick={(e) => {
-                  const target = (e.target as HTMLElement).closest("div");
-                  if (!target) return;
-                  if (target.textContent?.includes("Awaiting")) setActiveView("Verification");
-                  else if (target.textContent?.includes("Reimbursements")) setActiveView("Reimbursements");
-                  else if (target.textContent?.includes("Payments")) setActiveView("Payments");
-                }}
-                className="cursor-pointer"
-              >
-                <KpiCards
-                  data={{
-                    awaitingVerificationCount,
-                    awaitingVerificationHighPriority: awaitingHighPriorityCount,
-                    approvedAmount: `₹${(approvedAmountTotal / 100000).toFixed(2)}L`,
-                    reimbursementsPendingCount,
-                    reimbursementsPendingAmount: `₹${reimbursementsPendingAmount.toLocaleString("en-IN")} total`,
-                    paymentsPendingCount,
-                    paymentsPendingAmount: `₹${paymentsPendingAmount.toLocaleString("en-IN")} total`,
-                  }}
-                />
-              </div>
+              {/* Main Dashboard Overview View */}
+              {activeView === "Dashboard" && (
+                <>
+                  {/* 2. Top KPI Cards */}
+                  <div
+                    onClick={(e) => {
+                      const target = (e.target as HTMLElement).closest("div");
+                      if (!target) return;
+                      if (target.textContent?.includes("Awaiting")) setActiveView("Verification");
+                      else if (target.textContent?.includes("Reimbursements")) setActiveView("Reimbursements");
+                      else if (target.textContent?.includes("Payments")) setActiveView("Payments");
+                    }}
+                    className="cursor-pointer"
+                  >
+                    <KpiCards
+                      data={{
+                        awaitingVerificationCount,
+                        awaitingVerificationHighPriority: awaitingHighPriorityCount,
+                        approvedAmount: `₹${(approvedAmountTotal / 100000).toFixed(2)}L`,
+                        reimbursementsPendingCount,
+                        reimbursementsPendingAmount: `₹${reimbursementsPendingAmount.toLocaleString("en-IN")} total`,
+                        paymentsPendingCount,
+                        paymentsPendingAmount: `₹${paymentsPendingAmount.toLocaleString("en-IN")} total`,
+                      }}
+                    />
+                  </div>
 
-              {/* 2.5 Interactive Trends Area Chart */}
-              <ChartAreaInteractive />
+                  {/* 2.2 Global Filters moved below KPI Cards */}
+                  <div className="flex items-center justify-end">
+                    <GlobalFilters
+                      filters={filters}
+                      onFilterChange={setFilters}
+                      onReset={() => setFilters(DEFAULT_FILTERS)}
+                    />
+                  </div>
 
-              {/* 3. Visual Bento Grid: Budget vs Actual Bar Chart (7 cols) + Category Donut Chart (5 cols) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-7">
-                  <BudgetVsActualChart />
-                </div>
-                <div className="lg:col-span-5">
-                  <CategoryDonutChart />
-                </div>
-              </div>
+                  {/* 2.5 Interactive Trends Area Chart */}
+                  <ChartAreaInteractive />
 
-              {/* 4. Secondary Visual Grid: Department Utilization (6 cols) + Exceptions Queue (6 cols) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-6">
-                  <DepartmentSpendChart />
-                </div>
-                <div className="lg:col-span-6">
-                  <ExceptionsQueue
-                    onViewAll={() => setActiveView("Exceptions")}
-                    onReviewException={() => setActiveView("Verification")}
+                  {/* 3. Visual Bento Grid: Budget vs Actual Bar Chart (7 cols) + Category Donut Chart (5 cols) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
+                    <div className="lg:col-span-7 min-w-0">
+                      <BudgetVsActualChart />
+                    </div>
+                    <div className="lg:col-span-5 min-w-0">
+                      <CategoryDonutChart />
+                    </div>
+                  </div>
+
+                  {/* 4. Secondary Visual Grid: Department Utilization (6 cols) + Exceptions Queue (6 cols) */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-w-0">
+                    <div className="lg:col-span-6 min-w-0">
+                      <DepartmentSpendChart />
+                    </div>
+                    <div className="lg:col-span-6 min-w-0">
+                      <ExceptionsQueue
+                        onViewAll={() => setActiveView("Exceptions")}
+                        onReviewException={() => setActiveView("Exceptions")}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 5. Budget Breakdown & Threshold Indicators */}
+                  <BudgetBreakdownTable />
+
+                  {/* 6. Recent Completed Reimbursements */}
+                  <RecentReimbursementsTable
+                    onViewAll={() => setActiveView("Reimbursements")}
                   />
-                </div>
-              </div>
+                </>
+              )}
 
-              {/* 5. Budget Breakdown & Threshold Indicators */}
-              <BudgetBreakdownTable />
+              {/* Verification Queue View (PRD FR-10) */}
+              {activeView === "Verification" && <VerificationQueueView />}
 
-              {/* 6. Recent Completed Reimbursements */}
-              <RecentReimbursementsTable
-                onViewAll={() => setActiveView("Reimbursements")}
-              />
+              {/* Reimbursements View (PRD FR-11) */}
+              {activeView === "Reimbursements" && <ReimbursementsView />}
+
+              {/* Payments View (PRD FR-12) */}
+              {activeView === "Payments" && <PaymentsView />}
+
+              {/* Exceptions View (PRD FR-05 & FR-06) */}
+              {activeView === "Exceptions" && <ExceptionsView />}
+
+              {/* Budgets View (PRD FR-14) */}
+              {activeView === "Budgets" && <BudgetsView />}
+
+              {/* Reports View (PRD FR-18) */}
+              {activeView === "Reports" && <ReportsView />}
             </>
           )}
-
-          {/* Verification Queue View (PRD FR-10) */}
-          {activeView === "Verification" && <VerificationQueueView />}
-
-          {/* Reimbursements View (PRD FR-11) */}
-          {activeView === "Reimbursements" && <ReimbursementsView />}
-
-          {/* Payments View (PRD FR-12) */}
-          {activeView === "Payments" && <PaymentsView />}
-
-          {/* Exceptions View (PRD FR-05 & FR-06) */}
-          {activeView === "Exceptions" && <ExceptionsView />}
-
-          {/* Budgets View (PRD FR-14) */}
-          {activeView === "Budgets" && <BudgetsView />}
-
-          {/* Reports View (PRD FR-18) */}
-          {activeView === "Reports" && <ReportsView />}
         </main>
 
         {/* Mobile Bottom Navigation Bar (Thumb Friendly) */}

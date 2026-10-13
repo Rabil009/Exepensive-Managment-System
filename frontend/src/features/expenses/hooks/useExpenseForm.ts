@@ -1,35 +1,71 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useExpenses } from "../data/ExpensesContext";
-import { draftKey, remoteDraftKey, emptyDraft, type Draft } from "../data/expenseDraft";
-import type { ExpenseStatus } from "../types";
-import { discardNewExpense, loadExpenseOptions, loadNewExpense, saveNewExpense, type ExpenseOptions } from "../data/newExpenseApi";
+import {
+  draftKey,
+  remoteDraftKey,
+  emptyDraft,
+  type Draft,
+} from "../data/expenseDraft";
+import type { Expense, ExpenseStatus } from "../types";
+import {
+  discardNewExpense,
+  loadExpenseOptions,
+  loadNewExpense,
+  saveNewExpense,
+  type ExpenseOptions,
+} from "../data/newExpenseApi";
 import { scanReceiptFile } from "../utils/receiptScanner";
+
+function paymentMethodLabel(value: string | null | undefined) {
+  if (!value) return "Personal (Out-of-Pocket)";
+  const normalized = value.toLowerCase();
+  if (normalized.includes("card") || normalized.includes("corporate")) {
+    return "Corporate Card";
+  }
+  return "Personal (Out-of-Pocket)";
+}
+
 export function useExpenseForm() {
+  const router = useRouter();
   const params = useSearchParams();
   const draftParam = params.get("draft");
-  const { expenses, refresh } = useExpenses();
+  const { expenses, refresh, upsertDraft, removeDraft } = useExpenses();
   const [draft, setDraft] = useState<Draft>(() => {
-    const existing = expenses.find((expense) => expense.id === params.get("draft") && expense.status === "Draft");
-    if (existing) return {
-      ...emptyDraft(), ...existing, amount: String(existing.amount), currency: "INR",
-      report: existing.report || "Unassigned", paymentMethod: existing.paymentMethod || "Personal (Out-of-Pocket)",
-      purpose: existing.description, attendees: existing.attendees || [], receipt: existing.receipt || "",
-    };
+    const existing = expenses.find(
+      (expense) =>
+        expense.id === params.get("draft") && expense.status === "Draft",
+    );
+    if (existing)
+      return {
+        ...emptyDraft(),
+        ...existing,
+        amount: String(existing.amount),
+        currency: "INR",
+        report: existing.report || "Unassigned",
+        paymentMethod: existing.paymentMethod || "Personal (Out-of-Pocket)",
+        purpose: existing.description,
+        attendees: existing.attendees || [],
+        receipt: existing.receipt || "",
+      };
     const report = params.get("report");
     try {
       const saved = localStorage.getItem(draftKey);
       const restored = saved
         ? { ...emptyDraft(), ...JSON.parse(saved), currency: "INR" }
         : emptyDraft();
-      if (localStorage.getItem(remoteDraftKey) !== restored.id) restored.receipt = "";
+      if (localStorage.getItem(remoteDraftKey) !== restored.id)
+        restored.receipt = "";
       return report ? { ...restored, report } : restored;
     } catch {
       return { ...emptyDraft(), ...(report ? { report } : {}) };
     }
   });
   const [file, setFile] = useState<File | null>(null);
-  const [options, setOptions] = useState<ExpenseOptions>({ categories: [], reports: [], unlinked_transactions: [] });
+  const [options, setOptions] = useState<ExpenseOptions>({
+    categories: [],
+    reports: [],
+  });
   const [preview, setPreview] = useState("");
   const previewUrl = useRef("");
   const [error, setError] = useState("");
@@ -46,16 +82,28 @@ export function useExpenseForm() {
   const inputRef = useRef<HTMLInputElement>(null);
   const ready = Boolean(
     draft.merchant.trim() &&
-    draft.date &&
-    draft.category &&
-    Number(draft.amount) > 0,
+      draft.date &&
+      draft.category &&
+      Number(draft.amount) > 0,
   );
 
   useEffect(() => {
     let active = true;
-    loadExpenseOptions().then((result) => { if (active) setOptions(result); })
-      .catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "Could not load expense options."); });
-    return () => { active = false; };
+    loadExpenseOptions()
+      .then((result) => {
+        if (active) setOptions(result);
+      })
+      .catch((cause: unknown) => {
+        if (active)
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "Could not load expense options.",
+          );
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -68,44 +116,109 @@ export function useExpenseForm() {
     let cachedId: string | null = null;
     try {
       cachedId = localStorage.getItem(remoteDraftKey);
-    } catch { /* Invalid browser cache is ignored. */ }
+    } catch {
+      /* Invalid browser cache is ignored. */
+    }
     const id = draftParam || cachedId;
     if (!id) return;
-    let active = true;
-    loadNewExpense(id).then((stored) => {
-      if (!active) return;
+
+    const listedDraft = expenses.find(
+      (expense) => expense.id === id && expense.status === "Draft",
+    );
+    if (listedDraft) {
       setDraft({
-        ...emptyDraft(), id: stored.id, merchant: stored.merchant || "",
-        date: stored.expense_date || "", amount: String(stored.amount || ""),
-        category: stored.category || "", report: stored.report_name || "Unassigned",
-        paymentMethod: stored.payment_method || "Personal (Out-of-Pocket)",
-        purpose: stored.business_purpose || "", attendees: stored.attendees || [],
-        receipt: stored.receipt_name || "",
-        linkedTransactionId: stored.linked_transaction_id,
+        ...emptyDraft(),
+        id: listedDraft.id,
+        merchant: listedDraft.merchant || "",
+        date: listedDraft.date || "",
+        amount: String(listedDraft.amount ?? ""),
+        category: listedDraft.category || "",
+        report: listedDraft.report || "Unassigned",
+        paymentMethod: paymentMethodLabel(listedDraft.paymentMethod),
+        purpose: listedDraft.description || "",
+        attendees: listedDraft.attendees || [],
+        receipt: listedDraft.receipt || "",
       });
       setSaved(true);
+      setSubmitted(false);
       remoteDraft.current = true;
       setFile(null);
-    }).catch((cause: unknown) => {
-      if (active) setError(cause instanceof Error ? cause.message : "Could not load this draft.");
-    });
-    return () => { active = false; };
-  }, [draftParam]);
+      setPreview("");
+      setError("");
+      setMessage("Draft loaded. Make changes and submit when ready.");
+    }
+
+    let active = true;
+    loadNewExpense(id)
+      .then((stored) => {
+        if (!active) return;
+        setDraft({
+          ...emptyDraft(),
+          id: stored.id,
+          merchant: stored.merchant || "",
+          date: stored.expense_date || "",
+          amount: String(stored.amount ?? ""),
+          category: stored.category || "",
+          report: stored.report_name || "Unassigned",
+          paymentMethod: paymentMethodLabel(stored.payment_method),
+          purpose: stored.business_purpose || "",
+          attendees: stored.attendees || [],
+          receipt: stored.receipt_name || "",
+          linkedTransactionId: stored.linked_transaction_id,
+        });
+        setSaved(true);
+        remoteDraft.current = true;
+        setFile(null);
+        setPreview("");
+        setError("");
+        setMessage("Draft loaded. Make changes and submit when ready.");
+      })
+      .catch((cause: unknown) => {
+        if (active && !listedDraft) {
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "Could not load this draft.",
+          );
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [draftParam, expenses]);
 
   useEffect(() => {
     if (submitted || saved) return;
-    if (!draft.merchant && !draft.date && !draft.amount && !draft.category && !draft.purpose && !draft.receipt) return;
-    try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Keep editing in memory. */ }
+    if (
+      !draft.merchant &&
+      !draft.date &&
+      !draft.amount &&
+      !draft.category &&
+      !draft.purpose &&
+      !draft.receipt
+    )
+      return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify(draft));
+    } catch {
+      /* Keep editing in memory. */
+    }
   }, [draft, submitted, saved]);
 
   function update<K extends keyof Draft>(key: K, value: Draft[K]) {
-    setDraft((current) => ({ ...current, [key]: value,
-      ...(key === "paymentMethod" && value !== "Corporate Card" ? { linkedTransactionId: null } : {}) }));
+    setDraft((current) => ({
+      ...current,
+      [key]: value,
+      ...(key === "paymentMethod" && value !== "Corporate Card"
+        ? { linkedTransactionId: null }
+        : {}),
+    }));
     setSaved(false);
     setSubmitted(false);
     setMessage("");
     setError("");
   }
+
   function attach(next?: File) {
     if (!next) return;
     if (next.size > 25 * 1024 * 1024) {
@@ -127,12 +240,20 @@ export function useExpenseForm() {
     if (inputRef.current) inputRef.current.value = "";
 
     // Automatic Receipt OCR & Form Auto-fill (Supports both PDFs and Images!)
-    const isPdf = next.name.toLowerCase().endsWith(".pdf") || next.type === "application/pdf";
-    const isImage = next.type.startsWith("image/") || /\.(png|jpe?g|webp|heic)$/i.test(next.name);
+    const isPdf =
+      next.name.toLowerCase().endsWith(".pdf") ||
+      next.type === "application/pdf";
+    const isImage =
+      next.type.startsWith("image/") ||
+      /\.(png|jpe?g|webp|heic)$/i.test(next.name);
 
     if (isImage || isPdf) {
       setScanning(true);
-      setScanNotice(isPdf ? "Reading PDF receipt & extracting details..." : "Scanning receipt text & extracting details...");
+      setScanNotice(
+        isPdf
+          ? "Reading PDF receipt & extracting details..."
+          : "Scanning receipt text & extracting details...",
+      );
       scanReceiptFile(next)
         .then((extracted) => {
           setDraft((prev) => {
@@ -162,37 +283,31 @@ export function useExpenseForm() {
               );
               updated.category = matched || target || options.categories[0] || "Other";
             }
-            if (extracted.paymentMethod) updated.paymentMethod = extracted.paymentMethod;
-            if (extracted.purpose && (!prev.purpose || prev.purpose.trim() === "")) {
-              updated.purpose = extracted.purpose;
-            }
             return updated;
           });
-
-          const parts = [
-            extracted.merchant ? `Merchant: ${extracted.merchant}` : "",
-            extracted.amount ? `₹${extracted.amount}` : "",
-            extracted.date ? `Date: ${extracted.date}` : "",
-            extracted.category ? `Category: ${extracted.category}` : "",
-          ]
-            .filter(Boolean)
-            .join(" • ");
-
           setScanNotice(
-            parts
-              ? `✨ Receipt auto-scanned: ${parts}`
-              : "✨ Receipt scanned successfully."
+            extracted.merchant || extracted.amount
+              ? `Receipt scanned! Auto-filled ${[
+                  extracted.merchant ? "vendor" : "",
+                  extracted.amount ? "amount" : "",
+                  extracted.date ? "date" : "",
+                  extracted.category ? "category" : "",
+                ]
+                  .filter(Boolean)
+                  .join(", ")}.`
+              : "Receipt attached.",
           );
         })
         .catch((err) => {
           console.warn("Receipt scan note:", err);
-          setScanNotice("");
+          setScanNotice("Receipt attached.");
         })
         .finally(() => {
           setScanning(false);
         });
     }
   }
+
   async function save(status: ExpenseStatus) {
     if (saving) return;
     if (status === "Pending" && !ready) {
@@ -203,34 +318,92 @@ export function useExpenseForm() {
     setError("");
     try {
       await saveNewExpense(draft, file, status === "Pending");
-      remoteDraft.current = status === "Draft";
-      setSaved(true);
-      setSubmitted(status === "Pending");
-      setMessage(status === "Draft" ? "Draft saved to Supabase." : "Expense submitted to Supabase for approval.");
-      setFile(null);
-      await refresh();
-      void loadExpenseOptions().then(setOptions).catch(() => {});
       if (status === "Draft") {
-        try { localStorage.setItem(draftKey, JSON.stringify(draft)); } catch { /* Optional cache. */ }
-        try { localStorage.setItem(remoteDraftKey, draft.id); } catch { /* Optional cache. */ }
+        remoteDraft.current = true;
+        upsertDraft({
+          id: draft.id,
+          date: draft.date,
+          merchant: draft.merchant.trim() || "Untitled draft",
+          category: draft.category || "Other",
+          amount: Number(draft.amount) || 0,
+          status: "Draft",
+          description: draft.purpose,
+          receipt: draft.receipt || undefined,
+          currency: draft.currency,
+          report: draft.report,
+          paymentMethod: draft.paymentMethod,
+          attendees: draft.attendees,
+          raw_status: "DRAFT",
+          source: "draft",
+        } satisfies Expense);
+        setSaved(true);
+        setSubmitted(false);
+        setMessage("Draft saved to Supabase.");
+        setFile(null);
+        try {
+          localStorage.setItem(draftKey, JSON.stringify(draft));
+        } catch {
+          /* Optional cache. */
+        }
+        try {
+          localStorage.setItem(remoteDraftKey, draft.id);
+        } catch {
+          /* Optional cache. */
+        }
       } else {
-        try { localStorage.removeItem(draftKey); } catch { /* Optional cache. */ }
-        try { localStorage.removeItem(remoteDraftKey); } catch { /* Optional cache. */ }
+        remoteDraft.current = false;
+        removeDraft(draft.id);
+        setDraft(emptyDraft());
+        setFile(null);
+        if (previewUrl.current) URL.revokeObjectURL(previewUrl.current);
+        previewUrl.current = "";
+        setPreview("");
+        setSaved(false);
+        setSubmitted(false);
+        setMessage(
+          "Expense submitted successfully. You can enter another expense.",
+        );
+        try {
+          localStorage.removeItem(draftKey);
+        } catch {
+          /* Optional cache. */
+        }
+        try {
+          localStorage.removeItem(remoteDraftKey);
+        } catch {
+          /* Optional cache. */
+        }
+        if (typeof window !== "undefined") {
+          window.location.href = "/employee/dashboard";
+        } else {
+          router.push("/employee/dashboard");
+        }
+        return;
       }
+      await refresh();
+      void loadExpenseOptions()
+        .then(setOptions)
+        .catch(() => {});
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not save the expense.");
+      setError(
+        cause instanceof Error ? cause.message : "Could not save the expense.",
+      );
     } finally {
       setSaving(false);
     }
   }
+
   async function discard() {
     if (saving) return;
     try {
       setSaving(true);
       if (remoteDraft.current && !submitted) await discardNewExpense(draft.id);
       remoteDraft.current = false;
+      removeDraft(draft.id);
       await refresh();
-      void loadExpenseOptions().then(setOptions).catch(() => {});
+      void loadExpenseOptions()
+        .then(setOptions)
+        .catch(() => {});
       localStorage.removeItem(draftKey);
       localStorage.removeItem(remoteDraftKey);
       setDraft(emptyDraft());
@@ -242,16 +415,27 @@ export function useExpenseForm() {
       setMessage("");
       setSaved(false);
       setSubmitted(false);
+      if (typeof window !== "undefined") {
+        window.location.href = "/employee/dashboard";
+      } else {
+        router.push("/employee/dashboard");
+      }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not discard this draft.");
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not discard this draft.",
+      );
     } finally {
       setSaving(false);
     }
   }
+
   function submit(event: FormEvent) {
     event.preventDefault();
     save("Pending");
   }
+
   function addAttendee() {
     const name = attendee.trim();
     if (!name) return;
@@ -261,21 +445,6 @@ export function useExpenseForm() {
     setAddingAttendee(false);
   }
 
-  function linkTransaction(transaction: ExpenseOptions["unlinked_transactions"][number]) {
-    setDraft((current) => ({
-      ...current,
-      merchant: transaction.merchant,
-      amount: transaction.amount,
-      paymentMethod: "Corporate Card",
-      date: transaction.transaction_date,
-      linkedTransactionId: transaction.id,
-    }));
-    setSaved(false);
-    setSubmitted(false);
-    setMessage(
-      "Card transaction selected. Choose a category and review the details before submitting.",
-    );
-  }
   return {
     draft,
     options,
@@ -287,6 +456,7 @@ export function useExpenseForm() {
     submitted,
     saving,
     dragging,
+    editingDraft: Boolean(draftParam),
     setDragging,
     addingAttendee,
     setAddingAttendee,
@@ -303,7 +473,6 @@ export function useExpenseForm() {
     discard,
     submit,
     addAttendee,
-    linkTransaction,
   };
 }
 export type ExpenseFormModel = ReturnType<typeof useExpenseForm>;

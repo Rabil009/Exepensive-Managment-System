@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useExpenseForm } from "../hooks/useExpenseForm";
 import { ExpenseFormHeader } from "./ExpenseFormHeader";
 import { ReceiptCapture } from "./ReceiptCapture";
-import { UnlinkedTransactions } from "./UnlinkedTransactions";
+import { ExpenseDrafts } from "./ExpenseDrafts";
 import { ExpenseDetailsFields } from "./ExpenseDetailsFields";
 import { ExpenseCategorization } from "./ExpenseCategorization";
 import { ExpenseAttendees } from "./ExpenseAttendees";
@@ -15,10 +15,7 @@ export function ExpenseForm() {
   const model = useExpenseForm();
 
   return (
-    <form
-      className="flex flex-col w-full gap-5 pb-12"
-      onSubmit={model.submit}
-    >
+    <form className="flex flex-col w-full gap-5 pb-12" onSubmit={model.submit}>
       <ExpenseFormHeader model={model} />
 
       {/* Message / Error Notification */}
@@ -44,11 +41,11 @@ export function ExpenseForm() {
       )}
 
       {/* 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* Left Column: Receipt & Unlinked Transactions (col-span-5) */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
+      <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
+        {/* Receipt attachment & Saved Drafts */}
+        <div className="flex flex-col gap-4 lg:col-span-5 lg:h-full">
           <ReceiptCapture model={model} />
-          <UnlinkedTransactions model={model} />
+          <ExpenseDrafts />
         </div>
 
         {/* Right Column: Details, Categories, Attendees & Actions (col-span-7) */}
@@ -64,11 +61,9 @@ export function ExpenseForm() {
             <div className="h-px w-full bg-zinc-100 dark:bg-white/[0.05]" />
 
             <ExpenseAttendees model={model} />
-
-            <div className="h-px w-full bg-zinc-100 dark:bg-white/[0.05]" />
-
-            <ExpenseFormActions model={model} />
           </div>
+
+          <ExpenseFormActions model={model} />
         </div>
       </div>
     </form>

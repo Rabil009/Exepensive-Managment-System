@@ -30,6 +30,8 @@ import {
   Layers,
   ArrowUpRight,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   RefreshCw,
   Menu,
   CreditCard,
@@ -60,6 +62,7 @@ import { SearchModal } from "@/components/dashboard/SearchModal";
 import { HelpModal } from "@/components/dashboard/HelpModal";
 import { ReceiptModal } from "@/components/shared/ReceiptModal";
 import { QuarterlyFinancialStatements } from "@/components/manager/QuarterlyFinancialStatements";
+import { Spiral } from "@/components/ui/spiral";
 
 export type ManagerView =
   | "Approvals"
@@ -180,22 +183,31 @@ function ManagerDashboardInner() {
   const [showSearch, setShowSearch] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
   // Approvals & Claim State
   const [claims, setClaims] = useState<ManagerClaim[]>([]);
   const [cardRequests, setCardRequests] = useState<CardApprovalRequest[]>([]);
   const [budgets, setBudgets] = useState<DepartmentBudget[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"All" | "Pending" | "Approved" | "Rejected">("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [inspectClaim, setInspectClaim] = useState<ManagerClaim | null>(null);
-  const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
   const [exceptionSeverityFilter, setExceptionSeverityFilter] = useState<"All" | "high" | "medium" | "low" | "pending">("All");
   const [exceptionSearch, setExceptionSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [exceptionsPage, setExceptionsPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
 
-  const refreshData = async () => {
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, searchQuery]);
+
+  const refreshData = async (isInitial: boolean | unknown = false) => {
     try {
-      setIsRefreshing(true);
+      if (isInitial === true) setIsInitialLoading(true);
+      else setIsRefreshing(true);
       const [claimsResult, budgetsResult, cardsResult] = await Promise.allSettled([
         fetchManagerClaims(),
         fetchManagerBudgets(),
@@ -214,11 +226,12 @@ function ManagerDashboardInner() {
       console.warn("Backend sync notice:", e);
     } finally {
       setIsRefreshing(false);
+      setIsInitialLoading(false);
     }
   };
 
   useEffect(() => {
-    refreshData();
+    refreshData(true);
 
     // 1. Polling fallback for guaranteed responsiveness
     const interval = setInterval(() => {
@@ -541,6 +554,21 @@ function ManagerDashboardInner() {
     return matchStatus && matchSearch;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredClaims.length / ITEMS_PER_PAGE));
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (safeCurrentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedClaims = filteredClaims.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Exceptions list pagination
+  const allExceptionClaims = claims.filter((c) => Boolean(c.policyNotes) || !c.receiptVerified);
+  const exceptionsTotalPages = Math.max(1, Math.ceil(allExceptionClaims.length / ITEMS_PER_PAGE));
+  const safeExceptionsPage = Math.min(Math.max(1, exceptionsPage), exceptionsTotalPages);
+  const exceptionsStartIndex = (safeExceptionsPage - 1) * ITEMS_PER_PAGE;
+  const paginatedExceptionClaims = allExceptionClaims.slice(
+    exceptionsStartIndex,
+    exceptionsStartIndex + ITEMS_PER_PAGE
+  );
+
   const getPageTitle = () => {
     switch (activeView) {
       case "Approvals":
@@ -583,14 +611,18 @@ function ManagerDashboardInner() {
       }`}>
         {/* Core Manager Header */}
         <ManagerHeader
-          title={getPageTitle()}
           onToggleSidebar={() => setMobileDrawerOpen(true)}
+          onOpenSettings={() => setShowSettings(true)}
         />
 
         {/* Scrollable Main Application Space */}
-        <main className={`flex-1 overflow-y-auto overscroll-contain p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6 ${
-          isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"
-        }`}>
+        <main
+          className={`flex-1 overflow-y-auto overscroll-contain w-full min-w-0 max-w-full overflow-x-hidden ${
+            isInitialLoading
+              ? "flex items-center justify-center h-full"
+              : "p-3.5 sm:p-5 md:p-6 space-y-4 sm:space-y-6"
+          } ${isDark ? "bg-[#09090B]" : "bg-[#FAFAFA]"}`}
+        >
           {/* Toast Notification */}
           {feedbackNotice && (
             <div
@@ -612,132 +644,141 @@ function ManagerDashboardInner() {
             </div>
           )}
 
-          {/* Standardized Flat KPI Cards Matching Finance Dashboard */}
-          {activeView !== "Exceptions" && (
-            <section aria-label="Manager Key Metrics">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Card 1: Total Team Spend */}
-                <div
-                  onClick={() => setActiveView("Team Spend")}
-                  className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
-                    isDark
-                      ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
-                      : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-medium uppercase tracking-wider ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}>
-                      Team Total Spend
-                    </span>
-                    <Wallet className={`h-4 w-4 shrink-0 ${
-                      isDark ? "text-zinc-500" : "text-zinc-400"
-                    }`} />
-                  </div>
-                  <div className="mt-3.5 flex items-center">
-                    <span
-                      className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
-                        isDark ? "text-zinc-100" : "text-zinc-900"
+          {isInitialLoading ? (
+            <div className="flex items-center justify-center w-full h-64">
+              <Spiral className="size-10 text-blue-500" />
+            </div>
+          ) : (
+            <>
+              {/* Standardized Flat KPI Cards Matching Finance Dashboard */}
+              {activeView !== "Exceptions" && (
+                <section aria-label="Manager Key Metrics">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Card 1: Total Team Spend */}
+                    <div
+                      onClick={() => setActiveView("Team Spend")}
+                      className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
+                        isDark
+                          ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                          : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                       }`}
                     >
-                      ₹{totalSpent.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                </div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-medium uppercase tracking-wider ${
+                          isDark ? "text-zinc-400" : "text-zinc-500"
+                        }`}>
+                          Team Total Spend
+                        </span>
+                        <Wallet className={`h-4 w-4 shrink-0 ${
+                          isDark ? "text-zinc-500" : "text-zinc-400"
+                        }`} />
+                      </div>
+                      <div className="mt-3.5 flex items-center">
+                        <span
+                          title={`₹${totalSpent.toLocaleString("en-IN")}`}
+                          className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                            isDark ? "text-zinc-100" : "text-zinc-900"
+                          }`}
+                        >
+                          {totalSpent >= 100000 ? `₹${(totalSpent / 100000).toFixed(2)}L` : `₹${totalSpent.toLocaleString("en-IN")}`}
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Card 2: Awaiting Approval */}
-                <div
-                  onClick={() => setActiveView("Approvals")}
-                  className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
-                    isDark
-                      ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
-                      : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-medium uppercase tracking-wider ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}>
-                      Awaiting Verification
-                    </span>
-                    <Clock className={`h-4 w-4 shrink-0 ${
-                      isDark ? "text-zinc-500" : "text-zinc-400"
-                    }`} />
-                  </div>
-                  <div className="mt-3.5 flex items-center">
-                    <span
-                      className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
-                        isDark ? "text-zinc-100" : "text-zinc-900"
+                    {/* Card 2: Awaiting Approval */}
+                    <div
+                      onClick={() => setActiveView("Approvals")}
+                      className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
+                        isDark
+                          ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                          : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                       }`}
                     >
-                      {pendingClaims.length}
-                    </span>
-                  </div>
-                </div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-medium uppercase tracking-wider ${
+                          isDark ? "text-zinc-400" : "text-zinc-500"
+                        }`}>
+                          Awaiting Verification
+                        </span>
+                        <Clock className={`h-4 w-4 shrink-0 ${
+                          isDark ? "text-zinc-500" : "text-zinc-400"
+                        }`} />
+                      </div>
+                      <div className="mt-3.5 flex items-center">
+                        <span
+                          className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                            isDark ? "text-zinc-100" : "text-zinc-900"
+                          }`}
+                        >
+                          {pendingClaims.length}
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Card 3: Approved This Month */}
-                <div
-                  onClick={() => setActiveView("Approvals")}
-                  className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
-                    isDark
-                      ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
-                      : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-medium uppercase tracking-wider ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}>
-                      Approved This Month
-                    </span>
-                    <CheckCircle2 className={`h-4 w-4 shrink-0 ${
-                      isDark ? "text-zinc-500" : "text-zinc-400"
-                    }`} />
-                  </div>
-                  <div className="mt-3.5 flex items-center">
-                    <span
-                      className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
-                        isDark ? "text-zinc-100" : "text-zinc-900"
+                    {/* Card 3: Approved This Month */}
+                    <div
+                      onClick={() => setActiveView("Approvals")}
+                      className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
+                        isDark
+                          ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                          : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                       }`}
                     >
-                      ₹{approvedAmount.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                </div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-medium uppercase tracking-wider ${
+                          isDark ? "text-zinc-400" : "text-zinc-500"
+                        }`}>
+                          Approved This Month
+                        </span>
+                        <CheckCircle2 className={`h-4 w-4 shrink-0 ${
+                          isDark ? "text-zinc-500" : "text-zinc-400"
+                        }`} />
+                      </div>
+                      <div className="mt-3.5 flex items-center">
+                        <span
+                          title={`₹${approvedAmount.toLocaleString("en-IN")}`}
+                          className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                            isDark ? "text-zinc-100" : "text-zinc-900"
+                          }`}
+                        >
+                          {approvedAmount >= 100000 ? `₹${(approvedAmount / 100000).toFixed(2)}L` : `₹${approvedAmount.toLocaleString("en-IN")}`}
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Card 4: Policy Exceptions */}
-                <div
-                  onClick={() => setActiveView("Exceptions")}
-                  className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
-                    isDark
-                      ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
-                      : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs font-medium uppercase tracking-wider ${
-                      isDark ? "text-zinc-400" : "text-zinc-500"
-                    }`}>
-                      Policy Exceptions
-                    </span>
-                    <AlertTriangle className={`h-4 w-4 shrink-0 ${
-                      isDark ? "text-zinc-500" : "text-zinc-400"
-                    }`} />
-                  </div>
-                  <div className="mt-3.5 flex items-center">
-                    <span
-                      className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
-                        isDark ? "text-zinc-100" : "text-zinc-900"
+                    {/* Card 4: Policy Exceptions */}
+                    <div
+                      onClick={() => setActiveView("Exceptions")}
+                      className={`rounded-xl px-5 py-4 flex flex-col justify-between transition-colors cursor-pointer border ${
+                        isDark
+                          ? "bg-[#111113] border-white/[0.07] hover:bg-[#161619]"
+                          : "bg-white border-zinc-200/80 hover:bg-zinc-50/80 shadow-xs"
                       }`}
                     >
-                      {exceptionsCount}
-                    </span>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-xs font-medium uppercase tracking-wider ${
+                          isDark ? "text-zinc-400" : "text-zinc-500"
+                        }`}>
+                          Policy Exceptions
+                        </span>
+                        <AlertTriangle className={`h-4 w-4 shrink-0 ${
+                          isDark ? "text-zinc-500" : "text-zinc-400"
+                        }`} />
+                      </div>
+                      <div className="mt-3.5 flex items-center">
+                        <span
+                          className={`text-[26px] font-semibold tracking-tight tabular-nums leading-none ${
+                            isDark ? "text-zinc-100" : "text-zinc-900"
+                          }`}
+                        >
+                          {exceptionsCount}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </section>
-          )}
+                </section>
+              )}
+
 
           {/* VIEW 1: Approvals */}
           {activeView === "Approvals" && (
@@ -837,7 +878,7 @@ function ManagerDashboardInner() {
                         </td>
                       </tr>
                     ) : (
-                      filteredClaims.map((claim) => (
+                      paginatedClaims.map((claim) => (
                         <tr
                           key={claim.id}
                           className={`transition-colors cursor-pointer ${
@@ -924,6 +965,100 @@ function ManagerDashboardInner() {
                 </table>
               </div>
 
+              {/* Pagination Controls */}
+              {filteredClaims.length > 0 && (
+                <div
+                  className={`px-4 py-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs select-none ${
+                    isDark ? "border-white/[0.06] bg-[#141418]/60" : "border-zinc-200/60 bg-zinc-50/70"
+                  }`}
+                >
+                  <div className={isDark ? "text-zinc-400" : "text-zinc-500"}>
+                    Showing{" "}
+                    <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                      {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, filteredClaims.length)}
+                    </span>{" "}
+                    of{" "}
+                    <span className={`font-semibold ${isDark ? "text-zinc-200" : "text-zinc-900"}`}>
+                      {filteredClaims.length}
+                    </span>{" "}
+                    claims
+                  </div>
+
+                  <div className="flex items-center gap-1.5 self-center sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={safeCurrentPage === 1}
+                      className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                        isDark
+                          ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                          : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                      }`}
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <span>Previous</span>
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => {
+                        if (
+                          totalPages > 6 &&
+                          pageNum !== 1 &&
+                          pageNum !== totalPages &&
+                          Math.abs(pageNum - safeCurrentPage) > 1
+                        ) {
+                          if (
+                            (pageNum === 2 && safeCurrentPage > 3) ||
+                            (pageNum === totalPages - 1 && safeCurrentPage < totalPages - 2)
+                          ) {
+                            return (
+                              <span key={pageNum} className="px-1 text-zinc-500 text-xs">
+                                &hellip;
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        const isActive = pageNum === safeCurrentPage;
+                        return (
+                          <button
+                            key={pageNum}
+                            type="button"
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`min-w-7 h-7 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                              isActive
+                                ? isDark
+                                  ? "bg-white text-zinc-950 font-semibold shadow-xs"
+                                  : "bg-zinc-950 text-white font-semibold shadow-xs"
+                                : isDark
+                                ? "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                                : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={safeCurrentPage === totalPages}
+                      className={`px-2.5 py-1 rounded-lg border font-medium flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                        isDark
+                          ? "bg-[#18181D] hover:bg-[#22222A] text-zinc-300 border-white/[0.08]"
+                          : "bg-white hover:bg-zinc-100 text-zinc-700 border-zinc-200 shadow-2xs"
+                      }`}
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Corporate Card & Limit Requests Queue */}
               <div
                 className={`rounded-xl border transition-colors mt-6 ${
@@ -1000,20 +1135,18 @@ function ManagerDashboardInner() {
                             <td className="py-2.5 px-4 text-right text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
                               ₹{req.requestedLimit.toLocaleString("en-IN")}
                             </td>
-                            <td className="py-2.5 px-4">
-                              {req.status === "Approved" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25">
-                                  Approved
-                                </span>
-                              ) : req.status === "Rejected" ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/25">
-                                  Rejected
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 animate-pulse">
-                                  Pending Review
-                                </span>
-                              )}
+                            <td className="py-2.5 px-4 whitespace-nowrap">
+                              <StatusBadge
+                                tone={
+                                  req.status === "Approved"
+                                    ? "success"
+                                    : req.status === "Pending"
+                                    ? "warning"
+                                    : "danger"
+                                }
+                              >
+                                {req.status === "Pending" ? "Pending Review" : req.status}
+                              </StatusBadge>
                             </td>
                             <td className="py-2.5 px-4 text-right">
                               {req.status === "Pending" ? (
@@ -1663,6 +1796,8 @@ function ManagerDashboardInner() {
               ))}
             </div>
           )}
+            </>
+          )}
         </main>
 
         {/* Mobile Sticky Bottom Navigation Bar */}
@@ -1819,14 +1954,25 @@ function ManagerDashboardInner() {
                   )}
                   <div className="flex items-center justify-between pt-2 border-t dark:border-white/[0.06] border-zinc-200/60">
                     <span className="text-zinc-500">Invoice Voucher:</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowReceiptModal(true)}
-                      className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      <span>{inspectClaim.receiptName || "View Tax Invoice & Receipt"}</span>
-                    </button>
+                    {inspectClaim.receiptUrl ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>{inspectClaim.receiptName || "View Receipt"}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setShowReceiptModal(true)}
+                        className="text-amber-600 dark:text-amber-400 hover:underline font-medium flex items-center gap-1.5 cursor-pointer text-xs"
+                      >
+                        <FileText className="h-3.5 w-3.5" />
+                        <span>Upload Receipt Proof</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1893,7 +2039,13 @@ function ManagerDashboardInner() {
 export default function ManagerDashboardPage() {
   return (
     <ThemeProvider>
-      <React.Suspense fallback={<div className="h-screen w-full bg-transparent" />}>
+      <React.Suspense
+        fallback={
+          <div className="h-screen w-full flex items-center justify-center bg-[#FAFAFB] dark:bg-[#08080A]">
+            <Spiral className="size-9 text-blue-500" />
+          </div>
+        }
+      >
         <ManagerDashboardInner />
       </React.Suspense>
     </ThemeProvider>
