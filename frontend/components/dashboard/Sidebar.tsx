@@ -169,7 +169,6 @@ export function Sidebar({
   const bottomItems = [
     { label: "Settings", icon: Settings, action: onOpenSettings },
     { label: "Get Help", icon: HelpCircle, action: onOpenHelp },
-    { label: "Search", icon: Search, action: onOpenSearch },
   ];
 
   const handleToggle = onToggleCollapse || onToggleSidebar;
@@ -188,37 +187,34 @@ export function Sidebar({
       {/* Top Group: Brand Header & Navigation */}
       <div className="flex flex-col w-full">
         {/* Workspace Brand Header */}
-        <div className="flex items-center h-9 px-1 mb-3 relative overflow-hidden">
-          {/* Workspace Brand Logo & Name */}
-          <div
-            className={`flex items-center gap-2.5 transition-all duration-300 ease-in-out ${
-              isCollapsed
-                ? "w-0 opacity-0 -translate-x-3 pointer-events-none"
-                : "w-auto opacity-100 translate-x-0"
-            }`}
-          >
-            <div className="h-5 w-5 rounded-full border-[1.8px] border-zinc-900 dark:border-white flex items-center justify-center shrink-0">
-              <div className="h-1.5 w-1.5 rounded-full bg-zinc-900 dark:bg-white" />
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight whitespace-nowrap text-zinc-900 dark:text-white">
+        <div
+          className={`flex items-center h-9 px-1 mb-3 ${
+            isCollapsed ? "justify-center" : "justify-between"
+          }`}
+        >
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            {/* Collapse/Expand Toggle Button in place of logo */}
+            {handleToggle && (
+              <button
+                type="button"
+                onClick={handleToggle}
+                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 transition-colors text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08]"
+              >
+                <PanelLeft className="h-4 w-4 stroke-[1.85]" />
+              </button>
+            )}
+            <span
+              className={`text-[15px] font-semibold tracking-tight whitespace-nowrap text-zinc-900 dark:text-white transition-all duration-200 ${
+                isCollapsed
+                  ? "max-w-0 opacity-0 pointer-events-none"
+                  : "max-w-[140px] opacity-100"
+              }`}
+            >
               Payout
             </span>
           </div>
-
-          {/* Collapse/Expand Toggle Button */}
-          {handleToggle && (
-            <button
-              type="button"
-              onClick={handleToggle}
-              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className={`h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 transition-colors text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08] ${
-                isCollapsed ? "mx-auto" : "ml-auto"
-              }`}
-            >
-              <PanelLeft className="h-4 w-4 stroke-[1.85]" />
-            </button>
-          )}
         </div>
 
         {/* Primary Navigation List */}
@@ -397,103 +393,6 @@ export function Sidebar({
           </button>
         ))}
 
-        {/* User Profile Card */}
-        <div className="pt-2 mt-2 border-t border-zinc-200/80 dark:border-white/[0.08] relative" ref={profileRef}>
-          {isProfileOpen && (
-            <div
-              className={`z-50 bg-white dark:bg-[#18181B] border border-zinc-200 dark:border-white/[0.1] rounded-2xl shadow-xl shadow-black/10 dark:shadow-black/50 p-1.5 transition-all animate-in fade-in zoom-in-95 duration-150 ${
-                isCollapsed
-                  ? "fixed left-[72px] bottom-3 w-60"
-                  : "absolute bottom-[calc(100%+8px)] left-0 right-0"
-              }`}
-            >
-              {/* Profile info header */}
-              <div className="flex items-center gap-2.5 p-2 rounded-xl bg-zinc-50 dark:bg-white/[0.04]">
-                <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold text-xs flex items-center justify-center shrink-0 ring-1 ring-zinc-300 dark:ring-white/20">
-                  {initials}
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-semibold truncate text-zinc-900 dark:text-white leading-tight">
-                      {userName}
-                    </span>
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-zinc-200/70 dark:bg-white/[0.1] text-zinc-700 dark:text-zinc-300">
-                      Finance
-                    </span>
-                  </div>
-                  <span className="text-[11px] truncate text-zinc-500 dark:text-zinc-400 mt-0.5">
-                    {userEmail}
-                  </span>
-                </div>
-              </div>
-
-              <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
-
-              {/* Account Settings */}
-              {onOpenSettings && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    onOpenSettings();
-                  }}
-                  className="w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.08] rounded-xl transition-colors cursor-pointer"
-                >
-                  <Settings className="h-4 w-4 shrink-0 text-zinc-500 dark:text-zinc-400" />
-                  <span>Account Settings</span>
-                </button>
-              )}
-
-              {/* Divider */}
-              <div className="h-px bg-zinc-200/80 dark:bg-white/[0.08] my-1" />
-
-              {/* Log Out Button */}
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full flex items-center gap-2 px-2.5 py-2 text-[13px] font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer"
-              >
-                <LogOut className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
-                <span>Log out</span>
-              </button>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setIsProfileOpen((prev) => !prev)}
-            title={isCollapsed ? `${userName} - Profile & Logout` : undefined}
-            className={`w-full flex items-center h-11 px-1 rounded-xl cursor-pointer text-left group transition-colors duration-150 ${
-              isProfileOpen
-                ? "bg-zinc-200/70 dark:bg-white/[0.12] text-zinc-950 dark:text-white"
-                : "hover:bg-zinc-100 text-zinc-900 dark:text-white dark:hover:bg-white dark:hover:text-black"
-            }`}
-          >
-            <div className="h-8 w-8 shrink-0 flex items-center justify-center">
-              <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold text-xs flex items-center justify-center ring-1 ring-zinc-300 dark:ring-white/20">
-                {initials}
-              </div>
-            </div>
-
-            <div
-              className={`flex items-center justify-between whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${
-                isCollapsed
-                  ? "w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
-                  : "w-[160px] opacity-100 translate-x-0 ml-2.5"
-              }`}
-            >
-              <div className="flex flex-col min-w-0">
-                <span className="text-[13px] font-semibold truncate leading-tight text-zinc-900 dark:text-white dark:group-hover:text-black">
-                  {userName}
-                </span>
-                <span className="text-[11px] truncate leading-tight mt-0.5 text-zinc-500 dark:text-zinc-400 dark:group-hover:text-zinc-600">
-                  {userEmail}
-                </span>
-              </div>
-              <ChevronsUpDown className="h-4 w-4 shrink-0 text-zinc-400 group-hover:text-zinc-700 dark:text-zinc-500 dark:group-hover:text-black transition-colors" />
-            </div>
-          </button>
-        </div>
       </div>
     </aside>
 

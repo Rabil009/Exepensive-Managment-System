@@ -146,31 +146,26 @@ export function ManagerSidebar({
             isCollapsed ? "justify-center" : "justify-between"
           }`}
         >
-          <div
-            className={`flex items-center gap-2.5 overflow-hidden transition-all duration-200 ${
-              isCollapsed
-                ? "max-w-0 opacity-0 pointer-events-none"
-                : "max-w-[140px] opacity-100"
-            }`}
-          >
-            <div className="h-5 w-5 rounded-full border-[1.8px] border-zinc-900 dark:border-white flex items-center justify-center shrink-0">
-              <div className="h-1.5 w-1.5 rounded-full bg-zinc-900 dark:bg-white" />
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight whitespace-nowrap text-zinc-900 dark:text-white">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 transition-colors text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08]"
+            >
+              <PanelLeft className="h-4 w-4 stroke-[1.85]" />
+            </button>
+            <span
+              className={`text-[15px] font-semibold tracking-tight whitespace-nowrap text-zinc-900 dark:text-white transition-all duration-200 ${
+                isCollapsed
+                  ? "max-w-0 opacity-0 pointer-events-none"
+                  : "max-w-[140px] opacity-100"
+              }`}
+            >
               Payout
             </span>
           </div>
-
-          {/* Collapse/Expand Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 transition-colors text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08]"
-          >
-            <PanelLeft className="h-4 w-4 stroke-[1.85]" />
-          </button>
         </div>
 
         {/* Primary Navigation List */}

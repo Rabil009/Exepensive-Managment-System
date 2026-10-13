@@ -184,47 +184,32 @@ export function Sidebar({
             isCollapsed ? "justify-center" : "justify-between"
           }`}
         >
-          <div
-            className={`flex items-center gap-2.5 overflow-hidden transition-all duration-200 ${
-              isCollapsed
-                ? "max-w-0 opacity-0 pointer-events-none"
-                : "max-w-[140px] opacity-100"
-            }`}
-          >
-            <div
-              className={`h-5 w-5 rounded-full border-[1.8px] flex items-center justify-center shrink-0 ${
-                isDark ? "border-white" : "border-zinc-900"
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <button
+              type="button"
+              onClick={onToggleSidebar}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className={`h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 transition-colors ${
+                isDark
+                  ? "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
+                  : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60"
               }`}
             >
-              <div
-                className={`h-1.5 w-1.5 rounded-full ${
-                  isDark ? "bg-white" : "bg-zinc-900"
-                }`}
-              />
-            </div>
+              <PanelLeft className="h-4 w-4 stroke-[1.85]" />
+            </button>
             <span
-              className={`text-[15px] font-semibold tracking-tight whitespace-nowrap ${
+              className={`text-[15px] font-semibold tracking-tight whitespace-nowrap transition-all duration-200 ${
                 isDark ? "text-white" : "text-zinc-900"
+              } ${
+                isCollapsed
+                  ? "max-w-0 opacity-0 pointer-events-none"
+                  : "max-w-[140px] opacity-100"
               }`}
             >
               Payout
             </span>
           </div>
-
-          {/* Collapse/Expand Toggle Button */}
-          <button
-            type="button"
-            onClick={onToggleSidebar}
-            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className={`h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 transition-colors ${
-              isDark
-                ? "text-zinc-400 hover:text-white hover:bg-white/[0.08]"
-                : "text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100"
-            }`}
-          >
-            <PanelLeft className="h-4 w-4 stroke-[1.85]" />
-          </button>
         </div>
 
         {/* Primary Navigation */}

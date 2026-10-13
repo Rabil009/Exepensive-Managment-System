@@ -68,25 +68,6 @@ function DashboardContent() {
   const [showSearch, setShowSearch] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
-  const getPageTitle = () => {
-    switch (activeView) {
-      case "Verification":
-        return "Finance Verification Queue";
-      case "Reimbursements":
-        return "Employee Reimbursements";
-      case "Payments":
-        return "Disbursement & Payments";
-      case "Exceptions":
-        return "Exceptions & Policy Violations";
-      case "Budgets":
-        return "Treasury Budgets & Limits";
-      case "Reports":
-        return "Accounting Reports & CSV Export";
-      default:
-        return "Finance Operations";
-    }
-  };
-
   return (
     <div className="flex h-screen w-full overflow-hidden font-sans antialiased transition-colors bg-[#FAFAFB] dark:bg-[#08080A] text-zinc-900 dark:text-zinc-100">
       {/* Sidebar with Desktop rail and Mobile slide-over drawer */}
@@ -103,19 +84,10 @@ function DashboardContent() {
 
       {/* Main Application Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-        {/* Top Header with Mobile Hamburger and Actions */}
+        {/* Top Header with Mobile Hamburger and Right-Corner User Profile */}
         <Header
-          title={getPageTitle()}
           onToggleSidebar={() => setMobileDrawerOpen(true)}
-          rightContent={
-            activeView === "Dashboard" ? (
-              <GlobalFilters
-                filters={filters}
-                onFilterChange={setFilters}
-                onReset={() => setFilters(DEFAULT_FILTERS)}
-              />
-            ) : null
-          }
+          onOpenSettings={() => setShowSettings(true)}
         />
 
         {/* Scrollable Main Content (optimized mobile padding) */}
@@ -156,6 +128,15 @@ function DashboardContent() {
                         paymentsPendingCount,
                         paymentsPendingAmount: `₹${paymentsPendingAmount.toLocaleString("en-IN")} total`,
                       }}
+                    />
+                  </div>
+
+                  {/* 2.2 Global Filters moved below KPI Cards */}
+                  <div className="flex items-center justify-end">
+                    <GlobalFilters
+                      filters={filters}
+                      onFilterChange={setFilters}
+                      onReset={() => setFilters(DEFAULT_FILTERS)}
                     />
                   </div>
 
