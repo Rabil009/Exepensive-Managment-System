@@ -7,6 +7,7 @@ import type { ReportsModel } from "../hooks/useReports";
 import type { Expense } from "../../expenses/types";
 import { StatusBadge } from "../../../shared/components/StatusBadge";
 import { ReceiptModal } from "@/components/shared/ReceiptModal";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 import { displayDate, money } from "../../../shared/utils/format";
 import { formatTotal, isPersonal } from "../utils/reportTotals";
 import { downloadExpenseReceipt } from "../../expenses/data/newExpenseApi";
@@ -108,7 +109,7 @@ export function ReportTransactions({ model }: Props) {
             <span className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:inline">
               Category:
             </span>
-            <select
+            <StyledSelect
               aria-label="Category"
               className="h-8 px-2.5 text-xs bg-zinc-50/60 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-white/[0.08] rounded-lg text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer"
               value={category}
@@ -120,7 +121,7 @@ export function ReportTransactions({ model }: Props) {
                   {cat}
                 </option>
               ))}
-            </select>
+            </StyledSelect>
           </div>
 
           {/* Payment Method Filter */}
@@ -128,7 +129,7 @@ export function ReportTransactions({ model }: Props) {
             <span className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:inline">
               Payment:
             </span>
-            <select
+            <StyledSelect
               aria-label="Payment"
               className="h-8 px-2.5 text-xs bg-zinc-50/60 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-white/[0.08] rounded-lg text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer"
               value={payment}
@@ -137,7 +138,7 @@ export function ReportTransactions({ model }: Props) {
               <option value="All">All Payments</option>
               <option value="Corporate Card">Corporate Card</option>
               <option value="Out of Pocket">Out of Pocket</option>
-            </select>
+            </StyledSelect>
           </div>
 
           {/* Status Filter */}
@@ -145,7 +146,7 @@ export function ReportTransactions({ model }: Props) {
             <span className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:inline">
               Status:
             </span>
-            <select
+            <StyledSelect
               aria-label="Status"
               className="h-8 px-2.5 text-xs bg-zinc-50/60 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-white/[0.08] rounded-lg text-zinc-700 dark:text-zinc-300 focus:outline-none cursor-pointer"
               value={status}
@@ -157,7 +158,7 @@ export function ReportTransactions({ model }: Props) {
                   {st}
                 </option>
               ))}
-            </select>
+            </StyledSelect>
           </div>
 
           {(query || category !== "All" || payment !== "All" || status !== "All") && (

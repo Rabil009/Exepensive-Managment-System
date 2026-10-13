@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 export interface ExpenseTrendDataPoint {
   month: string;
@@ -28,7 +28,6 @@ export function ExpenseTrendChart({
   className?: string;
 }) {
   const [selectedRange, setSelectedRange] = useState("Last 6 months");
-  const [showRangeDropdown, setShowRangeDropdown] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const width = 640;
@@ -72,40 +71,17 @@ export function ExpenseTrendChart({
           </div>
 
           {/* Range Selector Filter */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowRangeDropdown(!showRangeDropdown)}
-              className="h-9 flex items-center gap-2 bg-[#121216] hover:bg-[#181820] border border-white/[0.08] hover:border-white/[0.14] text-xs font-medium text-zinc-300 hover:text-white px-3.5 rounded-xl transition-all cursor-pointer shadow-xs"
-            >
-              <span>{selectedRange}</span>
-              <ChevronDown
-                className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${
-                  showRangeDropdown ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {showRangeDropdown && (
-              <div className="absolute right-0 top-[calc(100%+6px)] w-36 bg-[#0a0a0d]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-[0_12px_32px_rgba(0,0,0,0.7)] py-1 z-30 text-xs animate-in fade-in zoom-in-95 duration-150">
-                {["Last 3 months", "Last 6 months", "Year to date", "Full year 2025"].map(
-                  (opt) => (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => {
-                        setSelectedRange(opt);
-                        setShowRangeDropdown(false);
-                      }}
-                      className="w-full text-left px-3 py-2 text-zinc-300 hover:bg-white/[0.06] hover:text-white transition-colors cursor-pointer"
-                    >
-                      {opt}
-                    </button>
-                  )
-                )}
-              </div>
-            )}
-          </div>
+          <StyledSelect
+            value={selectedRange}
+            onChange={(event) => setSelectedRange(event.target.value)}
+            aria-label="Chart range"
+            className="h-9 rounded-xl border border-white/[0.08] bg-[#121216] px-3.5 text-xs font-medium text-zinc-300 shadow-xs hover:border-white/[0.14] hover:bg-[#181820]"
+          >
+            <option value="Last 3 months">Last 3 months</option>
+            <option value="Last 6 months">Last 6 months</option>
+            <option value="Year to date">Year to date</option>
+            <option value="Full year 2025">Full year 2025</option>
+          </StyledSelect>
         </div>
       </div>
 

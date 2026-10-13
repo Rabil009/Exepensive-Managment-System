@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { X, PlusCircle, Upload, ShieldAlert } from "lucide-react";
 import { useFinanceStore } from "@/lib/finance-store";
 import type { ExpenseCategory, PaymentMethod } from "@/types/finance";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 interface QuickCreateModalProps {
   onClose: () => void;
@@ -110,7 +111,8 @@ export function QuickCreateModal({ onClose }: QuickCreateModalProps) {
               <label className="block text-[12px] text-[#A1A1AA] mb-1">
                 Category
               </label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
                 className="w-full h-8 px-2.5 rounded bg-[#141417] border border-white/[0.08] text-[12px] text-[#F4F4F5] focus:outline-none"
@@ -122,7 +124,7 @@ export function QuickCreateModal({ onClose }: QuickCreateModalProps) {
                 <option value="HARDWARE">Hardware Equipment</option>
                 <option value="TRAINING">Conferences & Training</option>
                 <option value="OTHER">Other Expense</option>
-              </select>
+              </StyledSelect>
             </div>
           </div>
 
@@ -131,7 +133,8 @@ export function QuickCreateModal({ onClose }: QuickCreateModalProps) {
               <label className="block text-[12px] text-[#A1A1AA] mb-1">
                 Payment Channel
               </label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
                 className="w-full h-8 px-2.5 rounded bg-[#141417] border border-white/[0.08] text-[12px] text-[#F4F4F5] focus:outline-none"
@@ -140,7 +143,7 @@ export function QuickCreateModal({ onClose }: QuickCreateModalProps) {
                 <option value="PERSONAL_UPI">Personal UPI (Reimbursable)</option>
                 <option value="CORPORATE_CARD">Corporate Card (Non-reimbursable)</option>
                 <option value="PERSONAL_CASH">Personal Cash</option>
-              </select>
+              </StyledSelect>
             </div>
 
             <div>
@@ -173,7 +176,8 @@ export function QuickCreateModal({ onClose }: QuickCreateModalProps) {
               <label className="block text-[12px] text-[#A1A1AA] mb-1">
                 Department
               </label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
                 className="w-full h-8 px-2.5 rounded bg-[#141417] border border-white/[0.08] text-[12px] text-[#F4F4F5] focus:outline-none"
@@ -183,7 +187,7 @@ export function QuickCreateModal({ onClose }: QuickCreateModalProps) {
                 <option value="Operations">Operations</option>
                 <option value="HR">HR</option>
                 <option value="Sales">Sales</option>
-              </select>
+              </StyledSelect>
             </div>
           </div>
 

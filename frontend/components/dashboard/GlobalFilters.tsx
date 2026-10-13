@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Filter, ChevronDown, RotateCcw } from "lucide-react";
 import { useTheme } from "@/lib/theme-store";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 export interface FilterState {
   employee: string;
@@ -177,7 +178,8 @@ export function GlobalFilters({
             {/* Employee */}
             <div>
               <label className={labelClass}>Employee</label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={filters.employee}
                 onChange={(e) =>
                   onFilterChange({ ...filters, employee: e.target.value })
@@ -190,13 +192,14 @@ export function GlobalFilters({
                 <option value="Amit Kumar">Amit Kumar</option>
                 <option value="Neha Verma">Neha Verma</option>
                 <option value="Aditya Kumar">Aditya Kumar</option>
-              </select>
+              </StyledSelect>
             </div>
 
             {/* Date Range */}
             <div>
               <label className={labelClass}>Date Range</label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={filters.dateRange}
                 onChange={(e) =>
                   onFilterChange({ ...filters, dateRange: e.target.value })
@@ -207,13 +210,14 @@ export function GlobalFilters({
                 <option value="Last 30 Days">Last 30 Days</option>
                 <option value="Last 3 Months">Last 3 Months (Q3-Q4)</option>
                 <option value="Current Fiscal Year">Current Fiscal Year (FY 26-27)</option>
-              </select>
+              </StyledSelect>
             </div>
 
             {/* Status */}
             <div>
               <label className={labelClass}>Status</label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={filters.status}
                 onChange={(e) =>
                   onFilterChange({ ...filters, status: e.target.value })
@@ -226,13 +230,14 @@ export function GlobalFilters({
                 <option value="Reimbursement Pending">Reimbursement Pending</option>
                 <option value="Payment Pending">Payment Pending</option>
                 <option value="Paid">Paid / Settled</option>
-              </select>
+              </StyledSelect>
             </div>
 
             {/* Department */}
             <div>
               <label className={labelClass}>Department</label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={filters.department}
                 onChange={(e) =>
                   onFilterChange({ ...filters, department: e.target.value })
@@ -245,13 +250,14 @@ export function GlobalFilters({
                 <option value="Operations">Operations</option>
                 <option value="HR">HR</option>
                 <option value="Sales">Sales</option>
-              </select>
+              </StyledSelect>
             </div>
 
             {/* Project */}
             <div>
               <label className={labelClass}>Project</label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={filters.project}
                 onChange={(e) =>
                   onFilterChange({ ...filters, project: e.target.value })
@@ -262,13 +268,14 @@ export function GlobalFilters({
                 <option value="Project Phoenix">Project Phoenix</option>
                 <option value="Core Platform Cloud">Core Platform Cloud</option>
                 <option value="Brand Identity 2026">Brand Identity 2026</option>
-              </select>
+              </StyledSelect>
             </div>
 
             {/* Category */}
             <div>
               <label className={labelClass}>Category</label>
-              <select
+              <StyledSelect
+                fullWidth
                 value={filters.category}
                 onChange={(e) =>
                   onFilterChange({ ...filters, category: e.target.value })
@@ -281,7 +288,7 @@ export function GlobalFilters({
                 <option value="Software">Software & Cloud</option>
                 <option value="Hardware">Hardware</option>
                 <option value="Hotel">Hotel & Lodging</option>
-              </select>
+              </StyledSelect>
             </div>
           </div>
 

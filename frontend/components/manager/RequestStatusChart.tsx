@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 export interface StatusSegment {
   label: "Pending" | "Approved" | "Rejected";
@@ -24,7 +24,6 @@ export function RequestStatusChart({
   className?: string;
 }) {
   const [selectedFilter, setSelectedFilter] = useState("All Time");
-  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [hoveredSegment, setHoveredSegment] = useState<StatusSegment | null>(null);
 
   const total = segments.reduce((acc, s) => acc + s.count, 0);
@@ -72,38 +71,17 @@ export function RequestStatusChart({
         </div>
 
         {/* Timeframe Filter Dropdown */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            className="h-9 flex items-center gap-2 bg-[#121216] hover:bg-[#181820] border border-white/[0.08] hover:border-white/[0.14] text-xs font-medium text-zinc-300 hover:text-white px-3.5 rounded-xl transition-all cursor-pointer shadow-xs"
-          >
-            <span>{selectedFilter}</span>
-            <ChevronDown
-              className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${
-                showFilterDropdown ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {showFilterDropdown && (
-            <div className="absolute right-0 top-[calc(100%+6px)] w-36 bg-[#0a0a0d]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-[0_12px_32px_rgba(0,0,0,0.7)] py-1 z-30 text-xs animate-in fade-in zoom-in-95 duration-150">
-              {["All Time", "This Month", "Last Quarter", "This Year"].map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => {
-                    setSelectedFilter(opt);
-                    setShowFilterDropdown(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-zinc-300 hover:bg-white/[0.06] hover:text-white transition-colors cursor-pointer"
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <StyledSelect
+          value={selectedFilter}
+          onChange={(event) => setSelectedFilter(event.target.value)}
+          aria-label="Status timeframe"
+          className="h-9 rounded-xl border border-white/[0.08] bg-[#121216] px-3.5 text-xs font-medium text-zinc-300 shadow-xs hover:border-white/[0.14] hover:bg-[#181820]"
+        >
+          <option value="All Time">All Time</option>
+          <option value="This Month">This Month</option>
+          <option value="Last Quarter">Last Quarter</option>
+          <option value="This Year">This Year</option>
+        </StyledSelect>
       </div>
 
       {/* Main Content (Donut + Legend) */}

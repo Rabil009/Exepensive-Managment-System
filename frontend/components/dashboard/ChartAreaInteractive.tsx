@@ -19,13 +19,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { StyledSelect } from "@/components/ui/StyledSelect"
 
 export const description = "An interactive area chart"
 
@@ -86,25 +80,16 @@ export function ChartAreaInteractive() {
             Interactive daily clearing and employee reimbursement trends
           </CardDescription>
         </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="w-[140px] rounded-lg flex shrink-0"
-            aria-label="Select time range"
-          >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="w-[140px] rounded-xl">
-            <SelectItem value="90d" className="rounded-lg">
-              Last 3 months
-            </SelectItem>
-            <SelectItem value="30d" className="rounded-lg">
-              Last 30 days
-            </SelectItem>
-            <SelectItem value="7d" className="rounded-lg">
-              Last 7 days
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <StyledSelect
+          value={timeRange}
+          onChange={(event) => setTimeRange(event.target.value)}
+          aria-label="Select time range"
+          className="h-8 w-[140px] rounded-lg border border-zinc-200/80 bg-white px-3 text-xs text-zinc-900 dark:border-white/[0.08] dark:bg-[#18181D] dark:text-zinc-100"
+        >
+          <option value="90d">Last 3 months</option>
+          <option value="30d">Last 30 days</option>
+          <option value="7d">Last 7 days</option>
+        </StyledSelect>
       </CardHeader>
       <CardContent className="px-5 pt-4 pb-5">
         {filteredData.length === 0 ? (

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { employeePasswordAuth, safeEmployeeReturnPath } from "@/lib/employee-auth";
 import { supabase } from "@/lib/supabase";
 import { Spiral } from "@/components/ui/spiral";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 import {
   Eye,
   EyeOff,
@@ -462,9 +463,7 @@ export default function LoginPage() {
               </button>
 
               {isPortalDropdownOpen && (
-                <div className={`absolute top-full left-0 right-0 mt-1 rounded-2xl shadow-xl p-1 z-30 space-y-0.5 border ${
-                  isDark ? "bg-[#18181D] border-white/[0.1]" : "bg-white border-zinc-200"
-                }`}>
+                <div className="absolute top-full left-0 right-0 z-30 mt-1 space-y-0.5 rounded-xl border border-zinc-700 bg-[#37373A] p-1 shadow-xl shadow-black/25">
                   {PORTALS.map((portal) => {
                     const Icon = portal.icon;
                     const isSelected = selectedPortal === portal.id;
@@ -476,21 +475,17 @@ export default function LoginPage() {
                           setSelectedPortal(portal.id);
                           setIsPortalDropdownOpen(false);
                         }}
-                        className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between transition-colors cursor-pointer ${
                           isSelected
-                            ? isDark
-                              ? "bg-white/[0.1] text-white font-medium"
-                              : "bg-zinc-100 text-zinc-950 font-medium"
-                            : isDark
-                            ? "text-zinc-300 hover:bg-white/[0.05]"
-                            : "text-zinc-700 hover:bg-zinc-50"
+                            ? "bg-white text-zinc-900 font-semibold"
+                            : "text-zinc-200 hover:bg-white/[0.1] hover:text-white"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <Icon className={`w-3.5 h-3.5 ${isDark ? "text-zinc-400" : "text-zinc-600"}`} />
+                          <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-zinc-600" : "text-zinc-400"}`} />
                           <span>{portal.title}</span>
                         </div>
-                        {isSelected && <Check className={`w-3.5 h-3.5 ${isDark ? "text-white" : "text-black"}`} />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-zinc-900" />}
                       </button>
                     );
                   })}
@@ -700,7 +695,8 @@ export default function LoginPage() {
                   <label className={`block text-[11px] font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                     System Role
                   </label>
-                  <select
+                  <StyledSelect
+                    fullWidth
                     value={signUpRole}
                     onChange={(e) => setSignUpRole(e.target.value as any)}
                     className={`w-full h-9 px-3 rounded-full border text-xs ${
@@ -712,14 +708,15 @@ export default function LoginPage() {
                     <option value="EMPLOYEE">Employee</option>
                     <option value="MANAGER">Manager</option>
                     <option value="FINANCE">Finance Admin</option>
-                  </select>
+                  </StyledSelect>
                 </div>
 
                 <div>
                   <label className={`block text-[11px] font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                     Department
                   </label>
-                  <select
+                  <StyledSelect
+                    fullWidth
                     value={signUpDepartment}
                     onChange={(e) => setSignUpDepartment(e.target.value)}
                     className={`w-full h-9 px-3 rounded-full border text-xs ${
@@ -733,7 +730,7 @@ export default function LoginPage() {
                     <option value="Marketing">Marketing</option>
                     <option value="Sales">Sales</option>
                     <option value="Operations">Operations</option>
-                  </select>
+                  </StyledSelect>
                 </div>
               </div>
 

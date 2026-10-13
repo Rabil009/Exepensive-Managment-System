@@ -3,6 +3,7 @@
 import React from "react";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
 import { fieldClass } from "../styles/formClasses";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 type Props = { model: Pick<ExpenseFormModel, "draft" | "update"> };
 
@@ -42,13 +43,10 @@ export function ExpenseDetailsFields({ model }: Props) {
           >
             Date
           </label>
-          <input
+          <DatePicker
             id="expense-date"
-            type="date"
-            className={fieldClass}
             value={draft.date}
-            onChange={(event) => update("date", event.target.value)}
-            required
+            onChange={(value) => update("date", value)}
           />
         </div>
       </div>

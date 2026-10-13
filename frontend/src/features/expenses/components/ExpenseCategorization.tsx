@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { Tag, FolderOpen, CreditCard, Wallet, ChevronDown } from "lucide-react";
+import { Tag, FolderOpen, CreditCard, Wallet } from "lucide-react";
 import type { ExpenseFormModel } from "../hooks/useExpenseForm";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 
 type Props = { model: Pick<ExpenseFormModel, "draft" | "update" | "options"> };
 
@@ -71,8 +72,9 @@ export function ExpenseCategorization({ model }: Props) {
           </label>
           <div className="relative">
             <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
-            <select
+            <StyledSelect
               id="expense-category"
+              fullWidth
               className="w-full h-9 bg-zinc-50/50 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-white/[0.08] rounded-lg pl-9 pr-8 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 appearance-none cursor-pointer"
               value={groupedCategory(draft.category)}
               onChange={(event) => update("category", event.target.value)}
@@ -84,8 +86,7 @@ export function ExpenseCategorization({ model }: Props) {
                   {category.label}
                 </option>
               ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+            </StyledSelect>
           </div>
         </div>
 
@@ -99,8 +100,9 @@ export function ExpenseCategorization({ model }: Props) {
           </label>
           <div className="relative">
             <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
-            <select
+            <StyledSelect
               id="expense-report"
+              fullWidth
               className="w-full h-9 bg-zinc-50/50 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-white/[0.08] rounded-lg pl-9 pr-8 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-400 dark:focus:ring-zinc-600 appearance-none cursor-pointer"
               value={draft.report}
               onChange={(event) => update("report", event.target.value)}
@@ -112,8 +114,7 @@ export function ExpenseCategorization({ model }: Props) {
                   {report}
                 </option>
               ))}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+            </StyledSelect>
           </div>
         </div>
       </div>

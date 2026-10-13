@@ -7,8 +7,8 @@ import {
   PlusCircle,
   Undo2,
   ChevronRight,
-  ChevronDown,
 } from "lucide-react";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 import type { ReportsModel } from "../hooks/useReports";
 import { StatusBadge } from "../../../shared/components/StatusBadge";
 
@@ -68,7 +68,7 @@ export function ReportHeader({ model }: Props) {
           <ChevronRight className="h-3 w-3 text-zinc-400" />
 
           <div className="relative inline-flex items-center">
-            <select
+            <StyledSelect
               aria-label="Select expense report"
               className="bg-transparent pr-5 text-xs font-semibold text-zinc-900 dark:text-zinc-100 focus:outline-none appearance-none cursor-pointer"
               value={selected}
@@ -79,8 +79,7 @@ export function ReportHeader({ model }: Props) {
                   {name}
                 </option>
               ))}
-            </select>
-            <ChevronDown className="absolute right-0 h-3 w-3 text-zinc-400 pointer-events-none" />
+            </StyledSelect>
           </div>
         </nav>
 

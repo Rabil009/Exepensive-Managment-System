@@ -7,6 +7,8 @@ import { useTheme } from "@/lib/theme-store";
 import { formatCurrency, getEmployeeAvatar } from "@/lib";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import type { ExpenseClaim } from "@/types/finance";
+import { StyledSelect } from "@/components/ui/StyledSelect";
+import { DatePicker } from "@/components/ui/DatePicker";
 
 export function ReimbursementsView() {
   const {
@@ -584,7 +586,8 @@ export function ReimbursementsView() {
                 <label className={`block text-xs font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                   Payment Channel
                 </label>
-                <select
+                <StyledSelect
+                  fullWidth
                   value={channel}
                   onChange={(e) => setChannel(e.target.value)}
                   className={`w-full h-8 px-2.5 rounded-lg text-xs outline-none border transition-colors ${
@@ -597,19 +600,18 @@ export function ReimbursementsView() {
                   <option value="Corporate RTGS High-Value">Corporate RTGS High-Value</option>
                   <option value="Instant UPI / IMPS Payout">Instant UPI / IMPS Payout</option>
                   <option value="Automated ACH Wire">Automated ACH Wire</option>
-                </select>
+                </StyledSelect>
               </div>
 
               <div>
-                <label className={`block text-xs font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
+                <label htmlFor="settlement-date" className={`block text-xs font-medium mb-1 ${isDark ? "text-zinc-300" : "text-zinc-700"}`}>
                   Settlement Date
                 </label>
-                <input
-                  type="date"
-                  required
+                <DatePicker
+                  id="settlement-date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className={`w-full h-8 px-3 font-mono rounded-lg text-xs outline-none border transition-colors ${
+                  onChange={setDate}
+                  className={`w-full h-8 px-3 rounded-lg border text-xs outline-none transition-colors ${
                     isDark
                       ? "bg-[#18181D] border-white/[0.08] text-zinc-100 focus:border-white/20"
                       : "bg-white border-zinc-200 text-zinc-900 focus:border-zinc-400"

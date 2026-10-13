@@ -11,6 +11,7 @@ import {
   Car,
 } from "lucide-react";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { StyledSelect } from "@/components/ui/StyledSelect";
 import type { CardControlsModel } from "../hooks/useCardControls";
 import { cardMoney as money } from "../utils/cardMoney";
 
@@ -80,7 +81,7 @@ export function CardTransactions({ model }: Props) {
           </div>
 
           {/* Status Filter */}
-          <select
+          <StyledSelect
             aria-label="Filter by transaction status"
             value={status}
             onChange={(event) => setStatus(event.target.value)}
@@ -90,7 +91,7 @@ export function CardTransactions({ model }: Props) {
             <option value="Success">Success</option>
             <option value="Pending">Pending</option>
             <option value="Failed">Failed</option>
-          </select>
+          </StyledSelect>
 
           {/* Export CSV */}
           <button
