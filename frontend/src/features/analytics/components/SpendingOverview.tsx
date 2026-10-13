@@ -16,7 +16,37 @@ import {
 import { money } from "../../../shared/utils/format";
 import type { AnalyticsData } from "../data/useEmployeeAnalytics";
 
-const colors = ["#5A78A6", "#3B9B78", "#C98642", "#8875B8"];
+const categoryGroups = [
+  {
+    name: "Travel & Lodging",
+    color: "#5A78A6",
+    matches: ["TRAVEL", "HOTEL", "ACCOMMODATION", "LODGING", "FLIGHT"],
+  },
+  {
+    name: "Software & SaaS",
+    color: "#3B9B78",
+    matches: ["SOFTWARE", "SAAS", "SUBSCRIPTION", "LICENSE"],
+  },
+  {
+    name: "Meals & Other",
+    color: "#C98642",
+    matches: ["MEAL", "FOOD", "DINING", "OTHER", "TRAINING"],
+  },
+  {
+    name: "Equipment & Devices",
+    color: "#8875B8",
+    matches: ["OFFICE", "HARDWARE", "EQUIPMENT", "DEVICE"],
+  },
+];
+
+function groupForCategory(name: string) {
+  const normalized = name.trim().toUpperCase();
+  return (
+    categoryGroups.find((group) =>
+      group.matches.some((category) => normalized.includes(category)),
+    ) || categoryGroups[2]
+  );
+}
 
 export function SpendingOverview({ data }: { data: AnalyticsData | null }) {
   const [period, setPeriod] = useState<"daily" | "weekly">("daily");
@@ -32,10 +62,12 @@ export function SpendingOverview({ data }: { data: AnalyticsData | null }) {
         }))) || [];
   const total = Number(data?.totals?.total_spend || 0);
   const rawCategories = data?.categories || [];
-  const categories = rawCategories.map((item, index) => ({
-    name: item.name,
-    value: Number(item.amount) || 0,
-    color: colors[index % colors.length],
+  const categories = categoryGroups.map((group) => ({
+    name: group.name,
+    color: group.color,
+    value: rawCategories
+      .filter((item) => groupForCategory(item.name) === group)
+      .reduce((sum, item) => sum + (Number(item.amount) || 0), 0),
   }));
 
   return (
