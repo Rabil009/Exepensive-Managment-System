@@ -186,35 +186,33 @@ export function Sidebar({
       >
       {/* Top Group: Brand Header & Navigation */}
       <div className="flex flex-col w-full">
-        {/* Workspace Brand Header */}
-        <div
-          className={`flex items-center h-9 px-1 mb-3 ${
-            isCollapsed ? "justify-center" : "justify-between"
-          }`}
-        >
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            {/* Collapse/Expand Toggle Button in place of logo */}
-            {handleToggle && (
-              <button
-                type="button"
-                onClick={handleToggle}
-                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                className="h-8 w-8 rounded-lg flex items-center justify-center cursor-pointer shrink-0 transition-colors text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-white/[0.08]"
-              >
-                <PanelLeft className="h-4 w-4 stroke-[1.85]" />
-              </button>
-            )}
-            <span
-              className={`text-[15px] font-semibold tracking-tight whitespace-nowrap text-zinc-900 dark:text-white transition-all duration-200 ${
-                isCollapsed
-                  ? "max-w-0 opacity-0 pointer-events-none"
-                  : "max-w-[140px] opacity-100"
-              }`}
+        {/* Workspace Brand Header / Toggle Button */}
+        <div className="w-full mb-2">
+          {handleToggle && (
+            <button
+              type="button"
+              onClick={handleToggle}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="group w-full flex items-center h-10 px-1.5 rounded-xl cursor-pointer transition-colors duration-150 hover:bg-zinc-200/60 dark:hover:bg-white/[0.08]"
             >
-              Payout
-            </span>
-          </div>
+              <div className="h-7 w-7 shrink-0 flex items-center justify-center text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-950 dark:group-hover:text-white transition-colors">
+                <PanelLeft className="h-4 w-4 stroke-[1.85]" />
+              </div>
+
+              <div
+                className={`flex items-center flex-1 whitespace-nowrap ml-2.5 overflow-hidden transition-all duration-300 ease-in-out ${
+                  isCollapsed
+                    ? "max-w-0 opacity-0 pointer-events-none ml-0"
+                    : "max-w-[170px] opacity-100"
+                }`}
+              >
+                <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-white truncate">
+                  Payout
+                </span>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* Primary Navigation List */}
